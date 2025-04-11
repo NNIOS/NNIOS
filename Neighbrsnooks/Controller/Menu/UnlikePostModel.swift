@@ -1,0 +1,19 @@
+//
+//  UnlikePostModel.swift
+//  NeighbrsNook Latest Latest
+//
+//  Created by Mac on 23/07/24.
+//
+
+import Foundation
+
+// MARK: - Welcome
+struct UnlikePostModel: Codable {
+    let status, message: String?
+    let totalLike: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case status, message
+        case totalLike = "total_like"
+    }
+}

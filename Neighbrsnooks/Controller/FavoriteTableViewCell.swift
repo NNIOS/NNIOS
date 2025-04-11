@@ -1,0 +1,515 @@
+//
+//  FavoriteTableViewCell.swift
+//  NeighbrsNook Latest
+//
+//  Created by Rajat Rao on 01/03/24.
+//
+
+import UIKit
+
+
+
+//protocol FavTableViewCellDelegate: AnyObject {
+//    func didSelectItem(at indexPath: IndexPath)
+//}
+ 
+
+protocol FavTableViewCellDelegate: AnyObject {
+    func didSelectItem(with postImage: PostImageF, username: String, allImages: [PostImageF])
+}
+
+protocol FavoriteTableViewCellDelegate: AnyObject {
+    func didTapCommentsButton(cell: FavoriteTableViewCell)
+}
+
+protocol ProfileFavTapDelegate: AnyObject {
+    func didTapProfile(userId: String)
+}
+
+ 
+
+class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource {
+
+    @IBOutlet weak var collectionViewBanner: UICollectionView!
+    @IBOutlet weak var lblName: UILabel!
+    @IBOutlet weak var lblGeneral: UILabel!
+    @IBOutlet weak var lblDescription: UILabel!
+    @IBOutlet weak var lblSec: UILabel!
+    @IBOutlet weak var lblMonth: UILabel!
+    @IBOutlet weak var lblLikes: UILabel!
+    @IBOutlet weak var lblComments: UILabel!
+    @IBOutlet weak var profileImgView : UIImageView!
+    @IBOutlet weak var HeartImgView : UIImageView!
+    @IBOutlet weak var LargeImgView : UIImageView!
+    @IBOutlet weak var EmojiView : UIImageView!
+    
+ 
+    @IBOutlet weak var lblNewEmoji: UILabel!
+    @IBOutlet weak var viewToHide: UIView!
+    @IBOutlet weak var viewDesc: UIView!
+    
+    
+    var userId: String?
+    weak var delegateFav: ProfileFavTapDelegate?
+    
+    @IBOutlet weak var likebtn: UIButton!
+    @IBOutlet weak var lblLikeCount: UILabel!
+    @IBOutlet weak var btnComments: UIButton!
+    @IBOutlet weak var lblCommentCount: UILabel!
+    @IBOutlet weak var btnShare: UIButton!
+    @IBOutlet weak var lblShareCount: UILabel!
+    @IBOutlet weak var btnFavourite: UIButton!
+    
+    weak var delegateCell: FavoriteTableViewCellDelegate?
+    var isLiked = false
+    var likeCount = 0
+    var selectedEmoji: String?
+    var commentCount = 0
+    var shareCount = 0
+    var isFavourite = false
+    
+    var emojiSelectionHandler: ((String) -> Void)?
+    var isLikedByUser = false // Track if user has already liked
+    var favouriteButtonCallback: (() -> Void)?
+    
+   // @IBOutlet weak var viewPopup: UIView!
+    
+    @IBOutlet weak var btnLikes: UIButton!
+    var LikesCallback : ((UIButton) -> Void)?
+    var CommentCallback : ((UIButton) -> Void)?
+    var FullImgCallback : ((UIButton) -> Void)?
+    var LikeListCallback : ((UIButton) -> Void)?
+    var UmlikeCallback : ((UIButton) -> Void)?
+    var DotCallback : ((UIButton) -> Void)?
+    var imgData = [PostImageF]()
+    var imgEmojiData = [Emojilistdata]()
+    var UserName = ""
+    //weak var delegate: PostTableViewCellDelegate?
+    var newStoryBoard:  UIStoryboard!
+    var newNavigationController:  UINavigationController!
+    @IBOutlet weak var btnUnlikepost: UIButton!
+    var UnlikeCallback : ((UIButton) -> Void)?
+    
+    @IBOutlet weak var shareButton: UIButton!
+    weak var delegate: FavTableViewCellDelegate?
+    
+    
+    let reactionButton: UIButton = {
+           let button = UIButton(type: .system)
+           button.setTitle("❤️", for: .normal)
+           button.translatesAutoresizingMaskIntoConstraints = false
+           return button
+       }()
+       
+       let emojiContainerView: UIView = {
+           let view = UIView()
+           view.translatesAutoresizingMaskIntoConstraints = false
+           view.backgroundColor = UIColor.white
+           view.layer.cornerRadius = 10
+           view.layer.shadowColor = UIColor.black.cgColor
+           view.layer.shadowOpacity = 0.3
+           view.layer.shadowOffset = CGSize(width: 0, height: 5)
+           view.layer.shadowRadius = 5
+           view.isHidden = true
+           return view
+       }()
+       
+       let emojis: [String] = ["👍", "❤️", "😂", "😮", "😎", "🥳","♡"]
+   
+        
+        var shareAction: (() -> Void)?
+    
+    var emojiAction: ((_ emoji : String?) ->())?
+    var unselectedemojiAction: ((_ emoji : String?) ->())?
+
+//        @IBAction func shareButtonTapped(_ sender: UIButton) {
+//            shareAction?()
+//        }
+
+    var thisWidth:CGFloat = 0
+    var PostListData : PostListModel?
+ 
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        collectionViewBanner.delegate = self
+        collectionViewBanner.dataSource = self
+        collectionViewBanner.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap)))
+
+        addTapGestureToProfile()
+        
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = 0 // Space between items should be 0
+        
+        collectionViewBanner.collectionViewLayout = layout
+        collectionViewBanner.isPagingEnabled = false // We'll handle custom snapping
+        collectionViewBanner.decelerationRate = .fast // Fast scrolling stop
+        collectionViewBanner.showsHorizontalScrollIndicator = false
+        
+    }
+    
+    
+    private func addTapGestureToProfile() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(profileTapped))
+        profileImgView.isUserInteractionEnabled = true
+        profileImgView.addGestureRecognizer(tapGesture)
+        
+        let nameTapGesture = UITapGestureRecognizer(target: self, action: #selector(profileTapped))
+        lblName.isUserInteractionEnabled = true
+        lblName.addGestureRecognizer(nameTapGesture)
+        
+        let secTapGesture = UITapGestureRecognizer(target: self, action: #selector(profileTapped))
+        lblSec.isUserInteractionEnabled = true
+        lblSec.addGestureRecognizer(nameTapGesture)
+        
+        
+        
+    }
+    
+    @objc private func profileTapped() {
+        if let userId = userId {
+            delegateFav?.didTapProfile(userId: userId)
+        }
+    }
+    
+    
+    
+    @IBAction func btnUnlikePost(_ sender: UIButton) {
+        UnlikeCallback?(sender)
+    }
+    
+    override func prepareForReuse() {
+            super.prepareForReuse()
+            // Reset the collection view's data to avoid displaying incorrect images
+        collectionViewBanner.reloadData()
+        }
+    
+   
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+
+        // Configure the view for the selected state
+    }
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+            super.init(style: style, reuseIdentifier: reuseIdentifier)
+            setupView()
+        }
+        
+        required init?(coder: NSCoder) {
+            super.init(coder: coder)
+            setupView()
+        }
+    
+//       required init?(coder: NSCoder) {
+//           fatalError("init(coder:) has not been implemented")
+//       }
+    
+    @objc private func handleCollectionViewTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: collectionViewBanner)
+        if let indexPath = collectionViewBanner.indexPathForItem(at: location) {
+            pauseAllVideosInVisibleCells()
+            let selectedData = imgData[indexPath.row]
+            delegate?.didSelectItem(with: selectedData, username: UserName, allImages: imgData)
+        }
+    }
+
+ 
+    
+   
+
+    
+    
+    @IBAction func btnLikes(_ sender: UIButton) {
+        LikesCallback?(sender)
+    }
+    @IBAction func btnDot(_ sender: UIButton) {
+        DotCallback?(sender)
+    }
+    
+    @IBAction func btnFullImg(_ sender: UIButton) {
+        FullImgCallback?(sender)
+    }
+    
+    
+    @IBAction func btnLikeList(_ sender: UIButton) {
+        LikeListCallback?(sender)
+    }
+    
+    @IBAction func btnUnLikePost(_ sender: UIButton) {
+        UmlikeCallback?(sender)
+    }
+    
+    @IBAction func btnClose(_ : UIButton){
+        
+     //   viewPopup.isHidden = true
+        
+    }
+    
+  //  emojiContainerView.centerXAnchor.constraint(equalTo: reactionButton.centerXAnchor , constant: 120),
+    
+    private func setupView() {
+        contentView.addSubview(reactionButton)
+        contentView.addSubview(emojiContainerView)
+        
+        
+        
+        NSLayoutConstraint.activate([
+            reactionButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor,constant: 155),
+            // reactionButton.centerYAnchor.constraint(equalTo: btnComment.centerYAnchor, constant: 40),
+            
+            
+            reactionButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            reactionButton.heightAnchor.constraint(equalToConstant: 20),
+            reactionButton.widthAnchor.constraint(equalToConstant: 20),
+            
+            emojiContainerView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor,constant: 90),
+            emojiContainerView.bottomAnchor.constraint(equalTo: reactionButton.topAnchor, constant: 50),
+            emojiContainerView.heightAnchor.constraint(equalToConstant: 50),
+            emojiContainerView.widthAnchor.constraint(equalToConstant: CGFloat(emojis.count * 50)),
+            
+            
+        ])
+        
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return imgData.count ?? 0
+       
+        
+    }
+    
+    @IBAction func categoryTapped(sender: UITapGestureRecognizer) {
+        
+       // self.sectorLbl.text = neighbrhoodData?.nearestNeighbrhood[viewTag!].name
+
+        let tappedView = sender.view
+        let viewTag = tappedView?.tag
+        
+        let url = URL(string: (imgData[viewTag!].img ?? ""))
+        self.LargeImgView.kf.indicatorType = .activity
+        self.LargeImgView.kf.setImage(with:url ,placeholder: UIImage(named: "NewBusiness"))
+        
+       
+        
+     //   viewPopup.isHidden = false
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FavoriteCollectionViewCell", for: indexPath) as! FavoriteCollectionViewCell
+        
+        
+        
+        let postImage = imgData[indexPath.row]  // Current item
+        cell.configure(with: postImage)  // Image ya video ko cell mein configure karna
+        
+//        let url = URL(string: (imgData[indexPath.row].img ?? ""))
+//        cell.profileImgView.kf.indicatorType = .activity
+//        cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: ""))
+        cell.numberLabel.text = "\(indexPath.item + 1)"
+        
+        let totalNumberOfImages = imgData.count
+        cell.totalImagesLabel.text =  "/ \(totalNumberOfImages)"
+        cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
+        cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
+        
+    
+        
+
+        return cell
+    }
+    
+   
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+                  thisWidth = CGFloat(self.collectionViewBanner.width) / 1
+                  return CGSize(width: thisWidth, height: 500)
+              }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        pauseAllVideosInVisibleCells()
+        let selectedPostImage = imgData[indexPath.row]
+        delegate?.didSelectItem(with: selectedPostImage, username: UserName, allImages: imgData)
+       }
+
+   
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView == collectionViewBanner {
+            pauseAllVideosInVisibleCells()
+        }
+    }
+
+    func pauseAllVideosInVisibleCells() {
+        let visibleCells = collectionViewBanner.visibleCells.compactMap { $0 as? FavoriteCollectionViewCell }
+
+        // Visible cells mein sabhi videos pause karein
+        visibleCells.forEach { cell in
+            if let player = cell.player {
+                player.pause()
+                cell.pauseButton.setImage(UIImage(systemName: "play.fill"), for: .normal) // Button ko update karein
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    //    new code emoji code
+    
+    @IBAction func likeButtonTapped(_ sender: UIButton) {
+        // Check if no emoji is selected
+               if selectedEmoji == nil {
+                   if isLikedByUser {
+                       // If already liked, unlike and decrement the count
+                       isLikedByUser = false
+                       likeCount -= 1
+                   } else {
+                       // If not liked, like and increment the count
+                       isLikedByUser = true
+                       likeCount += 1
+                   }
+                   
+                   // Update UI
+                   lblLikeCount.text = "\(likeCount)"
+                   likebtn.setImage(UIImage(named: isLikedByUser ? "Unlike" : "Like"), for: .normal)
+               } else {
+                   // If emoji is already selected, update like with emoji
+                   updateLikeWithEmoji()
+               }
+           }
+           
+    func showEmojiSelectionView(button: UIButton) {
+        // Remove previous emoji view if it exists
+        if let existingEmojiView = UIApplication.shared.windows.first?.viewWithTag(9999) {
+            existingEmojiView.removeFromSuperview()
+        }
+        
+        // Calculate button frame relative to the main window
+        guard let rootView = UIApplication.shared.windows.first?.rootViewController?.view else { return }
+        let buttonFrame = button.convert(button.bounds, to: rootView)
+        
+        // Create custom view for emoji selection
+        let emojiSelectionView = UIView(frame: CGRect(x: buttonFrame.midX - 2, y: buttonFrame.minY - 70, width: 300, height: 70))
+        emojiSelectionView.backgroundColor = .white
+        emojiSelectionView.layer.cornerRadius = 10
+        emojiSelectionView.layer.shadowColor = UIColor.black.cgColor
+        emojiSelectionView.layer.shadowOpacity = 0.5
+        emojiSelectionView.layer.shadowOffset = CGSize(width: 0, height: 2)
+        emojiSelectionView.layer.shadowRadius = 4
+        emojiSelectionView.tag = 9999 // Unique tag for easy identification and removal
+        
+        // Emojis list
+        let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳", "♡"]
+        
+        // Create a horizontal scroll view to hold emoji buttons
+        let scrollView = UIScrollView(frame: emojiSelectionView.bounds)
+        scrollView.contentSize = CGSize(width: emojis.count * 50, height: 80)
+        scrollView.showsHorizontalScrollIndicator = false
+        
+        for (index, emoji) in emojis.enumerated() {
+            let button = UIButton(frame: CGRect(x: CGFloat(index) * 50, y: 0, width: 50, height: 70))
+            button.setTitle(emoji, for: .normal)
+            button.setTitleColor(.black, for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 40) // Increased font size for bigger emoji
+            button.addTarget(self, action: #selector(emojiSelected(_:)), for: .touchUpInside)
+            scrollView.addSubview(button)
+        }
+        
+        emojiSelectionView.addSubview(scrollView)
+        rootView.addSubview(emojiSelectionView)
+        
+        // Add a 3-second timer to remove the emoji selection view
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            emojiSelectionView.removeFromSuperview()
+        }
+    }
+
+           
+           // Handle emoji selection
+           @objc func emojiSelected(_ sender: UIButton) {
+               guard let emoji = sender.titleLabel?.text else { return }
+               selectedEmoji = emoji
+               isLikedByUser = true // Mark as liked since emoji is selected
+               updateLikeWithEmoji()
+               
+               // Remove the emoji selection view
+               sender.superview?.superview?.removeFromSuperview()
+           }
+           
+           // Update like button with selected emoji
+           func updateLikeWithEmoji() {
+               guard let emoji = selectedEmoji else { return }
+               
+               // If user hasn't liked yet, increment the count
+               if !isLikedByUser {
+                   likeCount += 1
+                   isLikedByUser = true
+               }
+               
+               // Update the UI
+               lblLikeCount.text = "\(likeCount)"
+               likebtn.setTitle(emoji, for: .normal)
+               likebtn.setImage(nil, for: .normal)
+           }
+           
+           // Long press gesture to show emoji selection
+           @objc func showEmojis(_ gesture: UILongPressGestureRecognizer) {
+               if gesture.state == .began {
+                   // Ensure the gesture's view is a UIButton
+                   if let button = gesture.view as? UIButton {
+                       showEmojiSelectionView(button: button)
+                   }
+               }
+           }
+
+    
+    @IBAction func commentsButtonTapped(_ sender: UIButton) {
+ 
+        delegateCell?.didTapCommentsButton(cell: self)
+        
+       
+        
+    }
+    
+    @IBAction func shareButtonTapped(_ sender: UIButton) {
+        shareCount += 1
+        lblShareCount.text = "\(shareCount)"
+        let textToShare = "Check out this post!"
+        let activityVC = UIActivityViewController(activityItems: [textToShare], applicationActivities: nil)
+        UIApplication.shared.windows.first?.rootViewController?.present(activityVC, animated: true, completion: nil)
+    }
+    
+    @IBAction func favouriteButtonTapped(_ sender: UIButton) {
+        
+        favouriteButtonCallback?()
+       }
+    
+    func updateFavouriteButton(isFavourite: Bool) {
+            let imageName = isFavourite ? "favorites" : "Un favorites" // Set your image names
+        btnFavourite.setImage(UIImage(named: imageName), for: .normal)
+        }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+}
+
