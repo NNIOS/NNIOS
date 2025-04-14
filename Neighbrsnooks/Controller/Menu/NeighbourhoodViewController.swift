@@ -39,14 +39,24 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
     @IBOutlet weak var lblMember: UILabel!
     @IBOutlet weak var lblTotalMember: UILabel!
     @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var NeighbourhoddView: UIView!
+    @IBOutlet weak var MembersView: UIView!
+    @IBOutlet weak var NearNeighbourhoddView: UIView!
+    @IBOutlet weak var MyNeighbourhoddView: UIView!
     
-
+    @IBOutlet weak var LblMemberText: UILabel!
+    @IBOutlet weak var LblGroupsText: UILabel!
+    @IBOutlet weak var LblEventText: UILabel!
+    @IBOutlet weak var LblPollText: UILabel!
+    @IBOutlet weak var LblBussinessText: UILabel!
+    @IBOutlet weak var LblPostText: UILabel!
     
     private let spacing:CGFloat = 5.0
     var neighbrhoodData : MyNeighbhoodModel?
     var thisWidth:CGFloat = 0
     var selectedNeighborhoodId: String?
     var idNeighbour: String?
+    private var defaultTextColor: UIColor?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -66,7 +76,7 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         
         self.MyNearByLbl.font  = UIFont(name: "Montserrat-Regular", size: 20)
         self.LblMyNeighbrhoods.font  = UIFont(name: "Montserrat-Regular", size: 20)
-        
+        defaultTextColor = lblMember.textColor
         
     }
     
@@ -122,12 +132,84 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         // Do any additional setup after loading the view.
     }
     
-    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
     
     @IBAction func BackButtionAction(_ : UIButton){
 
         _ = navigationController?.popViewController(animated: true)
 
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            NeighbourhoddView.backgroundColor = .black
+            LblMemberText.textColor = .white
+            LblGroupsText.textColor = .white
+            LblEventText.textColor = .white
+            LblPollText.textColor = .white
+            LblBussinessText.textColor = .white
+            LblEventText.textColor = .white
+            LblPostText.textColor = .white
+            LblMyNeighbrhoods.textColor = .white
+            lblMember.textColor = .white
+            PrimaryNeighrhoodLbl.textColor = .white
+            
+            MyNearByLbl.textColor = .white
+            lblTotalMember.textColor = .white
+           
+            MembersView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+           
+            MembersView.layer.borderWidth = 1.0
+            
+            neighborhoodView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+           
+            neighborhoodView.layer.borderWidth = 1.0
+            
+            NearNeighbourhoddView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+           
+            NearNeighbourhoddView.layer.borderWidth = 1.0
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          //  questionView.textColor = UIColor.secondaryLabel
+           
+            MembersView.isUserInteractionEnabled = true
+            MembersView.layer.borderWidth = 0
+            
+            neighborhoodView.isUserInteractionEnabled = true
+            neighborhoodView.layer.borderWidth = 0
+            
+            NearNeighbourhoddView.isUserInteractionEnabled = true
+            NearNeighbourhoddView.layer.borderWidth = 0
+            NeighbourhoddView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            LblMemberText.textColor = UIColor.secondaryLabel
+            LblGroupsText.textColor = UIColor.secondaryLabel
+            LblEventText.textColor = UIColor.secondaryLabel
+            LblPollText.textColor = UIColor.secondaryLabel
+            LblBussinessText.textColor = UIColor.secondaryLabel
+            LblEventText.textColor = UIColor.secondaryLabel
+            LblPostText.textColor = UIColor.secondaryLabel
+            LblMyNeighbrhoods.textColor = defaultTextColor
+            lblMember.textColor = defaultTextColor
+            PrimaryNeighrhoodLbl.textColor = UIColor.secondaryLabel
+            MyNearByLbl.textColor = defaultTextColor
+            lblTotalMember.textColor =  UIColor.secondaryLabel
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     @IBAction func btnClose(_ : UIButton){
@@ -136,7 +218,7 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         
     }
     
-    @IBAction func btnMember(_ : UIButton){
+    @IBAction func btnMember(_ : UIButton) {
 
        
         

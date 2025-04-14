@@ -28,6 +28,7 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
     @IBOutlet weak var searchCollView: UIView!
     @IBOutlet weak var lblLatestTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var lblPopularTopConstraint: NSLayoutConstraint!
+    @IBOutlet weak var MarketFullView: UIView!
 
     
     var MarketCatData : MarketCatModel?
@@ -58,6 +59,7 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
         LatestCollectionViewListing.tag = 4
         LatestCollectionViewWishList.tag = 5
         callMarketwalltWebService()
+        NetworkMonitor.shared.startMonitoring()
       //  collectionViewMyEvent.isHidden = true // CollectionView ko hide karein
       //  collectionViewMyEvent.da
       //  updateUI()
@@ -108,11 +110,52 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
         timer = nil
     }
     
+    
 
     @IBAction func BackButtionAction(_ : UIButton){
 
         _ = navigationController?.popViewController(animated: true)
 
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            MarketFullView.backgroundColor = .black
+            lblMyItem.textColor = .white
+            LblLatest.textColor = .white
+            LblPopCat.textColor = .white
+            LblWishList.textColor = .white
+            lblAllListing.textColor = .white
+//            btnMyItems.setTitleColor(.white, for: .normal) // ✅ Correct way
+//            btnLatestViewAll.setTitleColor(.white, for: .normal) // ✅ Correct way
+//            btnWishList.setTitleColor(.white, for: .normal) // ✅ Correct way
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          
+            MarketFullView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            lblMyItem.textColor = UIColor.secondaryLabel
+            LblLatest.textColor = UIColor.secondaryLabel
+            LblPopCat.textColor = UIColor.secondaryLabel
+            LblWishList.textColor = UIColor.secondaryLabel
+            lblAllListing.textColor = UIColor.secondaryLabel
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     private func setupBottomPanel() {

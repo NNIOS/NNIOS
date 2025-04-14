@@ -8,7 +8,6 @@
 import UIKit
 import SVProgressHUD
 
-
 @available(iOS 16.0, *)
 class SettingNotificationViewController: UIViewController {
     
@@ -30,11 +29,26 @@ class SettingNotificationViewController: UIViewController {
     @IBOutlet weak var postLbl: UILabel!
     @IBOutlet weak var pollLbl: UILabel!
     @IBOutlet weak var EventLbl: UILabel!
+    @IBOutlet weak var MarketLbl: UILabel!
     
     @IBOutlet weak var groupLbl: UILabel!
     @IBOutlet weak var BussinessLbl: UILabel!
     @IBOutlet weak var DmLbl: UILabel!
     @IBOutlet weak var NotificationLbl: UILabel!
+    
+    @IBOutlet weak var btnMarketPhone: UIButton!
+    @IBOutlet weak var btnMarketMail: UIButton!
+    @IBOutlet weak var SettingView: UIView!
+    
+    @IBOutlet weak var ActivitsView: UIView!
+    @IBOutlet weak var PostView: UIView!
+    @IBOutlet weak var PollView: UIView!
+    @IBOutlet weak var EventView: UIView!
+    @IBOutlet weak var GroupView: UIView!
+    @IBOutlet weak var BusinessView: UIView!
+    @IBOutlet weak var DMView: UIView!
+    @IBOutlet weak var NotificationFullView: UIView!
+   
     
     var UpdateNewNotificationsData : NewNotificationModel?
     var selectedButton: UIButton?
@@ -51,6 +65,9 @@ class SettingNotificationViewController: UIViewController {
     var DMPhone = true
     var DMmail = true
     
+    var MarketPhone = true
+    var MarketMail = true
+    
     var PostPhnShow = ""
     var PostMailShow = ""
     var PollPhnShow = ""
@@ -66,6 +83,9 @@ class SettingNotificationViewController: UIViewController {
     var DMPhnShow = ""
     var DMMailShow = ""
     
+    var MarketPhnShow = ""
+    var MarketMailShow = ""
+    
     var isPostPhnShowChanged = false
        var isPostMailShowChanged = false
        var isPollPhnShowChanged = false
@@ -78,6 +98,9 @@ class SettingNotificationViewController: UIViewController {
        var isGroupMailShowChanged = false
        var isBussiPhnShowChanged = false
        var isBussiMailMailShowChanged = false
+    
+    var isMarketPhnShowChanged = false
+    var isMarketMailMailShowChanged = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -88,6 +111,7 @@ class SettingNotificationViewController: UIViewController {
         self.groupLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.BussinessLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.DmLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.MarketLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
         
         callNewNotificationWebService {
             self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
@@ -116,6 +140,64 @@ class SettingNotificationViewController: UIViewController {
 
         _ = navigationController?.popViewController(animated: true)
 
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            SettingView.backgroundColor = .black
+            NotificationFullView.backgroundColor = .black
+            ActivitsView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            PostView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            ActivitsView.layer.borderWidth = 1.0
+            
+            PollView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+           
+            PostView.layer.borderWidth = 1.0
+            
+            EventView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            GroupView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            BusinessView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            DMView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            NotificationFullView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+           
+            PollView.layer.borderWidth = 1.0
+            EventView.layer.borderWidth = 1.0
+            GroupView.layer.borderWidth = 1.0
+            BusinessView.layer.borderWidth = 1.0
+            DMView.layer.borderWidth = 1.0
+            NotificationFullView.layer.borderWidth = 1.0
+            
+            NotificationLbl.textColor = .white
+            lblActivity.textColor = .white
+           
+           
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          
+            SettingView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            NotificationFullView.backgroundColor = .white
+            NotificationLbl.textColor = UIColor.secondaryLabel
+            lblActivity.textColor = UIColor.secondaryLabel
+            NotificationFullView.layer.borderWidth = 0
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     @IBAction func btnSave(_ sender: UIButton) {
@@ -221,6 +303,21 @@ class SettingNotificationViewController: UIViewController {
                 self.btnDMMail.setImage(UIImage(named: "notificationsetting"), for: .normal)
             } else if directmsgmail == "0" {
                 self.btnDMMail.setImage(UIImage(named: "radio-blank"), for: .normal)
+            }
+        }
+        
+        if let SendMessageMarketMB = self.UpdateNewNotificationsData?.sendMessageMarketMB {
+            if SendMessageMarketMB == "1" {
+                self.btnMarketPhone.setImage(UIImage(named: "notificationsetting"), for: .normal)
+            } else if SendMessageMarketMB == "0" {
+                self.btnMarketPhone.setImage(UIImage(named: "radio-blank"), for: .normal)
+            }
+        }
+        if let SendMessageMarketEmail = self.UpdateNewNotificationsData?.sendMessageMarketEmail {
+            if SendMessageMarketEmail == "1" {
+                self.btnMarketMail.setImage(UIImage(named: "notificationsetting"), for: .normal)
+            } else if SendMessageMarketEmail == "0" {
+                self.btnMarketMail.setImage(UIImage(named: "radio-blank"), for: .normal)
             }
         }
     }
@@ -431,6 +528,41 @@ class SettingNotificationViewController: UIViewController {
         isDMMailShowChanged = true
     }
     
+    
+    @IBAction func btnMarketPhone(_ sender: UIButton) {
+        
+        if MarketPhone
+        {
+            MarketPhone = false
+            btnMarketPhone.setImage(UIImage(named: "notificationsetting"), for: .normal)
+            MarketPhnShow = "1"
+        }
+        else
+        {
+            MarketPhone = true
+            btnMarketPhone.setImage(UIImage(named: "radio-blank"), for: .normal)
+            MarketPhnShow = "0"
+        }
+        isMarketPhnShowChanged = true
+    }
+    
+    @IBAction func btnMarketMail(_ sender: UIButton) {
+        
+        if MarketMail
+        {
+            MarketMail = false
+            btnMarketMail.setImage(UIImage(named: "notificationsetting"), for: .normal)
+            MarketMailShow = "1"
+        }
+        else
+        {
+            MarketMail = true
+            btnMarketMail.setImage(UIImage(named: "radio-blank"), for: .normal)
+            MarketMailShow = "0"
+        }
+        isMarketMailMailShowChanged = true
+    }
+    
     func callNewNotificationWebService(_ completionClosure: @escaping () -> ()) {
         // Set up the parameters for the API request
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -539,6 +671,13 @@ class SettingNotificationViewController: UIViewController {
         }
         if isDMMailShowChanged {
             dictParams["directmsgmail"] = DMMailShow
+        }
+        
+        if isMarketPhnShowChanged {
+            dictParams["SendMessageMarketMB"] = MarketPhnShow
+        }
+        if isMarketMailMailShowChanged {
+            dictParams["SendMessageMarketEmail"] = MarketMailShow
         }
 
         WebService.sharedInstance.callNewNotificationWebService(withParams: dictParams) { responseData in

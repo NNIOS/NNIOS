@@ -7,13 +7,16 @@
 
 import Foundation
 
+import Foundation
+
 // MARK: - Welcome
 struct NewNotificationModel: Codable {
-    let status, message, commentOnYourPostsMB, commentpostmail: String?
-    let commentLikesOnYourSuggestionMB, commentsuggestionmail, pollForVoteMB, pollvotemail: String?
-    let notificationForEventMB, notificationeventmail, directMessageMB, directmsgmail: String?
-    let newGroupMB, groupcreatemail, ratingReviewsOnYourBusinessMB, ratingCommentbusinessmail: String?
-    let contactNo, emergencyContactno, addresslineone, addresslinetwo: String?
+    let status, message, commentOnYourPostsMB, commentpostmail: String
+    let commentLikesOnYourSuggestionMB, commentsuggestionmail, pollForVoteMB, pollvotemail: String
+    let notificationForEventMB, notificationeventmail, directMessageMB, directmsgmail: String
+    let newGroupMB, groupcreatemail, ratingReviewsOnYourBusinessMB, ratingCommentbusinessmail: String
+    let sendMessageMarketMB, sendMessageMarketEmail, contactNo, emergencyContactno: String
+    let addresslineone, addresslinetwo: String
 
     enum CodingKeys: String, CodingKey {
         case status, message
@@ -31,7 +34,8 @@ struct NewNotificationModel: Codable {
         case groupcreatemail
         case ratingReviewsOnYourBusinessMB = "rating_reviewsOnYourBusinessMb"
         case ratingCommentbusinessmail = "rating_commentbusinessmail"
+        case sendMessageMarketMB = "SendMessageMarketMB"
+        case sendMessageMarketEmail = "SendMessageMarketEmail"
         case contactNo, emergencyContactno, addresslineone, addresslinetwo
     }
 }
-

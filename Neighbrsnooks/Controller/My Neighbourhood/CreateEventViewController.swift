@@ -11,7 +11,7 @@ import Photos
 import PhotosUI
 import TOCropViewController
 
-
+@available(iOS 16.0, *)
 class CreateEventViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, ImageCollectionViewControllerDelegate, UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,UICollectionViewDataSource,CropViewControllerDelegate {
    
     
@@ -24,6 +24,7 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     func didDeleteImage(at index: Int) {
         images.remove(at: index)
     }
+    
     var allImages: [UIImage] {
         return images + imageArray
     }
@@ -131,16 +132,16 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-            TitleeView.layer.borderColor = UIColor.lightGray.cgColor
-            EndDateView.layer.borderColor = UIColor.lightGray.cgColor
-            startDateView.layer.borderColor = UIColor.lightGray.cgColor
+            TitleeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            EndDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            startDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             
-            EndTimeView.layer.borderColor = UIColor.lightGray.cgColor
-            tfEndTime.layer.borderColor = UIColor.lightGray.cgColor
-            Description.layer.borderColor = UIColor.lightGray.cgColor
-            UploadImageView.layer.borderColor = UIColor.lightGray.cgColor
-            startTimeView.layer.borderColor = UIColor.lightGray.cgColor
-            AddressEventView.layer.borderColor = UIColor.lightGray.cgColor
+            EndTimeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            tfEndTime.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            Description.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            startTimeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            AddressEventView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
 //            Add1View.layer.borderColor = UIColor.lightGray.cgColor
 //            Add2.layer.borderColor = UIColor.lightGray.cgColor
             
@@ -160,7 +161,7 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
             tfadd1.backgroundColor = .black
             tfAdd2.backgroundColor = .black
             UploadImageView.backgroundColor = .black
-            UploadImageView.layer.borderColor = UIColor.lightGray.cgColor
+            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             UploadImageView.layer.borderWidth = 1.0
            
             
@@ -319,90 +320,90 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     }
     
     
-    @objc func selectImages(){
-        //  let alert = UIAlertController(title:  "", message: "", preferredStyle: .actionSheet)
-          let alert = UIAlertController()
-          alert.addAction(UIAlertAction(title: "Take Photo", style: .default , handler:{ (UIAlertAction)in
-                  print("User click Camera button")
-                  self.present(self.imagePicker!, animated: true, completion: {
-                      self.imagePicker?.sourceType = .camera
-                      self.imagePicker?.allowsEditing = true
-                      self.imagePicker?.delegate = self
-                  })
-              }))
-
-          alert.addAction(UIAlertAction(title: "Choose Photo", style: .default , handler:{ (UIAlertAction)in
-                  print("User click Gallery button")
-
-                  self.present(self.imagePicker!, animated: true, completion: {
-                      self.imagePicker?.sourceType = .photoLibrary
-                      self.imagePicker?.allowsEditing = true
-                      self.imagePicker?.delegate = self
-                  })
-              }))
-
-          alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler:{ (UIAlertAction)in
-                  print("User click Dismiss button")
-              }))
-
-              self.present(alert, animated: true, completion: {
-                  print("completion block")
-          })
-      }
-
-    
-    func openCameraGallery()
-    {
-      //  let alert = UIAlertController(title:  "", message: "", preferredStyle: .actionSheet)
-        let alert = UIAlertController()
-        alert.addAction(UIAlertAction(title: "Take Photo", style: .default , handler:{ (UIAlertAction)in
-                print("User click Camera button")
-                self.present(self.imagePicker!, animated: true, completion: {
-                    self.imagePicker?.sourceType = .camera
-                    self.imagePicker?.allowsEditing = true
-                    self.imagePicker?.delegate = self
-                })
-            }))
-
-        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default , handler:{ (UIAlertAction)in
-                print("User click Gallery button")
-
-                self.present(self.imagePicker!, animated: true, completion: {
-                    self.imagePicker?.sourceType = .photoLibrary
-                    self.imagePicker?.allowsEditing = true
-                    self.imagePicker?.delegate = self
-                })
-            }))
-
-        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler:{ (UIAlertAction)in
-                print("User click Dismiss button")
-            }))
-
-            self.present(alert, animated: true, completion: {
-                print("completion block")
+    @objc func selectImages() {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
+            print("User clicked Camera button")
+            
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                let picker = UIImagePickerController()
+                picker.sourceType = .camera
+                picker.allowsEditing = true
+                picker.delegate = self
+                self.present(picker, animated: true, completion: nil)
+            } else {
+                print("Camera not available")
+            }
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
+            print("User clicked Gallery button")
+            
+            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+                let picker = UIImagePickerController()
+                picker.sourceType = .photoLibrary
+                picker.allowsEditing = true
+                picker.delegate = self
+                self.present(picker, animated: true, completion: nil)
+            } else {
+                print("Photo library not available")
+            }
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { _ in
+            print("User clicked Dismiss button")
+        }))
+        
+        self.present(alert, animated: true, completion: {
+            print("completion block")
         })
     }
+
+
     
-//    func presentCropViewController(image: UIImage) {
-//        let cropViewController = TOCropViewController(image: image)
-//        cropViewController.delegate = self
-//        self.present(cropViewController, animated: true, completion: nil)
-//    }
+    func openCameraGallery() {
+        let alert = UIAlertController()
+
+        alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
+            print("User clicked Camera button")
+
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                self.imagePicker = UIImagePickerController()
+                self.imagePicker?.sourceType = .camera
+                self.imagePicker?.allowsEditing = false
+                self.imagePicker?.delegate = self
+                self.present(self.imagePicker!, animated: true, completion: nil)
+            } else {
+                print("Camera not available")
+            }
+        }))
+
+        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
+            print("User clicked Gallery button")
+
+            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+                self.imagePicker = UIImagePickerController()
+                self.imagePicker?.sourceType = .photoLibrary
+                self.imagePicker?.allowsEditing = false
+                self.imagePicker?.delegate = self
+                self.present(self.imagePicker!, animated: true, completion: nil)
+            } else {
+                print("Photo library not available")
+            }
+        }))
+
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { _ in
+            print("User clicked Dismiss button")
+        }))
+
+        self.present(alert, animated: true, completion: {
+            print("completion block")
+        })
+    }
+
     
-//    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-//            if let image = info[.originalImage] as? UIImage {
-//                DispatchQueue.main.async {
-//                    self.presentCropViewController(image: image)
-//                    self.images.append(image)
-//                   // self.selectedImge = image
-//                    //  self.presentCropViewController(image: image)
-//                    self.WicketRangeCollectionView.reloadData()
-//                    self.updateCollectionView()
-//                }
-//            }
-//            picker.dismiss(animated: true, completion: nil)
-//        }
-    
+
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         guard let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage) else { return }
         
@@ -701,43 +702,9 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     }
     
 }
+ 
 
-//extension CreateEventViewController: TOCropViewControllerDelegate {
-////    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, withRect cropRect: CGRect, angle: Int)
-////
-////    {
-////        self.imageArray.append(image)
-////         self.images.append(image)
-////        self.WicketRangeCollectionView.reloadData()
-////        cropViewController.dismiss(animated: true, completion: nil)
-////    }
-////
-////
-////
-////    @nonobjc func cropViewController(_ cropViewController: TOCropViewController, didFinishCancelled cancelled: Bool) {
-////        cropViewController.dismiss(animated: true, completion: nil)
-////    }
-//
-//
-//    func cropViewController(_ cropViewController: CropViewController, didFinishCancelled cancelled: Bool) {
-//        cropViewController.dismiss(animated: true)
-//    }
-//
-//    func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
-//        cropViewController.dismiss(animated: true)
-//        print("Did crop")
-//
-//        // Assign the cropped image to profilePic
-//        self.imageArray.append(image)
-//         self.images.append(image)
-//        self.WicketRangeCollectionView.reloadData()
-//
-//     //   updateProfileImageView() // ✅ Yeh line zaroori hai
-//    }
-//
-//}
-
-
+@available(iOS 16.0, *)
 extension CreateEventViewController: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.text == "Description" {

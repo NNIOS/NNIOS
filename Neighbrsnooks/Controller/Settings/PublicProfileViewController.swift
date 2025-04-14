@@ -7,6 +7,7 @@
 
 import UIKit
 import SVProgressHUD
+
 @available(iOS 16.0, *)
 class PublicProfileViewController: UIViewController {
     
@@ -35,6 +36,14 @@ class PublicProfileViewController: UIViewController {
     @IBOutlet weak var lblContact: UILabel!
     @IBOutlet weak var lblAdd1: UILabel!
     @IBOutlet weak var lblAdd2: UILabel!
+    
+    @IBOutlet weak var PublicView: UIView!
+    @IBOutlet weak var FullPublicView: UIView!
+    
+    @IBOutlet weak var EmergencyView: UIView!
+    @IBOutlet weak var Add1View: UIView!
+    @IBOutlet weak var Add2View: UIView!
+    @IBOutlet weak var ContactView: UIView!
    
     
     var UpdateNewNotificationsData : NewNotificationModel?
@@ -78,6 +87,49 @@ class PublicProfileViewController: UIViewController {
             self.updateRadioButtons()
         }
       
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            FullPublicView.backgroundColor = .black
+            PublicView.backgroundColor = .black
+            EmergencyView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            Add1View.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            PublicView.layer.borderWidth = 1.0
+            PublicView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            Add2View.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+           
+            EmergencyView.layer.borderWidth = 1.0
+            
+            ContactView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+           
+           
+            Add1View.layer.borderWidth = 1.0
+            ContactView.layer.borderWidth = 1.0
+            Add2View.layer.borderWidth = 1.0
+            
+           
+           
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          
+            FullPublicView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            PublicView.backgroundColor = .white
+//            NotificationLbl.textColor = UIColor.secondaryLabel
+//            lblActivity.textColor = UIColor.secondaryLabel
+//            NotificationFullView.layer.borderWidth = 0
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
     
     

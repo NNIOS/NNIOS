@@ -32,6 +32,19 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
     @IBOutlet weak var lblEventAddress: UILabel!
     @IBOutlet weak var lblUploadEvent: UILabel!
     @IBOutlet weak var lblmaxImg: UILabel!
+    @IBOutlet weak var TitleeView: UIView!
+    @IBOutlet weak var EndDateView: UIView!
+    
+    @IBOutlet weak var startDateView: UIView!
+    @IBOutlet weak var startTimeView: UIView!
+    @IBOutlet weak var EndTimeView: UIView!
+    @IBOutlet weak var Description: UIView!
+    
+    @IBOutlet weak var UploadImageView: UIView!
+    @IBOutlet weak var Add1View: UIView!
+    @IBOutlet weak var Add2: UIView!
+    @IBOutlet weak var createEventView: UIView!
+    @IBOutlet weak var AddressEventView: UIView!
     
     @IBOutlet weak var profileImgView : UIImageView!
     var eventid = ""
@@ -109,6 +122,91 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
             
             // Do any additional setup after loading the view.
         }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            TitleeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            EndDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            startDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            EndTimeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            tfEndTime.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            Description.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            startTimeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            AddressEventView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+//            Add1View.layer.borderColor = UIColor.lightGray.cgColor
+//            Add2.layer.borderColor = UIColor.lightGray.cgColor
+            
+            TitleeView.layer.borderWidth = 1.0 // Enable border in dark mode
+            EndDateView.layer.borderWidth = 1.0
+            startDateView.layer.borderWidth = 1.0
+            startTimeView.layer.borderWidth = 1.0
+            EndTimeView.layer.borderWidth = 1.0 // Enable border in dark mode
+            
+            Description.layer.borderWidth = 1.0
+            Add1View.layer.borderWidth = 1.0
+            Add2.layer.borderWidth = 1.0
+            AddressEventView.layer.borderWidth = 1.0
+            createEventView.backgroundColor = .black
+            Description.backgroundColor = .black
+            TitleeView.backgroundColor = .black
+            Add1View.backgroundColor = .black
+            Add2.backgroundColor = .black
+            tfAdd1.backgroundColor = .black
+            tfAdd2.backgroundColor = .black
+            UploadImageView.backgroundColor = .black
+            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadImageView.layer.borderWidth = 1.0
+           
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          //  questionView.textColor = UIColor.secondaryLabel
+            TitleeView.isUserInteractionEnabled = true // Disable in light mode
+            EndDateView.isUserInteractionEnabled = true
+            startDateView.isUserInteractionEnabled = true
+            
+            EndTimeView.isUserInteractionEnabled = true // Disable in light mode
+            tfEndTime.isUserInteractionEnabled = true
+            Description.isUserInteractionEnabled = true
+            UploadImageView.isUserInteractionEnabled = true
+            
+            Add1View.isUserInteractionEnabled = true
+            Add2.isUserInteractionEnabled = true
+            startTimeView.isUserInteractionEnabled = true
+            
+            TitleeView.layer.borderWidth = 0 // Remove border in light mode
+            tfSrartDate.layer.borderWidth = 0
+            startDateView.layer.borderWidth = 0
+            startTimeView.layer.borderWidth = 0
+            EndDateView.layer.borderWidth = 0
+            AddressEventView.layer.borderWidth = 0
+            tfAdd1.backgroundColor = .white
+            tfAdd2.backgroundColor = .white
+            
+            Add1View.backgroundColor = .white
+            Add2.backgroundColor = .white
+            UploadImageView.backgroundColor = .white
+            
+            EndTimeView.layer.borderWidth = 0 // Remove border in light mode
+            tfEndTime.layer.borderWidth = 0
+            Description.layer.borderWidth = 0
+            Add1View.layer.borderWidth = 0
+            Add2.layer.borderWidth = 0
+           // option4.layer.borderWidth = 0
+            UploadImageView.layer.borderWidth = 0
+            createEventView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
     
     @IBAction func BackButtionAction(_ : UIButton){
@@ -387,29 +485,30 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
             "addlinetwo": self.tfAdd2.text ?? "",
             "datelong": "5"
         ]
+        
         WebService.sharedInstance.callUpdateEventWebService(withParams: dictParams) { [self] data in
             self.EventUpdatesData = data
             
-            callsendImageAPI(param: dictParams, arrImage: profileImgView.image!, imageKey: "eventpic", URlName: kBASEURL + WebServiceName.kUpdateEvent) {
-                DispatchQueue.main.async {
-                    completionClosure(true)  // Call completion closure with success
+            if let croppedImage = profileImgView.image {
+                callsendImageAPI(param: dictParams, arrImage: croppedImage, imageKey: "eventpic", URlName: kBASEURL + WebServiceName.kUpdateEvent) {
+                    DispatchQueue.main.async {
+                        completionClosure(true)
+                    }
                 }
             }
         }
     }
+
 
 }
 
 @available(iOS 16.0, *)
 extension UpdateEventViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        guard let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage) else { return }
-        // volunteerProfileVM.profileImg = image
-        picker.dismiss(animated: true, completion: nil)
-      //   imageview.image = image
-    //   showCrop(image: image) for crop visible
-        self.profileImgView.image = image
-        self.selectedImge = image
+        guard let image = info[.originalImage] as? UIImage else { return }
+        picker.dismiss(animated: true) {
+            self.showCrop(image: image) // Open crop view
+        }
     }
 
     func showCrop(image: UIImage) {
@@ -428,49 +527,56 @@ extension UpdateEventViewController: UIImagePickerControllerDelegate, UINavigati
     }
 
     func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
-        cropViewController.dismiss(animated: true)
-        print("Did crop")
-        //rajuuuuu
-        
-//            let imageView = UIImageView(frame: view.frame)
-//            imageView.contentMode = .scaleAspectFit
-//            imageView.image = image
-//            view.addSubview(imageView)
+        cropViewController.dismiss(animated: true) {
+            self.profileImgView.image = image
+            self.selectedImge = image
+        }
     }
+
 //
 
 
-    func openCameraGallery()
-    {
-      //  let alert = UIAlertController(title:  "", message: "", preferredStyle: .actionSheet)
+    func openCameraGallery() {
         let alert = UIAlertController()
-        alert.addAction(UIAlertAction(title: "Take Photo", style: .default , handler:{ (UIAlertAction)in
-                print("User click Camera button")
-                self.present(self.imagePicker!, animated: true, completion: {
-                    self.imagePicker?.sourceType = .camera
-                    self.imagePicker?.allowsEditing = true
-                    self.imagePicker?.delegate = self
-                })
-            }))
 
-        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default , handler:{ (UIAlertAction)in
-                print("User click Gallery button")
+        alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
+            print("User clicked Camera button")
 
-                self.present(self.imagePicker!, animated: true, completion: {
-                    self.imagePicker?.sourceType = .photoLibrary
-                    self.imagePicker?.allowsEditing = true
-                    self.imagePicker?.delegate = self
-                })
-            }))
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                self.imagePicker = UIImagePickerController()
+                self.imagePicker?.sourceType = .camera
+                self.imagePicker?.allowsEditing = false
+                self.imagePicker?.delegate = self
+                self.present(self.imagePicker!, animated: true, completion: nil)
+            } else {
+                print("Camera not available")
+            }
+        }))
 
-        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler:{ (UIAlertAction)in
-                print("User click Dismiss button")
-            }))
+        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
+            print("User clicked Gallery button")
 
-            self.present(alert, animated: true, completion: {
-                print("completion block")
+            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+                self.imagePicker = UIImagePickerController()
+                self.imagePicker?.sourceType = .photoLibrary
+                self.imagePicker?.allowsEditing = false
+                self.imagePicker?.delegate = self
+                self.present(self.imagePicker!, animated: true, completion: nil)
+            } else {
+                print("Photo library not available")
+            }
+        }))
+
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { _ in
+            print("User clicked Dismiss button")
+        }))
+
+        self.present(alert, animated: true, completion: {
+            print("completion block")
         })
     }
+
+
 
 
 }

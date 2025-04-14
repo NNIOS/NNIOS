@@ -6,7 +6,7 @@
 //
 
 import UIKit
-//import DropDown
+ 
 import Alamofire
 import Photos
 import PhotosUI
@@ -33,6 +33,18 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
     @IBOutlet weak var tpyePostLbl: UILabel!
     @IBOutlet weak var lblUploadImg: UILabel!
     
+    @IBOutlet weak var FullMarketView: UIView!
+    @IBOutlet weak var ItemNameView: UIView!
+    
+    @IBOutlet weak var CategoryView: UIView!
+    @IBOutlet weak var sellView: UIView!
+    @IBOutlet weak var DonateView: UIView!
+    @IBOutlet weak var PriceView: UIView!
+    
+    @IBOutlet weak var UploadImageView: UIView!
+    @IBOutlet weak var DescriptionView: UIView!
+   
+    
     
     enum MediaType {
         case image(UIImage)
@@ -46,7 +58,6 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
    // let pickerView = UIPickerView()
     var MarketCatDataNew : MarketCategoryModel?
     var MarketCreateDataNew : CreateMarketModel?
-//    var serviceDropdownData = DropDown()
     var imagePicker:UIImagePickerController?
     var imageArray = [UIImage]()
     var CamimageArray = [UIImage]()
@@ -126,6 +137,102 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
 
         _ = navigationController?.popViewController(animated: true)
 
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            ItemNameView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            CategoryView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+//            sellView.layer.borderColor = UIColor.lightGray.cgColor
+//
+//            DonateView.layer.borderColor = UIColor.lightGray.cgColor
+            PriceView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            DescriptionView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            btnSell.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            btnDonate.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+           
+//            Add1View.layer.borderColor = UIColor.lightGray.cgColor
+//            Add2.layer.borderColor = UIColor.lightGray.cgColor
+            
+            ItemNameView.layer.borderWidth = 1.0 // Enable border in dark mode
+            CategoryView.layer.borderWidth = 1.0
+            btnSell.layer.borderWidth = 1.0 // Enable border in dark mode
+            btnDonate.layer.borderWidth = 1.0
+//            sellView.layer.borderWidth = 1.0
+//            DonateView.layer.borderWidth = 1.0
+            PriceView.layer.borderWidth = 1.0 // Enable border in dark mode
+            
+            DescriptionView.layer.borderWidth = 1.0
+            UploadImageView.layer.borderWidth = 1.0
+                        FullMarketView.backgroundColor = .black
+            
+            UploadImageView.backgroundColor = .black
+            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadImageView.layer.borderWidth = 1.0
+            ItemNameView.backgroundColor = .black
+            CategoryView.backgroundColor = .black
+            PriceView.backgroundColor = .black
+            collectionViewEvent.backgroundColor = .black
+            btnSell.backgroundColor = .black
+            btnDonate.backgroundColor = .black
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          //  questionView.textColor = UIColor.secondaryLabel
+            ItemNameView.backgroundColor = .white
+            ItemNameView.isUserInteractionEnabled = true // Disable in light mode
+            CategoryView.isUserInteractionEnabled = true
+//            sellView.isUserInteractionEnabled = true
+//
+//            DonateView.isUserInteractionEnabled = true // Disable in light mode
+            PriceView.isUserInteractionEnabled = true
+            DescriptionView.isUserInteractionEnabled = true
+            UploadImageView.isUserInteractionEnabled = true
+            
+            UploadImageView.isUserInteractionEnabled = true
+            
+            
+            ItemNameView.layer.borderWidth = 0 // Remove border in light mode
+//            DonateView.layer.borderWidth = 0
+//            sellView.layer.borderWidth = 0
+            PriceView.layer.borderWidth = 0
+            CategoryView.layer.borderWidth = 0
+            DescriptionView.layer.borderWidth = 0
+            btnSell.layer.borderWidth = 0
+            btnDonate.layer.borderWidth = 0
+           
+            UploadImageView.backgroundColor = .white
+            CategoryView.backgroundColor = .white
+            PriceView.backgroundColor = .white
+            collectionViewEvent.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            
+            UploadImageView.layer.borderWidth = 0 // Remove border in light mode
+            
+           // option4.layer.borderWidth = 0
+            UploadImageView.layer.borderWidth = 0
+            FullMarketView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            
+            btnSell.backgroundColor = .white
+            btnDonate.backgroundColor = .white
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     @IBAction func SellBtnAction(_ sender: UIButton) {
@@ -688,7 +795,7 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
 //      //  serviceDropdownData.bottomOffset = CGPoint(x: 50, y: 24)
 //       // self.ServiceDescriptionLabel.text = self.ServiceTypeData?.data.seri
 //    }
-    
+//    
 //    private func showDropdownData(showOn textField: UITextField, DropdownName dropdown: DropDown) {
 //
 //        // Set the anchor and dropdown position
@@ -729,8 +836,8 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
 //        // Show the dropdown
 //        dropdown.show()
 //    }
-//
-//    
+
+    
     
     
     
@@ -801,7 +908,7 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
                         for value in self.MarketCatDataNew?.category ?? [] {
                             self.serviceName.append(value.catTitle ?? "")
                         }
-//                        self.serviceDropdownData.dataSource = self.serviceName
+                         
                         DispatchQueue.main.async {
                             completion() // Call completion handler
                         }

@@ -1,12 +1,6 @@
-//
-//  GroupDetailsViewController.swift
-//  NeighbrsNook Latest Latest
-//
-//  Created by Mac on 05/06/24.
-//
-
 import UIKit
 import SVProgressHUD
+
 
 @available(iOS 16.0, *)
 class GroupDetailsViewController: BaseViewC, UITableViewDataSource, UITableViewDelegate, ConfirmNewDelegate  {
@@ -711,5 +705,3 @@ class GroupDetailsViewController: BaseViewC, UITableViewDataSource, UITableViewD
         }
         
     }
-
-

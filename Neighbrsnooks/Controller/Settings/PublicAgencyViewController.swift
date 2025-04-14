@@ -7,6 +7,7 @@
 
 import UIKit
 import GoogleMaps
+
 @available(iOS 16.0, *)
 class PublicAgencyViewController: BaseViewController {
     
@@ -32,6 +33,7 @@ class PublicAgencyViewController: BaseViewController {
     @IBOutlet weak var HospiImgView : UIImageView!
     @IBOutlet weak var PoliceImgView : UIImageView!
     @IBOutlet weak var FireImgView : UIImageView!
+    @IBOutlet weak var PublicFullView: UIView!
     var selection = 1
     var PublicDirecData : PublicDirectoryModel?
     var profileData : ProfileModel?
@@ -132,6 +134,39 @@ class PublicAgencyViewController: BaseViewController {
 
         _ = navigationController?.popViewController(animated: true)
 
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            PublicFullView.backgroundColor = .black
+           
+           
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          
+            PublicFullView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            
+           
+            
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     @IBAction func btnHospi(_ sender: UIButton) {
@@ -273,6 +308,7 @@ class PublicAgencyViewController: BaseViewController {
         }
 
 }
+
 @available(iOS 16.0, *)
 extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate {
     
@@ -378,6 +414,9 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
 
             // Store the website URL in gesture recognizer's `accessibilityLabel`
             cell.WebLbl.accessibilityLabel = data.website
+            cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
+            cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
+
 
             
             let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
@@ -401,6 +440,8 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
             cell.Number1Lbl.text = data.number1
             cell.Number2Lbl.text = data.number2
             cell.viewLine.isHidden = expandedIndexPath != indexPath
+            cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
+            cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
             
             if let number2 = data.number2, !number2.isEmpty {
                    cell.Number2View.isHidden = false
@@ -453,6 +494,8 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
             cell.Number1Lbl.text = data.number1
             cell.Number2Lbl.text = data.number2
             cell.viewLine.isHidden = expandedIndexPath != indexPath
+            cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
+            cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
             
             if let number2 = data.number2, !number2.isEmpty {
                    cell.Number2View.isHidden = false
@@ -505,6 +548,8 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
             cell.Number1Lbl.text = data.number1
             cell.Number2Lbl.text = data.number2
             cell.viewLine.isHidden = expandedIndexPath != indexPath
+            cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
+            cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
             
             if let number2 = data.number2, !number2.isEmpty {
                    cell.Number2View.isHidden = false

@@ -7,6 +7,7 @@
 
 import UIKit
 import Kingfisher
+
 @available(iOS 16.0, *)
 class GroupMessageViewController: BaseViewController, UITextViewDelegate {
     
@@ -19,6 +20,7 @@ class GroupMessageViewController: BaseViewController, UITextViewDelegate {
     @IBOutlet weak var placeholderLabel: UILabel!
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var mainView: UIView!
+    @IBOutlet weak var MessageFullView: UIView!
     
     
     var userName : String?
@@ -92,6 +94,42 @@ class GroupMessageViewController: BaseViewController, UITextViewDelegate {
 
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            MessageFullView.backgroundColor = .black
+            mainView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+
+            
+            mainView.layer.borderWidth = 1.0 // En
+           
+           
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          //  questionView.textColor = UIColor.secondaryLabel
+          
+            MessageFullView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            mainView.layer.borderWidth = 0 // En
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
+    }
+    
     func addShadowToMainView() {
             mainView.layer.shadowColor = UIColor.black.cgColor
             mainView.layer.shadowOpacity = 0.25
@@ -155,6 +193,7 @@ class GroupMessageViewController: BaseViewController, UITextViewDelegate {
     }
 
 }
+
 
 @available(iOS 16.0, *)
 extension GroupMessageViewController: UITableViewDataSource, UITableViewDelegate{
