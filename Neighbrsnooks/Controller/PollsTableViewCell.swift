@@ -1,4 +1,5 @@
 import UIKit
+
 class PollsTableViewCell: UITableViewCell {
     
     @IBOutlet weak var lblCreaterName: UILabel!
@@ -36,34 +37,48 @@ class PollsTableViewCell: UITableViewCell {
     }
     
    
-
     private func updateColors() {
-        if traitCollection.userInterfaceStyle == .dark {
-            // Dark mode colors
-            lblCreaterName.textColor = .white
-            lblSec.textColor = .white
-            lblPolls.textColor = .white
-            lblStartDate.textColor = .white
-            lblEndDate.textColor = .white
-            lblFavorite.textColor = .white
-            lblStart.textColor = .white
-            lblEnd.textColor = .white
-            lblTime.textColor = .white
-        } else {
-            // Light mode mein storyboard ke original colors preserve karna
-            lblCreaterName.textColor = defaultTextColor
-            lblSec.textColor = UIColor.secondaryLabel
-            lblPolls.textColor = UIColor.secondaryLabel
-            lblStartDate.textColor = UIColor.secondaryLabel
-            lblEndDate.textColor = UIColor.secondaryLabel
-            lblFavorite.textColor = UIColor.secondaryLabel
-            lblStart.textColor = UIColor.secondaryLabel
-            lblEnd.textColor = UIColor.secondaryLabel
-            lblTime.textColor = UIColor.secondaryLabel
-            BgView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-        }
-      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
-    }
+                // Optional binding for safety inside the function
+                if let lblCreaterName = lblCreaterName,
+                   let lblSec = lblSec,
+                   let lblPolls = lblPolls,
+                   let lblStartDate = lblStartDate,
+                   let lblEndDate = lblEndDate,
+                   let lblFavorite = lblFavorite,
+                   let lblStart = lblStart,
+                   let lblEnd = lblEnd,
+                   let lblTime = lblTime,
+                   let bgView = BgView {
+
+                    if traitCollection.userInterfaceStyle == .dark {
+                        // Dark mode colors
+                        lblCreaterName.textColor = .white
+                        lblSec.textColor = .white
+                        lblPolls.textColor = .white
+                        lblStartDate.textColor = .white
+                        lblEndDate.textColor = .white
+                        lblFavorite.textColor = .white
+                        lblStart.textColor = .white
+                        lblEnd.textColor = .white
+                        lblTime.textColor = .white
+                    } else {
+                        // Light mode: use default colors
+                        lblCreaterName.textColor = defaultTextColor
+                        lblSec.textColor = .secondaryLabel
+                        lblPolls.textColor = .secondaryLabel
+                        lblStartDate.textColor = .secondaryLabel
+                        lblEndDate.textColor = .secondaryLabel
+                        lblFavorite.textColor = .secondaryLabel
+                        lblStart.textColor = .secondaryLabel
+                        lblEnd.textColor = .secondaryLabel
+                        lblTime.textColor = .secondaryLabel
+                        BgView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                    }
+
+                } else {
+                    print("❗️One or more UI elements are nil. Skipping color update.")
+                }
+            }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)

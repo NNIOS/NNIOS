@@ -23,6 +23,15 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     @IBOutlet weak var lblAnyone: UILabel!
     @IBOutlet weak var lblApproved: UILabel!
     
+    @IBOutlet weak var GroupView: UIView!
+    @IBOutlet weak var GroupNameView: UIView!
+    @IBOutlet weak var AboutGroupView: UIView!
+    @IBOutlet weak var JoinView: UIView!
+    @IBOutlet weak var UploadImgView: UIView!
+    
+    
+   
+    
     var Anyone = ""
     var ApprovedMember = ""
     var account = ""
@@ -34,6 +43,7 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        NetworkMonitor.shared.startMonitoring()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         
         self.tfGroupName.font = UIFont(name: "Montserrat-Regular", size: 17)
@@ -57,7 +67,7 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
         profilePic.layer.masksToBounds = true
       //  profilePic.layer.cornerRadius = profilePic.frame.height / 2
         
-       
+     //   updateCollectionView()
         
         tfGroupName.autocapitalizationType = .sentences
         tvaboutGroup.autocapitalizationType = .sentences
@@ -67,11 +77,74 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
         // Do any additional setup after loading the view.
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
     @IBAction func BackButtionAction(_ : UIButton){
 
         _ = navigationController?.popViewController(animated: true)
 
     }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            GroupNameView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadImgView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            AboutGroupView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            JoinView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            btnAnyone.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            btnApprove.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            GroupNameView.layer.borderWidth = 1.0 // Enable border in dark mode
+            UploadImgView.layer.borderWidth = 1.0
+            AboutGroupView.layer.borderWidth = 1.0
+            JoinView.layer.borderWidth = 1.0 // Enable border in dark mode
+            
+            GroupView.backgroundColor = .black
+            GroupNameView.backgroundColor = .black
+            UploadImgView.backgroundColor = .black
+            
+            btnAnyone.backgroundColor = .white
+            btnApprove.backgroundColor = .white
+            btnAnyone.setTitleColor(.black, for: .normal) // Adjust text color for contrast
+            btnApprove.setTitleColor(.black, for: .normal)
+            
+        } else {
+            GroupNameView.isUserInteractionEnabled = true
+            UploadImgView.isUserInteractionEnabled = true
+            AboutGroupView.isUserInteractionEnabled = true
+            JoinView.isUserInteractionEnabled = true
+            
+            GroupNameView.layer.borderWidth = 0 // Remove border in light mode
+            AboutGroupView.layer.borderWidth = 0
+            UploadImgView.layer.borderWidth = 0
+            JoinView.layer.borderWidth = 0 // Remove border in light mode
+            
+            GroupNameView.backgroundColor = .white
+            UploadImgView.backgroundColor = .white
+            GroupView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            
+            btnAnyone.layer.borderColor = UIColor.white.cgColor
+            btnApprove.layer.borderColor = UIColor.white.cgColor
+            btnAnyone.backgroundColor = .white
+            btnApprove.backgroundColor = .white
+            btnAnyone.setTitleColor(.black, for: .normal) // Adjust text color for contrast
+            btnApprove.setTitleColor(.black, for: .normal)
+        }
+    }
+
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
+    }
+    
     
     func textViewDidChange(_ textView: UITextView) {
             // Show or hide placeholder label based on text view content
@@ -191,6 +264,7 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
 
 }
 
+
 @available(iOS 16.0, *)
 extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -236,37 +310,46 @@ extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigati
 
 
 
-    func openCameraGallery()
-    {
-      //  let alert = UIAlertController(title:  "", message: "", preferredStyle: .actionSheet)
+    func openCameraGallery() {
         let alert = UIAlertController()
-        alert.addAction(UIAlertAction(title: "Take Photo", style: .default , handler:{ (UIAlertAction)in
-                print("User click Camera button")
-                self.present(self.imagePicker!, animated: true, completion: {
-                    self.imagePicker?.sourceType = .camera
-                    self.imagePicker?.allowsEditing = true
-                    self.imagePicker?.delegate = self
-                })
-            }))
 
-        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default , handler:{ (UIAlertAction)in
-                print("User click Gallery button")
+        alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
+            print("User clicked Camera button")
 
-                self.present(self.imagePicker!, animated: true, completion: {
-                    self.imagePicker?.sourceType = .photoLibrary
-                    self.imagePicker?.allowsEditing = true
-                    self.imagePicker?.delegate = self
-                })
-            }))
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                self.imagePicker = UIImagePickerController()
+                self.imagePicker?.sourceType = .camera
+                self.imagePicker?.allowsEditing = false
+                self.imagePicker?.delegate = self
+                self.present(self.imagePicker!, animated: true, completion: nil)
+            } else {
+                print("Camera not available")
+            }
+        }))
 
-        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler:{ (UIAlertAction)in
-                print("User click Dismiss button")
-            }))
+        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
+            print("User clicked Gallery button")
 
-            self.present(alert, animated: true, completion: {
-                print("completion block")
+            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+                self.imagePicker = UIImagePickerController()
+                self.imagePicker?.sourceType = .photoLibrary
+                self.imagePicker?.allowsEditing = false
+                self.imagePicker?.delegate = self
+                self.present(self.imagePicker!, animated: true, completion: nil)
+            } else {
+                print("Photo library not available")
+            }
+        }))
+
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { _ in
+            print("User clicked Dismiss button")
+        }))
+
+        self.present(alert, animated: true, completion: {
+            print("completion block")
         })
     }
+
 
     
     

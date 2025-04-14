@@ -27,6 +27,7 @@ class AmbulanceTableViewCell: UITableViewCell {
     @IBOutlet weak var arrowImageView : UIImageView!
     override func awakeFromNib() {
         super.awakeFromNib()
+        updateColors()
         // Initialization code
     }
 
@@ -34,6 +35,34 @@ class AmbulanceTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
+    }
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            EventLbl.textColor = .white
+            AddLbl.textColor = .white
+            Number1Lbl.textColor = .white
+            Number2Lbl.textColor = .white
+            WebLbl.textColor = .white
+            arrowImageView.tintColor = .white // Arrow tint for dark mode
+        } else {
+            // Light mode
+            EventLbl.textColor = UIColor.secondaryLabel
+            AddLbl.textColor = UIColor.secondaryLabel
+            Number1Lbl.textColor = UIColor.secondaryLabel
+            Number2Lbl.textColor = UIColor.secondaryLabel
+            WebLbl.textColor = UIColor.secondaryLabel
+            arrowImageView.tintColor = .black // Arrow tint for light mode
+        }
+    }
+
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
 
 }

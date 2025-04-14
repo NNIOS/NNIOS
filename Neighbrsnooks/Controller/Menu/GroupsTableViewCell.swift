@@ -34,7 +34,7 @@ class GroupsTableViewCell: UITableViewCell {
     
     var userId: String?
     weak var delegate: ProfileTapDelegate?
-
+    private var defaultTextColor: UIColor?
     
     weak var delegateFav: ProfileFavTapDelegate?
     
@@ -44,8 +44,42 @@ class GroupsTableViewCell: UITableViewCell {
         if UserImgView != nil{
             addTapGestureToProfile()
         }
-        
+        defaultTextColor = lblGroupName.textColor
+        updateColors()
     }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = .white
+            lblGroupName.textColor = .white
+            lblPrivate.textColor = .white
+            lblSec.textColor = .white
+           // lblMember.textColor = .white
+          //  lblMemberText.textColor = .white
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+            lblName.textColor = UIColor.secondaryLabel
+           // lblGroupName.textColor = defaultTextColor
+            lblGroupName.textColor = defaultTextColor
+            lblPrivate.textColor = UIColor.secondaryLabel
+            lblSec.textColor = UIColor.secondaryLabel
+//            lblMember.textColor = .white
+//            lblMemberText.textColor = UIColor.secondaryLabel
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
+    }
+
     
     private func addTapGestureToProfile() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(profileTapped))

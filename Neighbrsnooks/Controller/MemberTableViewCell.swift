@@ -82,6 +82,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     var DotCallback: ((String?) -> Void)?
     var thisWidth:CGFloat = 0
     var favouriteButtonCallback: (() -> Void)?
+    var likeUnLikeTab: (() -> Void)?
     var postid: String?
     
     
@@ -94,34 +95,21 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         lblGeneral.font = UIFont(name: "Montserrat-SemiBold", size: 14)
         lblDescription.font = UIFont(name: "Montserrat-Regular", size: 14)
         profileImgView.layer.cornerRadius = profileImgView.frame.height/2
-        
         collectionViewBanner.showsHorizontalScrollIndicator = false
         collectionViewBanner.showsVerticalScrollIndicator = false
-        
         addTapGestures()
         collectionViewBanner.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap)))
         // Initialization code
-        
         likebtn.setImage(UIImage(named: "Unlike"), for: .normal)
         lblLikeCount.text = "\(likeCount)"
-        
-        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(showEmojis(_:)))
-        longPressGesture.minimumPressDuration = 1.0 // Set duration to 3 seconds
-        likebtn.addGestureRecognizer(longPressGesture)
-        
         
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumLineSpacing = 0 // Space between items should be 0
-        
         collectionViewBanner.collectionViewLayout = layout
         collectionViewBanner.isPagingEnabled = false // We'll handle custom snapping
         collectionViewBanner.decelerationRate = .fast // Fast scrolling stop
         collectionViewBanner.showsHorizontalScrollIndicator = false
-        
-       
-        
-        
     }
     
    
@@ -130,11 +118,9 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         let nameTap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         lblName.isUserInteractionEnabled = true
         lblName.addGestureRecognizer(nameTap)
-        
         let secTap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         lblSec.isUserInteractionEnabled = true
         lblSec.addGestureRecognizer(secTap)
-        
         let profileTap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         profileImgView.isUserInteractionEnabled = true
         profileImgView.addGestureRecognizer(profileTap)
@@ -176,10 +162,8 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     func configureDescription(with text: String) {
         // If the text is expanded, show all the text (0 means no limit)
         lblDescription.numberOfLines = isExpanded ? 0 : 2  // If expanded, show all lines, otherwise show 2 lines
-        
-        var displayText = text
-        
-        if !isExpanded {
+         var displayText = text
+         if !isExpanded {
             // If not expanded, truncate the text and add '... More' at the end
             let maxLength = 80  // You can adjust this as per your requirement
             if text.count > maxLength {
@@ -219,22 +203,17 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     
     @IBAction func btnDotPost(_ sender: UIButton) {
         DotCallback?(postid)
-        
-        
-        
-    }
+      }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         print("Data in imgDataAll: \(imgDataAll)") // Prints the entire data
         print("Total items in section: \(imgDataAll.count)") // Prints the count of items
-        
-        return imgDataAll.count ?? 0
+         return imgDataAll.count ?? 0
         
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCollectionViewCell", for: indexPath) as! HomeCollectionViewCell
+         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCollectionViewCell", for: indexPath) as! HomeCollectionViewCell
         
         let postImage = imgDataAll[indexPath.row]  // Current item
         cell.configure(with: postImage)
@@ -353,110 +332,83 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     //    new code emoji code
     
     @IBAction func likeButtonTapped(_ sender: UIButton) {
-        // Check if no emoji is selected
+        likeUnLikeTab?()
+        
         if selectedEmoji == nil {
-            if isLikedByUser {
-                // If already liked, unlike and decrement the count
-                isLikedByUser = false
-                likeCount -= 1
-            } else {
-                // If not liked, like and increment the count
-                isLikedByUser = true
-                likeCount += 1
-            }
-            
-            // Update UI
-            lblLikeCount.text = "\(likeCount)"
-            likebtn.setImage(UIImage(named: isLikedByUser ? "Unlike" : "Like"), for: .normal)
-        } else {
-            // If emoji is already selected, update like with emoji
-            updateLikeWithEmoji()
-        }
-    }
-    
-    func showEmojiSelectionView(button: UIButton) {
-        // Remove previous emoji view if it exists
-        if let existingEmojiView = UIApplication.shared.windows.first?.viewWithTag(9999) {
-            existingEmojiView.removeFromSuperview()
-        }
-        
-        // Calculate button frame relative to the main window
-        guard let rootView = UIApplication.shared.windows.first?.rootViewController?.view else { return }
-        let buttonFrame = button.convert(button.bounds, to: rootView)
-        
-        // Create custom view for emoji selection
-        let emojiSelectionView = UIView(frame: CGRect(x: buttonFrame.midX - 2, y: buttonFrame.minY - 70, width: 300, height: 70))
-        emojiSelectionView.backgroundColor = .white
-        emojiSelectionView.layer.cornerRadius = 10
-        emojiSelectionView.layer.shadowColor = UIColor.black.cgColor
-        emojiSelectionView.layer.shadowOpacity = 0.5
-        emojiSelectionView.layer.shadowOffset = CGSize(width: 0, height: 2)
-        emojiSelectionView.layer.shadowRadius = 4
-        emojiSelectionView.tag = 9999 // Unique tag for easy identification and removal
-        
-        // Emojis list
-        let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳", "♡"]
-        
-        // Create a horizontal scroll view to hold emoji buttons
-        let scrollView = UIScrollView(frame: emojiSelectionView.bounds)
-        scrollView.contentSize = CGSize(width: emojis.count * 50, height: 80)
-        scrollView.showsHorizontalScrollIndicator = false
-        
-        for (index, emoji) in emojis.enumerated() {
-            let button = UIButton(frame: CGRect(x: CGFloat(index) * 50, y: 0, width: 50, height: 70))
-            button.setTitle(emoji, for: .normal)
-            button.setTitleColor(.black, for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: 40) // Increased font size for bigger emoji
-            button.addTarget(self, action: #selector(emojiSelected(_:)), for: .touchUpInside)
-            scrollView.addSubview(button)
-        }
-        
-        emojiSelectionView.addSubview(scrollView)
-        rootView.addSubview(emojiSelectionView)
-        
-        // Add a 3-second timer to remove the emoji selection view
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            emojiSelectionView.removeFromSuperview()
-        }
-    }
-    
-    
-    // Handle emoji selection
-    @objc func emojiSelected(_ sender: UIButton) {
-        guard let emoji = sender.titleLabel?.text else { return }
-        selectedEmoji = emoji
-        isLikedByUser = true // Mark as liked since emoji is selected
-        updateLikeWithEmoji()
-        
-        // Remove the emoji selection view
-        sender.superview?.superview?.removeFromSuperview()
-    }
-    
-    // Update like button with selected emoji
-    func updateLikeWithEmoji() {
-        guard let emoji = selectedEmoji else { return }
-        
-        // If user hasn't liked yet, increment the count
-        if !isLikedByUser {
-            likeCount += 1
-            isLikedByUser = true
-        }
-        
-        // Update the UI
-        lblLikeCount.text = "\(likeCount)"
-        likebtn.setTitle(emoji, for: .normal)
-        likebtn.setImage(nil, for: .normal)
-    }
-    
-    // Long press gesture to show emoji selection
-    @objc func showEmojis(_ gesture: UILongPressGestureRecognizer) {
-        if gesture.state == .began {
-            // Ensure the gesture's view is a UIButton
-            if let button = gesture.view as? UIButton {
-                showEmojiSelectionView(button: button)
-            }
-        }
-    }
+                   isLikedByUser.toggle()
+                   likeCount += isLikedByUser ? 1 : -1
+                   lblLikeCount.text = "\(likeCount)"
+                   likebtn.setImage(UIImage(named: isLikedByUser ? "Unlike" : "Like"), for: .normal)
+               } else {
+                   updateLikeWithEmoji()
+               }
+           }
+
+           func updateLikeWithEmoji() {
+               guard let emoji = selectedEmoji else { return }
+               if !isLikedByUser {
+                   likeCount += 1
+                   isLikedByUser = true
+               }
+               lblLikeCount.text = "\(likeCount)"
+               likebtn.setTitle(emoji, for: .normal)
+               likebtn.setImage(nil, for: .normal)
+           }
+
+           @objc func emojiSelected(_ sender: UIButton) {
+               guard let emoji = sender.titleLabel?.text else { return }
+               selectedEmoji = emoji
+               isLikedByUser = true
+               updateLikeWithEmoji()
+               sender.superview?.superview?.removeFromSuperview()
+           }
+
+           func showEmojiSelectionView(button: UIButton) {
+               if let existingEmojiView = UIApplication.shared.windows.first?.viewWithTag(9999) {
+                   existingEmojiView.removeFromSuperview()
+               }
+
+               guard let rootView = UIApplication.shared.windows.first?.rootViewController?.view else { return }
+               let buttonFrame = button.convert(button.bounds, to: rootView)
+
+               let emojiSelectionView = UIView(frame: CGRect(x: buttonFrame.midX - 2, y: buttonFrame.minY - 70, width: 300, height: 70))
+               emojiSelectionView.backgroundColor = .white
+               emojiSelectionView.layer.cornerRadius = 10
+               emojiSelectionView.layer.shadowColor = UIColor.black.cgColor
+               emojiSelectionView.layer.shadowOpacity = 0.5
+               emojiSelectionView.layer.shadowOffset = CGSize(width: 0, height: 2)
+               emojiSelectionView.layer.shadowRadius = 4
+               emojiSelectionView.tag = 9999
+
+               let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳", "♡"]
+               let scrollView = UIScrollView(frame: emojiSelectionView.bounds)
+               scrollView.contentSize = CGSize(width: emojis.count * 50, height: 80)
+               scrollView.showsHorizontalScrollIndicator = false
+
+               for (index, emoji) in emojis.enumerated() {
+                   let button = UIButton(frame: CGRect(x: CGFloat(index) * 50, y: 0, width: 50, height: 70))
+                   button.setTitle(emoji, for: .normal)
+                   button.setTitleColor(.black, for: .normal)
+                   button.titleLabel?.font = UIFont.systemFont(ofSize: 40)
+                   button.addTarget(self, action: #selector(emojiSelected(_:)), for: .touchUpInside)
+                   scrollView.addSubview(button)
+               }
+
+               emojiSelectionView.addSubview(scrollView)
+               rootView.addSubview(emojiSelectionView)
+
+               DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                   emojiSelectionView.removeFromSuperview()
+               }
+           }
+
+           @objc func showEmojis(_ gesture: UILongPressGestureRecognizer) {
+               if gesture.state == .began {
+                   if let button = gesture.view as? UIButton {
+                       showEmojiSelectionView(button: button)
+                   }
+               }
+           }
     
     
     @IBAction func commentsButtonTapped(_ sender: UIButton) {

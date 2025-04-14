@@ -21,6 +21,16 @@ class EditPollViewController: UIViewController {
     
     @IBOutlet weak var tfStartDatee: UITextField!
     @IBOutlet weak var tfEndDate: UITextField!
+    
+    @IBOutlet weak var PollsView: UIView!
+    @IBOutlet weak var questionView: UIView!
+    @IBOutlet weak var startDateView: UIView!
+    @IBOutlet weak var EndDateView: UIView!
+    
+    @IBOutlet weak var option1: UIView!
+    @IBOutlet weak var option2: UIView!
+    @IBOutlet weak var option3: UIView!
+    @IBOutlet weak var option4: UIView!
    
    // @IBOutlet weak var profileImgView : UIImageView!
     
@@ -43,6 +53,13 @@ class EditPollViewController: UIViewController {
         tfop3.autocapitalizationType = .sentences
         tfop4.autocapitalizationType = .sentences
         NetworkMonitor.shared.startMonitoring()
+        
+        PollsView.backgroundColor = UIColor.systemBackground
+        option1.backgroundColor = UIColor.systemBackground
+        option2.backgroundColor = UIColor.systemBackground
+        option3.backgroundColor = UIColor.systemBackground
+        option4.backgroundColor = UIColor.systemBackground
+        updateColors()
         // Do any additional setup after loading the view.
     }
     
@@ -85,6 +102,54 @@ class EditPollViewController: UIViewController {
 
         _ = navigationController?.popViewController(animated: true)
 
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            questionView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            startDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            EndDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            option1.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            option2.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            option3.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            option4.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            questionView.layer.borderWidth = 1.0 // Enable border in dark mode
+                   startDateView.layer.borderWidth = 1.0
+                   EndDateView.layer.borderWidth = 1.0
+            
+            option1.layer.borderWidth = 1.0 // Enable border in dark mode
+            option2.layer.borderWidth = 1.0
+            option3.layer.borderWidth = 1.0
+            option4.layer.borderWidth = 1.0
+           
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          //  questionView.textColor = UIColor.secondaryLabel
+            questionView.isUserInteractionEnabled = false // Disable in light mode
+            startDateView.isUserInteractionEnabled = false
+            EndDateView.isUserInteractionEnabled = false
+            
+            option1.isUserInteractionEnabled = false // Disable in light mode
+            option2.isUserInteractionEnabled = false
+            option3.isUserInteractionEnabled = false
+            option4.isUserInteractionEnabled = false
+            
+            questionView.layer.borderWidth = 0 // Remove border in light mode
+                   startDateView.layer.borderWidth = 0
+                   EndDateView.layer.borderWidth = 0
+            
+            option1.layer.borderWidth = 0 // Remove border in light mode
+            option2.layer.borderWidth = 0
+            option3.layer.borderWidth = 0
+            option4.layer.borderWidth = 0
+            PollsView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
     
     @IBAction func btnStartDate(_ sender: UIButton) {

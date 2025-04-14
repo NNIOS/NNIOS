@@ -7,11 +7,13 @@
 
 import UIKit
 import SVProgressHUD
+
 @available(iOS 16.0, *)
 class ChatMemberViewController: BaseViewC {
     
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var MembersLbl: UILabel!
+    @IBOutlet weak var DMView: UIView!
     
     var ChatMemberData : ChatMemberModel?
 
@@ -44,7 +46,28 @@ class ChatMemberViewController: BaseViewC {
         _ = navigationController?.popViewController(animated: true)
 
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            DMView.backgroundColor = .black
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+           
+
+            // Light mode mein PollsView ka background red karna
+            DMView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewMembers.separatorStyle = .none
+        }
+    }
 }
+
 @available(iOS 16.0, *)
 extension ChatMemberViewController: UITableViewDataSource, UITableViewDelegate{
     
@@ -76,22 +99,22 @@ extension ChatMemberViewController: UITableViewDataSource, UITableViewDelegate{
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: "MessageViewController")as! MessageViewController
-            vc.otherid = ChatMemberData?.listdata[indexPath.row].id ?? ""
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "MessageViewController")as! MessageViewController
+        vc.otherid = ChatMemberData?.listdata[indexPath.row].id ?? ""
 
-            vc.userImage = ChatMemberData?.listdata[indexPath.row].userpic
+        vc.userImage = ChatMemberData?.listdata[indexPath.row].userpic
 
-            vc.userName = self.ChatMemberData?.listdata[indexPath.row].fullname
-           /// vc.otherid = self.ChatMemberData?.listdata[indexPath.row].id
-            
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
+        vc.userName = self.ChatMemberData?.listdata[indexPath.row].fullname
+       /// vc.otherid = self.ChatMemberData?.listdata[indexPath.row].id
+        
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
     
 //    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 //        let vc = self.storyboard?.instantiateViewController(withIdentifier: "OtherProfileViewController")as! OtherProfileViewController
 //        vc.otherid = MemberListData?.listdata[indexPath.row].id ?? ""
 //
-//        
+//
 //        self.navigationController?.pushViewController(vc, animated: true)
 //    }
     

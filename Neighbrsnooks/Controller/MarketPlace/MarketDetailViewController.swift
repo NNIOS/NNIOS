@@ -10,6 +10,7 @@ import Kingfisher
 import AVFoundation
 import AVKit
 
+
 @available(iOS 16.0, *)
 class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource, ConfirmDeletemarket {
     func tapConfirm() {
@@ -37,17 +38,21 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     @IBOutlet weak var btnEdit : UIButton!
     
     @IBOutlet weak var SoldImgView : UIImageView!
+    @IBOutlet weak var MarketFullView: UIView!
     
     var MarketWDetailData : ProductResponse?
     var MarketWDeleteData : DelMarketProductModel?
     var WishlistdataData : WishListModel?
     var WishlistdeleteData : WishListRemoveModel?
-    // var imgDataM = [ProductImage]()
+   // var imgDataM = [ProductImage]()
     var ProductDataM = [ProductDetail]()
     var thisWidth:CGFloat = 0
     var idD = ""
     var id = ""
+  //  var productImages: [ProductImage] = []
+  //  var productImages: [PImage] = []
     var productImages: [ProductImage] = []
+ //   var MarketWDetailData : ProductResponse?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,17 +60,15 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         collectionViewEvent.dataSource = self
         collectionViewEvent.reloadData()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.LblCat.font = UIFont(name: "Montserrat-SemiBold", size: 15)
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        
-        layout.minimumLineSpacing = 0 // Space between items should be 0
-        collectionViewEvent.collectionViewLayout = layout
-        collectionViewEvent.isPagingEnabled = false // We'll handle custom snapping
-        collectionViewEvent.decelerationRate = .fast // Fast scrolling stop
-        collectionViewEvent.showsHorizontalScrollIndicator = false
-        
-        
+        self.LblCat.font = UIFont(name: "Montserrat-Regular", size: 16)
+        self.UserLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+        self.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+        self.DescLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+        self.timeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+        self.secLbl.font = UIFont(name: "Montserrat-Regular", size: 13)
+        self.CreatorLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+        self.SimilarProductLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+        self.timeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         
         callMarketDetailWebService { [weak self] in
             DispatchQueue.main.async {
@@ -73,65 +76,65 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 self.updateUI()
             }
         }
+
         
-        
-        //        callMarketDetailWebService{ [self] in
-        //            self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pTitle
-        //            // cell.rsLbl.text = "Rs." + (MarketWallData?.yourItems![indexPath.row].salePrice ?? "")
-        //            self.rsLbl.text = "Rs." + (self.MarketWDetailData?.productdetail?.first?.salePrice ?? "")
-        //            self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
-        //            self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
-        //            self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
-        //            self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
-        //            self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.catName
-        //
-        //            let url = URL(string: (MarketWDetailData?.productdetail?.first?.userpic ?? ""))
-        //            self.profileImgView.kf.indicatorType = .activity
-        //            self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-        //
-        //          //  MarketWDetailData = ProductResponse // Update your data
-        //            SimilarCollectionView.reloadData()
-        //            updateSimilarProductsVisibility()
-        //
-        //
-        //            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        //            var id = UserDefaults.standard.string(forKey: "userid")
-        //            if id == idCr {
-        //
-        //                btnChat.setTitle("Chat", for: .normal)
-        //                self.btnDel.isHidden = false
-        //                self.btnEdit.isHidden = false
-        //                self.AddWishList.isHidden = true
-        //            } else {
-        //                btnChat.setTitle("Chat with seller", for: .normal)
-        //                self.btnDel.isHidden = true
-        //                self.btnEdit.isHidden = true
-        //                self.AddWishList.isHidden = false
-        //            }
-        //
-        //            if MarketWDetailData?.productdetail?.first?.wishlistStatus == 1 {
-        //                RemoveWishList.isHidden = false
-        //              //  AddWishList.isHidden = true
-        //
-        //            } else if MarketWDetailData?.productdetail?.first?.wishlistStatus == 0 {
-        //
-        //                RemoveWishList.isHidden = true
-        //              //  AddWishList.isHidden = false
-        //
-        //            }
-        //
-        //            if MarketWDetailData?.productdetail?.first?.pStatus == 2 {
-        //                self.SoldImgView.isHidden = false
-        //
-        //
-        //            } else {
-        //
-        //                SoldImgView.isHidden = true
-        //
-        //
-        //            }
-        //
-        //        }
+//        callMarketDetailWebService{ [self] in
+//            self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pTitle
+//            // cell.rsLbl.text = "Rs." + (MarketWallData?.yourItems![indexPath.row].salePrice ?? "")
+//            self.rsLbl.text = "Rs." + (self.MarketWDetailData?.productdetail?.first?.salePrice ?? "")
+//            self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
+//            self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
+//            self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
+//            self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
+//            self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.catName
+//
+//            let url = URL(string: (MarketWDetailData?.productdetail?.first?.userpic ?? ""))
+//            self.profileImgView.kf.indicatorType = .activity
+//            self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
+//
+//          //  MarketWDetailData = ProductResponse // Update your data
+//            SimilarCollectionView.reloadData()
+//            updateSimilarProductsVisibility()
+//
+//
+//            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+//            var id = UserDefaults.standard.string(forKey: "userid")
+//            if id == idCr {
+//
+//                btnChat.setTitle("Chat", for: .normal)
+//                self.btnDel.isHidden = false
+//                self.btnEdit.isHidden = false
+//                self.AddWishList.isHidden = true
+//            } else {
+//                btnChat.setTitle("Chat with seller", for: .normal)
+//                self.btnDel.isHidden = true
+//                self.btnEdit.isHidden = true
+//                self.AddWishList.isHidden = false
+//            }
+//
+//            if MarketWDetailData?.productdetail?.first?.wishlistStatus == 1 {
+//                RemoveWishList.isHidden = false
+//              //  AddWishList.isHidden = true
+//
+//            } else if MarketWDetailData?.productdetail?.first?.wishlistStatus == 0 {
+//
+//                RemoveWishList.isHidden = true
+//              //  AddWishList.isHidden = false
+//
+//            }
+//
+//            if MarketWDetailData?.productdetail?.first?.pStatus == 2 {
+//                self.SoldImgView.isHidden = false
+//
+//
+//            } else {
+//
+//                SoldImgView.isHidden = true
+//
+//
+//            }
+//
+//        }
         // Do any additional setup after loading the view.
     }
     
@@ -147,84 +150,84 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         let url = URL(string: self.MarketWDetailData?.productdetail?.first?.userpic ?? "")
         self.profileImgView.kf.indicatorType = .activity
         self.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
-        
+
         self.SimilarCollectionView.reloadData()
         self.updateSimilarProductsVisibility()
-        
+
         let idCr = UserDefaults.standard.string(forKey: "CreatorId")
         let id = UserDefaults.standard.string(forKey: "userid")
         self.btnChat.setTitle(id == idCr ? "Chat" : "Chat with seller", for: .normal)
         self.btnDel.isHidden = id != idCr
         self.btnEdit.isHidden = id != idCr
         self.AddWishList.isHidden = id == idCr
-        
+
         self.RemoveWishList.isHidden = self.MarketWDetailData?.productdetail?.first?.wishlistStatus != 1
         self.SoldImgView.isHidden = self.MarketWDetailData?.productdetail?.first?.pStatus != 2
     }
-    
+
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         //callProductListWebService{}
-        //        callMarketDetailWebService{ [self] in
-        //            self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pTitle
-        //            // cell.rsLbl.text = "Rs." + (MarketWallData?.yourItems![indexPath.row].salePrice ?? "")
-        //            self.rsLbl.text = "Rs." + (self.MarketWDetailData?.productdetail?.first?.salePrice ?? "")
-        //            self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
-        //            self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
-        //            self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
-        //            self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
-        //            self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.catName
-        //
-        //            let url = URL(string: (MarketWDetailData?.productdetail?.first?.userpic ?? ""))
-        //            self.profileImgView.kf.indicatorType = .activity
-        //            self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-        //
-        //          //  MarketWDetailData = ProductResponse // Update your data
-        //            SimilarCollectionView.reloadData()
-        //            updateSimilarProductsVisibility()
-        //
-        //
-        //            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        //            var id = UserDefaults.standard.string(forKey: "userid")
-        //            if id == idCr {
-        //
-        //                btnChat.setTitle("Chat", for: .normal)
-        //                self.btnDel.isHidden = false
-        //                self.btnEdit.isHidden = false
-        //                self.AddWishList.isHidden = true
-        //            } else {
-        //                btnChat.setTitle("Chat with seller", for: .normal)
-        //                self.btnDel.isHidden = true
-        //                self.btnEdit.isHidden = true
-        //                self.AddWishList.isHidden = false
-        //            }
-        //
-        //            if MarketWDetailData?.productdetail?.first?.wishlistStatus == 1 {
-        //                RemoveWishList.isHidden = false
-        //              //  AddWishList.isHidden = true
-        //
-        //            } else if MarketWDetailData?.productdetail?.first?.wishlistStatus == 0 {
-        //
-        //                RemoveWishList.isHidden = true
-        //              //  AddWishList.isHidden = false
-        //
-        //            }
-        //
-        //            if MarketWDetailData?.productdetail?.first?.pStatus == 2 {
-        //                self.SoldImgView.isHidden = false
-        //
-        //
-        //            } else {
-        //
-        //                SoldImgView.isHidden = true
-        //
-        //
-        //            }
-        //
-        //        }
-        
+//        callMarketDetailWebService{ [self] in
+//            self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pTitle
+//            // cell.rsLbl.text = "Rs." + (MarketWallData?.yourItems![indexPath.row].salePrice ?? "")
+//            self.rsLbl.text = "Rs." + (self.MarketWDetailData?.productdetail?.first?.salePrice ?? "")
+//            self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
+//            self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
+//            self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
+//            self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
+//            self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.catName
+//
+//            let url = URL(string: (MarketWDetailData?.productdetail?.first?.userpic ?? ""))
+//            self.profileImgView.kf.indicatorType = .activity
+//            self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
+//
+//          //  MarketWDetailData = ProductResponse // Update your data
+//            SimilarCollectionView.reloadData()
+//            updateSimilarProductsVisibility()
+//
+//
+//            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+//            var id = UserDefaults.standard.string(forKey: "userid")
+//            if id == idCr {
+//
+//                btnChat.setTitle("Chat", for: .normal)
+//                self.btnDel.isHidden = false
+//                self.btnEdit.isHidden = false
+//                self.AddWishList.isHidden = true
+//            } else {
+//                btnChat.setTitle("Chat with seller", for: .normal)
+//                self.btnDel.isHidden = true
+//                self.btnEdit.isHidden = true
+//                self.AddWishList.isHidden = false
+//            }
+//
+//            if MarketWDetailData?.productdetail?.first?.wishlistStatus == 1 {
+//                RemoveWishList.isHidden = false
+//              //  AddWishList.isHidden = true
+//
+//            } else if MarketWDetailData?.productdetail?.first?.wishlistStatus == 0 {
+//
+//                RemoveWishList.isHidden = true
+//              //  AddWishList.isHidden = false
+//
+//            }
+//
+//            if MarketWDetailData?.productdetail?.first?.pStatus == 2 {
+//                self.SoldImgView.isHidden = false
+//
+//
+//            } else {
+//
+//                SoldImgView.isHidden = true
+//
+//
+//            }
+//
+//        }
+       
         
         
     }
@@ -235,6 +238,39 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            MarketFullView.backgroundColor = .black
+           
+           
+           
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          
+            MarketFullView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
+    }
+    
+    
     func updateSimilarProductsVisibility() {
         if let similarProducts = MarketWDetailData?.similarproducts, !similarProducts.isEmpty {
             SimilarProductLbl.isHidden = false
@@ -244,129 +280,131 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
             SimilarCollectionView.isHidden = true
         }
     }
+
     
+        @IBAction func btnChat(_ : UIButton){
     
-    @IBAction func btnChat(_ : UIButton){
-        
         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatListViewController") as? MarketChatListViewController else {return}
-        
-        vc.NewidD = idD
-        
+    
+            vc.NewidD = idD
+    
         self.navigationController?.pushViewController(vc, animated: true)
-        
-    }
+    
+           }
     
     @IBAction func btnProfile(_ : UIButton){
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {return}
-        
+
+    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {return}
+
         vc.Oid = String(self.MarketWDetailData?.productdetail?.first?.createdBy ?? 0)
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-    }
+
+    self.navigationController?.pushViewController(vc, animated: true)
+
+       }
     
     @IBAction func btnEdit(_ : UIButton){
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditMarketViewController") as? EditMarketViewController else {return}
+
+    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditMarketViewController") as? EditMarketViewController else {return}
         vc.idD = idD
-        self.navigationController?.pushViewController(vc, animated: true)
-    }
+
+    self.navigationController?.pushViewController(vc, animated: true)
+
+       }
     
     @IBAction func btnNewChat(_ : UIButton) {
         
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        var id = UserDefaults.standard.string(forKey: "userid")
-        if id == idCr {
-            
-            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatListViewController") as? MarketChatListViewController else {return}
-            
-            vc.NewidD = idD
-            
-            self.navigationController?.pushViewController(vc, animated: true)
-        } else {
-            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatViewController") as? MarketChatViewController else {return}
-            vc.Productid = String(self.MarketWDetailData?.productdetail?.first?.id ?? 0)
-            // vc.userName = String(self.MarketWDetailData?.productdetail?.first?.sellerName )
-            vc.userName = (self.MarketWDetailData?.productdetail?.first?.sellerName)!
-            vc.senderUserpic = (self.MarketWDetailData?.productdetail?.first?.userpic)!
-            
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
+            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+            var id = UserDefaults.standard.string(forKey: "userid")
+            if id == idCr {
         
-    }
+                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatListViewController") as? MarketChatListViewController else {return}
+        
+                    vc.NewidD = idD
+        
+                self.navigationController?.pushViewController(vc, animated: true)
+            } else {
+                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatViewController") as? MarketChatViewController else {return}
+                vc.Productid = String(self.MarketWDetailData?.productdetail?.first?.id ?? 0)
+               // vc.userName = String(self.MarketWDetailData?.productdetail?.first?.sellerName )
+                vc.userName = (self.MarketWDetailData?.productdetail?.first?.sellerName)!
+                vc.senderUserpic = (self.MarketWDetailData?.productdetail?.first?.userpic)!
+               
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+        
+           }
     
     @IBAction func DeletePopUpBtnAction(_ sender: UIButton) {
-        
+      
         let vc = storyboard?.instantiateViewController(withIdentifier:"DeleteMarketViewController")as! DeleteMarketViewController
         vc.modalPresentationStyle = .overFullScreen
         vc.modalTransitionStyle = .crossDissolve
         vc.delegate = self
         
-        
+    
         self.present(vc , animated: true)
-        
-    }
+
+   }
     
     @IBAction func DeletePopUpNewBtnAction(_ sender: UIButton) {
-        
+      
         let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
-        
-        // Customizing the message font and size
-        let messageText = "Are you sure you want to remove this product?"
-        let attributedMessage = NSAttributedString(string: messageText, attributes: [
-            .font: UIFont(name: "Montserrat-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17),
-            .foregroundColor: #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
-        ])
-        alertController.setValue(attributedMessage, forKey: "attributedMessage")
-        
-        // Define RGB Colors
-        let yesColor = UIColor(red: 0/255, green: 128/255, blue: 0/255, alpha: 1)  // Green
-        let noColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 1)   // Red
-        
-        // Yes Action
-        let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
-            self.callMarketDelWebService {
-                // Pop one screen back after the API call is successful
-                self.navigationController?.popViewController(animated: true)
-                
+
+            // Customizing the message font and size
+            let messageText = "Are you sure you want to remove this product?"
+            let attributedMessage = NSAttributedString(string: messageText, attributes: [
+                .font: UIFont(name: "Montserrat-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17),
+                .foregroundColor: #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+            ])
+            alertController.setValue(attributedMessage, forKey: "attributedMessage")
+
+            // Define RGB Colors
+            let yesColor = UIColor(red: 0/255, green: 128/255, blue: 0/255, alpha: 1)  // Green
+            let noColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 1)   // Red
+
+            // Yes Action
+            let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
+                self.callMarketDelWebService {
+                    // Pop one screen back after the API call is successful
+                    self.navigationController?.popViewController(animated: true)
+                   
+                }
             }
-        }
-        yesAction.setValue(yesColor, forKey: "titleTextColor") // Set Yes button color
-        
-        // No Action
-        let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
-        noAction.setValue(noColor, forKey: "titleTextColor") // Set No button color
-        
-        alertController.addAction(yesAction)
-        alertController.addAction(noAction)
-        
-        // Present the alert
-        self.present(alertController, animated: true, completion: nil)
-    }
+            yesAction.setValue(yesColor, forKey: "titleTextColor") // Set Yes button color
+
+            // No Action
+            let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
+            noAction.setValue(noColor, forKey: "titleTextColor") // Set No button color
+
+            alertController.addAction(yesAction)
+            alertController.addAction(noAction)
+
+            // Present the alert
+            self.present(alertController, animated: true, completion: nil)
+   }
     
     @IBAction func AddWishlistBtnAction(_ sender: UIButton) {
-        
+      
         callWishListWebService { [weak self] in
-            
-            // After the API call is successful, navigate to HomeMarketViewController
-            DispatchQueue.main.async {
-                // Ensure that self is not nil
-                guard let strongSelf = self else { return }
-                self?.navigationController?.popViewController(animated: true)
-                // Initialize HomeMarketViewController
-                //                   if let homeMarketVC = strongSelf.storyboard?.instantiateViewController(withIdentifier: "HomeMarketViewController") as? HomeMarketViewController {
-                //
-                //                       // Navigate to HomeMarketViewController
-                //                       strongSelf.navigationController?.pushViewController(homeMarketVC, animated: true)
-                //                   }
-            }
-        }
-    }
+               
+               // After the API call is successful, navigate to HomeMarketViewController
+               DispatchQueue.main.async {
+                   // Ensure that self is not nil
+                   guard let strongSelf = self else { return }
+                   self?.navigationController?.popViewController(animated: true)
+                   // Initialize HomeMarketViewController
+//                   if let homeMarketVC = strongSelf.storyboard?.instantiateViewController(withIdentifier: "HomeMarketViewController") as? HomeMarketViewController {
+//
+//                       // Navigate to HomeMarketViewController
+//                       strongSelf.navigationController?.pushViewController(homeMarketVC, animated: true)
+//                   }
+               }
+           }
+       }
     
-    
+   
     @IBAction func DelWishlistBtnAction(_ sender: UIButton) {
-        
+      
         callWishlistDeleteWebService{ [weak self] in
             
             // After the API call is successful, navigate to HomeMarketViewController
@@ -375,11 +413,11 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 guard let strongSelf = self else { return }
                 self?.navigationController?.popViewController(animated: true)
                 // Initialize HomeMarketViewController
-                //                if let homeMarketVC = strongSelf.storyboard?.instantiateViewController(withIdentifier: "HomeMarketViewController") as? HomeMarketViewController {
-                //
-                //                    // Navigate to HomeMarketViewController
-                //                    strongSelf.navigationController?.pushViewController(homeMarketVC, animated: true)
-                //                }
+//                if let homeMarketVC = strongSelf.storyboard?.instantiateViewController(withIdentifier: "HomeMarketViewController") as? HomeMarketViewController {
+//
+//                    // Navigate to HomeMarketViewController
+//                    strongSelf.navigationController?.pushViewController(homeMarketVC, animated: true)
+//                }
             }
         }
     }
@@ -433,80 +471,84 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
             }
         }
     }
+
     
-    
-    //    @IBAction func btnProfile(_ : UIButton){
-    //
-    //    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "ChatOtherProfileViewController") as? ChatOtherProfileViewController else {return}
-    //
-    //        vc.Newid = idCr
-    //
-    //    self.navigationController?.pushViewController(vc, animated: true)
-    //
-    //       }
+//    @IBAction func btnProfile(_ : UIButton){
+//
+//    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "ChatOtherProfileViewController") as? ChatOtherProfileViewController else {return}
+//
+//        vc.Newid = idCr
+//
+//    self.navigationController?.pushViewController(vc, animated: true)
+//
+//       }
     
     func callMarketDetailWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
         
-        // let dictParams: Dictionary<String, Any> = ["":""]
-        
-        let idName = UserDefaults.standard.string(forKey: "name")
-        let idEvent = UserDefaults.standard.string(forKey: "eventid")
         let id = UserDefaults.standard.string(forKey: "userid")
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let sellN = UserDefaults.standard.string(forKey: "sellerName")
-        let Sid = UserDefaults.standard.string(forKey: "SenderidN")
         let dictParams: Dictionary<String, Any> = [
-            "user_id":id ?? "",
-            "product_id":idD ?? "",
-            
-            
+            "user_id": id ?? "",
+            "product_id": idD ?? ""
         ]
         
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+        RSNetworkManager.shared.newRequestApi(
+            withServiceName: url,
+            requestMethod: .GET,
+            requestParameters: dictParams,
+            withProgressHUD: true
+        ) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
             switch statusCode {
-            case .SUCCESS ,.CREATED:
-                
+            case .SUCCESS, .CREATED:
                 do {
                     let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-                    self.MarketWDetailData = data
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.sellerName, forKey: "sellerName")
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "SenderidN")
-                    self.collectionViewEvent.reloadData()
-                    self.SimilarCollectionView.reloadData()
                     
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
+                    // Update UI and UserDefaults on main thread
+                    DispatchQueue.main.async {
+                        self.MarketWDetailData = data
                         
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        //self.MarketWDetailData = data // Your actual data fetching logic
-                        
-                        DispatchQueue.main.async {
-                            self.MarketWDetailData = data
-                            completion() // Call completion handler
+                        // Store necessary values
+                        if let productDetail = data.productdetail?.first {
+                            UserDefaults.standard.set(productDetail.createdBy, forKey: "CreatorId")
+                            UserDefaults.standard.set(productDetail.id, forKey: "producttId")
+                            UserDefaults.standard.set(productDetail.sellerName, forKey: "sellerName")
+                            UserDefaults.standard.set(productDetail.createdBy, forKey: "SenderidN")
                         }
+                        
+                        self.collectionViewEvent.reloadData()
+                        self.SimilarCollectionView.reloadData()
+                        completion()
                     }
                 } catch {
-                    print(error.localizedDescription)
+                    print("Decoding error: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        completion()
+                    }
                 }
+                
             case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                // Handle error cases
                 do {
                     let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+                    // self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
                 } catch {
                     print(error.localizedDescription)
                 }
+                DispatchQueue.main.async {
+                    completion()
+                }
+                
             case .UNAUTHORIZED:
                 print(error?.localizedDescription)
-                //   self.showLogoutAlert()
+                // self.showLogoutAlert()
+                DispatchQueue.main.async {
+                    completion()
+                }
+                
             default:
-                break
+                DispatchQueue.main.async {
+                    completion()
+                }
             }
         }
     }
@@ -514,8 +556,8 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     func callWishListWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/wishlist"
         
-        
-        
+     
+       
         // let dictParams: Dictionary<String, Any> = ["":""]
         
         let idName = UserDefaults.standard.string(forKey: "name")
@@ -578,19 +620,19 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     
     func callWishlistDeleteWebService(completion: @escaping () -> Void) {
         
-        //        guard let id = UserDefaults.standard.string(forKey: "userid"), !id.isEmpty else {
-        //                print("Product ID is not available")
-        //                return
-        //            }
-        // let idPr = UserDefaults.standard.string(forKey: "producttId")
+//        guard let id = UserDefaults.standard.string(forKey: "userid"), !id.isEmpty else {
+//                print("Product ID is not available")
+//                return
+//            }
+       // let idPr = UserDefaults.standard.string(forKey: "producttId")
         let idCr = UserDefaults.standard.string(forKey: "CreatorId")
         let url = "https://dev.neighbrsnook.com/admin/api/wishlist/\(idD)"
-        
-        // "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
-        
+
+       // "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
+       
         // let dictParams: Dictionary<String, Any> = ["":""]
-        
-        
+       
+       
         let dictParams: Dictionary<String, Any> = ["":""]
         
         RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.DELETE,requestParameters: dictParams, withProgressHUD: true)
@@ -601,7 +643,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 do {
                     let data = try JSONDecoder().decode(WishListRemoveModel.self, from: result!)
                     self.WishlistdeleteData = data
-                    //   UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "CrId")
+                 //   UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "CrId")
                     
                     
                     DispatchQueue.global().async {
@@ -639,7 +681,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         // return MarketWDetailData?.productdetail.count ?? 0
         if collectionView == collectionViewEvent
         {
-            // return MarketWDetailData?.productdetail?.count ?? 0
+           // return MarketWDetailData?.productdetail?.count ?? 0
             return MarketWDetailData?.productdetail?.first?.pImages?.count ?? 0
             
         }
@@ -654,16 +696,16 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         if collectionView == collectionViewEvent
         {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MarketDetailCollectionViewCell", for: indexPath) as! MarketDetailCollectionViewCell
-            
+ 
             
             
             if let postImage = MarketWDetailData?.productdetail?.first?.pImages?[indexPath.row] {
-                cell.configure(with: postImage) // Configure the cell with the data
-                
-            }
+                    cell.configure(with: postImage) // Configure the cell with the data
+               
+                }
             
             cell.numberLabel.text = "\(indexPath.item + 1)"
-            //   let totalNumberOfImages =  BussinessDetailData?.image?.count ?? 0
+         //   let totalNumberOfImages =  BussinessDetailData?.image?.count ?? 0
             let totalNumberOfImages =  MarketWDetailData?.productdetail?.first?.pImages?.count ?? 0
             cell.totalImagesLabel.text =  "/ \(totalNumberOfImages)"
             cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -675,7 +717,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SimilarProductCollectionViewCell", for: indexPath) as! SimilarProductCollectionViewCell
             
-            
+
             cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
             cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
             cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
@@ -689,7 +731,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 cell.viewItems.layer.shadowRadius = 5
                 cell.viewItems.layer.masksToBounds = false
                 cell.ViewSimilar.isHidden = false
-                
+
                 cell.EventLbl.isEnabled = true
                 cell.rsLbl.isEnabled = true
                 cell.secttLbl.isEnabled = true
@@ -700,7 +742,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 cell.rsLbl.text = "Rs." + (similarProducts[indexPath.row].salePrice ?? "")
                 cell.secttLbl.text = similarProducts[indexPath.row].salePrice
                 cell.DayLbl.text = similarProducts[indexPath.row].createdTime
-                
+
                 let url = URL(string: similarProducts[indexPath.row].pImages ?? "")
                 cell.profileImgView.kf.indicatorType = .activity
                 cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
@@ -718,8 +760,8 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 cell.DayLbl.text = ""
                 cell.profileImgView.image = nil
                 
-                
-                
+               
+               
             }
             
             cell.DetailCallback = { [self] value in
@@ -729,6 +771,8 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 vc.idD = String(MarketWDetailData?.similarproducts?[indexPath.row].id ?? 0)
                 
                 self.navigationController?.pushViewController(vc, animated: true)
+                
+                
                 
             }
             return cell
@@ -750,48 +794,40 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if collectionView == collectionViewEvent {
+            
             guard let pImages = MarketWDetailData?.productdetail?.first?.pImages else { return }
             
-            // Get the selected media item (image or video)
+            // Get the selected media item (could be image or video)
             let selectedItem = pImages[indexPath.row]
-            
-            // Prepare media array (both images & videos)
-            let mediaArray = pImages.compactMap { $0.video ?? $0.img }
-            
+
             // Check if the selected item is a video
             if let videoUrl = selectedItem.video, let url = URL(string: videoUrl) {
-                // ✅ Play video in fullscreen
+                // If it's a video, play it in fullscreen
                 let player = AVPlayer(url: url)
                 let playerViewController = AVPlayerViewController()
                 playerViewController.player = player
-                player.isMuted = true // ✅ By default video mute rahega
-                
+
                 // Present video in full screen
                 present(playerViewController, animated: true) {
-                    player.play()
+                    player.play() // Automatically play the video
                 }
-                
-            } else if let imageUrlString = selectedItem.img, let _ = URL(string: imageUrlString) {
-                // ✅ If it's an image, navigate to PostViewShowImgVideosDataVC
+            } else if let imageUrlString = selectedItem.img, let imageUrl = URL(string: imageUrlString) {
+                // If it's an image, navigate to MarketEnlargmentViewController
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                if let enlargementVC = storyboard.instantiateViewController(withIdentifier: "PostViewShowImgVideosDataVC") as? PostViewShowImgVideosDataVC {
+                if let enlargementVC = storyboard.instantiateViewController(withIdentifier: "MarketEnlargmentViewController") as? MarketEnlargmentViewController {
                     
-                    // ✅ Pass the selected media (image)
-                    enlargementVC.selectedMediaDetailsUrl = imageUrlString
+                    // Pass the image array to the next view controller
+                    enlargementVC.images = pImages
+                    enlargementVC.selectedIndex = indexPath.row // Pass the selected image index
                     
-                    // ✅ Pass the complete media array (both images & videos)
-                    enlargementVC.mediaArrayMarketDetails = mediaArray
-                    
-                    // Navigate to PostViewShowImgVideosDataVC
+                    // Navigate to the MarketEnlargmentViewController
                     self.navigationController?.pushViewController(enlargementVC, animated: true)
                 }
             }
         }
     }
-    
-    
-    
-    
+
+   
 }
 
 //status 2 dono gone

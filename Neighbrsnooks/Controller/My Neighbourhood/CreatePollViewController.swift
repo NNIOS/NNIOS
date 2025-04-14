@@ -6,6 +6,7 @@
 //
 
 import UIKit
+
 @available(iOS 16.0, *)
 class CreatePollViewController: UIViewController, UITextViewDelegate {
 
@@ -87,14 +88,14 @@ class CreatePollViewController: UIViewController, UITextViewDelegate {
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-            questionView.layer.borderColor = UIColor.lightGray.cgColor
-            startDateView.layer.borderColor = UIColor.lightGray.cgColor
-            EndDateView.layer.borderColor = UIColor.lightGray.cgColor
+            questionView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            startDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            EndDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             
-            option1.layer.borderColor = UIColor.lightGray.cgColor
-            option2.layer.borderColor = UIColor.lightGray.cgColor
-            option3.layer.borderColor = UIColor.lightGray.cgColor
-            option4.layer.borderColor = UIColor.lightGray.cgColor
+            option1.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            option2.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            option3.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            option4.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             
             questionView.layer.borderWidth = 1.0 // Enable border in dark mode
                    startDateView.layer.borderWidth = 1.0
