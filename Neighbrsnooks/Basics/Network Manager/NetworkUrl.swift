@@ -152,6 +152,7 @@ struct WebServiceName {
     static let kaboutUs = "aboutusapi?flag=aboutus"
     static let kHideNotification = "hide-notification?flag=hidenotification"
     static let kEventLikeList = "event?flag=eventlikeslist"
+    static let kUpdateToken = "update-token"
     
     
     

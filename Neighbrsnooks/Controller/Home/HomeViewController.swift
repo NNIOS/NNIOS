@@ -1278,7 +1278,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         case "Post":
             print("🟢 Calling Post Cell")
             let dataSource = isSearching ? filteredData : HomeNewData
-            
             let cell = tableView.dequeueReusableCell(withIdentifier: "MemberTableViewCell", for: indexPath) as! MemberTableViewCell
             cell.delegate = self
             cell.delegateCell = self // Delegate assign karo
@@ -1332,27 +1331,25 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 
                 cell.likeUnLikeTab = { [weak self] in
                     guard let self = self else { return }
-
                     var mutablePostData = postData
                     guard let postId = mutablePostData.postid, !postId.isEmpty else { return }
 
                     // Like with Emoji
                     if let emoji = cell.selectedEmoji {
                         self.callPostLikeWebService(postId: postId, emoji: emoji) {
-                            mutablePostData.favouritstatus = 1
+                             
                              print("✅ Liked with emoji \(emoji)")
                         }
                     } else {
                         // Normal Like / Unlike toggle
                         if cell.isLikedByUser {
                             self.callPostLikeWebService(postId: postId, emoji: "") {
-                                mutablePostData.favouritstatus = 1
-                                cell.updateFavouriteButton(isFavourite: true)
+                               
                                 print("✅ Liked without emoji")
                             }
                         } else {
                             self.callPostUnLikeWebService {
-                                mutablePostData.favouritstatus = 0
+                                
                                  print("❌ Unliked")
                             }
                         }

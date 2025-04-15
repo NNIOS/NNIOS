@@ -13,78 +13,89 @@ import Firebase
 import FirebaseCore
 import FirebaseFirestore
 import FirebaseAuth
- 
-      
+
+
 
 @available(iOS 16.0, *)
 @main
 @available(iOS 16.0, *)
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-
+    
     var window: UIWindow?
     var shouldSupportAllOrientations = false
-
+    var lastNotificationIdentifier: String?
+    var fireBaseToken : UpdateTokenModel?
     
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
-           return OrientationManager.shared.shouldSupportAllOrientations ? .all : .portrait
-       }
-
-       func applicationDidFinishLaunching(_ application: UIApplication) {
-           NotificationCenter.default.addObserver(self, selector: #selector(updateOrientation), name: NSNotification.Name("UpdateOrientation"), object: nil)
-       }
-
-       @objc func updateOrientation() {
-           let orientation = OrientationManager.shared.shouldSupportAllOrientations ? UIInterfaceOrientationMask.all : .portrait
-           DispatchQueue.main.async {
-               UIApplication.shared.windows.first?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
-           }
-       }
+        return OrientationManager.shared.shouldSupportAllOrientations ? .all : .portrait
+    }
+    
+    func applicationDidFinishLaunching(_ application: UIApplication) {
+        NotificationCenter.default.addObserver(self, selector: #selector(updateOrientation), name: NSNotification.Name("UpdateOrientation"), object: nil)
+    }
+    
+    @objc func updateOrientation() {
+        let orientation = OrientationManager.shared.shouldSupportAllOrientations ? UIInterfaceOrientationMask.all : .portrait
+        DispatchQueue.main.async {
+            UIApplication.shared.windows.first?.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+        }
+    }
     
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         NetworkMonitor.shared.startMonitoring()
-
         
-      //  UITextField.appearance().autocapitalizationType = .sentences
+        FirebaseApp.configure()
+        Messaging.messaging().delegate = self
+        //  UITextField.appearance().autocapitalizationType = .sentences
         
         GMSServices.provideAPIKey("AIzaSyD7gl7LrxtbTjlplCXphN2EJi7HRi9s_8Y")
         GMSPlacesClient.provideAPIKey("AIzaSyBWpyfvSIauIk1wgzWU4PhnZuYe-doOv1I")
         
-      //  AIzaSyDzLGIh8vJ1SCOkp_rgSLch3z7uSPFOl3I
+        //  AIzaSyDzLGIh8vJ1SCOkp_rgSLch3z7uSPFOl3I
         
-       // AIzaSyD7gl7LrxtbTjlplCXphN2EJi7HRi9s_8Y
+        // AIzaSyD7gl7LrxtbTjlplCXphN2EJi7HRi9s_8Y
         // Override point for customization after application launch.
-//        let homeVC = HomeViewController()
-//                // Set title and image for the fifth tab
-//                let homeTabBarItem = UITabBarItem(title: "MenuRaj", image: UIImage(named: "menu_icon"), tag: 4)
-//                homeVC.tabBarItem = homeTabBarItem
-
+        //        let homeVC = HomeViewController()
+        //                // Set title and image for the fifth tab
+        //                let homeTabBarItem = UITabBarItem(title: "MenuRaj", image: UIImage(named: "menu_icon"), tag: 4)
+        //                homeVC.tabBarItem = homeTabBarItem
+        
         window?.rootViewController = NeigbrnookViewController()
         window?.makeKeyAndVisible()
- 
-        Messaging.messaging().delegate = self
-
-        FirebaseApp.configure()
-      //  customizeAppearance()
+        Messaging.messaging().token { token, error in
+               if let error = error {
+                   print("❌ Error fetching FCM token: \(error)")
+               } else if let token = token {
+                   print("✅ FCM token: \(token)")
+                   
+                   if let userId = UserDefaults.standard.string(forKey: "userid") {
+                       self.callUpdateFirebaseTokenPostWebService(userId: userId, firebaseToken: token) {
+                           print("🎯 Firebase token API call completed")
+                       }
+                   } else {
+                       print("⚠️ User ID not found in UserDefaults")
+                   }
+               }
+           }
         
+        //  customizeAppearance()
+        
+        // Request Notification Permission
         UNUserNotificationCenter.current().delegate = self
-              Messaging.messaging().delegate = self
-
-              UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-                  print("Notification permission granted: \(granted)")
-              }
-
-              application.registerForRemoteNotifications()
-        
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            print("Notification permission granted: \(granted)")
+        }
+        application.registerForRemoteNotifications()
         return true
         
         
         
     }
     deinit {
-            // Stop monitoring when the view controller is deallocated
-            NetworkMonitor.shared.stopMonitoring()
-        }
+        // Stop monitoring when the view controller is deallocated
+        NetworkMonitor.shared.stopMonitoring()
+    }
     
     
     func customizeAppearance() {
@@ -95,22 +106,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     
-
-
+    
+    
     // MARK: UISceneSession Lifecycle
-
+    
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         // Called when a new scene session is being created.
         // Use this method to select a configuration to create the new scene with.
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
-
+    
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
-
+    
     func applicationDidBecomeActive(_ application: UIApplication) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
@@ -125,23 +136,75 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
         self.window?.makeKeyAndVisible()
     }
+    
+    
+    
+    
+    // MARK: - Call api delete for post
+    func callUpdateFirebaseTokenPostWebService(userId: String, firebaseToken: String, _ completionClosure: @escaping () -> ()) {
+        let dictParams: Dictionary<String, Any> = [
+            "userid": userId,
+            "firebase_token": firebaseToken
+            
+        ]
+        print(dictParams)
+        
+        WebService.sharedInstance.callUpdatetokenPostWebService(withParams: dictParams) { data in
+            self.fireBaseToken = data
+            completionClosure()
+        }
+    }
 
-
+    
+    
 }
 
 @available(iOS 16.0, *)
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    // Show alert while app is open
+
+    // Show alert while app is in foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.alert, .sound, .badge])
+
+        let title = notification.request.content.title
+        let body = notification.request.content.body
+        let combined = "\(title)-\(body)"
+
+        // 🎉 emoji wala title hi show karna hai
+        if !title.contains("🎉") {
+            print("🚫 Notification without 🎉 ignored")
+            completionHandler([])
+            return
+        }
+
+        // Duplicate check
+        if combined == lastNotificationIdentifier {
+            print("🔁 Duplicate notification ignored")
+            completionHandler([])
+        } else {
+            lastNotificationIdentifier = combined
+            print("🔔 Showing notification: \(combined)")
+            completionHandler([.alert, .sound])
+        }
+    }
+
+
+    // Handle tap on notification
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        // Handle when user taps the notification
+        let userInfo = response.notification.request.content.userInfo
+        print("📩 Notification tapped: \(userInfo)")
+        completionHandler()
     }
 }
 
+
+
 @available(iOS 16.0, *)
 extension AppDelegate: MessagingDelegate {
-    // Firebase Token
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("🌐 Firebase registration token: \(fcmToken ?? "")")
         if let token = fcmToken {
@@ -175,7 +238,5 @@ extension AppDelegate: MessagingDelegate {
             }
         }.resume()
     }
-
-    
-    
 }
+

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		042408262DAE6C3900E2C6BA /* UpdateTokenModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 042408252DAE6C3900E2C6BA /* UpdateTokenModel.swift */; };
 		0491B2F32DA7A65C00955502 /* FontUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B2F22DA7A65C00955502 /* FontUtility.swift */; };
 		0491B2F42DA7A65C00955502 /* checkCameraPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B2F12DA7A65C00955502 /* checkCameraPermission.swift */; };
 		0491B3932DA7A73C00955502 /* Montserrat-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0491B37F2DA7A73C00955502 /* Montserrat-Black.ttf */; };
@@ -470,6 +471,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		042408252DAE6C3900E2C6BA /* UpdateTokenModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateTokenModel.swift; sourceTree = "<group>"; };
 		0491B2F12DA7A65C00955502 /* checkCameraPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = checkCameraPermission.swift; sourceTree = "<group>"; };
 		0491B2F22DA7A65C00955502 /* FontUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontUtility.swift; sourceTree = "<group>"; };
 		0491B37F2DA7A73C00955502 /* Montserrat-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Black.ttf"; sourceTree = "<group>"; };
@@ -1574,6 +1576,7 @@
 				0491B8922DA7BE8C00955502 /* UserLocationModel.swift */,
 				0491B8932DA7BE8C00955502 /* WishlistModel.swift */,
 				0491B8942DA7BE8C00955502 /* WishListRemoveModel.swift */,
+				042408252DAE6C3900E2C6BA /* UpdateTokenModel.swift */,
 			);
 			path = ApiModel;
 			sourceTree = "<group>";
@@ -2075,6 +2078,7 @@
 				0491B8B72DA7BE8C00955502 /* DelMarketProductModel.swift in Sources */,
 				0491BA282DA7D47E00955502 /* WelcomeTableViewCell.swift in Sources */,
 				0491B8B82DA7BE8C00955502 /* cityModel.swift in Sources */,
+				042408262DAE6C3900E2C6BA /* UpdateTokenModel.swift in Sources */,
 				0491B8B92DA7BE8C00955502 /* WishListRemoveModel.swift in Sources */,
 				0491B9CC2DA7BF1600955502 /* ContactUsViewController.swift in Sources */,
 				0491B9CD2DA7BF1600955502 /* RegisterThirdImageShowPopupVC.swift in Sources */,

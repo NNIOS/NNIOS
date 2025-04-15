@@ -3160,6 +3160,42 @@ class WebService {
     
     
     
+    // MARK: - Update token firebase
+    
+    func callUpdatetokenPostWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: UpdateTokenModel) -> ()) {
+              RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kUpdateToken, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+              {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+                switch statusCode {
+                case .SUCCESS:
+                  do {
+                    let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                      FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+
+                    let data = try JSONDecoder().decode(UpdateTokenModel.self, from: result!)
+                    completionClosure(data)
+                  } catch {
+                    print(error.localizedDescription)
+                  }
+
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                  print("")
+                  self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                case .UNAUTHORIZED:
+                    print(error)
+               //   self.showLogoutAlert()
+                default:
+                  break
+                }
+              }
+        }
+    
+    
+    
+    
+    
+    
+    
 //    func callAddressProofWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: AdressProofModel) -> ()) {
 //          RSNetworkManager.shared.requestMultipartApi(withServiceName: WebServiceName.kAddressProof, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
 //          {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
