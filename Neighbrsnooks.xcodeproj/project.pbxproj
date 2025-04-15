@@ -434,7 +434,6 @@
 		0491BA2E2DA7D5BB00955502 /* CreatePostModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA2D2DA7D5BB00955502 /* CreatePostModel.swift */; };
 		0491BA302DA7D8F600955502 /* AddressModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA2F2DA7D8F600955502 /* AddressModel.swift */; };
 		0491BA322DA7DE0600955502 /* GroupMessageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA312DA7DE0600955502 /* GroupMessageViewController.swift */; };
-		04C2BD3A2DA92AE7000D967E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 04C2BD392DA92AE7000D967E /* GoogleService-Info.plist */; };
 		04C2BD3D2DA92FE8000D967E /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD3C2DA92FE8000D967E /* FirebaseAnalytics */; };
 		04C2BD3F2DA92FE8000D967E /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD3E2DA92FE8000D967E /* FirebaseAnalyticsOnDeviceConversion */; };
 		04C2BD412DA92FE8000D967E /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD402DA92FE8000D967E /* FirebaseAnalyticsWithoutAdIdSupport */; };
@@ -460,6 +459,7 @@
 		04C2BD692DA92FE8000D967E /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD682DA92FE8000D967E /* FirebaseStorageCombine-Community */; };
 		04C2BD6B2DA92FE8000D967E /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD6A2DA92FE8000D967E /* FirebaseVertexAI */; };
 		04DB4B8C2DA79CFA00A4CC0C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04DB4B8B2DA79CFA00A4CC0C /* Assets.xcassets */; };
+		04ED67172DAD341300822687 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 04ED67162DAD341300822687 /* GoogleService-Info.plist */; };
 		9E94EBEF2DA7802500DD28FD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E94EBEE2DA7802500DD28FD /* AppDelegate.swift */; };
 		9E94EBF12DA7802500DD28FD /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E94EBF02DA7802500DD28FD /* SceneDelegate.swift */; };
 		9E94EBF32DA7802500DD28FD /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E94EBF22DA7802500DD28FD /* ViewController.swift */; };
@@ -916,8 +916,9 @@
 		0491BA2D2DA7D5BB00955502 /* CreatePostModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePostModel.swift; sourceTree = "<group>"; };
 		0491BA2F2DA7D8F600955502 /* AddressModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressModel.swift; sourceTree = "<group>"; };
 		0491BA312DA7DE0600955502 /* GroupMessageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMessageViewController.swift; sourceTree = "<group>"; };
-		04C2BD392DA92AE7000D967E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		04DB4B8B2DA79CFA00A4CC0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		04ED67152DAD1A6700822687 /* Neighbrsnooks.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Neighbrsnooks.entitlements; sourceTree = "<group>"; };
+		04ED67162DAD341300822687 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		12DFF4E8BF0FC27B67B6F689 /* Pods_Neighbrsnooks.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Neighbrsnooks.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		87E7EBD65317B1CE1A17BF96 /* Pods-Neighbrsnooks.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Neighbrsnooks.release.xcconfig"; path = "Target Support Files/Pods-Neighbrsnooks/Pods-Neighbrsnooks.release.xcconfig"; sourceTree = "<group>"; };
 		9E94EBEB2DA7802500DD28FD /* Neighbrsnooks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Neighbrsnooks.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1818,6 +1819,7 @@
 		9E94EBED2DA7802500DD28FD /* Neighbrsnooks */ = {
 			isa = PBXGroup;
 			children = (
+				04ED67152DAD1A6700822687 /* Neighbrsnooks.entitlements */,
 				04DB4B7A2DA7954400A4CC0C /* Application */,
 				0491B98A2DA7BEEE00955502 /* NetworkMonitor */,
 				0491B9632DA7BEDB00955502 /* Basics */,
@@ -1828,7 +1830,7 @@
 				04DB4B752DA7953800A4CC0C /* FontUtility */,
 				9E94EBF22DA7802500DD28FD /* ViewController.swift */,
 				9E94EBFF2DA7802C00DD28FD /* Info.plist */,
-				04C2BD392DA92AE7000D967E /* GoogleService-Info.plist */,
+				04ED67162DAD341300822687 /* GoogleService-Info.plist */,
 				9E94EBF72DA7802500DD28FD /* Neighbrsnooks.xcdatamodeld */,
 			);
 			path = Neighbrsnooks;
@@ -1918,7 +1920,7 @@
 				0491B70B2DA7BDE900955502 /* Montserrat-ThinItalic.ttf in Resources */,
 				0491B70C2DA7BDE900955502 /* Montserrat-Thin.ttf in Resources */,
 				0491B70D2DA7BDE900955502 /* Montserrat-Light.ttf in Resources */,
-				04C2BD3A2DA92AE7000D967E /* GoogleService-Info.plist in Resources */,
+				04ED67172DAD341300822687 /* GoogleService-Info.plist in Resources */,
 				0491B70E2DA7BDE900955502 /* Montserrat-ExtraLightItalic.ttf in Resources */,
 				0491B70F2DA7BDE900955502 /* Montserrat-Medium.ttf in Resources */,
 				0491B7102DA7BDE900955502 /* Montserrat-BoldItalic.ttf in Resources */,
@@ -1936,9 +1938,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Neighbrsnooks/Pods-Neighbrsnooks-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Neighbrsnooks/Pods-Neighbrsnooks-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -1953,9 +1959,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Neighbrsnooks/Pods-Neighbrsnooks-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Neighbrsnooks/Pods-Neighbrsnooks-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2546,6 +2556,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Neighbrsnooks/Neighbrsnooks.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2586,6 +2597,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Neighbrsnooks/Neighbrsnooks.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

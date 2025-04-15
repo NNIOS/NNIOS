@@ -8,6 +8,7 @@
 import UIKit
 import Kingfisher
 import SVProgressHUD
+import FirebaseMessaging
 @available(iOS 16.0, *)
 
 class RegisterViewController: BaseViewC {
@@ -22,7 +23,7 @@ class RegisterViewController: BaseViewC {
     @IBOutlet weak var tfEmail: UITextField!
     @IBOutlet weak var tfOtp1: UITextField!
     @IBOutlet weak var tfOtp2: UITextField!
-    @IBOutlet weak var tfOtp3: UITextField!
+    @IBOutlet weak var tfOtp3: UITextField! 
     @IBOutlet weak var tfOtp4: UITextField!
     @IBOutlet weak var tfOtp5: UITextField!
     @IBOutlet weak var tfOtp6: UITextField!
@@ -355,57 +356,61 @@ class RegisterViewController: BaseViewC {
         // **Show Loader on Button**
            UIHelper.showLoader(on: sender, show: true)
 
-           // All validations passed, proceed to call the web service
-           callRegisterWebService { [self] in
-               DispatchQueue.main.async {
-                   // **Hide Loader After API Response**
+        // Fetch FCM Token before proceeding
+        Messaging.messaging().token { token, error in
+               if let error = error {
+                   print("❌ Error fetching FCM token: \(error)")
                    UIHelper.showLoader(on: sender, show: false)
-
-                   SVProgressHUD.show()
-                   let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterSecondViewController") as! RegisterSecondViewController
-                   vc.name = self.tfFirstName.text ?? ""
-                   vc.secname = self.tfLastName.text ?? ""
-                   let firstName = tfFirstName.text ?? ""
-                   let lastName = tfLastName.text ?? ""
-                   callDeviceInfoWebService()
+               } else if let token = token {
+                   print("📱 FCM Token fetched: \(token)")
                    
-                   // Save to UserDefaults
-                   UserDefaults.standard.set(firstName, forKey: "FirstName")
-                   UserDefaults.standard.set(lastName, forKey: "LastName")
-                   
-                   print("Name saved: \(firstName) \(lastName)")
-                   self.navigationController?.pushViewController(vc, animated: false)
+                   self.callRegisterWebService(firebaseToken: token) {
+                       DispatchQueue.main.async {
+                           UIHelper.showLoader(on: sender, show: false)
+                           
+                           SVProgressHUD.show()
+                           let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterSecondViewController") as! RegisterSecondViewController
+                           vc.name = self.tfFirstName.text ?? ""
+                           vc.secname = self.tfLastName.text ?? ""
+                           
+                           UserDefaults.standard.set(self.tfFirstName.text ?? "", forKey: "FirstName")
+                           UserDefaults.standard.set(self.tfLastName.text ?? "", forKey: "LastName")
+                           
+                           print("Name saved: \(self.tfFirstName.text ?? "") \(self.tfLastName.text ?? "")")
+                           self.navigationController?.pushViewController(vc, animated: false)
+                       }
+                   }
                }
            }
        }
     
     
-    func callRegisterWebService(_ completionClosure: @escaping () -> ()) {
-        
-        let dictParams: Dictionary<String, Any> = [
+    func callRegisterWebService(firebaseToken: String, completionClosure: @escaping () -> ()) {
+        let dictParams: [String: Any] = [
             "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
-            "firstname":self.tfFirstName.text ?? "",
-            "lastname":self.tfLastName.text ?? "",
-            "emailid":self.tfEmail.text ?? "",
-            "phoneno":self.tfMobile.text ?? "",
-            "password":self.tfPassword.text ?? "",
-            "confirm_password":self.tfConfirmPassword.text ?? "",
-            "term":"1"
-            
+            "firebase_token": firebaseToken, // ✅ now passed properly
+            "firstname": self.tfFirstName.text ?? "",
+            "lastname": self.tfLastName.text ?? "",
+            "emailid": self.tfEmail.text ?? "",
+            "phoneno": self.tfMobile.text ?? "",
+            "password": self.tfPassword.text ?? "",
+            "confirm_password": self.tfConfirmPassword.text ?? "",
+            "term": "1"
         ]
+
         WebService.sharedInstance.callRegisterWebService(withParams: dictParams) { data in
             self.registerData = data
             UserDefaults.standard.set(self.registerData?.userid, forKey: "userid")
-            //              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-            // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
             
-            if self.registerData?.status == "success"{
+            if self.registerData?.status == "success" {
                 completionClosure()
-            }else{
+            } else {
                 self.showAlert(Message: self.registerData?.message ?? "")
             }
         }
     }
+
+
     
     
     

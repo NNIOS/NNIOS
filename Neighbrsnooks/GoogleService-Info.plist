@@ -2,18 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1008869088846-pco85hikp1hnihs6lp6s03aohjkdeqd7.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyCqN6tDZ-ocfaBJ4XSwId7ab-h-hmOkfqo</string>
+	<string>AIzaSyA9ibudubKoD6vr45HaY9EUxG7BLeLwM0I</string>
 	<key>GCM_SENDER_ID</key>
-	<string>385958913837</string>
+	<string>1008869088846</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>Neighbrsnooks.com</string>
 	<key>PROJECT_ID</key>
-	<string>neighbrsnooks</string>
+	<string>neighbrsnook-20eef</string>
 	<key>STORAGE_BUCKET</key>
-	<string>neighbrsnooks.firebasestorage.app</string>
+	<string>neighbrsnook-20eef.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +27,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:385958913837:ios:628863d12539fdb7da55a4</string>
+	<string>1:1008869088846:ios:4bd052ef29df044498ed1f</string>
 </dict>
 </plist>

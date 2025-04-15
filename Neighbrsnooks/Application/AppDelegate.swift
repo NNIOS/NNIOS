@@ -61,18 +61,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
         window?.rootViewController = NeigbrnookViewController()
         window?.makeKeyAndVisible()
-        
-//        if #available(iOS 16.0, *){
-//            UNUserNotificationCenter.current().delegate = self
-//            let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-//            UNUserNotificationCenter.current().requestAuthorization(
-//                with: authOptions { _, _ in})
-//        }
-//        
-//        
-        
+ 
+        Messaging.messaging().delegate = self
+
         FirebaseApp.configure()
       //  customizeAppearance()
+        
+        UNUserNotificationCenter.current().delegate = self
+              Messaging.messaging().delegate = self
+
+              UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                  print("Notification permission granted: \(granted)")
+              }
+
+              application.registerForRemoteNotifications()
+        
         return true
         
         
@@ -126,3 +129,53 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
 }
 
+@available(iOS 16.0, *)
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    // Show alert while app is open
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.alert, .sound, .badge])
+    }
+}
+
+@available(iOS 16.0, *)
+extension AppDelegate: MessagingDelegate {
+    // Firebase Token
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("🌐 Firebase registration token: \(fcmToken ?? "")")
+        if let token = fcmToken {
+            sendTokenToServer(token)
+        }
+    }
+
+    func sendTokenToServer(_ fcmToken: String) {
+        guard let userId = UserDefaults.standard.string(forKey: "userid") else { return }
+
+        let url = URL(string: "https://yourdomain.com/api/store-fcm-token")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let payload: [String: Any] = [
+            "user_id": userId,
+            "firebase_token": fcmToken
+        ]
+
+        request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Error sending token: \(error.localizedDescription)")
+                return
+            }
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("✅ Token sent with status code: \(httpResponse.statusCode)")
+            }
+        }.resume()
+    }
+
+    
+    
+}
