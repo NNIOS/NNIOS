@@ -267,16 +267,13 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
             DescView.backgroundColor = .black
             UploadView.backgroundColor = .black
         } else {
-            // Light mode mein storyboard ke original colors preserve karna
-           
-
-            // Light mode mein PollsView ka background red karna
+            
             createPostView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
             SelectPostView.layer.borderWidth = 0 // Enable border in dark mode
             DescView.layer.borderWidth = 0
             UploadView.layer.borderWidth = 0
             
-            createPostView.backgroundColor = .white
+            
             SelectPostView.backgroundColor = .white
             DescView.backgroundColor = .white
             UploadView.backgroundColor = .white

@@ -30,11 +30,13 @@ class BussinessTableViewCell: UITableViewCell {
     @IBOutlet weak var BannerImgView : UIImageView!
     @IBOutlet weak var BussinessImgView : UIImageView!
     @IBOutlet weak var lblRating: UILabel!
-    
+    @IBOutlet weak var bussinessImg: UIImageView!
+    @IBOutlet weak var btnDotsImg : UIButton!
 
     weak var delegate: BussinessTableViewCellDelegate?
     var bussCollectionData: [String] = []
     var imgAray = ["NewBusiness","NewBusiness"]
+    private var defaultTextColor: UIColor?
     
     //   var BusimgData = [image]()
     // var BusimgData = [image].self
@@ -55,6 +57,9 @@ class BussinessTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
+        defaultTextColor = lblUserName.textColor
+        updateColors()
         collecViewBuss.delegate = self
         collecViewBuss.dataSource = self
         collecViewBuss.reloadData()
@@ -92,6 +97,37 @@ class BussinessTableViewCell: UITableViewCell {
         self.bussData = data
         collecViewBuss.reloadData()
        
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblUserName.textColor = .white
+            lblSector.textColor = .white
+            lblProduct.textColor = .white
+            lblHealth.textColor = .white
+            btnDotsImg.tintColor = .white
+            bussinessImg.tintColor = .white
+            
+        } else {
+            // Light mode
+            lblUserName.textColor = defaultTextColor
+            lblSector.textColor = UIColor.secondaryLabel
+            lblProduct.textColor = UIColor.secondaryLabel
+            lblHealth.textColor = UIColor.secondaryLabel
+            btnDotsImg.tintColor = .black
+            bussinessImg.tintColor = .black
+            
+        }
+    }
+
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     

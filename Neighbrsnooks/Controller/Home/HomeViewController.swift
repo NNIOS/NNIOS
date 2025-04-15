@@ -10,6 +10,7 @@ import SVProgressHUD
 import AVFoundation
 import AVKit
 
+
 @available(iOS 16.0, *)
 class HomeViewController: BaseViewController, UITextFieldDelegate {
     
@@ -42,6 +43,35 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     @IBOutlet weak var LblContact: UILabel!
     @IBOutlet weak var btnHomeimg: UILabel!
     @IBOutlet weak var lblVersionNeighbrsnook: UILabel!
+    
+    @IBOutlet weak var ProfileeView: UIView!
+    @IBOutlet weak var NeighbourhoodView: UIView!
+    
+    @IBOutlet weak var BusinessView: UIView!
+    @IBOutlet weak var EventView: UIView!
+    @IBOutlet weak var GroupView: UIView!
+    @IBOutlet weak var PollView: UIView!
+    
+    @IBOutlet weak var PostView: UIView!
+    @IBOutlet weak var PublicView: UIView!
+    @IBOutlet weak var shareView: UIView!
+    @IBOutlet weak var SettingsView: UIView!
+    
+    @IBOutlet weak var MyProfileeView: UIView!
+    @IBOutlet weak var MyNeighbourhoodView: UIView!
+    
+    @IBOutlet weak var MyBusinessView: UIView!
+    @IBOutlet weak var MyEventView: UIView!
+    @IBOutlet weak var MyGroupView: UIView!
+    @IBOutlet weak var MyPollsPollView: UIView!
+    
+    @IBOutlet weak var MyPostView: UIView!
+    @IBOutlet weak var myPublicView: UIView!
+    @IBOutlet weak var myshareView: UIView!
+    @IBOutlet weak var mySettingsView: UIView!
+    @IBOutlet weak var myContactView: UIView!
+    @IBOutlet weak var shareNewView: UIView!
+   
     
     var filteredData: HomeAllModel? = nil
     var isFromProfile: Bool?
@@ -211,6 +241,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        updateColors()
         //        tabBarController?.delegate = self
     }
     
@@ -242,8 +273,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         viewSideMenu.isHidden = true
         self.searchView.isHidden = true
         if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-            appDelegate.shouldSupportAllOrientations = false
-        }
+                appDelegate.shouldSupportAllOrientations = false
+            }
         
         
         if let verifiedStatus = HomeNewData?.verifiedStatus,
@@ -327,6 +358,121 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         }
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTableViewTap))
         tableviewMember.addGestureRecognizer(tapGesture)
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            ProfileeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            NeighbourhoodView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            BusinessView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            EventView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            PollView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            GroupView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            PollView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            PostView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            PublicView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            shareView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            SettingsView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            myContactView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+//            Add2.layer.borderColor = UIColor.lightGray.cgColor
+            
+            ProfileeView.layer.borderWidth = 0.5 // Enable border in dark mode
+            NeighbourhoodView.layer.borderWidth =  0.5
+            BusinessView.layer.borderWidth =  0.5
+            EventView.layer.borderWidth = 0.5
+            GroupView.layer.borderWidth = 0.5 // Enable border in dark mode
+            PollView.layer.borderWidth = 0.5
+            PostView.layer.borderWidth = 0.5
+            shareView.layer.borderWidth = 0.5
+            SettingsView.layer.borderWidth = 0.5
+            PublicView.layer.borderWidth = 0.5
+            myContactView.layer.borderWidth = 0.5
+           
+            viewSideMenu.backgroundColor = .black
+            MyProfileeView.backgroundColor = .black
+            MyNeighbourhoodView.backgroundColor = .black
+            MyBusinessView.backgroundColor = .black
+            MyEventView.backgroundColor = .black
+            MyGroupView.backgroundColor = .black
+            shareNewView.backgroundColor = .black
+            
+            MyPollsPollView.backgroundColor = .black
+            MyPostView.backgroundColor = .black
+            myPublicView.backgroundColor = .black
+            myshareView.backgroundColor = .black
+            mySettingsView.backgroundColor = .black
+            myContactView.backgroundColor = .black
+            lblProfile.textColor = .white
+            Lblneighbourhood.textColor = .white
+            LblBussiness.textColor = .white
+            LblEvent.textColor = .white
+            lblGroup.textColor = .white
+            LblPolls.textColor = .white
+            LblPost.textColor = .white
+            lblPublic.textColor = .white
+            LblShare.textColor = .white
+            LblContact.textColor = .white
+            lblVersionNeighbrsnook.textColor = .white
+            LblSetting.textColor = .white
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+          //  questionView.textColor = UIColor.secondaryLabel
+            
+            
+            ProfileeView.layer.borderWidth = 0 // Remove border in light mode
+            NeighbourhoodView.layer.borderWidth = 0
+            BusinessView.layer.borderWidth = 0
+            EventView.layer.borderWidth = 0
+            GroupView.layer.borderWidth = 0
+            PollView.layer.borderWidth = 0
+            PublicView.layer.borderWidth = 0
+            myContactView.layer.borderWidth = 0
+            viewSideMenu.backgroundColor = .white
+           
+            
+            PostView.layer.borderWidth = 0 // Remove border in light mode
+            shareView.layer.borderWidth = 0
+            SettingsView.layer.borderWidth = 0
+          
+            MyProfileeView.backgroundColor = .white
+            MyNeighbourhoodView.backgroundColor = .white
+            MyBusinessView.backgroundColor = .white
+            MyEventView.backgroundColor = .white
+            MyGroupView.backgroundColor = .white
+            
+            MyPollsPollView.backgroundColor = .white
+            MyPostView.backgroundColor = .white
+            myPublicView.backgroundColor = .white
+            myshareView.backgroundColor = .white
+            mySettingsView.backgroundColor = .white
+            myContactView.backgroundColor = .white
+            shareNewView.backgroundColor = .white
+            
+            lblProfile.textColor = UIColor.secondaryLabel
+            Lblneighbourhood.textColor = UIColor.secondaryLabel
+            LblBussiness.textColor = UIColor.secondaryLabel
+            LblEvent.textColor = UIColor.secondaryLabel
+            lblGroup.textColor = UIColor.secondaryLabel
+            LblPolls.textColor = UIColor.secondaryLabel
+            LblPost.textColor = UIColor.secondaryLabel
+            lblPublic.textColor = UIColor.secondaryLabel
+            LblShare.textColor = UIColor.secondaryLabel
+            LblContact.textColor = UIColor.secondaryLabel
+            lblVersionNeighbrsnook.textColor = UIColor.secondaryLabel
+            LblSetting.textColor = UIColor.secondaryLabel
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     @objc func handleTableViewTap() {
@@ -1202,7 +1348,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         tableviewMember.reloadData()
     }
     
-    
+  
     // warking code hai ye tabke view ko theek karne ke liye
     
     func prepareSortedData(homeModel: HomeAllModel?) {
@@ -1210,18 +1356,18 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             print("❌ homeModel is NIL")
             return
         }
-        guard let data = homeModel.listdata, !data.isEmpty else {
+         guard let data = homeModel.listdata, !data.isEmpty else {
             print("❌ listdata is NIL or EMPTY")
             return
         }
-        print("✅ listdata found, Count: \(data.count)")
-        sortedSections.removeAll()
-        // Add Announcement section first
+         print("✅ listdata found, Count: \(data.count)")
+         sortedSections.removeAll()
+         // Add Announcement section first
         if let announcement = homeModel.announcement, !announcement.isEmpty {
             sortedSections.append(("Announcement", announcement))
             print("🟢 Added Announcement Section")
         }
-        // **Maintain Exact API Order**
+         // **Maintain Exact API Order**
         for item in data {
             let type = item.type ?? "" // ✅ Optional handling
             sortedSections.append((type, [item])) // ✅ Correct tuple format
@@ -1231,7 +1377,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         print("🔢 Total Sections: \(sortedSections.count)")
         //        print("🟡 Final Sorted Sections: \(sortedSections)")
     }
-    
+   
     // Filtered data ko fetch karna
     func getFilteredData(for type: String, at index: Int) -> HomeNewData? {
         let dataSource = isSearching ? filteredData : HomeNewData
@@ -1260,7 +1406,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         return sectionData.1.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+      func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let sectionData = sortedSections[indexPath.section]
         let item = sectionData.1[indexPath.row]
         print("🟢 CellForRowAt: Section = \(sectionData.0), Row = \(indexPath.row)")
@@ -1280,7 +1426,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         case "Post":
             print("🟢 Calling Post Cell")
             let dataSource = isSearching ? filteredData : HomeNewData
-            
             let cell = tableView.dequeueReusableCell(withIdentifier: "MemberTableViewCell", for: indexPath) as! MemberTableViewCell
             cell.delegate = self
             cell.delegateCell = self // Delegate assign karo
@@ -1327,44 +1472,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                         }
                     }
                 }
-                
-                
-                
- 
-                
-                cell.likeUnLikeTab = { [weak self] in
-                    guard let self = self else { return }
-
-                    var mutablePostData = postData
-                    guard let postId = mutablePostData.postid, !postId.isEmpty else { return }
-
-                    // Like with Emoji
-                    if let emoji = cell.selectedEmoji {
-                        self.callPostLikeWebService(postId: postId, emoji: emoji) {
-                            mutablePostData.favouritstatus = 1
-                             print("✅ Liked with emoji \(emoji)")
-                        }
-                    } else {
-                        // Normal Like / Unlike toggle
-                        if cell.isLikedByUser {
-                            self.callPostLikeWebService(postId: postId, emoji: "") {
-                                mutablePostData.favouritstatus = 1
-                                cell.updateFavouriteButton(isFavourite: true)
-                                print("✅ Liked without emoji")
-                            }
-                        } else {
-                            self.callPostUnLikeWebService {
-                                mutablePostData.favouritstatus = 0
-                                 print("❌ Unliked")
-                            }
-                        }
-                    }
-                }
-
-                
-                
-                
-                
                 
                 cell.FullImgCallback = { [self] value in
                     let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostEnlargeImageViewController")as! PostEnlargeImageViewController
@@ -2144,10 +2251,10 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             if self.profileData?.verfiedMsg == "User Verification is completed!" {
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 if let postDetailsVC = storyboard.instantiateViewController(withIdentifier: "PostDetailsViewController") as? PostDetailsViewController {
-                    //                    let navController = UINavigationController(rootViewController: postDetailsVC)
-                    //                       navController.hidesBottomBarWhenPushed = false
-                    //                       self.present(navController, animated: true)
-                    
+//                    let navController = UINavigationController(rootViewController: postDetailsVC)
+//                       navController.hidesBottomBarWhenPushed = false
+//                       self.present(navController, animated: true)
+
                     // ✅ Correct way to fetch post data
                     let sectionData = sortedSections[indexPath.section]
                     if let postData = sectionData.1[indexPath.row] as? HomeNewData {
@@ -2284,6 +2391,7 @@ extension String {
 
 
 
+
 @available(iOS 16.0, *)
 extension HomeViewController: UIScrollViewDelegate {
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
@@ -2335,6 +2443,7 @@ extension HomeViewController: UIScrollViewDelegate {
     
     
 }
+
 
 @available(iOS 16.0, *)
 extension HomeViewController {

@@ -19,6 +19,7 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
     
     @IBOutlet weak var tfSearch: UITextField!
     @IBOutlet weak var searchView: UIView!
+    @IBOutlet weak var postView: UIView!
     // emojiLabel.text = "😊🚀🌟"
     
     var PostListData : PostListModel?
@@ -61,7 +62,7 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
         super.viewWillAppear(animated)
         
         // SVProgressHUD.show()
-        
+        updateColors()
         
         callPostListWebService(searchQuery: "") {
             SVProgressHUD.dismiss()
@@ -79,6 +80,30 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
         _ = navigationController?.popViewController(animated: true)
         
         
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            postView.backgroundColor = .black
+            tableviewPost.backgroundColor = .black
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+           
+
+            // Light mode mein PollsView ka background red karna
+            postView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewPost.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+           
+        }
     }
     
     @objc func refreshData() {

@@ -12,16 +12,37 @@ class FAQTableViewCell: UITableViewCell {
     @IBOutlet weak var lblQuestion: UILabel!
     @IBOutlet weak var lblAnswer: UILabel!
     @IBOutlet weak var arrowImageView : UIImageView!
-
+    
     override func awakeFromNib() {
         super.awakeFromNib()
+        updateColors()
         // Initialization code
     }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblAnswer.textColor = .white
+            lblQuestion.textColor = .white
+            arrowImageView.tintColor = .white
+            
+            // lblMember.textColor = .white
+            //  lblMemberText.textColor = .white
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+            lblAnswer.textColor = UIColor.secondaryLabel
+            lblQuestion.textColor = .black
+            arrowImageView.tintColor = .black
+            
+            
+        }
+        
+        func setSelected(_ selected: Bool, animated: Bool) {
+            super.setSelected(selected, animated: animated)
+            
+            // Configure the view for the selected state
+        }
+        
     }
-
 }
