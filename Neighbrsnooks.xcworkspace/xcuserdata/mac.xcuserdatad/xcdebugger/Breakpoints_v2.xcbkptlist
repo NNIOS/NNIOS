@@ -14,8 +14,8 @@
             filePath = "Neighbrsnooks/Controller/Home/HomeViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1342"
-            endingLineNumber = "1342"
+            startingLineNumber = "1344"
+            endingLineNumber = "1344"
             landmarkName = "tableView(_:cellForRowAt:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -30,8 +30,8 @@
             filePath = "Neighbrsnooks/Controller/Home/HomeViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1353"
-            endingLineNumber = "1353"
+            startingLineNumber = "1355"
+            endingLineNumber = "1355"
             landmarkName = "tableView(_:cellForRowAt:)"
             landmarkType = "7">
          </BreakpointContent>

@@ -474,6 +474,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         }
         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {return}
         vc.sourceViewController = "HomeViewController"
+       // vc.headingTitle = vc.Oid!.isEmpty ? "My Profile" : "Profile"
+        vc.headingTitle = "My Profile" // हमेशा "My Profile" सेट करें
         
         self.navigationController?.pushViewController(vc, animated: true)
     }
