@@ -21,7 +21,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     @IBOutlet weak var tpyeCategoryLbl: UILabel!
     @IBOutlet weak var tfSearch: UITextField!
     @IBOutlet weak var searchView: UIView!
-    
+    @IBOutlet weak var bussinessView: UIView!
     
     private let bottomPanelView = BottomPanelView()
     var BusinessListData : BussinessListModel?
@@ -195,6 +195,38 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     
     @IBAction func BackButtionAction(_ : UIButton){
         _ = navigationController?.popViewController(animated: true)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            bussinessView.backgroundColor = .black
+            tableviewBussiness.backgroundColor = .black
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+           
+
+            // Light mode mein PollsView ka background red karna
+            bussinessView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewBussiness.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+           
+        }
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     @IBAction func serviceBtnAction(_ sender: UIButton) {

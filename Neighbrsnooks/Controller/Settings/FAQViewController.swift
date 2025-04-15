@@ -11,6 +11,7 @@ class FAQViewController: UIViewController {
 
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var lblHeading: UILabel!
+    @IBOutlet weak var FAQView: UIView!
     
     var FAQData : FAQModel?
     var expandedIndexPaths = Set<IndexPath>() // Track which rows are expanded
@@ -45,6 +46,30 @@ class FAQViewController: UIViewController {
 
         _ = navigationController?.popViewController(animated: true)
 
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            tableviewMembers.backgroundColor = .black
+            FAQView.backgroundColor = .black
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+           
+
+            // Light mode mein PollsView ka background red karna
+            tableviewMembers.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            FAQView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+           // tableviewMembers.separatorStyle = .none
+        }
     }
 
 }
