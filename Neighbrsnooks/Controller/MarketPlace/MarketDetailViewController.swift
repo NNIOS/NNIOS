@@ -52,6 +52,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
   //  var productImages: [ProductImage] = []
   //  var productImages: [PImage] = []
     var productImages: [ProductImage] = []
+    private var defaultTextColor: UIColor?
  //   var MarketWDetailData : ProductResponse?
     
     override func viewDidLoad() {
@@ -69,6 +70,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         self.CreatorLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         self.SimilarProductLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         self.timeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+        defaultTextColor = CreatorLbl.textColor
         
         callMarketDetailWebService { [weak self] in
             DispatchQueue.main.async {
@@ -248,14 +250,25 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
             // Dark mode colors
            
             MarketFullView.backgroundColor = .black
-           
-           
-           
+            UserLbl.textColor = .white
+            rsLbl.textColor = .white
+            DescLbl.textColor = .white
+            CreatorLbl.textColor = .white
+            secLbl.textColor = .white
+            timeLbl.textColor = .white
+            LblCat.textColor = .white
             
         } else {
             // Light mode mein storyboard ke original colors preserve karna
           
             MarketFullView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            UserLbl.textColor =  UIColor.secondaryLabel
+            rsLbl.textColor =  UIColor.secondaryLabel
+            DescLbl.textColor =  UIColor.secondaryLabel
+            CreatorLbl.textColor =  defaultTextColor
+            secLbl.textColor =  UIColor.secondaryLabel
+            timeLbl.textColor =  UIColor.secondaryLabel
+            LblCat.textColor =  UIColor.secondaryLabel
             
             
         }

@@ -17,6 +17,8 @@ class NotificationViewController: BaseViewController {
     @IBOutlet weak var lblHeading: UILabel!
     
     @IBOutlet weak var tableviewMembers: UITableView!
+    @IBOutlet weak var NotificationView: UIView!
+    
 //    @IBOutlet weak var viewSideMenu: UIView!
 //    @IBOutlet weak var NameLbl: UILabel!
 //    @IBOutlet weak var LastNameLbl: UILabel!
@@ -109,7 +111,27 @@ class NotificationViewController: BaseViewController {
         ])
     }
     
-   
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            NotificationView.backgroundColor = .black
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+           
+
+            // Light mode mein PollsView ka background red karna
+            NotificationView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewMembers.separatorStyle = .none
+        }
+    }
 
     
 //    func setdata(){
