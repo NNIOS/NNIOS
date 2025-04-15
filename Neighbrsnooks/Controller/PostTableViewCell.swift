@@ -32,6 +32,10 @@ class PostTableViewCell: UITableViewCell {
     @IBOutlet weak var profileImgView : UIImageView!
     @IBOutlet weak var viewToHide: UIView!
     @IBOutlet weak var viewDesc: UIView!
+    @IBOutlet weak var UnlikeImageView : UIButton!
+    @IBOutlet weak var btnCommentsImg : UIButton!
+    @IBOutlet weak var btnShareImg : UIButton!
+    @IBOutlet weak var btnDotsImg : UIButton!
     // @IBOutlet weak var viewPopup: UIView!
 //    @IBOutlet weak var btnLikes: UIButton!
     var LikesCallback : ((UIButton) -> Void)?
@@ -61,6 +65,7 @@ class PostTableViewCell: UITableViewCell {
     var isFavourite = false
     var favouriteButtonCallback: (() -> Void)?
     var emojiSelectionHandler: ((String) -> Void)?
+    private var defaultTextColor: UIColor?
     
     @IBOutlet weak var likebtn: UIButton!
     @IBOutlet weak var lblLikeCount: UILabel!
@@ -116,12 +121,52 @@ class PostTableViewCell: UITableViewCell {
         // Add tap gesture recognizer single tab
         let tapGestureS = UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap(_:)))
         collectionViewBanner.addGestureRecognizer(tapGestureS)
+        defaultTextColor = lblName.textColor
+        updateColors()
         
         
     }
     
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = .white
+            lblSec.textColor = .white
+            lblMonth.textColor = .white
+            lblGeneral.textColor = .white
+            lblDescription.textColor = .white
+            viewToHide.backgroundColor = .black
+            UnlikeImageView.tintColor = .white // Arrow tint for dark mode
+            btnCommentsImg.tintColor = .white
+            btnShareImg.tintColor = .white
+            UnlikeImageView.tintColor = .white
+            btnDotsImg.tintColor = .white
+            
+        } else {
+            // Light mode
+            lblName.textColor = defaultTextColor
+            lblSec.textColor = UIColor.secondaryLabel
+            lblMonth.textColor = UIColor.secondaryLabel
+            lblGeneral.textColor = UIColor.secondaryLabel
+            lblDescription.textColor = UIColor.secondaryLabel
+            UnlikeImageView.tintColor = .black // Arrow tint for light mode
+            btnCommentsImg.tintColor = .black
+            btnShareImg.tintColor = .black
+            btnDotsImg.tintColor = .black
+            viewToHide.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+        }
+    }
+
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
+    }
     
+   
     
     private func addTapGestures() {
           let nameTap = UITapGestureRecognizer(target: self, action: #selector(handleTapPost))

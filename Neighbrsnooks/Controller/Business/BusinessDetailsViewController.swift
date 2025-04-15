@@ -35,12 +35,15 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
     @IBOutlet weak var profileImgView : UIImageView!
     @IBOutlet weak var tvmessage: UITextView!
     @IBOutlet weak var placeholderLabel: UILabel!
+    @IBOutlet weak var lblClosedOn: UILabel!
     @IBOutlet weak var commentView: UIView!
     
     @IBOutlet weak var DocImgView : UIImageView!
     @IBOutlet weak var DocView: UIView!
     @IBOutlet weak var btnReviewHide : UIButton!
     @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var bussinessView: UIView!
+    
     var bussData = [ImageBussi]()
     var thisWidth:CGFloat = 0
     var BussinessDetailData : BusinessDetailModel?
@@ -50,10 +53,11 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
     var BusinessDeleteData : DeleteBusinessModel?
     var id : String?
     var images: [ImageBussi] = []
-    
+    private var defaultTextColor: UIColor?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+       
         NetworkMonitor.shared.startMonitoring()
         self.profileImgView.layer.cornerRadius = profileImgView.frame.height/2
         self.profileImgView.clipsToBounds = true
@@ -110,7 +114,8 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         SVProgressHUD.show()
         commentView.isHidden = true
-        
+        defaultTextColor = BussinessLbl.textColor
+        updateColors()
         
         callBussinesDetailPostWebService{
             SVProgressHUD.dismiss()
@@ -180,6 +185,58 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
         
         _ = navigationController?.popViewController(animated: true)
         
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            bussinessView.backgroundColor = .black
+            BussinessLbl.textColor = .white
+            CategoryLbl.textColor = .white
+            TacosLbl.textColor = .white
+            DocTypeLbl.textColor = .white
+            lblOpen.textColor = .white
+            lblWeek.textColor = .white
+            lblMob.textColor = .white
+            AddressLbl.textColor = .white
+            GmailLbl.textColor = .white
+            lblWeek.textColor = .white
+            lblWeek.textColor = .white
+            WebLbl.textColor = .white
+            lblClosedOn.textColor = .white
+        } else {
+            BussinessLbl.textColor = defaultTextColor
+            CategoryLbl.textColor = UIColor.secondaryLabel
+            TacosLbl.textColor = UIColor.secondaryLabel
+            DocTypeLbl.textColor = UIColor.secondaryLabel
+            lblOpen.textColor = UIColor.secondaryLabel
+            lblWeek.textColor = UIColor.secondaryLabel
+            lblMob.textColor = UIColor.secondaryLabel
+            AddressLbl.textColor = UIColor.secondaryLabel
+            GmailLbl.textColor = UIColor.secondaryLabel
+            lblWeek.textColor = UIColor.secondaryLabel
+            WebLbl.textColor = UIColor.secondaryLabel
+            lblClosedOn.textColor = UIColor.secondaryLabel
+            bussinessView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+           // tableviewBussiness.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+           
+        }
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     func textViewDidChange(_ textView: UITextView) {

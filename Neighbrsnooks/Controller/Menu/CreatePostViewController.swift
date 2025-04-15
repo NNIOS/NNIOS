@@ -32,6 +32,11 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
     @IBOutlet weak var btnPreview: UIButton!
     
     @IBOutlet weak var btnPlusImg: UIButton!
+    @IBOutlet weak var createPostView: UIView!
+    @IBOutlet weak var SelectPostView: UIView!
+    @IBOutlet weak var DescView: UIView!
+    
+    @IBOutlet weak var UploadView: UIView!
     
 //    var serviceDropdownData = DropDown()
     var serviceName = [String]()
@@ -237,6 +242,56 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
         
         _ = navigationController?.popViewController(animated: true)
         
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            createPostView.backgroundColor = .black
+            SelectPostView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            DescView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            SelectPostView.layer.borderWidth = 1.0 // Enable border in dark mode
+            DescView.layer.borderWidth = 1.0
+            UploadView.layer.borderWidth = 1.0
+            createPostView.backgroundColor = .black
+            SelectPostView.backgroundColor = .black
+            DescView.backgroundColor = .black
+            UploadView.backgroundColor = .black
+        } else {
+            
+            createPostView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            SelectPostView.layer.borderWidth = 0 // Enable border in dark mode
+            DescView.layer.borderWidth = 0
+            UploadView.layer.borderWidth = 0
+            
+            
+            SelectPostView.backgroundColor = .white
+            DescView.backgroundColor = .white
+            UploadView.backgroundColor = .white
+            
+            SelectPostView.isUserInteractionEnabled = true // Disable in light mode
+            DescView.isUserInteractionEnabled = true
+            UploadView.isUserInteractionEnabled = true
+            
+            
+        }
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     func textViewDidChange(_ textView: UITextView) {
