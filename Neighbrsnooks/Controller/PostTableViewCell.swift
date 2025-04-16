@@ -153,7 +153,7 @@ class PostTableViewCell: UITableViewCell {
             btnCommentsImg.tintColor = .black
             btnShareImg.tintColor = .black
             btnDotsImg.tintColor = .black
-            viewToHide.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            viewToHide.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
         }
     }
 

@@ -38,6 +38,7 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
    @IBOutlet weak var  imgcmndLike : UIImageView!
     @IBOutlet weak var  imgcmndReply : UIImageView!
     @IBOutlet weak var  imgcmndDelete : UIImageView!
+    @IBOutlet weak var btnShareImg : UIButton!
     var createdBy: String?
     var selectedCommentIndexPath: IndexPath?
     var fullText: String = "" // Full text from backend
@@ -83,6 +84,7 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
     var selectedPostID: String?
     var selectedUserID: String?
     var selectRreateOn : String?
+    private var defaultTextColor: UIColor?
     @IBOutlet weak var containerView: UIView! // Bottom popup view
     @IBOutlet weak var btnLike: UIButton!
     @IBOutlet weak var btnFav: UIButton!
@@ -95,6 +97,8 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        defaultTextColor = lblName.textColor
+        updateColors()
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
            view.addGestureRecognizer(tapGesture)
@@ -187,6 +191,43 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
             }
         }
         
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = .white
+            lblSector.textColor = .white
+            lblmonth.textColor = .white
+            lblGeneral.textColor = .white
+            lblDescription.textColor = .white
+            
+            btnLike.tintColor = .white // Arrow tint for dark mode
+            btnClickComment.tintColor = .white
+            btnShareImg.tintColor = .white
+            
+            
+        } else {
+            // Light mode
+            lblName.textColor = defaultTextColor
+            lblSector.textColor = UIColor.secondaryLabel
+            lblmonth.textColor = UIColor.secondaryLabel
+            lblGeneral.textColor = UIColor.secondaryLabel
+            lblDescription.textColor = UIColor.secondaryLabel
+            btnLike.tintColor = .black // Arrow tint for dark mode
+            btnClickComment.tintColor = .black
+            btnShareImg.tintColor = .black
+           
+        }
+    }
+
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     

@@ -62,6 +62,20 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     @IBOutlet weak var lblNeighborhood: UILabel!
     
     @IBOutlet weak var lblCountPdfFile: UILabel!
+    @IBOutlet weak var BussinesssView: UIView!
+    
+    @IBOutlet weak var BusinesNameView: UIView!
+    @IBOutlet weak var TagLineView: UIView!
+    @IBOutlet weak var CategoryView: UIView!
+  //  @IBOutlet weak var DescView: UIView!
+    
+    @IBOutlet weak var UploadImgView: UIView!
+    @IBOutlet weak var BussinessHoursView: UIView!
+    @IBOutlet weak var DocTypeView: UIView!
+    @IBOutlet weak var BussinessAddView: UIView!
+    
+    @IBOutlet weak var FlatView: UIView!
+    @IBOutlet weak var StreetView: UIView!
     
     //    let doPickerView = UIPickerView()
     let pickerView = UIPickerView()
@@ -194,6 +208,97 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         tfAdd1.text = UserDefaults.standard.string(forKey: "addressLineOne") ?? ""
         tfAdd2.text = UserDefaults.standard.string(forKey: "addressLineTwo") ?? ""
         
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+           
+            BussinesssView.backgroundColor = .black
+            BusinesNameView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            TagLineView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            CategoryView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadImgView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            BussinessHoursView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            DocTypeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            BussinessAddView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            viewWeekly.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            tvDescribe.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            BusinesNameView.backgroundColor = .black
+            TagLineView.backgroundColor = .black
+            CategoryView.backgroundColor = .black
+            UploadImgView.backgroundColor = .black
+            BussinessHoursView.backgroundColor = .black
+            DocTypeView.backgroundColor = .black
+            BussinessAddView.backgroundColor = .black
+            viewWeekly.backgroundColor = .black
+            tvDescribe.backgroundColor = .black
+            FlatView.backgroundColor = .black
+            StreetView.backgroundColor = .black
+            
+            BusinesNameView.layer.borderWidth = 1.0 // Enable border in dark mode
+            TagLineView.layer.borderWidth = 1.0
+            CategoryView.layer.borderWidth = 1.0
+            
+            UploadImgView.layer.borderWidth = 1.0 // Enable border in dark mode
+            BussinessHoursView.layer.borderWidth = 1.0
+            DocTypeView.layer.borderWidth = 1.0
+            BussinessAddView.layer.borderWidth = 1.0
+            viewWeekly.layer.borderWidth = 1.0
+            tvDescribe.layer.borderWidth = 1.0
+            
+        } else {
+           
+            BussinesssView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            BusinesNameView.isUserInteractionEnabled = true
+            TagLineView.isUserInteractionEnabled = true
+            CategoryView.isUserInteractionEnabled = true
+                   
+            UploadImgView.isUserInteractionEnabled = true
+            BussinessHoursView.isUserInteractionEnabled = true
+            DocTypeView.isUserInteractionEnabled = true
+            BussinessAddView.isUserInteractionEnabled = true
+            tvDescribe.isUserInteractionEnabled = true
+            
+            BusinesNameView.layer.borderWidth = 0 // Remove border in light mode
+            TagLineView.layer.borderWidth = 0
+            CategoryView.layer.borderWidth = 0
+            
+            UploadImgView.layer.borderWidth = 0 // Remove border in light mode
+            BussinessHoursView.layer.borderWidth = 0
+            DocTypeView.layer.borderWidth = 0
+            BussinessAddView.layer.borderWidth = 0
+            viewWeekly.layer.borderWidth = 0
+            tvDescribe.layer.borderWidth = 0
+            
+            BusinesNameView.backgroundColor = .white
+            TagLineView.backgroundColor = .white
+            CategoryView.backgroundColor = .white
+            UploadImgView.backgroundColor = .white
+            BussinessHoursView.backgroundColor = .white
+            DocTypeView.backgroundColor = .white
+            BussinessAddView.backgroundColor = .white
+            viewWeekly.backgroundColor = .white
+            FlatView.backgroundColor = .white
+            StreetView.backgroundColor = .white
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     

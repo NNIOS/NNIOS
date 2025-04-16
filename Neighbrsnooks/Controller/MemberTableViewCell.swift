@@ -47,6 +47,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     @IBOutlet weak var lblStLikes: UILabel!
     @IBOutlet weak var lblStComment: UIButton!
     @IBOutlet weak var viewToHide: UIView!
+    @IBOutlet weak var btnDotsImg : UIButton!
     
     var business_id : String?
     var BussinessFavouriteData : FavouriteBussinessModel?
@@ -77,7 +78,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     weak var delegate: HomeTableViewCellDelegate?
     var imgDataAll = [postImagesN]()
     var UserName = ""
-    
+    private var defaultTextColor: UIColor?
     var FullImgCallback : ((UIButton) -> Void)?
     var DotCallback: ((String?) -> Void)?
     var thisWidth:CGFloat = 0
@@ -88,6 +89,8 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        defaultTextColor = lblName.textColor
+        updateColors()
         collectionViewBanner.delegate = self
         collectionViewBanner.dataSource = self
         lblMonth.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -145,6 +148,44 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         // Configure the view for the selected state
     }
     
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = .white
+            lblSec.textColor = .white
+            lblMonth.textColor = .white
+            lblGeneral.textColor = .white
+            lblDescription.textColor = .white
+            viewToHide.backgroundColor = .black
+            btnComments.tintColor = .white // Arrow tint for dark mode
+            btnShare.tintColor = .white
+            
+            likebtn.tintColor = .white
+            btnDotsImg.tintColor = .white
+            
+        } else {
+            // Light mode
+            lblName.textColor = defaultTextColor
+            lblSec.textColor = UIColor.secondaryLabel
+            lblMonth.textColor = UIColor.secondaryLabel
+            lblGeneral.textColor = UIColor.secondaryLabel
+            lblDescription.textColor = UIColor.secondaryLabel
+            likebtn.tintColor = .black // Arrow tint for light mode
+            btnComments.tintColor = .black
+            btnShare.tintColor = .black
+            btnDotsImg.tintColor = .black
+            viewToHide.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+        }
+    }
+
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
+    }
     
     
     

@@ -22,6 +22,9 @@ class PollHomeTableViewCell: UITableViewCell {
     @IBOutlet weak var lblVote: UILabel!
     @IBOutlet weak var ProfileImgView : UIImageView!
     @IBOutlet weak var VoteBtn: UIButton!
+    @IBOutlet weak var btnDotsImg : UIButton!
+    @IBOutlet weak var lblStartPoll: UILabel!
+    @IBOutlet weak var lblEndPoll: UILabel!
     
     var userId: String?
     weak var delegate: ProfileTapDelegate?
@@ -31,7 +34,46 @@ class PollHomeTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        updateColors()
         addTapGestureToProfile()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = .white
+            lblSector.textColor = .white
+            lblTime.textColor = .white
+            lblAddress.textColor = .white
+            lblstartdate.textColor = .white
+            lblEnddate.textColor = .white
+            lblVote.textColor = .white
+            lblStartPoll.textColor = .white
+            lblEndPoll.textColor = .white
+            btnDotsImg.tintColor = .white
+            
+        } else {
+            // Light mode
+            lblName.textColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+            lblSector.textColor = UIColor.secondaryLabel
+            lblTime.textColor = UIColor.secondaryLabel
+            lblAddress.textColor = UIColor.secondaryLabel
+            lblstartdate.textColor = UIColor.secondaryLabel
+            lblEnddate.textColor = UIColor.secondaryLabel
+            lblVote.textColor = UIColor.secondaryLabel
+            lblStartPoll.textColor = UIColor.secondaryLabel
+            lblEndPoll.textColor = UIColor.secondaryLabel
+            btnDotsImg.tintColor = .black
+            
+        }
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     private func addTapGestureToProfile() {

@@ -71,6 +71,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     @IBOutlet weak var mySettingsView: UIView!
     @IBOutlet weak var myContactView: UIView!
     @IBOutlet weak var shareNewView: UIView!
+    @IBOutlet weak var HomeView: UIView!
    
     
     var filteredData: HomeAllModel? = nil
@@ -113,6 +114,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
            let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
             lblVersionNeighbrsnook.text = "V\(version) @Neighbrsnook"
@@ -397,6 +399,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             MyEventView.backgroundColor = .black
             MyGroupView.backgroundColor = .black
             shareNewView.backgroundColor = .black
+            HomeView.backgroundColor = .black
             
             MyPollsPollView.backgroundColor = .black
             MyPostView.backgroundColor = .black
@@ -416,6 +419,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             LblContact.textColor = .white
             lblVersionNeighbrsnook.textColor = .white
             LblSetting.textColor = .white
+            tableviewMember.backgroundColor = .black
             
         } else {
             // Light mode mein storyboard ke original colors preserve karna
@@ -463,6 +467,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             LblContact.textColor = UIColor.secondaryLabel
             lblVersionNeighbrsnook.textColor = UIColor.secondaryLabel
             LblSetting.textColor = UIColor.secondaryLabel
+            HomeView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewMember.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
         }
       //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
@@ -1451,6 +1457,12 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.userId = postData.createdby // Assign user ID
                 print(postData.createdby)
                 cell.delegateM = self
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
+                
                 cell.favouriteButtonCallback = { [weak self] in
                     guard let self = self else { return }
                     // Make a mutable copy of the postData
@@ -1649,6 +1661,12 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblWelcmCount.text = "\(wlcmData.totalLike ?? 0)"
                 cell.lblBookaCount.text = "\(wlcmData.totalBokay ?? 0)"
                 
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
+                
                 cell.bookayCallback = { [self] value in
                     
                     
@@ -1743,6 +1761,11 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.userId = eventData.createdby // 🟢 Assign userId
                 cell.delegate = self  // 🟢 Assign Delegate
                 
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
                 
                 // MARK: - Call for button push toh eventDitails
                 cell.eventCallAction = { [weak self] value in
@@ -1855,6 +1878,12 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblstartdate.font = UIFont(name: "Montserrat-Regular", size: 14)
                 cell.lblEnddate.font = UIFont(name: "Montserrat-Regular", size: 14)
                 cell.lblVote.font = UIFont(name: "Montserrat-Regular", size: 14)
+                
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
                 
                 if pollData.isvoted == "0" {
                     cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
@@ -2100,6 +2129,12 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 
                 cell.userId = groupsData.createdby
                 cell.delegate = self
+                
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
                 
                 cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 16)
                 cell.lblGroupName.font = UIFont(name: "Montserrat-Regular", size: 13)
