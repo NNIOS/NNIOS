@@ -206,7 +206,12 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                     // Share action logic here
                 }
                 
-                
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
+
                 // Update button icon based on favouritstatus
                 cell.updateFavouriteButton(isFavourite: postData.favouritstatus == 1)
                 

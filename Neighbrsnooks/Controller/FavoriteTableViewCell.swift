@@ -59,6 +59,7 @@ class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,
     @IBOutlet weak var btnShare: UIButton!
     @IBOutlet weak var lblShareCount: UILabel!
     @IBOutlet weak var btnFavourite: UIButton!
+    @IBOutlet weak var btnDotsImg : UIButton!
     
     weak var delegateCell: FavoriteTableViewCellDelegate?
     var isLiked = false
@@ -71,6 +72,7 @@ class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,
     var emojiSelectionHandler: ((String) -> Void)?
     var isLikedByUser = false // Track if user has already liked
     var favouriteButtonCallback: (() -> Void)?
+    private var defaultTextColor: UIColor?
     
    // @IBOutlet weak var viewPopup: UIView!
     
@@ -132,7 +134,8 @@ class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+        defaultTextColor = lblName.textColor
+        updateColors()
         collectionViewBanner.delegate = self
         collectionViewBanner.dataSource = self
         collectionViewBanner.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap)))
@@ -167,6 +170,45 @@ class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,
         
         
         
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = .white
+            lblSec.textColor = .white
+            lblMonth.textColor = .white
+            lblGeneral.textColor = .white
+            lblDescription.textColor = .white
+            viewToHide.backgroundColor = .black
+            btnComments.tintColor = .white // Arrow tint for dark mode
+            btnShare.tintColor = .white
+            
+            likebtn.tintColor = .white
+            btnDotsImg.tintColor = .white
+            
+        } else {
+            // Light mode
+            lblName.textColor = defaultTextColor
+            lblSec.textColor = UIColor.secondaryLabel
+            lblMonth.textColor = UIColor.secondaryLabel
+            lblGeneral.textColor = UIColor.secondaryLabel
+            lblDescription.textColor = UIColor.secondaryLabel
+            likebtn.tintColor = .black // Arrow tint for light mode
+            btnComments.tintColor = .black
+            btnShare.tintColor = .black
+            btnDotsImg.tintColor = .black
+            viewToHide.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+        }
+    }
+
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     @objc private func profileTapped() {
