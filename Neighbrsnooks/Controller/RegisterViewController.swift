@@ -36,12 +36,16 @@ class RegisterViewController: BaseViewC {
     @IBOutlet weak var btnTrems: UIButton!
     @IBOutlet weak var lblHeading: UILabel!
     @IBOutlet var checkOTP: UIImageView!
+    @IBOutlet weak var lblStrongPass: UILabel!
+    @IBOutlet weak var stackView: UIStackView!
+
     
     var lastSentOTP: String? = nil
     var SendOTPData : OtpModel?
     var registerData : RegisterModel?
     var verifyOTPData : MatchOTPModel?
-    var isTimerStopped = false // Flag to check if the timer is already stopped
+    var verifyEmail : EmailVerifyModel?
+    var isTimerStopped = false
     var show = false
     var showConfirm = false
     var check = false
@@ -50,6 +54,7 @@ class RegisterViewController: BaseViewC {
     var timer = Timer()
     var otpFromAPI: String = ""
     var isOTPVerified: Bool = false
+    
 
     
     override func viewDidLoad() {
@@ -64,7 +69,6 @@ class RegisterViewController: BaseViewC {
         self.lblHeading.font = UIFont(name: "Montserrat-SemiBold", size: 22)
         btnPrivacy.titleLabel?.font = UIFont(name: "Montserrat-SemiBold", size: 14) //
         btnTrems.titleLabel?.font = UIFont(name: "Montserrat-SemiBold", size: 14) //
-        
         lblTimer.isHidden = true
         checkOTP.isHidden = true
         self.navigationItem.hidesBackButton = true
@@ -72,12 +76,38 @@ class RegisterViewController: BaseViewC {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapLoginLabel))
            lblIalredyhaveAnAccount.isUserInteractionEnabled = true
            lblIalredyhaveAnAccount.addGestureRecognizer(tapGesture)
-        
+        // First label after first view
+        stackView.insertArrangedSubview(createInfoLabel(), at: 1)
+        stackView.setCustomSpacing(0, after: stackView.arrangedSubviews[0])
+
+        // Second label after second view
+        stackView.insertArrangedSubview(createInfoLabel(), at: 3) // adjust index if needed
+        stackView.setCustomSpacing(0, after: stackView.arrangedSubviews[2])
+        tfPassword.addTarget(self, action: #selector(passwordDidChange), for: .editingChanged)
+
       
      }
     
     
-    @objc func didTapLoginLabel() {
+    func createInfoLabel() -> UIView {
+        let label = UILabel()
+        label.text = "(as per your govt ID)"
+        label.font = UIFont(name: "Montserrat-Regular", size: 12)  // 👉 custom font
+        label.textColor = .lightGray
+        label.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        let container = UIView()
+        container.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 10),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            label.topAnchor.constraint(equalTo: container.topAnchor),
+            label.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+
+        return container
+    }
+     @objc func didTapLoginLabel() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
             self.navigationController?.pushViewController(loginVC, animated: true)
@@ -85,6 +115,50 @@ class RegisterViewController: BaseViewC {
     }
 
     
+    // MARK: - passwordDidChange pass week medm and strong
+    @objc func passwordDidChange(_ textField: UITextField) {
+        guard let password = textField.text else { return }
+        
+        if password.isEmpty {
+            lblStrongPass.text = ""
+            return
+        }
+        
+        lblStrongPass.text = checkPasswordStrength(password)
+    }
+
+
+    func checkPasswordStrength(_ password: String) -> String {
+        let length = password.count
+        let hasUpperCase = NSPredicate(format: "SELF MATCHES %@", ".*[A-Z]+.*").evaluate(with: password)
+        let hasLowerCase = NSPredicate(format: "SELF MATCHES %@", ".*[a-z]+.*").evaluate(with: password)
+        let hasNumber = NSPredicate(format: "SELF MATCHES %@", ".*[0-9]+.*").evaluate(with: password)
+        let hasSpecial = NSPredicate(format: "SELF MATCHES %@", ".*[!&^%$#@()/]+.*").evaluate(with: password)
+        
+        var strength = 0
+        if length >= 6 { strength += 1 }
+        if hasUpperCase { strength += 1 }
+        if hasLowerCase { strength += 1 }
+        if hasNumber { strength += 1 }
+        if hasSpecial { strength += 1 }
+
+        switch strength {
+        case 0...2:
+            lblStrongPass.textColor = .red
+            return "Weak"
+        case 3...4:
+            lblStrongPass.textColor = .orange
+            return "Medium"
+        case 5:
+            lblStrongPass.textColor = .systemGreen
+            return "Strong"
+        default:
+            lblStrongPass.textColor = .gray
+            return ""
+        }
+    }
+
+
     
     // MARK: - Setup TextFields
        func setupTextFields() {
@@ -271,11 +345,7 @@ class RegisterViewController: BaseViewC {
     
     
     @IBAction func createBtn(_ sender: UIButton){
-        
-//        if !isOTPVerified {
-//               showAlert(title: "", message: "Please verify your OTP before proceeding.")
-//               return
-//           }
+      
         
         // Validate First Name
         if tfFirstName.text?.isEmpty == true {
@@ -298,6 +368,10 @@ class RegisterViewController: BaseViewC {
             return
         }
         
+        
+        callVerifyEmailAPI()
+        
+        
         // Validate Mobile Number
         if tfMobile.text?.isEmpty == true {
             showAlert(title: "", message: "Please enter mobile number")
@@ -306,6 +380,12 @@ class RegisterViewController: BaseViewC {
             showAlert(title: "", message: "Please enter valid mobile number")
             return
         }
+        
+        
+        if !isOTPVerified {
+               showAlert(title: "", message: "Please verify your OTP before proceeding.")
+               return
+           }
         
         // Validate OTP
         if tfOtp1.text?.isEmpty == true {
@@ -411,6 +491,54 @@ class RegisterViewController: BaseViewC {
 
     
     
+    // MARK: - Call api
+    func callVerifyEmailAPI() {
+        guard let email = self.tfEmail.text, !email.isEmpty else {
+            print("Email field is empty")
+            return
+        }
+
+        let url = URL(string: "https://dev.neighbrsnook.com/admin/api/verify-email")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let parameters = ["email": email]
+
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
+        } catch {
+            print("Failed to encode parameters: \(error)")
+            return
+        }
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+                return
+            }
+
+            guard let data = data else {
+                print("No data received")
+                return
+            }
+
+            do {
+                let decodedResponse = try JSONDecoder().decode(EmailVerifyModel.self, from: data)
+                print("Status: \(decodedResponse.status)")
+                print("Message: \(decodedResponse.message)")
+            } catch {
+                print("Decoding error: \(error)")
+                // Agar response plain text hai to:
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("Raw response: \(responseString)")
+                }
+            }
+        }
+
+        task.resume()
+    }
+
     
     
     

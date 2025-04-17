@@ -3191,6 +3191,37 @@ class WebService {
         }
     
     
+    // MARK: - Email Verify  
+    
+    func callEmailVerifyPostWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: EmailVerifyModel) -> ()) {
+              RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kEmailVerify, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+              {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+                switch statusCode {
+                case .SUCCESS:
+                  do {
+                    let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                      FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+
+                    let data = try JSONDecoder().decode(EmailVerifyModel.self, from: result!)
+                    completionClosure(data)
+                  } catch {
+                    print(error.localizedDescription)
+                  }
+
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                  print("")
+                  self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                case .UNAUTHORIZED:
+                    print(error)
+               //   self.showLogoutAlert()
+                default:
+                  break
+                }
+              }
+        }
+    
+    
     
     
     

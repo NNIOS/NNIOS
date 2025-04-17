@@ -435,6 +435,7 @@
 		0491BA2E2DA7D5BB00955502 /* CreatePostModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA2D2DA7D5BB00955502 /* CreatePostModel.swift */; };
 		0491BA302DA7D8F600955502 /* AddressModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA2F2DA7D8F600955502 /* AddressModel.swift */; };
 		0491BA322DA7DE0600955502 /* GroupMessageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA312DA7DE0600955502 /* GroupMessageViewController.swift */; };
+		04AB900F2DB12894008761C9 /* EmailVerifyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04AB900E2DB12894008761C9 /* EmailVerifyModel.swift */; };
 		04C2BD3D2DA92FE8000D967E /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD3C2DA92FE8000D967E /* FirebaseAnalytics */; };
 		04C2BD3F2DA92FE8000D967E /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD3E2DA92FE8000D967E /* FirebaseAnalyticsOnDeviceConversion */; };
 		04C2BD412DA92FE8000D967E /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD402DA92FE8000D967E /* FirebaseAnalyticsWithoutAdIdSupport */; };
@@ -918,6 +919,7 @@
 		0491BA2D2DA7D5BB00955502 /* CreatePostModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePostModel.swift; sourceTree = "<group>"; };
 		0491BA2F2DA7D8F600955502 /* AddressModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressModel.swift; sourceTree = "<group>"; };
 		0491BA312DA7DE0600955502 /* GroupMessageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMessageViewController.swift; sourceTree = "<group>"; };
+		04AB900E2DB12894008761C9 /* EmailVerifyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailVerifyModel.swift; sourceTree = "<group>"; };
 		04DB4B8B2DA79CFA00A4CC0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		04ED67152DAD1A6700822687 /* Neighbrsnooks.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Neighbrsnooks.entitlements; sourceTree = "<group>"; };
 		04ED67162DAD341300822687 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -1577,6 +1579,7 @@
 				0491B8932DA7BE8C00955502 /* WishlistModel.swift */,
 				0491B8942DA7BE8C00955502 /* WishListRemoveModel.swift */,
 				042408252DAE6C3900E2C6BA /* UpdateTokenModel.swift */,
+				04AB900E2DB12894008761C9 /* EmailVerifyModel.swift */,
 			);
 			path = ApiModel;
 			sourceTree = "<group>";
@@ -2047,6 +2050,7 @@
 				0491B8992DA7BE8C00955502 /* PublicDirectoryModel.swift in Sources */,
 				0491B89A2DA7BE8C00955502 /* FinalReportModel.swift in Sources */,
 				0491B89B2DA7BE8C00955502 /* ReachoutNeighborhoodModel.swift in Sources */,
+				04AB900F2DB12894008761C9 /* EmailVerifyModel.swift in Sources */,
 				0491B89C2DA7BE8C00955502 /* PollEditModel.swift in Sources */,
 				0491B89D2DA7BE8C00955502 /* UpdateEventModel.swift in Sources */,
 				0491B89E2DA7BE8C00955502 /* EventJoinListViewController.swift in Sources */,

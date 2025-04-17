@@ -120,7 +120,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         self.serviceName.append("Bussiness Categories")
         tfBussinessName.autocapitalizationType = .words
         tfTag.autocapitalizationType = .words
-        tvDescribe.autocapitalizationType = .words
+        tvDescribe.autocapitalizationType = .none
         tfAdd1.autocapitalizationType = .words
         tfAdd2.autocapitalizationType = .words
         tfWeb.autocapitalizationType = .words

@@ -22,6 +22,8 @@ let kDeviceModel                = UIDevice.current.model
 // api
 
 //let kBASEURL = "http://dev.neighbrsnook.com/admin/api/"
+
+
 let kBASEURL = "https://dev.neighbrsnook.com/oldadmin/api/"
 
 
@@ -153,6 +155,7 @@ struct WebServiceName {
     static let kHideNotification = "hide-notification?flag=hidenotification"
     static let kEventLikeList = "event?flag=eventlikeslist"
     static let kUpdateToken = "update-token"
+    static let kEmailVerify = "verify-email"
     
     
     
