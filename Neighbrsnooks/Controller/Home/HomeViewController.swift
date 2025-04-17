@@ -1119,7 +1119,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     
     
     
-    // -------------------------    get Device info Irshad malik --------------------/
+    // MARK: - -------------------------    get Device info Irshad malik --------------------/
+    
     func getDeviceInfo() -> (deviceModel: String, deviceIMEI: String, devicePlatform: String, deviceID: String) {
         let device = UIDevice.current
         
@@ -1161,7 +1162,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         }
     }
     
-    // API call to post device information
+    //MARK: - API call to post device information
+    
     func callDeviceInfoWebService() {
         let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
         

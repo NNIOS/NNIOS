@@ -63,21 +63,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         window?.rootViewController = NeigbrnookViewController()
         window?.makeKeyAndVisible()
-        Messaging.messaging().token { token, error in
-               if let error = error {
-                   print("❌ Error fetching FCM token: \(error)")
-               } else if let token = token {
-                   print("✅ FCM token: \(token)")
-                   
-                   if let userId = UserDefaults.standard.string(forKey: "userid") {
-                       self.callUpdateFirebaseTokenPostWebService(userId: userId, firebaseToken: token) {
-                           print("🎯 Firebase token API call completed")
-                       }
-                   } else {
-                       print("⚠️ User ID not found in UserDefaults")
-                   }
-               }
-           }
+//        Messaging.messaging().token { token, error in
+//               if let error = error {
+//                   print("❌ Error fetching FCM token: \(error)")
+//               } else if let token = token {
+//                   print("✅ FCM token: \(token)")
+//                   
+//                   if let userId = UserDefaults.standard.string(forKey: "userid") {
+//                       self.callUpdateFirebaseTokenPostWebService(userId: userId, firebaseToken: token) {
+//                           print("🎯 Firebase token API call completed")
+//                       }
+//                   } else {
+//                       print("⚠️ User ID not found in UserDefaults")
+//                   }
+//               }
+//           }
         
         //  customizeAppearance()
         
