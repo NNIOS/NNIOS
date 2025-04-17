@@ -59,7 +59,6 @@ class RegisterViewController: BaseViewC {
         tfFirstName.autocapitalizationType = .words
         tfLastName.autocapitalizationType = .words
         tfMobile.keyboardType = .numberPad
-//        otpViewSetUp()
         tfMobile.delegate = self
         self.checkBox.image = UIImage(systemName: "square")
         self.lblHeading.font = UIFont(name: "Montserrat-SemiBold", size: 22)
@@ -76,7 +75,6 @@ class RegisterViewController: BaseViewC {
         
       
      }
-    
     
     
     @objc func didTapLoginLabel() {

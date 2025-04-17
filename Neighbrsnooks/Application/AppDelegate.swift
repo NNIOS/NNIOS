@@ -162,44 +162,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 @available(iOS 16.0, *)
 extension AppDelegate: UNUserNotificationCenterDelegate {
 
-    // Show alert while app is in foreground
+    // App foreground me ho toh ye chalega
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
 
         let title = notification.request.content.title
         let body = notification.request.content.body
-        let combined = "\(title)-\(body)"
+        print("🔔 Notification received: Title: \(title), Body: \(body)")
 
-        // 🎉 emoji wala title hi show karna hai
-        if !title.contains("🎉") {
-            print("🚫 Notification without 🎉 ignored")
-            completionHandler([])
-            return
-        }
+        // Send signal to refresh Home page
+        NotificationCenter.default.post(name: NSNotification.Name("RefreshHomePageNotification"), object: nil)
 
-        // Duplicate check
-        if combined == lastNotificationIdentifier {
-            print("🔁 Duplicate notification ignored")
-            completionHandler([])
-        } else {
-            lastNotificationIdentifier = combined
-            print("🔔 Showing notification: \(combined)")
-            completionHandler([.alert, .sound])
-        }
+        completionHandler([.alert, .sound])
     }
 
-
-    // Handle tap on notification
+    // Jab user notification pe tap kare tab ye chalega
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        // Handle when user taps the notification
         let userInfo = response.notification.request.content.userInfo
         print("📩 Notification tapped: \(userInfo)")
+
+        // Send signal to refresh Home page
+        NotificationCenter.default.post(name: NSNotification.Name("RefreshHomePageNotification"), object: nil)
+
         completionHandler()
     }
 }
+
 
 
 
