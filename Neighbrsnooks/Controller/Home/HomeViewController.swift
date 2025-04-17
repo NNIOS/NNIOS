@@ -116,6 +116,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
            let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
             lblVersionNeighbrsnook.text = "V\(version) @Neighbrsnook"
+            
         }
         
         
@@ -229,11 +230,24 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         // Add the refresh control to your UITableView or UICollectionView
         tableviewMember.refreshControl = refreshControl
         
-        
+        // Listen for refresh notification
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(handleRefreshNotification),
+                                                   name: NSNotification.Name("RefreshHomePageNotification"),
+                                                   object: nil)
         
         
         
     }
+    
+    
+    
+    @objc func handleRefreshNotification() {
+        print("🔄 Refresh notification received in HomeViewController")
+        refreshPage()
+    }
+    
+    
     
     deinit {
         // Stop monitoring when the view controller is deallocated
