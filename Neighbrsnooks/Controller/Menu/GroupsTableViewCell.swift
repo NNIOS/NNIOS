@@ -51,10 +51,10 @@ class GroupsTableViewCell: UITableViewCell {
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-            lblName.textColor = .white
-            lblGroupName.textColor = .white
-            lblPrivate.textColor = .white
-            lblSec.textColor = .white
+            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblGroupName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblPrivate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
            // lblMember.textColor = .white
           //  lblMemberText.textColor = .white
             

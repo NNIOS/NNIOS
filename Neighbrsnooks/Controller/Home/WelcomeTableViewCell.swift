@@ -15,6 +15,7 @@ class WelcomeTableViewCell: UITableViewCell {
     @IBOutlet weak var lblWelcmCount: UILabel!
     @IBOutlet weak var lblBookaCount: UILabel!
     @IBOutlet weak var WelcomeView: UIView!
+    @IBOutlet weak var CongratulationView: UIView!
     
     var WelLikeCallback : ((UIButton) -> Void)?
     var bookayCallback : ((UIButton) -> Void)?
@@ -31,15 +32,16 @@ class WelcomeTableViewCell: UITableViewCell {
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-            lblName.textColor = .white
-            lblWelcmMsg.textColor = .white
-           // WelcomeView.backgroundColor = .black
+            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblWelcmMsg.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            CongratulationView.isHidden = true
            
             
         } else {
             // Light mode
             lblName.textColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
             lblWelcmMsg.textColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+            CongratulationView.isHidden = false
            // WelcomeView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
             
         }

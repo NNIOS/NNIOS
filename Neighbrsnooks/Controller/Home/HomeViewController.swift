@@ -391,6 +391,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             SettingsView.layer.borderWidth = 0.5
             PublicView.layer.borderWidth = 0.5
             myContactView.layer.borderWidth = 0.5
+            
            
             viewSideMenu.backgroundColor = .black
             MyProfileeView.backgroundColor = .black
@@ -407,19 +408,20 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             myshareView.backgroundColor = .black
             mySettingsView.backgroundColor = .black
             myContactView.backgroundColor = .black
-            lblProfile.textColor = .white
-            Lblneighbourhood.textColor = .white
-            LblBussiness.textColor = .white
-            LblEvent.textColor = .white
-            lblGroup.textColor = .white
-            LblPolls.textColor = .white
-            LblPost.textColor = .white
-            lblPublic.textColor = .white
-            LblShare.textColor = .white
-            LblContact.textColor = .white
-            lblVersionNeighbrsnook.textColor = .white
-            LblSetting.textColor = .white
+            lblProfile.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            Lblneighbourhood.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblBussiness.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblEvent.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblGroup.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblPolls.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblPost.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblPublic.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblShare.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblContact.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblVersionNeighbrsnook.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblSetting.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
             tableviewMember.backgroundColor = .black
+            
             
         } else {
             // Light mode mein storyboard ke original colors preserve karna
@@ -469,6 +471,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             LblSetting.textColor = UIColor.secondaryLabel
             HomeView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
             tableviewMember.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewMember.separatorStyle = .none
         }
       //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
@@ -1424,6 +1427,41 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 print("Configuring Announcement Cell")
                 cell.lblTitle.text = announcement.title
                 cell.lblMessage.text = announcement.msg
+                
+                if traitCollection.userInterfaceStyle == .dark {
+                   // separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                } else {
+                  //  separator.isHidden = true
+                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                }
+//                cell.contentView.subviews
+//                        .filter { $0.tag == 999 }
+//                        .forEach { $0.removeFromSuperview() }
+//
+//                    // Custom separator
+//                    let separator = UIView()
+//                    separator.tag = 999
+//                    separator.translatesAutoresizingMaskIntoConstraints = false
+//                    
+//                    // Use the custom dark green in dark mode, otherwise default gray
+//                    if traitCollection.userInterfaceStyle == .dark {
+//                        separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+//                        cell.backgroundColor = UIColor.systemBackground
+//                    } else {
+//                        separator.isHidden = true
+//                        cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+//                    }
+//                    
+//                    cell.contentView.addSubview(separator)
+//                    
+//                    // Full-width constraints
+//                    NSLayoutConstraint.activate([
+//                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+//                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+//                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+//                    ])
                 return cell
             }
         }
@@ -1435,6 +1473,35 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             let cell = tableView.dequeueReusableCell(withIdentifier: "MemberTableViewCell", for: indexPath) as! MemberTableViewCell
             cell.delegate = self
             cell.delegateCell = self // Delegate assign karo
+            
+//            cell.contentView.subviews
+//                    .filter { $0.tag == 999 }
+//                    .forEach { $0.removeFromSuperview() }
+//
+//                // Custom separator
+//                let separator = UIView()
+//                separator.tag = 999
+//                separator.translatesAutoresizingMaskIntoConstraints = false
+//                
+//                // Use the custom dark green in dark mode, otherwise default gray
+//                if traitCollection.userInterfaceStyle == .dark {
+//                    separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+//                } else {
+//                    separator.isHidden = true
+//                }
+//                
+//                cell.contentView.addSubview(separator)
+//                
+//                // Full-width constraints
+//                NSLayoutConstraint.activate([
+//                    separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+//                    separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+//                    separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//                    separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+//                ])
+
+            
+            
             if let postData = item as? HomeNewData {
                 print("Post Data: \(postData)")
                 //      guard var postData = dataSource?.listdata?.filter({ $0.type == "Post" })[indexPath.row] else { return cell }
@@ -1458,7 +1525,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 print(postData.createdby)
                 cell.delegateM = self
                 if traitCollection.userInterfaceStyle == .dark {
-                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                       cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background
                    } else {
                        cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
                    }
@@ -1661,11 +1728,39 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblWelcmCount.text = "\(wlcmData.totalLike ?? 0)"
                 cell.lblBookaCount.text = "\(wlcmData.totalBokay ?? 0)"
                 
-                if traitCollection.userInterfaceStyle == .dark {
-                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
-                   } else {
-                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
-                   }
+//                if traitCollection.userInterfaceStyle == .dark {
+//                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+//                   } else {
+//                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+//                   }
+                
+//                cell.contentView.subviews
+//                        .filter { $0.tag == 999 }
+//                        .forEach { $0.removeFromSuperview() }
+//
+//                    // Custom separator
+//                    let separator = UIView()
+//                    separator.tag = 999
+//                    separator.translatesAutoresizingMaskIntoConstraints = false
+                    
+                    // Use the custom dark green in dark mode, otherwise default gray
+                    if traitCollection.userInterfaceStyle == .dark {
+                      //  separator.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                        cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    } else {
+                      //  separator.isHidden = true
+                        cell.backgroundColor =  #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                    }
+                    
+//                    cell.contentView.addSubview(separator)
+//                    
+//                    // Full-width constraints
+//                    NSLayoutConstraint.activate([
+//                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+//                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+//                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+//                    ])
                 
                 cell.bookayCallback = { [self] value in
                     
@@ -1706,6 +1801,41 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblAction.text = sponsorData.action
                 cell.lblAction.text = sponsorData.companylink
                 
+                if traitCollection.userInterfaceStyle == .dark {
+                   // separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                } else {
+                  //  separator.isHidden = true
+                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                }
+                
+//                cell.contentView.subviews
+//                        .filter { $0.tag == 999 }
+//                        .forEach { $0.removeFromSuperview() }
+//
+//                    // Custom separator
+//                    let separator = UIView()
+//                    separator.tag = 999
+//                    separator.translatesAutoresizingMaskIntoConstraints = false
+//                    
+//                    // Use the custom dark green in dark mode, otherwise default gray
+//                    if traitCollection.userInterfaceStyle == .dark {
+//                        separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+//                    } else {
+//                        separator.isHidden = true
+//                    }
+//                    
+//                    cell.contentView.addSubview(separator)
+//                    
+//                    // Full-width constraints
+//                    NSLayoutConstraint.activate([
+//                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+//                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+//                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+//                    ])
+
+                
                 cell.SponsCallback = { [weak self] value in
                     if let urlString = sponsorData.companylink, let url = URL(string: urlString) {
                         UIApplication.shared.open(url, options: [:], completionHandler: nil)
@@ -1743,6 +1873,33 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblStartDate.text = eventData.eventStartDate
                 cell.lblEndDate.text = eventData.eventEndDate
                 
+//                cell.contentView.subviews
+//                        .filter { $0.tag == 999 }
+//                        .forEach { $0.removeFromSuperview() }
+//
+//                    // Custom separator
+//                    let separator = UIView()
+//                    separator.tag = 999
+//                    separator.translatesAutoresizingMaskIntoConstraints = false
+//                    
+//                    // Use the custom dark green in dark mode, otherwise default gray
+//                    if traitCollection.userInterfaceStyle == .dark {
+//                        separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+//                    } else {
+//                        separator.isHidden = true
+//                    }
+//                    
+//                    cell.contentView.addSubview(separator)
+//                    
+//                    // Full-width constraints
+//                    NSLayoutConstraint.activate([
+//                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+//                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+//                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+//                    ])
+
+                
                 
                 cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 16)
                 cell.lblCreateOn.font = UIFont(name: "Montserrat-Regular", size: 10)
@@ -1762,7 +1919,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.delegate = self  // 🟢 Assign Delegate
                 
                 if traitCollection.userInterfaceStyle == .dark {
-                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                       cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // mode background
                    } else {
                        cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
                    }
@@ -1878,12 +2035,41 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblstartdate.font = UIFont(name: "Montserrat-Regular", size: 14)
                 cell.lblEnddate.font = UIFont(name: "Montserrat-Regular", size: 14)
                 cell.lblVote.font = UIFont(name: "Montserrat-Regular", size: 14)
-                
-                if traitCollection.userInterfaceStyle == .dark {
-                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
-                   } else {
-                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
-                   }
+//                
+//                if traitCollection.userInterfaceStyle == .dark {
+//                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+//                   } else {
+//                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+//                   }
+              //  022C0A
+//                cell.contentView.subviews
+//                        .filter { $0.tag == 999 }
+//                        .forEach { $0.removeFromSuperview() }
+//
+//                    // Custom separator
+//                    let separator = UIView()
+//                    separator.tag = 999
+//                    separator.translatesAutoresizingMaskIntoConstraints = false
+                    
+                    // Use the custom dark green in dark mode, otherwise default gray
+                    if traitCollection.userInterfaceStyle == .dark {
+                       // separator.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                        cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    } else {
+                       // separator.isHidden = true
+                        cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                    }
+                    
+//                    cell.contentView.addSubview(separator)
+//                    
+//                    // Full-width constraints
+//                    NSLayoutConstraint.activate([
+//                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+//                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+//                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+//                    ])
+
                 
                 if pollData.isvoted == "0" {
                     cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
@@ -2015,6 +2201,34 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.userId = businessData.createdby
                 cell.delegate = self
                 
+//                cell.contentView.subviews
+//                        .filter { $0.tag == 999 }
+//                        .forEach { $0.removeFromSuperview() }
+//
+//                    // Custom separator
+//                    let separator = UIView()
+//                    separator.tag = 999
+//                    separator.translatesAutoresizingMaskIntoConstraints = false
+                    
+                    // Use the custom dark green in dark mode, otherwise default gray
+                    if traitCollection.userInterfaceStyle == .dark {
+                       // separator.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                        cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    } else {
+                      //  separator.isHidden = true
+                        cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                    }
+                    
+//                    cell.contentView.addSubview(separator)
+//                    
+//                    // Full-width constraints
+//                    NSLayoutConstraint.activate([
+//                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+//                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+//                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+//                    ])
+                
                 let urlBan = URL(string: (businessData.userpic ?? ""))
                 cell.profileImgView.kf.indicatorType = .activity
                 cell.profileImgView.kf.setImage(with:urlBan ,placeholder: UIImage(named: "defaultImage"))
@@ -2130,11 +2344,39 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.userId = groupsData.createdby
                 cell.delegate = self
                 
-                if traitCollection.userInterfaceStyle == .dark {
-                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
-                   } else {
-                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
-                   }
+//                if traitCollection.userInterfaceStyle == .dark {
+//                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+//                   } else {
+//                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+//                   }
+                
+//                cell.contentView.subviews
+//                        .filter { $0.tag == 999 }
+//                        .forEach { $0.removeFromSuperview() }
+//
+//                    // Custom separator
+//                    let separator = UIView()
+//                    separator.tag = 999
+//                    separator.translatesAutoresizingMaskIntoConstraints = false
+                    
+                    // Use the custom dark green in dark mode, otherwise default gray
+                    if traitCollection.userInterfaceStyle == .dark {
+                       // separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                        cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    } else {
+                      //  separator.isHidden = true
+                        cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                    }
+                    
+                //    cell.contentView.addSubview(separator)
+                    
+                    // Full-width constraints
+//                    NSLayoutConstraint.activate([
+//                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+//                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+//                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+//                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+//                    ])
                 
                 cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 16)
                 cell.lblGroupName.font = UIFont(name: "Montserrat-Regular", size: 13)
@@ -2535,6 +2777,7 @@ extension HomeViewController: EventHomeTableViewCellDelegate,ProfileTapDelegate 
         }
     }
 }
+
 
 
 

@@ -143,13 +143,13 @@ class PollsDetailViewController: UIViewController, ConfirmPollDelDelegate, Delet
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-            NameLbl.textColor = .white
-            SectLbl.textColor = .white
-            StartLbl.textColor = .white
-            EnddateLbl.textColor = .white
-            StateLbl.textColor = .white
-            DateLbl.textColor = .white
-            VoteLbl.textColor = .white
+            NameLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            SectLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            StartLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            EnddateLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            StateLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            DateLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            VoteLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
             PollsBgView.backgroundColor = .black
         } else {
             // Light mode mein storyboard ke original colors preserve karna

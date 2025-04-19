@@ -52,15 +52,15 @@ class PollsTableViewCell: UITableViewCell {
 
                     if traitCollection.userInterfaceStyle == .dark {
                         // Dark mode colors
-                        lblCreaterName.textColor = .white
-                        lblSec.textColor = .white
-                        lblPolls.textColor = .white
-                        lblStartDate.textColor = .white
-                        lblEndDate.textColor = .white
-                        lblFavorite.textColor = .white
-                        lblStart.textColor = .white
-                        lblEnd.textColor = .white
-                        lblTime.textColor = .white
+                        lblCreaterName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+                        lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+                        lblPolls.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+                        lblStartDate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+                        lblEndDate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+                        lblFavorite.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+                        lblStart.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+                        lblEnd.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+                        lblTime.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
                     } else {
                         // Light mode: use default colors
                         lblCreaterName.textColor = defaultTextColor

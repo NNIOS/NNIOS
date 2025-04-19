@@ -47,6 +47,7 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.lblMyItem.font = UIFont(name: "Montserrat-SemiBold", size: 18)
         self.LblPopCat.font = UIFont(name: "Montserrat-SemiBold", size: 18)

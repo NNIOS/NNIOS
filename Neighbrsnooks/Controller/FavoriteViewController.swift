@@ -207,7 +207,7 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 }
                 
                 if traitCollection.userInterfaceStyle == .dark {
-                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
                    } else {
                        cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
                    }
@@ -440,6 +440,12 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 cell.lblStart.font = UIFont(name: "Montserrat-Regular", size: 13)
                 cell.lblEnd.font = UIFont(name: "Montserrat-Regular", size: 13)
                 
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
+                
                 let url = URL(string: (pollData.userpic ?? ""))
                 cell.profileImgView.kf.indicatorType = .activity
                 cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "NewBusiness"))
@@ -501,6 +507,12 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 15)
                 cell.lblProduct.font = UIFont(name: "Montserrat-SemiBold", size: 15)
                 cell.lblHealth.font = UIFont(name: "Montserrat-Regular", size: 15)
+                
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
                 //  cell.lblRating.font = UIFont(name: "Montserrat-SemiBold", size: 14)
                 
                 let url = URL(string: (businessData.userpic ?? ""))
@@ -597,7 +609,11 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 cell.ProfileImgView.kf.setImage(with:urlBan ,placeholder: UIImage(named: "defaultImage"))
                 print(eventData.eventid)
                 
-                
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
                 
                 
                 // MARK: - Call for button push toh eventDitails
@@ -682,6 +698,11 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 cell.delegateFav = self
                 cell.userId = groupsData.createdby
                 
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
                 
                 cell.DotCallback = { [weak self] value in
                     guard let self = self else { return }
