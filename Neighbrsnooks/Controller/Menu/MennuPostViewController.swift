@@ -17,6 +17,7 @@ class MennuPostViewController: BaseViewController, MemberCellDelegate,UITextFiel
     @IBOutlet weak var lblHeading: UILabel!
     @IBOutlet weak var tfSearch: UITextField!
     @IBOutlet weak var searchView: UIView!
+    @IBOutlet weak var postView: UIView!
     // emojiLabel.text = "😊🚀🌟"
     private let bottomPanelView = BottomPanelView()
     var PostListData : PostListModel?
@@ -40,7 +41,7 @@ class MennuPostViewController: BaseViewController, MemberCellDelegate,UITextFiel
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        updateColors()
         self.searchView.isHidden = true
         tfSearch.delegate = self
         
@@ -67,13 +68,33 @@ class MennuPostViewController: BaseViewController, MemberCellDelegate,UITextFiel
         }
     }
     
-    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
     
     
     @IBAction func BackButtionAction(_ : UIButton){
         
         _ = navigationController?.popViewController(animated: true)
         
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            postView.backgroundColor = .black
+            tableviewPost.backgroundColor = .black
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+           
+
+            // Light mode mein PollsView ka background red karna
+            postView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewPost.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+           
+        }
     }
     
     @objc func refreshData() {
@@ -209,7 +230,11 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
             cell.updateFavouriteButton(isFavourite: false) // Default to non-favorite
         }
 
-        
+        if traitCollection.userInterfaceStyle == .dark {
+               cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background
+           } else {
+               cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+           }
         
         
         cell.favouriteButtonCallback = { [weak self] in

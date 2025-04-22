@@ -43,6 +43,7 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         NetworkMonitor.shared.startMonitoring()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         

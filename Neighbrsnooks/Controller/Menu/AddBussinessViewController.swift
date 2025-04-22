@@ -120,6 +120,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         setupTextView()
         btnOpenOnAllDay.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle
         btnSelectWeekyOf.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle

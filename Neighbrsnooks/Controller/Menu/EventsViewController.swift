@@ -49,7 +49,7 @@ class EventsViewController: BaseViewController , UICollectionViewDelegateFlowLay
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       // setdata()
+        updateColors()
         self.searchView.isHidden = true
         tfSearch.delegate = self
         NetworkMonitor.shared.startMonitoring()

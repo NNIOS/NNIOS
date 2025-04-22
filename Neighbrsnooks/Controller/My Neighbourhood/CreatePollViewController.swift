@@ -37,6 +37,7 @@ class CreatePollViewController: UIViewController, UITextViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.tvQuest.font = UIFont(name: "Montserrat-Regular", size: 17)
         

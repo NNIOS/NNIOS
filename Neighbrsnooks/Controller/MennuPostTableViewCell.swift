@@ -55,7 +55,10 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
     @IBOutlet weak var lblShareCount: UILabel!
     @IBOutlet weak var btnFavourite: UIButton!
     
-    
+   // @IBOutlet weak var UnlikeImageView : UIButton!
+   // @IBOutlet weak var btnCommentsImg : UIButton!
+   // @IBOutlet weak var btnShareImg : UIButton!
+    @IBOutlet weak var btnDotsImg : UIButton!
     
     var DotCallback: ((String?) -> Void)?
     var CommentCallback : ((UIButton) -> Void)?
@@ -70,10 +73,12 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
     var thisWidth:CGFloat = 0
     var PostListData : PostListModel?
     var favouriteButtonCallback: (() -> Void)?
+    private var defaultTextColor: UIColor?
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+        defaultTextColor = lblName.textColor
+        updateColors()
         collectionViewBanner.delegate = self
         collectionViewBanner.dataSource = self
         
@@ -96,6 +101,43 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
         // Initialization code
         addTapGestures()
         
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblMonth.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblGeneral.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblDescription.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            viewToHide.backgroundColor =  .black
+            likebtn.tintColor = .white // Arrow tint for dark mode
+            btnShare.tintColor = .white
+            btnComments.tintColor = .white
+            btnDotsImg.tintColor = .white
+            
+        } else {
+            // Light mode
+            lblName.textColor = defaultTextColor
+            lblSec.textColor = UIColor.secondaryLabel
+            lblMonth.textColor = UIColor.secondaryLabel
+            lblGeneral.textColor = UIColor.secondaryLabel
+            lblDescription.textColor = UIColor.secondaryLabel
+            likebtn.tintColor = .black // Arrow tint for light mode
+            btnShare.tintColor = .black
+            btnComments.tintColor = .black
+            btnDotsImg.tintColor = .black
+        }
+    }
+
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     private func addTapGestures() {

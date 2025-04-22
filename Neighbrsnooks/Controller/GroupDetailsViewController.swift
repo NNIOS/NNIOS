@@ -42,7 +42,7 @@ class GroupDetailsViewController: BaseViewC, UITableViewDataSource, UITableViewD
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        updateColors()
         self.GroupNameLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.DescriptionLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         tableviewDetails.dataSource = self

@@ -57,7 +57,7 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        updateColors()
         NetworkMonitor.shared.startMonitoring()
         self.profileImgView.layer.cornerRadius = profileImgView.frame.height/2
         self.profileImgView.clipsToBounds = true

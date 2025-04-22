@@ -59,6 +59,7 @@ class PublicProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.hide1.font = UIFont(name: "Montserrat-Regular", size: 13)
         self.hide2.font = UIFont(name: "Montserrat-Regular", size: 13)
@@ -116,7 +117,14 @@ class PublicProfileViewController: UIViewController {
             ContactView.layer.borderWidth = 1.0
             Add2View.layer.borderWidth = 1.0
             
-           
+            btnEmergencyHide.tintColor = .white
+            btnEmergencyShow.tintColor = .white
+            btnAdd1Hide.tintColor = .white
+            btnAdd1Show.tintColor = .white
+            btnAdd2Hide.tintColor = .white
+            btnAdd2Show.tintColor = .white
+            btnContactHide.tintColor = .white
+            btnContactShow.tintColor = .white
            
             
         } else {

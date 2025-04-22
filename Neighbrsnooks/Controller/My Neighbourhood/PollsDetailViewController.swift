@@ -38,7 +38,7 @@ class PollsDetailViewController: UIViewController, ConfirmPollDelDelegate, Delet
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        updateColors()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.SectLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
         self.NameLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)

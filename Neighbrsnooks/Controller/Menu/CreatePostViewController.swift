@@ -66,6 +66,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         btnPlusImg.layer.cornerRadius = btnPlusImg.frame.height/2
         btnPlusImg.clipsToBounds = true
         btnPlusImg.contentEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)

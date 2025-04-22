@@ -18,6 +18,7 @@ class FAQViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         callFAQWebService{
            

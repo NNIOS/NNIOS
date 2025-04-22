@@ -38,7 +38,7 @@ class MyItemCollectionViewCell: UICollectionViewCell {
             
             viewItems.layer.borderWidth = 1.0
             EventLbl.textColor = .white
-            rsLbl.textColor = .white
+           // rsLbl.textColor = .white
             secttLbl.textColor = .white
            
             

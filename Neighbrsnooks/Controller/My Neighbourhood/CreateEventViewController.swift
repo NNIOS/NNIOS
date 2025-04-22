@@ -87,7 +87,7 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        updateColors()
         openTimePicker()
         timePickerContainer.removeFromSuperview()
         

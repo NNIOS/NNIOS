@@ -126,6 +126,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         SVProgressHUD.show()
         collectionViewEvent.delegate = self
         collectionViewEvent.dataSource = self

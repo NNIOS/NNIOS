@@ -39,6 +39,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.searchView.isHidden = true
         tfSearch.delegate = self
         if let selectedIndex = selectedTabIndex {

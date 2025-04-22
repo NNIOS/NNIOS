@@ -104,6 +104,7 @@ class SettingNotificationViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.postLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.NotificationLbl.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.pollLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
@@ -166,6 +167,7 @@ class SettingNotificationViewController: UIViewController {
             BusinessView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             DMView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             NotificationFullView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+           // btnPost.layer.borderColor = #colorLiteral(red: 0.9333333333, green: 0.9333333333, blue: 0.9333333333, alpha: 1)
            
             PollView.layer.borderWidth = 1.0
             EventView.layer.borderWidth = 1.0
@@ -173,11 +175,24 @@ class SettingNotificationViewController: UIViewController {
             BusinessView.layer.borderWidth = 1.0
             DMView.layer.borderWidth = 1.0
             NotificationFullView.layer.borderWidth = 1.0
-            
+          //  btnPost.layer.borderWidth = 1.0
             NotificationLbl.textColor = .white
             lblActivity.textColor = .white
-           
-           
+            btnPost.tintColor = .white
+            btnPoll.tintColor = .white
+            btnEvent.tintColor = .white
+            btnGroups.tintColor = .white
+            btnBusiness.tintColor = .white
+            btnDM.tintColor = .white
+            btnMarketPhone.tintColor = .white
+            
+            btnPostMail.tintColor = .white
+            btnPollMail.tintColor = .white
+            btnEventMail.tintColor = .white
+            btnGroupsMail.tintColor = .white
+            btnBusinessMail.tintColor = .white
+            btnDMMail.tintColor = .white
+            btnMarketMail.tintColor = .white
             
         } else {
             // Light mode mein storyboard ke original colors preserve karna
@@ -187,7 +202,7 @@ class SettingNotificationViewController: UIViewController {
             NotificationLbl.textColor = UIColor.secondaryLabel
             lblActivity.textColor = UIColor.secondaryLabel
             NotificationFullView.layer.borderWidth = 0
-            
+            btnPost.tintColor = .black
         }
       //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }

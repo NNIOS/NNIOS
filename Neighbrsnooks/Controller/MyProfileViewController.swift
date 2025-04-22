@@ -152,6 +152,7 @@ class MyProfileViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         updateEventFill()
+        updateColors()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.EventprcntgLbl.text =  self.profileData?.eventper
         viewMarket.layer.cornerRadius = 15 // Adjust the radius as needed
