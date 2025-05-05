@@ -42,7 +42,14 @@ class NeigbrnookViewController:UITabBarController,UITabBarControllerDelegate, UI
         self.tabBar.barTintColor = UIColor.white
         self.tabBar.tintColor = #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1)
         
-        // MARK: - Irshad code tab bar show and hide 
+        tabBar.backgroundColor = UIColor { traitCollection in
+                   return traitCollection.userInterfaceStyle == .dark ? .black : .white
+               }
+
+               // Optional: Set tint colors for selected/unselected items
+               tabBar.tintColor = #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1)
+               tabBar.unselectedItemTintColor = .gray
+        // MARK: - Irshad code tab bar show and hide
         
 //        if let tabBar = self.tabBarController {
 //                tabBar.tabBar.isHidden = false // Ensure tab bar is visible
@@ -72,6 +79,14 @@ class NeigbrnookViewController:UITabBarController,UITabBarControllerDelegate, UI
                ])
         
     }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+            super.traitCollectionDidChange(previousTraitCollection)
+
+            tabBar.backgroundColor = UIColor { traitCollection in
+                return traitCollection.userInterfaceStyle == .dark ? .black : .white
+            }
+        }
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
             // Check if verification is completed
@@ -149,16 +164,7 @@ class NeigbrnookViewController:UITabBarController,UITabBarControllerDelegate, UI
           }
         }
     
-//    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
-//            if self.selectedIndex == 4 { // Check if the selected index is 4 (fifth tab)
-//
-//                NotificationCenter.default.post(name: Notification.Name("NotificationIdentifier"), object: nil)
-//
-////                if let homeVC = viewController as? HomeViewController {
-////                    homeVC.tabBarButtonTapped()
-////                }
-//            }
-//        }
+
     
     
     func callNotificationCountWebService(_ completionClosure: @escaping () -> ()) {
@@ -166,7 +172,7 @@ class NeigbrnookViewController:UITabBarController,UITabBarControllerDelegate, UI
         let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
           let dictParams: Dictionary<String, Any> = [
                                                     "userid":id ?? "",
-                                                    "appkey":"abc1239"
+                                                    //"appkey":"abc1239"
                                                    
                                                                         ]
           WebService.sharedInstance.callNotificationCountWebService(withParams: dictParams) { data in

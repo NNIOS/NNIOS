@@ -30,6 +30,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     @IBOutlet weak var SimilarProductLbl: UILabel!
     @IBOutlet weak var LblCat: UILabel!
     @IBOutlet weak var profileImgView : UIImageView!
+    @IBOutlet weak var LblCount: UILabel!
     
     @IBOutlet weak var AddWishList: UIButton!
     @IBOutlet weak var RemoveWishList : UIButton!
@@ -54,6 +55,8 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     var productImages: [ProductImage] = []
     private var defaultTextColor: UIColor?
  //   var MarketWDetailData : ProductResponse?
+    var isFromChatList: Bool = false
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -148,6 +151,13 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
         self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
         self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.catName
+        if let readCount = self.MarketWDetailData?.productdetail?.first?.readCount {
+            self.LblCount.text = "\(readCount)"
+        }
+
+
+
+
         
         let url = URL(string: self.MarketWDetailData?.productdetail?.first?.userpic ?? "")
         self.profileImgView.kf.indicatorType = .activity
@@ -293,6 +303,22 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
             SimilarCollectionView.isHidden = true
         }
     }
+    
+    @IBAction func btnShareApp(_ : UIButton){
+        // Step 1: Show share popup
+        let appName = "NeighboursNook"
+        let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
+        let appLink = "https://testflight.apple.com/join/1G74jNEC"
+        
+        let shareText = "\(appDescription) \nDownload now: \(appLink)"
+        
+        // Step 2: Show share popup
+        let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+        
+        // Step 3: Present the share popup
+        present(activityViewController, animated: true, completion: nil)
+        
+    }
 
     
         @IBAction func btnChat(_ : UIButton){
@@ -326,22 +352,20 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     
     @IBAction func btnNewChat(_ : UIButton) {
         
-            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-            var id = UserDefaults.standard.string(forKey: "userid")
+        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+            let id = UserDefaults.standard.string(forKey: "userid")
+
             if id == idCr {
-        
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatListViewController") as? MarketChatListViewController else {return}
-        
-                    vc.NewidD = idD
-        
+                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatListViewController") as? MarketChatListViewController else { return }
+                vc.NewidD = idD
+                vc.isFromChatList = true // ✅ Set the flag here
                 self.navigationController?.pushViewController(vc, animated: true)
             } else {
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatViewController") as? MarketChatViewController else {return}
+                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatViewController") as? MarketChatViewController else { return }
                 vc.Productid = String(self.MarketWDetailData?.productdetail?.first?.id ?? 0)
-               // vc.userName = String(self.MarketWDetailData?.productdetail?.first?.sellerName )
                 vc.userName = (self.MarketWDetailData?.productdetail?.first?.sellerName)!
                 vc.senderUserpic = (self.MarketWDetailData?.productdetail?.first?.userpic)!
-               
+                vc.isFromChatList = false // ✅ Set the flag here
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         

@@ -16,7 +16,7 @@ protocol ConfirmfollowDelegate: AnyObject {
 }
 
 @available(iOS 16.0, *)
-class followPopUpViewController: BaseViewC {
+class followPopUpViewController: BaseViewController {
     
     @IBOutlet weak var lblFollowUnFollow: UILabel!
     @IBOutlet weak var lblName: UILabel!

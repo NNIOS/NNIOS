@@ -28,6 +28,7 @@ class SettingNewViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.lblNotification.font = UIFont(name: "Montserrat-Regular", size: 16)
         self.lblPublic.font = UIFont(name: "Montserrat-Regular", size: 16)

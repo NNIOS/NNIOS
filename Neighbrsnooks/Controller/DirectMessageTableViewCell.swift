@@ -44,8 +44,8 @@ class DirectMessageTableViewCell: UITableViewCell {
             BgView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
            
             BgView.layer.borderWidth = 1.0
-            lblName.textColor = .white
-            lblSec.textColor = .white
+            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
         } else {
             // Light mode mein storyboard ke original colors preserve karna
             BgView.isUserInteractionEnabled = true

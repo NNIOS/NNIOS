@@ -57,7 +57,7 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        updateColors()
         NetworkMonitor.shared.startMonitoring()
         self.profileImgView.layer.cornerRadius = profileImgView.frame.height/2
         self.profileImgView.clipsToBounds = true
@@ -199,19 +199,19 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
             // Dark mode colors
            
             bussinessView.backgroundColor = .black
-            BussinessLbl.textColor = .white
-            CategoryLbl.textColor = .white
-            TacosLbl.textColor = .white
-            DocTypeLbl.textColor = .white
-            lblOpen.textColor = .white
-            lblWeek.textColor = .white
-            lblMob.textColor = .white
-            AddressLbl.textColor = .white
-            GmailLbl.textColor = .white
-            lblWeek.textColor = .white
-            lblWeek.textColor = .white
-            WebLbl.textColor = .white
-            lblClosedOn.textColor = .white
+            BussinessLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            CategoryLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            TacosLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            DocTypeLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblOpen.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblWeek.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblMob.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            AddressLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            GmailLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblWeek.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblWeek.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            WebLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblClosedOn.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
         } else {
             BussinessLbl.textColor = defaultTextColor
             CategoryLbl.textColor = UIColor.secondaryLabel

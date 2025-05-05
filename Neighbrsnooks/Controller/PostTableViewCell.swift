@@ -130,12 +130,12 @@ class PostTableViewCell: UITableViewCell {
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-            lblName.textColor = .white
-            lblSec.textColor = .white
-            lblMonth.textColor = .white
-            lblGeneral.textColor = .white
-            lblDescription.textColor = .white
-            viewToHide.backgroundColor = .black
+            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblMonth.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblGeneral.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblDescription.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            viewToHide.backgroundColor =  .black
             UnlikeImageView.tintColor = .white // Arrow tint for dark mode
             btnCommentsImg.tintColor = .white
             btnShareImg.tintColor = .white
@@ -153,7 +153,7 @@ class PostTableViewCell: UITableViewCell {
             btnCommentsImg.tintColor = .black
             btnShareImg.tintColor = .black
             btnDotsImg.tintColor = .black
-            viewToHide.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            viewToHide.backgroundColor = .white
         }
     }
 

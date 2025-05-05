@@ -39,6 +39,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.searchView.isHidden = true
         tfSearch.delegate = self
         if let selectedIndex = selectedTabIndex {
@@ -269,7 +270,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
 //            }else{
 //                self.tfCategory.text = ""
 //            }
-//            
+//
 //            UserDefaults.standard.set(self.serviceName[index], forKey: "id")
 //            if index != 0{
 //                UserDefaults.standard.set(self.BussinessCategoryData?.nbdata?[index - 1].id, forKey: "idCategory")

@@ -194,7 +194,8 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 cell.lblMonth.text = postData.createdOn
                 cell.lblLikeCount.text = postData.totallike
                 cell.lblCommentCount.text = postData.totcomment
-                 
+                cell.configureDescription(with: postData.postMessage ?? "N/A")
+                cell.addTapGestureToLabel()
                 let url = URL(string: (postData.userpic ?? ""))
                 cell.profileImgView.kf.indicatorType = .activity
                 cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "NewBusiness"))
@@ -206,7 +207,12 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                     // Share action logic here
                 }
                 
-                
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
+
                 // Update button icon based on favouritstatus
                 cell.updateFavouriteButton(isFavourite: postData.favouritstatus == 1)
                 
@@ -292,7 +298,7 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                     // Pass required data to PostDotViewController
                     vc.business_id = postListData[indexPath.row].postid
                     vc.poststs = postListData[indexPath.row].favouritstatus
-                    vc.createdBy = createdByUser 
+                    vc.createdBy = createdByUser
                     vc.height = 250
                     vc.topCornerRadius = 10.0
                     vc.presentDuration = 0.5
@@ -435,6 +441,12 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 cell.lblStart.font = UIFont(name: "Montserrat-Regular", size: 13)
                 cell.lblEnd.font = UIFont(name: "Montserrat-Regular", size: 13)
                 
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
+                
                 let url = URL(string: (pollData.userpic ?? ""))
                 cell.profileImgView.kf.indicatorType = .activity
                 cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "NewBusiness"))
@@ -496,6 +508,12 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 15)
                 cell.lblProduct.font = UIFont(name: "Montserrat-SemiBold", size: 15)
                 cell.lblHealth.font = UIFont(name: "Montserrat-Regular", size: 15)
+                
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
                 //  cell.lblRating.font = UIFont(name: "Montserrat-SemiBold", size: 14)
                 
                 let url = URL(string: (businessData.userpic ?? ""))
@@ -592,7 +610,11 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 cell.ProfileImgView.kf.setImage(with:urlBan ,placeholder: UIImage(named: "defaultImage"))
                 print(eventData.eventid)
                 
-                
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
                 
                 
                 // MARK: - Call for button push toh eventDitails
@@ -677,6 +699,11 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 cell.delegateFav = self
                 cell.userId = groupsData.createdby
                 
+                if traitCollection.userInterfaceStyle == .dark {
+                       cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background  // Dark mode background
+                   } else {
+                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                   }
                 
                 cell.DotCallback = { [weak self] value in
                     guard let self = self else { return }

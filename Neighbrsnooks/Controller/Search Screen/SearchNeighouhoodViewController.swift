@@ -40,6 +40,7 @@ class SearchNeighouhoodViewController: UIViewController,  UITableViewDelegate, U
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationItem.hidesBackButton = true
         NetworkMonitor.shared.startMonitoring()
         print("isFromProfile: \(self.isFromProfile ?? false)")
         activityIndicator = UIActivityIndicatorView(style: .large)
@@ -49,18 +50,8 @@ class SearchNeighouhoodViewController: UIViewController,  UITableViewDelegate, U
         searchBar.delegate = self
         tableView.delegate = self
         tableView.dataSource = self
-        
-        // Set delegates
-        locationManager.delegate = self
-        locationManager.requestWhenInUseAuthorization()
-        
-        // Request current location
-        locationManager.requestLocation()
-        self.navigationItem.hidesBackButton = true
-        
+ 
     }
-    
-    
     
     deinit {
            // Stop monitoring when the view controller is deallocated
@@ -130,30 +121,41 @@ class SearchNeighouhoodViewController: UIViewController,  UITableViewDelegate, U
     }
 
   
+    @IBAction func actionBack(_ sender: Any) {
+        self.dismiss(animated: true, completion: nil)
+    }
     
     
     // Get current location and update the label
     @IBAction func getCurrentLocationTapped(_ sender: Any) {
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
         activityIndicator.startAnimating() // Start loader
-        print("Tab Current button: \(locationManager)")
-        isNavigated = false // Reset navigation flag
-        locationManager.requestLocation() // Fetch current location
+        print("tab Current button\(locationManager)")
+        locationManager.requestLocation()
+        locationManager.startUpdatingLocation()
     }
 
     // CLLocationManagerDelegate methods
+    // CLLocationManagerDelegate methods
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        activityIndicator.stopAnimating() // Stop loader
+            guard let currentLocation = locations.first else {
+                activityIndicator.stopAnimating()
+                print("Error: Could not retrieve current location.")
+                return
+            }
 
-        if let location = locations.first {
-            lat = location.coordinate.latitude
-            long = location.coordinate.longitude
+            // Stop updating location (for a single fetch)
+            locationManager.stopUpdatingLocation()
 
             let geocoder = CLGeocoder()
-            geocoder.reverseGeocodeLocation(location) { [self] (placemarks, error) in
+            geocoder.reverseGeocodeLocation(currentLocation) { [weak self] (placemarks, error) in
+                guard let self = self else { return }
+                self.activityIndicator.stopAnimating()
+
                 if let error = error {
-                    print("Geocoding error: \(error.localizedDescription)")
-                    self.lblCurrentLocationDataShow.text = "Failed to fetch address"
-                    self.retryLocationFetch(withDelay: 5)
+                    print("Error in reverse geocoding: \(error.localizedDescription)")
                     return
                 }
 
@@ -162,9 +164,11 @@ class SearchNeighouhoodViewController: UIViewController,  UITableViewDelegate, U
                     self.state = placemark.administrativeArea
                     self.zipcode = placemark.postalCode
 
+                    let locality = placemark.subLocality ?? "N/A"
+
                     let address = [
                         placemark.name,
-                        placemark.subLocality,
+                        locality,
                         self.city,
                         self.state,
                         self.zipcode,
@@ -173,24 +177,22 @@ class SearchNeighouhoodViewController: UIViewController,  UITableViewDelegate, U
 
                     self.lblCurrentLocationDataShow.text = address
                     self.selectedLocation = address
-                    self.selectedLatitude = self.lat
-                    self.selectedLongitude = self.long
-                    self.isSearchLocation = false
+                    self.isSearchLocation = true
 
-                    // Navigation sirf ek baar karein
-                    if !isNavigated {
-                        isNavigated = true
+                    // Store latitude and longitude
+                    self.selectedLatitude = currentLocation.coordinate.latitude
+                    self.selectedLongitude = currentLocation.coordinate.longitude
+                    print("Abdul Latitude: \(self.selectedLatitude!), Abdul Longitude: \(self.selectedLongitude!)")
+
+                    if !self.isNavigated {
+                        self.isNavigated = true
                         DispatchQueue.main.async {
                             self.navigateToRegisterSecondVC()
                         }
                     }
                 }
             }
-        } else {
-            print("No location found")
-            lblCurrentLocationDataShow.text = "Location not available"
         }
-    }
 
         
     

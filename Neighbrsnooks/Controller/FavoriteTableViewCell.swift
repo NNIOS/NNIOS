@@ -59,6 +59,7 @@ class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,
     @IBOutlet weak var btnShare: UIButton!
     @IBOutlet weak var lblShareCount: UILabel!
     @IBOutlet weak var btnFavourite: UIButton!
+    @IBOutlet weak var btnDotsImg : UIButton!
     
     weak var delegateCell: FavoriteTableViewCellDelegate?
     var isLiked = false
@@ -67,10 +68,12 @@ class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,
     var commentCount = 0
     var shareCount = 0
     var isFavourite = false
-    
+    var isExpanded = false
+    var fullDescriptionText: String = ""
     var emojiSelectionHandler: ((String) -> Void)?
     var isLikedByUser = false // Track if user has already liked
     var favouriteButtonCallback: (() -> Void)?
+    private var defaultTextColor: UIColor?
     
    // @IBOutlet weak var viewPopup: UIView!
     
@@ -132,7 +135,8 @@ class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+        defaultTextColor = lblName.textColor
+        updateColors()
         collectionViewBanner.delegate = self
         collectionViewBanner.dataSource = self
         collectionViewBanner.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap)))
@@ -167,6 +171,170 @@ class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,
         
         
         
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblMonth.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblGeneral.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblDescription.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            viewToHide.backgroundColor = .black
+            btnComments.tintColor = .white // Arrow tint for dark mode
+            btnShare.tintColor = .white
+            
+            likebtn.tintColor = .white
+            btnDotsImg.tintColor = .white
+            
+        } else {
+            // Light mode
+            lblName.textColor = defaultTextColor
+            lblSec.textColor = UIColor.secondaryLabel
+            lblMonth.textColor = UIColor.secondaryLabel
+            lblGeneral.textColor = UIColor.secondaryLabel
+            lblDescription.textColor = UIColor.secondaryLabel
+            likebtn.tintColor = .black // Arrow tint for light mode
+            btnComments.tintColor = .black
+            btnShare.tintColor = .black
+            btnDotsImg.tintColor = .black
+            viewToHide.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+        }
+    }
+
+    
+    // MARK: - expand cell
+    func addTapGestureToLabel() {
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
+            lblDescription.isUserInteractionEnabled = true
+            lblDescription.addGestureRecognizer(tapGesture)
+        }
+        
+        // Action when label is tapped (toggle between expanded/collapsed state)
+        @objc func labelTapped() {
+            isExpanded.toggle()
+          //  updateDescriptionText() // Update the description based on new state
+            DispatchQueue.main.async {
+                self.updateDescriptionText()
+            }
+        }
+        
+        // Function to configure description text
+        func configureDescription(with text: String) {
+            fullDescriptionText = text
+    //          updateDescriptionText()
+            DispatchQueue.main.async {
+                self.updateDescriptionText()
+            }
+        }
+        
+        private func updateDescriptionText() {
+            guard let font = lblDescription.font else { return }
+
+            let maxLines = 2
+            let maxWidth = lblDescription.frame.width > 0 ? lblDescription.frame.width : UIScreen.main.bounds.width - 40
+            let lineHeight = "A".size(withAttributes: [.font: font]).height
+            let maxHeight = lineHeight * CGFloat(maxLines)
+
+            let fullTextAttr = NSAttributedString(string: fullDescriptionText, attributes: [
+                .font: font
+            ])
+
+            let fullBoundingRect = fullTextAttr.boundingRect(
+                with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                context: nil
+            )
+
+            let lineCount = Int(ceil(fullBoundingRect.height / lineHeight))
+
+            if isExpanded {
+                // Show full description with "Less"
+                let fullText = NSMutableAttributedString(string: "\(fullDescriptionText) ", attributes: [
+                    .font: font,
+                    .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
+                ])
+                let lessText = NSAttributedString(string: "Less", attributes: [
+                    .font: font,
+                    .foregroundColor: #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                ])
+                fullText.append(lessText)
+
+                lblDescription.numberOfLines = 0
+                lblDescription.attributedText = fullText
+            } else {
+                if lineCount > maxLines {
+                    // Show trimmed text + "... More"
+                    let trailingText = "... More"
+                    let trailingAttr = NSAttributedString(string: trailingText, attributes: [
+                        .font: font,
+                        .foregroundColor: #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                    ])
+
+                    var fittingText = fullDescriptionText
+                    var finalText = NSMutableAttributedString()
+
+                    for i in stride(from: fittingText.count, through: 0, by: -1) {
+                        let sub = String(fittingText.prefix(i)).trimmingCharacters(in: .whitespacesAndNewlines)
+                        let testAttr = NSMutableAttributedString(string: sub, attributes: [
+                            .font: font,
+                            .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
+                        ])
+                        testAttr.append(trailingAttr)
+
+                        let boundingRect = testAttr.boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+                                                                 options: [.usesLineFragmentOrigin, .usesFontLeading],
+                                                                 context: nil)
+
+                        if boundingRect.height <= maxHeight {
+                            finalText = testAttr
+                            break
+                        }
+                    }
+
+                    lblDescription.numberOfLines = maxLines
+                    lblDescription.attributedText = finalText
+                } else {
+                    // Show plain full text, no "More"
+                    lblDescription.numberOfLines = 0
+                    lblDescription.text = fullDescriptionText
+                }
+            }
+
+            // Disable tap if only 1 line
+            if lineCount <= 1 {
+                lblDescription.gestureRecognizers?.forEach { recognizer in
+                    lblDescription.removeGestureRecognizer(recognizer)
+                }
+                lblDescription.isUserInteractionEnabled = false
+            } else {
+                // Re-add tap gesture if missing
+                if lblDescription.gestureRecognizers?.isEmpty ?? true {
+                    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
+                    lblDescription.addGestureRecognizer(tapGesture)
+                    lblDescription.isUserInteractionEnabled = true
+                }
+            }
+
+            lblDescription.setNeedsLayout()
+            lblDescription.layoutIfNeeded()
+
+            if let tableView = self.superview as? UITableView {
+                tableView.beginUpdates()
+                tableView.endUpdates()
+            }
+        }
+    
+    
+    
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
     }
     
     @objc private func profileTapped() {
@@ -512,4 +680,3 @@ class FavoriteTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,
     
     
 }
-

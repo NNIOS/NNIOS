@@ -71,7 +71,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     @IBOutlet weak var mySettingsView: UIView!
     @IBOutlet weak var myContactView: UIView!
     @IBOutlet weak var shareNewView: UIView!
-   
+    @IBOutlet weak var HomeView: UIView!
+    
     
     var filteredData: HomeAllModel? = nil
     var isFromProfile: Bool?
@@ -113,18 +114,26 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+//        self.additionalSafeAreaInsets.top = -30
+        self.additionalSafeAreaInsets.top = -view.safeAreaInsets.top
+
+        NotificationCenter.default.addObserver(self, selector: #selector(showVerificationPopup), name: Notification.Name("ShowVerificationPopup"), object: nil)
+        
+        
+        updateColors()
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
            let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
             lblVersionNeighbrsnook.text = "V\(version) @Neighbrsnook"
-            
         }
         
         
         prepareSortedData(homeModel: HomeNewData)
         NetworkMonitor.shared.startMonitoring()
+        
         if let verifiedStatus = HomeNewData?.verifiedStatus,
            let popupVerifiedStatus = HomeNewData?.popupVerifiedStatus,
            verifiedStatus == "1" && popupVerifiedStatus == 0 {
+            
             // Create an attributed title
             let titleAttributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont(name: "Montserrat-Regular", size: 22) ?? UIFont.systemFont(ofSize: 18),
@@ -139,6 +148,19 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             ]
             let attributedMessage = NSAttributedString(string: "You are now a verified member.\n Happy Neighbrsnooking!!!", attributes: messageAttributes)
             
+            // Create UIImageView for the "Welcome" image
+            let welcomeImageView = UIImageView(image: UIImage(named: "Welcome"))
+            welcomeImageView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+            welcomeImageView.contentMode = .scaleAspectFit
+            
+            // Create a custom view to contain the image and the title
+            let customView = UIView()
+            customView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+            
+            // Center the image view inside the custom view
+            welcomeImageView.center = CGPoint(x: customView.frame.size.width / 2, y: 50)
+            customView.addSubview(welcomeImageView)
+            
             // Create the alert controller
             let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
             
@@ -146,15 +168,23 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             alertController.setValue(attributedTitle, forKey: "attributedTitle")
             alertController.setValue(attributedMessage, forKey: "attributedMessage")
             
+            // Add custom view to the alert
+            alertController.view.addSubview(customView)
+            
+            // Adjust the size of the alert view to fit the image and title
+            let alertView = alertController.view.subviews.first
+            alertView?.frame = CGRect(x: 0, y: 0, width: 270, height: 270)
+            
+            // Add OK button action
             let okAction = UIAlertAction(title: "OK", style: .default) { _ in
                 print("OK button tapped")
                 self.callpopupVerificationWebService {}
             }
-            
             alertController.addAction(okAction)
             
             // Present the alert
             self.present(alertController, animated: true, completion: nil)
+            
         } else {
             print("Conditions not met, popup not shown")
         }
@@ -166,13 +196,15 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         tfSearch.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         
         
-        self.tabBarController?.tabBar.tintColor = UIColor.red
+        
+        
         SVProgressHUD.show()
-        //  self.tabBarController?.tabBar.tintColor = UIColor.green
+        
         self.SectorLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+        self.NameLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.MemberLbl.font = UIFont(name: "Montserrat-Regular", size: 14)
         self.NMemberLbl.font = UIFont(name: "Montserrat-Regular", size: 14)
-        self.SectorMenuLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+        self.SectorMenuLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         
         self.lblProfile.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.Lblneighbourhood.font = UIFont(name: "Montserrat-Regular", size: 17)
@@ -202,7 +234,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         profileImgView.layer.cornerRadius = profileImgView.frame.size.width / 2
         profileImgView.clipsToBounds = true
         closeSideMenu()
-        //        self.tabBarController?.delegate = self
+       
         
         //        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         //        viewToHide.addGestureRecognizer(tapGesture)
@@ -230,16 +262,40 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         // Add the refresh control to your UITableView or UICollectionView
         tableviewMember.refreshControl = refreshControl
         
-        // Listen for refresh notification
-            NotificationCenter.default.addObserver(self,
-                                                   selector: #selector(handleRefreshNotification),
-                                                   name: NSNotification.Name("RefreshHomePageNotification"),
-                                                   object: nil)
         
+        // Listen for refresh notification
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleRefreshNotification),
+                                               name: NSNotification.Name("RefreshHomePageNotification"),
+                                               object: nil)
         
         
     }
     
+    @objc func showVerificationPopup() {
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont(name: "Montserrat-Regular", size: 22) ?? UIFont.systemFont(ofSize: 18),
+            .foregroundColor: UIColor.black
+        ]
+        let attributedTitle = NSAttributedString(string: "Welcome!", attributes: titleAttributes)
+        
+        let messageAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont(name: "Montserrat-Regular", size: 14) ?? UIFont.systemFont(ofSize: 16),
+            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+        ]
+        let attributedMessage = NSAttributedString(string: "You are now a verified member.\nHappy Neighbrsnooking!!!", attributes: messageAttributes)
+        
+        let alert = UIAlertController(title: "", message: "", preferredStyle: .alert)
+        alert.setValue(attributedTitle, forKey: "attributedTitle")
+        alert.setValue(attributedMessage, forKey: "attributedMessage")
+        
+        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+            print("OK tapped")
+            self.callpopupVerificationWebService {} // ✅ Optional: call backend after OK
+        }
+        alert.addAction(okAction)
+        self.present(alert, animated: true, completion: nil)
+    }
     
     
     @objc func handleRefreshNotification() {
@@ -256,15 +312,10 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         updateColors()
-        //        tabBarController?.delegate = self
+        
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        if tabBarController?.delegate === self {
-            tabBarController?.delegate = nil
-        }
-    }
+  
     
     // Jab bhi text change hoga yeh function call hoga
     @objc func textFieldDidChange(_ textField: UITextField) {
@@ -286,9 +337,10 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         viewSideMenu.isHidden = true
         viewSideMenu.isHidden = true
         self.searchView.isHidden = true
+ 
         if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-                appDelegate.shouldSupportAllOrientations = false
-            }
+            appDelegate.shouldSupportAllOrientations = false
+        }
         
         
         if let verifiedStatus = HomeNewData?.verifiedStatus,
@@ -328,18 +380,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             print("Conditions not met, popup not shown")
         }
         
-        
-        //        if let selectedIndex = selectedTabIndex {
-        //            bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
-        //        }
-        
-        //        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        //                viewToHide.addGestureRecognizer(tapGesture)
-        
-        //   self.lblHeading.font = UIFont(name: "Montserrat-SemiBold", size: 20)
         SVProgressHUD.show()
-        
-        
         
         callHomeAllWebService{
             SVProgressHUD.dismiss()
@@ -390,7 +431,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             shareView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             SettingsView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             myContactView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-//            Add2.layer.borderColor = UIColor.lightGray.cgColor
+            //            Add2.layer.borderColor = UIColor.lightGray.cgColor
             
             ProfileeView.layer.borderWidth = 0.5 // Enable border in dark mode
             NeighbourhoodView.layer.borderWidth =  0.5
@@ -403,7 +444,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             SettingsView.layer.borderWidth = 0.5
             PublicView.layer.borderWidth = 0.5
             myContactView.layer.borderWidth = 0.5
-           
+            
+            
             viewSideMenu.backgroundColor = .black
             MyProfileeView.backgroundColor = .black
             MyNeighbourhoodView.backgroundColor = .black
@@ -411,6 +453,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             MyEventView.backgroundColor = .black
             MyGroupView.backgroundColor = .black
             shareNewView.backgroundColor = .black
+            HomeView.backgroundColor = .black
             
             MyPollsPollView.backgroundColor = .black
             MyPostView.backgroundColor = .black
@@ -418,22 +461,24 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             myshareView.backgroundColor = .black
             mySettingsView.backgroundColor = .black
             myContactView.backgroundColor = .black
-            lblProfile.textColor = .white
-            Lblneighbourhood.textColor = .white
-            LblBussiness.textColor = .white
-            LblEvent.textColor = .white
-            lblGroup.textColor = .white
-            LblPolls.textColor = .white
-            LblPost.textColor = .white
-            lblPublic.textColor = .white
-            LblShare.textColor = .white
-            LblContact.textColor = .white
-            lblVersionNeighbrsnook.textColor = .white
-            LblSetting.textColor = .white
+            lblProfile.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            Lblneighbourhood.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblBussiness.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblEvent.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblGroup.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblPolls.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblPost.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblPublic.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblShare.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblContact.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblVersionNeighbrsnook.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblSetting.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tableviewMember.backgroundColor = .black
+            
             
         } else {
             // Light mode mein storyboard ke original colors preserve karna
-          //  questionView.textColor = UIColor.secondaryLabel
+            //  questionView.textColor = UIColor.secondaryLabel
             
             
             ProfileeView.layer.borderWidth = 0 // Remove border in light mode
@@ -445,12 +490,12 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             PublicView.layer.borderWidth = 0
             myContactView.layer.borderWidth = 0
             viewSideMenu.backgroundColor = .white
-           
+            
             
             PostView.layer.borderWidth = 0 // Remove border in light mode
             shareView.layer.borderWidth = 0
             SettingsView.layer.borderWidth = 0
-          
+            
             MyProfileeView.backgroundColor = .white
             MyNeighbourhoodView.backgroundColor = .white
             MyBusinessView.backgroundColor = .white
@@ -477,8 +522,11 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             LblContact.textColor = UIColor.secondaryLabel
             lblVersionNeighbrsnook.textColor = UIColor.secondaryLabel
             LblSetting.textColor = UIColor.secondaryLabel
+            HomeView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewMember.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewMember.separatorStyle = .none
         }
-      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+        //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -533,6 +581,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     
     @IBAction func btnSliderMenu(_ sender: UIButton) {
         viewSideMenu.isHidden = false
+        // self.tabBarController?.tabBar.isHidden = true
         
         // Create an overlay view to darken the background
         let extraView = UIView(frame: CGRect(x: viewSideMenu.frame.maxX,
@@ -541,7 +590,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
                                              height: self.view.frame.height))
         
         // Apply a dark semi-transparent background color
-        extraView.backgroundColor = UIColor.black.withAlphaComponent(0.3) // Adjust the alpha for darkness intensity
+        extraView.backgroundColor = UIColor.black.withAlphaComponent(0.8) // Adjust the alpha for darkness intensity
         extraView.tag = 100 // Assign a unique tag to identify this view later
         
         // Add a tap gesture recognizer to the extra view to close the menu
@@ -634,7 +683,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         }
         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {return}
         vc.sourceViewController = "HomeViewController"
-       // vc.headingTitle = vc.Oid!.isEmpty ? "My Profile" : "Profile"
+        // vc.headingTitle = vc.Oid!.isEmpty ? "My Profile" : "Profile"
         vc.headingTitle = "My Profile" // हमेशा "My Profile" सेट करें
         
         self.navigationController?.pushViewController(vc, animated: true)
@@ -756,6 +805,17 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         
     }
     
+    @IBAction func btnContactUs(_ : UIButton){
+        // Remove the extra view
+        if let extraView = self.view.viewWithTag(100) {
+            extraView.removeFromSuperview()
+        }
+        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "ContactUsViewController") as? ContactUsViewController else {return}
+        
+        self.navigationController?.pushViewController(vc, animated: true)
+        
+    }
+    
     @IBAction func btnTerms$Condition(_ sender: UIButton) {
         
         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "WebViewControllerViewController") as? WebViewControllerViewController else {return}
@@ -802,8 +862,6 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     }
     
     
-    
-    
     @IBAction func btnSearch(_ : UIButton) {
         
         self.searchView.isHidden = false
@@ -812,7 +870,6 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         self.sideMenu.isHidden = true
         
     }
-    
     
     
     
@@ -849,6 +906,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
         if let extraView = self.view.viewWithTag(100) {
             extraView.removeFromSuperview()
         }
+        // self.tabBarController?.tabBar.isHidden = false
     }
     
     
@@ -994,7 +1052,6 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
             NSLayoutConstraint.activate([
                 activityIndicator.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
                 activityIndicator.centerYAnchor.constraint(equalTo: backgroundView.centerYAnchor),
-                
                 loadingLabel.centerXAnchor.constraint(equalTo: backgroundView.centerXAnchor),
                 loadingLabel.topAnchor.constraint(equalTo: activityIndicator.bottomAnchor, constant: 20)
             ])
@@ -1026,35 +1083,36 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     
     
     
-    
-    
-    // Your function to show the popup
     func showAwaitPopup(message: String) {
-        let fullMessage = "There has been a mismatch found in your address against ID/ \(message) Please provide suitable documents for processing."
-        let attributedMessage = NSMutableAttributedString(string: fullMessage)
+        let fullMessage = "\(message)"
         
+        // MARK: - Customize Title
+        let title = "Missmatched Documents"
+        let attributedTitle = NSMutableAttributedString(string: title)
+        attributedTitle.addAttribute(.font, value: UIFont(name: "Montserrat-Regular", size: 18) ?? UIFont.systemFont(ofSize: 18), range: NSRange(location: 0, length: title.count))
+        attributedTitle.addAttribute(.foregroundColor, value: UIColor(hex: "#353535"), range: NSRange(location: 0, length: title.count))
+        
+        // MARK: - Customize Message
+        let attributedMessage = NSMutableAttributedString(string: fullMessage)
         if let range = fullMessage.range(of: message) {
             let nsRange = NSRange(range, in: fullMessage)
-            attributedMessage.addAttribute(.font, value: UIFont.boldSystemFont(ofSize: 16), range: nsRange)
+            attributedMessage.addAttribute(.font, value: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16), range: nsRange)
+            attributedMessage.addAttribute(.foregroundColor, value: UIColor(hex: "#353535"), range: nsRange)
         }
         
-        let alert = UIAlertController(title: "Missmatched Documents", message: nil, preferredStyle: .alert)
+        // MARK: - Alert Setup
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+        alert.setValue(attributedTitle, forKey: "attributedTitle")
         alert.setValue(attributedMessage, forKey: "attributedMessage")
         
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-            // Call user profile API
+        // MARK: - OK Button
+        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
             self.callUserProfileWebService { [weak self] in
                 guard let self = self else { return }
-                
-                // Call upload documents API
                 self.callUploaddocumentWebService {
-                    // Save uploaded documents data
                     self.savedUploadedDocuments = self.uploadDoc
-                    
-                    // Navigate to the next screen
                     let storyboard = UIStoryboard(name: "Main", bundle: nil)
                     if let registerVC = storyboard.instantiateViewController(withIdentifier: "ReUploadDocumentsVC") as? ReUploadDocumentsVC {
-                        // Pass data to the next controller
                         print("Passing Profile Data: \(self.savedProfileData ?? nil)")
                         registerVC.uploadedDocuments = self.savedUploadedDocuments
                         registerVC.profileData = self.savedProfileData
@@ -1062,10 +1120,13 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
                     }
                 }
             }
-        }))
-        
+        }
+        okAction.setValue(UIColor(hex: "#008000"), forKey: "titleTextColor")
+        alert.addAction(okAction)
         self.present(alert, animated: true, completion: nil)
     }
+    
+    
     
     
     
@@ -1133,49 +1194,9 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
     
     
     
-    // -------------------------    get Device info Irshad malik --------------------/
-    func getDeviceInfo() -> (deviceModel: String, deviceIMEI: String, devicePlatform: String, deviceID: String) {
-        let device = UIDevice.current
-        
-        // Operating system name (e.g., "iOS")
-        let systemName = device.systemName
-        
-        // Unique device identifier (UUID)
-        let uuid = device.identifierForVendor?.uuidString ?? "N/A"
-        
-        // Get specific model name
-        let modelName = getDeviceModelName()
-        
-        return (deviceModel: modelName, deviceIMEI: uuid, devicePlatform: systemName, deviceID: uuid)
-    }
     
-    // Helper function to get the specific model name using hardware identifier
-    func getDeviceModelName() -> String {
-        var systemInfo = utsname()
-        uname(&systemInfo)
-        let modelCode = withUnsafePointer(to: &systemInfo.machine) {
-            $0.withMemoryRebound(to: CChar.self, capacity: 1) {
-                String(validatingUTF8: $0)
-            }
-        }
-        
-        // Mapping of model codes to specific iPhone models (only some examples shown here)
-        let modelMap: [String: String] = [
-            "iPhone14,2": "iPhone 13 Pro",
-            "iPhone14,3": "iPhone 13 Pro Max",
-            "iPhone13,4": "iPhone 12 Pro Max",
-            "iPhone13,3": "iPhone 12 Pro",
-            // Add more models here as needed
-        ]
-        
-        if let modelName = modelMap[modelCode ?? ""] {
-            return modelName
-        } else {
-            return modelCode ?? "Unknown iPhone"
-        }
-    }
+    // MARK: - API call to post device information
     
-    // API call to post device information
     func callDeviceInfoWebService() {
         let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
         
@@ -1259,7 +1280,6 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
                     }
                     
                     // Debug print
-                    
                     if let newListData = data.listdata {
                         print("📢 listdata Count: \(newListData.count)")
                         
@@ -1289,6 +1309,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
                     self.isLastPage = newListData.isEmpty
                 }
                 
+                
+                
                 if let listData = data.listdata {
                     for datum in listData {
                         if let welcomeID = datum.welcomeid, let userID = datum.hID {
@@ -1297,6 +1319,47 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
                         }
                     }
                 }
+                
+                // ✅ Show welcome popup here
+                if let verifiedStatus = data.verifiedStatus,
+                   let popupVerifiedStatus = data.popupVerifiedStatus,
+                   verifiedStatus == "1", popupVerifiedStatus == 0 {
+                    
+                    let alreadyShown = UserDefaults.standard.bool(forKey: "hasShownWelcomePopup")
+                    if !alreadyShown {
+                        UserDefaults.standard.set(true, forKey: "hasShownWelcomePopup")
+                        
+                        let titleAttributes: [NSAttributedString.Key: Any] = [
+                            .font: UIFont(name: "Montserrat-Regular", size: 22) ?? UIFont.systemFont(ofSize: 18),
+                            .foregroundColor: UIColor.black
+                        ]
+                        let attributedTitle = NSAttributedString(string: "Welcome!", attributes: titleAttributes)
+                        
+                        let messageAttributes: [NSAttributedString.Key: Any] = [
+                            .font: UIFont(name: "Montserrat-Regular", size: 14) ?? UIFont.systemFont(ofSize: 16),
+                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                        ]
+                        let attributedMessage = NSAttributedString(
+                            string: "You are now a verified member.\nHappy Neighbrsnooking!!!",
+                            attributes: messageAttributes
+                        )
+                        
+                        let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+                        alertController.setValue(attributedTitle, forKey: "attributedTitle")
+                        alertController.setValue(attributedMessage, forKey: "attributedMessage")
+                        
+                        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+                            self.callpopupVerificationWebService {}
+                        }
+                        alertController.addAction(okAction)
+                        
+                        DispatchQueue.main.async {
+                            self.present(alertController, animated: true, completion: nil)
+                        }
+                    }
+                }
+                
+                
                 
                 if let awaitStatus = data.awaitStatus, awaitStatus == "1" {
                     let remarks = data.missmatchRemarks ?? "No remarks available"
@@ -1320,12 +1383,26 @@ class HomeViewController: BaseViewController, UITextFieldDelegate {
 @available(iOS 16.0, *)
 extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTableViewCellDelegate, MemberTableViewCellDelegate, MemberCellDelegate {
     
+    
+    func updateSortedSections() {
+        let sourceData = isSearching ? filteredData : HomeNewData
+        prepareSortedData(homeModel: sourceData)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        filterData(with: searchText)
+    }
+    
+    
+    
     func filterData(with searchText: String) {
-        print("🔍 Searching for: \(searchText)")  // Debug log
+        print("🔍 Searching for: \(searchText)")
         
         guard !searchText.isEmpty else {
-            filteredData = HomeNewData  // Search clear hone par pura data show karein
+            filteredData = HomeNewData
             isSearching = false
+            
+            prepareSortedData(homeModel: HomeNewData) // 👉 Important
             tableviewMember.reloadData()
             return
         }
@@ -1359,10 +1436,13 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         )
         
         print("🔎 Filtered items count: \(filteredData?.listdata?.count ?? 0)")
-        tableviewMember.reloadData()
+        
+        prepareSortedData(homeModel: filteredData)  // ✅ After filtering, make sortedSections
+        tableviewMember.reloadData()                // ✅ Then reload table
     }
     
-  
+    
+    
     // warking code hai ye tabke view ko theek karne ke liye
     
     func prepareSortedData(homeModel: HomeAllModel?) {
@@ -1370,18 +1450,18 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             print("❌ homeModel is NIL")
             return
         }
-         guard let data = homeModel.listdata, !data.isEmpty else {
+        guard let data = homeModel.listdata, !data.isEmpty else {
             print("❌ listdata is NIL or EMPTY")
             return
         }
-         print("✅ listdata found, Count: \(data.count)")
-         sortedSections.removeAll()
-         // Add Announcement section first
+        print("✅ listdata found, Count: \(data.count)")
+        sortedSections.removeAll()
+        // Add Announcement section first
         if let announcement = homeModel.announcement, !announcement.isEmpty {
             sortedSections.append(("Announcement", announcement))
             print("🟢 Added Announcement Section")
         }
-         // **Maintain Exact API Order**
+        // **Maintain Exact API Order**
         for item in data {
             let type = item.type ?? "" // ✅ Optional handling
             sortedSections.append((type, [item])) // ✅ Correct tuple format
@@ -1391,7 +1471,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         print("🔢 Total Sections: \(sortedSections.count)")
         //        print("🟡 Final Sorted Sections: \(sortedSections)")
     }
-   
+    
     // Filtered data ko fetch karna
     func getFilteredData(for type: String, at index: Int) -> HomeNewData? {
         let dataSource = isSearching ? filteredData : HomeNewData
@@ -1420,7 +1500,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         return sectionData.1.count
     }
     
-      func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let sectionData = sortedSections[indexPath.section]
         let item = sectionData.1[indexPath.row]
         print("🟢 CellForRowAt: Section = \(sectionData.0), Row = \(indexPath.row)")
@@ -1432,6 +1512,15 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 print("Configuring Announcement Cell")
                 cell.lblTitle.text = announcement.title
                 cell.lblMessage.text = announcement.msg
+                
+                if traitCollection.userInterfaceStyle == .dark {
+                    // separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                } else {
+                    //  separator.isHidden = true
+                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                }
+                
                 return cell
             }
         }
@@ -1443,6 +1532,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             let cell = tableView.dequeueReusableCell(withIdentifier: "MemberTableViewCell", for: indexPath) as! MemberTableViewCell
             cell.delegate = self
             cell.delegateCell = self // Delegate assign karo
+            
             if let postData = item as? HomeNewData {
                 print("Post Data: \(postData)")
                 //      guard var postData = dataSource?.listdata?.filter({ $0.type == "Post" })[indexPath.row] else { return cell }
@@ -1465,63 +1555,55 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.userId = postData.createdby // Assign user ID
                 print(postData.createdby)
                 cell.delegateM = self
-                cell.favouriteButtonCallback = { [weak self] in
-                    guard let self = self else { return }
-                    // Make a mutable copy of the postData
-                    var mutablePostData = postData
-                    guard let postId = mutablePostData.postid, !postId.isEmpty else { return }
-                    if mutablePostData.favouritstatus == 1 {
-                        // Unfavourite Action
-                        self.callFavouriteRemoveBussinessWebService(postId: postId) { message in
-                            mutablePostData.favouritstatus = 0 // Update status
-                            cell.updateFavouriteButton(isFavourite: false) // Update button icon
-                            self.showAlert(message: message) // Show alert
-                        }
-                    } else {
-                        // Favourite Action
-                        self.callFavouriteBussinessWebService(postId: postId) { message in
-                            mutablePostData.favouritstatus = 1 // Update status
-                            cell.updateFavouriteButton(isFavourite: true) // Update button icon
-                            self.showAlert(message: message) // Show alert
-                        }
-                    }
+                if traitCollection.userInterfaceStyle == .dark {
+                    cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background
+                } else {
+                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
                 }
                 
- 
-                
-                
- 
-                
-                cell.likeUnLikeTab = { [weak self] in
-                    guard let self = self else { return }
-                    var mutablePostData = postData
-                    guard let postId = mutablePostData.postid, !postId.isEmpty else { return }
-
-                    // Like with Emoji
-                    if let emoji = cell.selectedEmoji {
-                        self.callPostLikeWebService(postId: postId, emoji: emoji) {
-                             
-                             print("✅ Liked with emoji \(emoji)")
-                        }
-                    } else {
-                        // Normal Like / Unlike toggle
-                        if cell.isLikedByUser {
-                            self.callPostLikeWebService(postId: postId, emoji: "") {
-                               
-                                print("✅ Liked without emoji")
+                cell.favouriteButtonCallback = { [weak self] in
+                    
+                    if self?.HomeNewData?.verfiedMsg == "User Verification is completed!" {
+                        guard let self = self else { return }
+                        // Make a mutable copy of the postData
+                        var mutablePostData = postData
+                        guard let postId = mutablePostData.postid, !postId.isEmpty else { return }
+                        if mutablePostData.favouritstatus == 1 {
+                            // Unfavourite Action
+                            self.callFavouriteRemoveBussinessWebService(postId: postId) { message in
+                                mutablePostData.favouritstatus = 0 // Update status
+                                cell.updateFavouriteButton(isFavourite: false) // Update button icon
+                                self.showAlert(message: message) // Show alert
                             }
                         } else {
-                            self.callPostUnLikeWebService {
-                                
-                                 print("❌ Unliked")
+                            // Favourite Action
+                            self.callFavouriteBussinessWebService(postId: postId) { message in
+                                mutablePostData.favouritstatus = 1 // Update status
+                                cell.updateFavouriteButton(isFavourite: true) // Update button icon
+                                self.showAlert(message: message) // Show alert
                             }
                         }
+                    } else {
+                        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                        let messageAttributes: [NSAttributedString.Key: Any] = [
+                            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                        ]
+                        let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                        let attributedMessage = NSAttributedString(
+                            string: "You have limited access till verification is complete. We thank you for your patience.",
+                            attributes: messageAttributes
+                        )
+                        alert.setValue(attributedTitle, forKey: "attributedTitle")
+                        alert.setValue(attributedMessage, forKey: "attributedMessage")
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                            alert.dismiss(animated: true, completion: nil)
+                        }))
+                        self?.present(alert, animated: true, completion: nil)
                     }
                 }
-
                 
-                
- 
                 cell.FullImgCallback = { [self] value in
                     let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostEnlargeImageViewController")as! PostEnlargeImageViewController
                     vc.UserName = PostListData?.listdata?[indexPath.row].username ?? ""
@@ -1698,6 +1780,40 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblWelcmCount.text = "\(wlcmData.totalLike ?? 0)"
                 cell.lblBookaCount.text = "\(wlcmData.totalBokay ?? 0)"
                 
+                //                if traitCollection.userInterfaceStyle == .dark {
+                //                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                //                   } else {
+                //                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                //                   }
+                
+                //                cell.contentView.subviews
+                //                        .filter { $0.tag == 999 }
+                //                        .forEach { $0.removeFromSuperview() }
+                //
+                //                    // Custom separator
+                //                    let separator = UIView()
+                //                    separator.tag = 999
+                //                    separator.translatesAutoresizingMaskIntoConstraints = false
+                
+                // Use the custom dark green in dark mode, otherwise default gray
+                if traitCollection.userInterfaceStyle == .dark {
+                    //  separator.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                } else {
+                    //  separator.isHidden = true
+                    cell.backgroundColor =  #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                }
+                
+                //                    cell.contentView.addSubview(separator)
+                //
+                //                    // Full-width constraints
+                //                    NSLayoutConstraint.activate([
+                //                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+                //                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+                //                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+                //                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+                //                    ])
+                
                 cell.bookayCallback = { [self] value in
                     
                     
@@ -1737,6 +1853,41 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblAction.text = sponsorData.action
                 cell.lblAction.text = sponsorData.companylink
                 
+                if traitCollection.userInterfaceStyle == .dark {
+                    // separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                } else {
+                    //  separator.isHidden = true
+                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                }
+                
+                //                cell.contentView.subviews
+                //                        .filter { $0.tag == 999 }
+                //                        .forEach { $0.removeFromSuperview() }
+                //
+                //                    // Custom separator
+                //                    let separator = UIView()
+                //                    separator.tag = 999
+                //                    separator.translatesAutoresizingMaskIntoConstraints = false
+                //
+                //                    // Use the custom dark green in dark mode, otherwise default gray
+                //                    if traitCollection.userInterfaceStyle == .dark {
+                //                        separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                //                    } else {
+                //                        separator.isHidden = true
+                //                    }
+                //
+                //                    cell.contentView.addSubview(separator)
+                //
+                //                    // Full-width constraints
+                //                    NSLayoutConstraint.activate([
+                //                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+                //                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+                //                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+                //                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+                //                    ])
+                
+                
                 cell.SponsCallback = { [weak self] value in
                     if let urlString = sponsorData.companylink, let url = URL(string: urlString) {
                         UIApplication.shared.open(url, options: [:], completionHandler: nil)
@@ -1774,6 +1925,33 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblStartDate.text = eventData.eventStartDate
                 cell.lblEndDate.text = eventData.eventEndDate
                 
+                //                cell.contentView.subviews
+                //                        .filter { $0.tag == 999 }
+                //                        .forEach { $0.removeFromSuperview() }
+                //
+                //                    // Custom separator
+                //                    let separator = UIView()
+                //                    separator.tag = 999
+                //                    separator.translatesAutoresizingMaskIntoConstraints = false
+                //
+                //                    // Use the custom dark green in dark mode, otherwise default gray
+                //                    if traitCollection.userInterfaceStyle == .dark {
+                //                        separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                //                    } else {
+                //                        separator.isHidden = true
+                //                    }
+                //
+                //                    cell.contentView.addSubview(separator)
+                //
+                //                    // Full-width constraints
+                //                    NSLayoutConstraint.activate([
+                //                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+                //                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+                //                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+                //                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+                //                    ])
+                
+                
                 
                 cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 16)
                 cell.lblCreateOn.font = UIFont(name: "Montserrat-Regular", size: 10)
@@ -1792,16 +1970,40 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.userId = eventData.createdby // 🟢 Assign userId
                 cell.delegate = self  // 🟢 Assign Delegate
                 
+                if traitCollection.userInterfaceStyle == .dark {
+                    cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // mode background
+                } else {
+                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                }
                 
                 // MARK: - Call for button push toh eventDitails
                 cell.eventCallAction = { [weak self] value in
                     guard let self = self else { return }
                     guard let postListData = self.HomeNewData?.listdata, indexPath.row < postListData.count else { return }
-                    
-                    // Safely unwrap PostDotViewController
-                    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController") as? EventsDetailViewController else { return }
-                    vc.eventid = eventData.eventid ?? ""
-                    self.navigationController?.pushViewController(vc, animated: true)
+                    if HomeNewData?.verfiedMsg == "User Verification is completed!" {
+                        // Safely unwrap PostDotViewController
+                        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController") as? EventsDetailViewController else { return }
+                        vc.eventid = eventData.eventid ?? ""
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    } else {
+                        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                        let messageAttributes: [NSAttributedString.Key: Any] = [
+                            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                        ]
+                        let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                        let attributedMessage = NSAttributedString(
+                            string: "You have limited access till verification is complete. We thank you for your patience.",
+                            attributes: messageAttributes
+                        )
+                        alert.setValue(attributedTitle, forKey: "attributedTitle")
+                        alert.setValue(attributedMessage, forKey: "attributedMessage")
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                            alert.dismiss(animated: true, completion: nil)
+                        }))
+                        self.present(alert, animated: true, completion: nil)
+                    }
                     
                 }
                 
@@ -1904,6 +2106,41 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblstartdate.font = UIFont(name: "Montserrat-Regular", size: 14)
                 cell.lblEnddate.font = UIFont(name: "Montserrat-Regular", size: 14)
                 cell.lblVote.font = UIFont(name: "Montserrat-Regular", size: 14)
+                //
+                //                if traitCollection.userInterfaceStyle == .dark {
+                //                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                //                   } else {
+                //                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                //                   }
+                //  022C0A
+                //                cell.contentView.subviews
+                //                        .filter { $0.tag == 999 }
+                //                        .forEach { $0.removeFromSuperview() }
+                //
+                //                    // Custom separator
+                //                    let separator = UIView()
+                //                    separator.tag = 999
+                //                    separator.translatesAutoresizingMaskIntoConstraints = false
+                
+                // Use the custom dark green in dark mode, otherwise default gray
+                if traitCollection.userInterfaceStyle == .dark {
+                    // separator.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                } else {
+                    // separator.isHidden = true
+                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                }
+                
+                //                    cell.contentView.addSubview(separator)
+                //
+                //                    // Full-width constraints
+                //                    NSLayoutConstraint.activate([
+                //                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+                //                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+                //                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+                //                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+                //                    ])
+                
                 
                 if pollData.isvoted == "0" {
                     cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
@@ -2035,6 +2272,34 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.userId = businessData.createdby
                 cell.delegate = self
                 
+                //                cell.contentView.subviews
+                //                        .filter { $0.tag == 999 }
+                //                        .forEach { $0.removeFromSuperview() }
+                //
+                //                    // Custom separator
+                //                    let separator = UIView()
+                //                    separator.tag = 999
+                //                    separator.translatesAutoresizingMaskIntoConstraints = false
+                
+                // Use the custom dark green in dark mode, otherwise default gray
+                if traitCollection.userInterfaceStyle == .dark {
+                    // separator.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                } else {
+                    //  separator.isHidden = true
+                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                }
+                
+                //                    cell.contentView.addSubview(separator)
+                //
+                //                    // Full-width constraints
+                //                    NSLayoutConstraint.activate([
+                //                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+                //                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+                //                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+                //                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+                //                    ])
+                
                 let urlBan = URL(string: (businessData.userpic ?? ""))
                 cell.profileImgView.kf.indicatorType = .activity
                 cell.profileImgView.kf.setImage(with:urlBan ,placeholder: UIImage(named: "defaultImage"))
@@ -2149,6 +2414,40 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 
                 cell.userId = groupsData.createdby
                 cell.delegate = self
+                
+                //                if traitCollection.userInterfaceStyle == .dark {
+                //                       cell.backgroundColor = UIColor.systemBackground  // Dark mode background
+                //                   } else {
+                //                       cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+                //                   }
+                
+                //                cell.contentView.subviews
+                //                        .filter { $0.tag == 999 }
+                //                        .forEach { $0.removeFromSuperview() }
+                //
+                //                    // Custom separator
+                //                    let separator = UIView()
+                //                    separator.tag = 999
+                //                    separator.translatesAutoresizingMaskIntoConstraints = false
+                
+                // Use the custom dark green in dark mode, otherwise default gray
+                if traitCollection.userInterfaceStyle == .dark {
+                    // separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                    cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
+                } else {
+                    //  separator.isHidden = true
+                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                }
+                
+                //    cell.contentView.addSubview(separator)
+                
+                // Full-width constraints
+                //                    NSLayoutConstraint.activate([
+                //                        separator.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+                //                        separator.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+                //                        separator.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+                //                        separator.heightAnchor.constraint(equalToConstant: 4.0) // Thickness
+                //                    ])
                 
                 cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 16)
                 cell.lblGroupName.font = UIFont(name: "Montserrat-Regular", size: 13)
@@ -2300,10 +2599,10 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             if self.profileData?.verfiedMsg == "User Verification is completed!" {
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 if let postDetailsVC = storyboard.instantiateViewController(withIdentifier: "PostDetailsViewController") as? PostDetailsViewController {
-//                    let navController = UINavigationController(rootViewController: postDetailsVC)
-//                       navController.hidesBottomBarWhenPushed = false
-//                       self.present(navController, animated: true)
-
+                    //                    let navController = UINavigationController(rootViewController: postDetailsVC)
+                    //                       navController.hidesBottomBarWhenPushed = false
+                    //                       self.present(navController, animated: true)
+                    
                     // ✅ Correct way to fetch post data
                     let sectionData = sortedSections[indexPath.section]
                     if let postData = sectionData.1[indexPath.row] as? HomeNewData {
@@ -2381,22 +2680,38 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         if let videoUrl = postImage.video, let url = URL(string: videoUrl) {
             let player = AVPlayer(url: url)
             player.isMuted = true // ✅ By default video mute rahega
-            
             let playerViewController = AVPlayerViewController()
             playerViewController.player = player
-            
             present(playerViewController, animated: true) {
                 player.pause()
             }
         } else {
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let destinationVC = storyboard.instantiateViewController(withIdentifier: "PostViewShowImgVideosDataVC") as! PostViewShowImgVideosDataVC
-            
-            // ✅ Saara data pass karo
-            destinationVC.imgDataAll = allImages
-            destinationVC.UserName = username
-            
-            self.navigationController?.pushViewController(destinationVC, animated: true)
+            if HomeNewData?.verfiedMsg == "User Verification is completed!" {
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let destinationVC = storyboard.instantiateViewController(withIdentifier: "PostViewShowImgVideosDataVC") as! PostViewShowImgVideosDataVC
+                // ✅ Saara data pass karo
+                destinationVC.imgDataAll = allImages
+                destinationVC.UserName = username
+                self.navigationController?.pushViewController(destinationVC, animated: true)
+            } else {
+                let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                let messageAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                    .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                ]
+                let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                let attributedMessage = NSAttributedString(
+                    string: "You have limited access till verification is complete. We thank you for your patience.",
+                    attributes: messageAttributes
+                )
+                alert.setValue(attributedTitle, forKey: "attributedTitle")
+                alert.setValue(attributedMessage, forKey: "attributedMessage")
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                    alert.dismiss(animated: true, completion: nil)
+                }))
+                self.present(alert, animated: true, completion: nil)
+            }
         }
     }
     
@@ -2404,12 +2719,31 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
     
     
     func didTapProfile(for userId: String) {
-        let vc = storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as! MyProfileViewController
-        vc.Oid = userId
-        print(userId)
-        navigationController?.pushViewController(vc, animated: true)
+        if HomeNewData?.verfiedMsg == "User Verification is completed!" {
+            let vc = storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as! MyProfileViewController
+            vc.Oid = userId
+            print(userId)
+            navigationController?.pushViewController(vc, animated: true)
+        } else {
+            let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+            let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+            ]
+            let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+            let attributedMessage = NSAttributedString(
+                string: "You have limited access till verification is complete. We thank you for your patience.",
+                attributes: messageAttributes
+            )
+            alert.setValue(attributedTitle, forKey: "attributedTitle")
+            alert.setValue(attributedMessage, forKey: "attributedMessage")
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                alert.dismiss(animated: true, completion: nil)
+            }))
+            self.present(alert, animated: true, completion: nil)
+        }
     }
-    
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentText = textField.text ?? ""

@@ -14,6 +14,7 @@ protocol HomeTableViewCellDelegate: AnyObject {
 
 
 
+@available(iOS 16.0, *)
 protocol MemberTableViewCellDelegate: AnyObject {
     func didTapCommentsButton(cell: MemberTableViewCell)
 }
@@ -23,10 +24,12 @@ protocol MemberCellDelegate: AnyObject {
 }
 
 
+@available(iOS 16.0, *)
 protocol ThreeDotMemberTableViewCellDelegate: AnyObject {
     func didTapDotButton(cell: MemberTableViewCell)
 }
 
+@available(iOS 16.0, *)
 class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource {
     
     
@@ -47,6 +50,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     @IBOutlet weak var lblStLikes: UILabel!
     @IBOutlet weak var lblStComment: UIButton!
     @IBOutlet weak var viewToHide: UIView!
+    @IBOutlet weak var btnDotsImg : UIButton!
     
     var business_id : String?
     var BussinessFavouriteData : FavouriteBussinessModel?
@@ -63,6 +67,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     var commentCount = 0
     var shareCount = 0
     var isFavourite = false
+    var fullDescriptionText: String = ""
     var emojiSelectionHandler: ((String) -> Void)?
     
     @IBOutlet weak var likebtn: UIButton!
@@ -77,7 +82,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     weak var delegate: HomeTableViewCellDelegate?
     var imgDataAll = [postImagesN]()
     var UserName = ""
-    
+    private var defaultTextColor: UIColor?
     var FullImgCallback : ((UIButton) -> Void)?
     var DotCallback: ((String?) -> Void)?
     var thisWidth:CGFloat = 0
@@ -88,6 +93,8 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        defaultTextColor = lblName.textColor
+        updateColors()
         collectionViewBanner.delegate = self
         collectionViewBanner.dataSource = self
         lblMonth.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -110,14 +117,9 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         collectionViewBanner.isPagingEnabled = false // We'll handle custom snapping
         collectionViewBanner.decelerationRate = .fast // Fast scrolling stop
         collectionViewBanner.showsHorizontalScrollIndicator = false
-        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(showEmojis(_:)))
-        likebtn.addGestureRecognizer(longPressRecognizer)
-        
-        
-        
     }
     
-    
+   
     
     private func addTapGestures() {
         let nameTap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -150,6 +152,44 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         // Configure the view for the selected state
     }
     
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblMonth.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) ////
+            lblGeneral.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblDescription.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) ///
+            viewToHide.backgroundColor = .black
+            btnComments.tintColor = .white // Arrow tint for dark mode
+            btnShare.tintColor = .white
+            
+            likebtn.tintColor = .white
+            btnDotsImg.tintColor = .white
+            
+        } else {
+            // Light mode
+            lblName.textColor = defaultTextColor
+            lblSec.textColor = UIColor.secondaryLabel
+            lblMonth.textColor = UIColor.secondaryLabel
+            lblGeneral.textColor = UIColor.secondaryLabel
+            lblDescription.textColor = UIColor.secondaryLabel
+            likebtn.tintColor = .black // Arrow tint for light mode
+            btnComments.tintColor = .black
+            btnShare.tintColor = .black
+            btnDotsImg.tintColor = .black
+            viewToHide.backgroundColor = .white
+        }
+    }
+
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
+    }
     
     
     
@@ -163,42 +203,126 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     }
     
     
-    // Function to configure description text
-    func configureDescription(with text: String) {
-        // If the text is expanded, show all the text (0 means no limit)
-        lblDescription.numberOfLines = isExpanded ? 0 : 2  // If expanded, show all lines, otherwise show 2 lines
-        var displayText = text
-        if !isExpanded {
-            // If not expanded, truncate the text and add '... More' at the end
-            let maxLength = 80  // You can adjust this as per your requirement
-            if text.count > maxLength {
-                let truncatedText = "\(text.prefix(maxLength))... "
-                displayText = truncatedText
-            } else {
-                displayText = text  // If the text is short, just display it
-            }
-        } else {
-            // If expanded, show full text and add 'Less' at the end
-            displayText = "\(text) "
+    func addTapGestureToLabel() {
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
+            lblDescription.isUserInteractionEnabled = true
+            lblDescription.addGestureRecognizer(tapGesture)
         }
         
-        lblDescription.text = displayText
-        lblDescription.setNeedsLayout()  // Mark for layout update
-        lblDescription.layoutIfNeeded() // Force immediate layout update
-    }
-    
-    // Add tap gesture to handle clicks on label for expanding/collapsing
-    func addTapGestureToLabel() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
-        lblDescription.isUserInteractionEnabled = true
-        lblDescription.addGestureRecognizer(tapGesture)
-    }
-    
-    // Action when label is tapped (toggle between expanded/collapsed state)
-    @objc func labelTapped() {
-        isExpanded.toggle()  // Toggle between expanded and collapsed state
-        configureDescription(with: lblDescription.text ?? "")  // Update the description based on new state
-    }
+        // Action when label is tapped (toggle between expanded/collapsed state)
+        @objc func labelTapped() {
+            isExpanded.toggle()
+          //  updateDescriptionText() // Update the description based on new state
+            DispatchQueue.main.async {
+                self.updateDescriptionText()
+            }
+        }
+        
+        // Function to configure description text
+        func configureDescription(with text: String) {
+            fullDescriptionText = text
+    //          updateDescriptionText()
+            DispatchQueue.main.async {
+                self.updateDescriptionText()
+            }
+        }
+        
+        private func updateDescriptionText() {
+            guard let font = lblDescription.font else { return }
+
+            let maxLines = 2
+            let maxWidth = lblDescription.frame.width > 0 ? lblDescription.frame.width : UIScreen.main.bounds.width - 40
+            let lineHeight = "A".size(withAttributes: [.font: font]).height
+            let maxHeight = lineHeight * CGFloat(maxLines)
+
+            let fullTextAttr = NSAttributedString(string: fullDescriptionText, attributes: [
+                .font: font
+            ])
+
+            let fullBoundingRect = fullTextAttr.boundingRect(
+                with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                context: nil
+            )
+
+            let lineCount = Int(ceil(fullBoundingRect.height / lineHeight))
+
+            if isExpanded {
+                // Show full description with "Less"
+                let fullText = NSMutableAttributedString(string: "\(fullDescriptionText) ", attributes: [
+                    .font: font,
+                    .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
+                ])
+                let lessText = NSAttributedString(string: "Less", attributes: [
+                    .font: font,
+                    .foregroundColor: #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                ])
+                fullText.append(lessText)
+
+                lblDescription.numberOfLines = 0
+                lblDescription.attributedText = fullText
+            } else {
+                if lineCount > maxLines {
+                    // Show trimmed text + "... More"
+                    let trailingText = "... More"
+                    let trailingAttr = NSAttributedString(string: trailingText, attributes: [
+                        .font: font,
+                        .foregroundColor: #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                    ])
+
+                    var fittingText = fullDescriptionText
+                    var finalText = NSMutableAttributedString()
+
+                    for i in stride(from: fittingText.count, through: 0, by: -1) {
+                        let sub = String(fittingText.prefix(i)).trimmingCharacters(in: .whitespacesAndNewlines)
+                        let testAttr = NSMutableAttributedString(string: sub, attributes: [
+                            .font: font,
+                            .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
+                        ])
+                        testAttr.append(trailingAttr)
+
+                        let boundingRect = testAttr.boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+                                                                 options: [.usesLineFragmentOrigin, .usesFontLeading],
+                                                                 context: nil)
+
+                        if boundingRect.height <= maxHeight {
+                            finalText = testAttr
+                            break
+                        }
+                    }
+
+                    lblDescription.numberOfLines = maxLines
+                    lblDescription.attributedText = finalText
+                } else {
+                    // Show plain full text, no "More"
+                    lblDescription.numberOfLines = 0
+                    lblDescription.text = fullDescriptionText
+                }
+            }
+
+            // Disable tap if only 1 line
+            if lineCount <= 1 {
+                lblDescription.gestureRecognizers?.forEach { recognizer in
+                    lblDescription.removeGestureRecognizer(recognizer)
+                }
+                lblDescription.isUserInteractionEnabled = false
+            } else {
+                // Re-add tap gesture if missing
+                if lblDescription.gestureRecognizers?.isEmpty ?? true {
+                    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
+                    lblDescription.addGestureRecognizer(tapGesture)
+                    lblDescription.isUserInteractionEnabled = true
+                }
+            }
+
+            lblDescription.setNeedsLayout()
+            lblDescription.layoutIfNeeded()
+
+            if let tableView = self.superview as? UITableView {
+                tableView.beginUpdates()
+                tableView.endUpdates()
+            }
+        }
     
     @IBAction func btnFullImg(_ sender: UIButton) {
         FullImgCallback?(sender)
@@ -208,18 +332,17 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     
     @IBAction func btnDotPost(_ sender: UIButton) {
         DotCallback?(postid)
-    }
+      }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         print("Data in imgDataAll: \(imgDataAll)") // Prints the entire data
         print("Total items in section: \(imgDataAll.count)") // Prints the count of items
-        return imgDataAll.count ?? 0
+         return imgDataAll.count ?? 0
         
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCollectionViewCell", for: indexPath) as! HomeCollectionViewCell
-        
+         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCollectionViewCell", for: indexPath) as! HomeCollectionViewCell
         let postImage = imgDataAll[indexPath.row]  // Current item
         cell.configure(with: postImage)
         cell.numberLabel.text = "\(indexPath.item + 1)"
@@ -275,7 +398,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         let selectedData = imgDataAll[indexPath.row]
         delegate?.didSelectItem(with: selectedData, username: UserName, allImages: imgDataAll)
     }
-    
+
     
     
     
@@ -337,102 +460,112 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     //    new code emoji code
     
     @IBAction func likeButtonTapped(_ sender: UIButton) {
-        likeUnLikeTab?()
-        
-        if selectedEmoji == nil {
-            isLikedByUser.toggle()
-            likeCount += isLikedByUser ? 1 : -1
-            lblLikeCount.text = "\(likeCount)"
-            likebtn.setImage(UIImage(named: isLikedByUser ? "Unlike" : "Like"), for: .normal)
-        } else {
-            updateLikeWithEmoji()
-        }
-    }
-    
-    func updateLikeWithEmoji() {
-        guard let emoji = selectedEmoji else { return }
-        if !isLikedByUser {
-            likeCount += 1
-            isLikedByUser = true
-        }
-        lblLikeCount.text = "\(likeCount)"
-        likebtn.setTitle(emoji, for: .normal)
-        likebtn.setImage(nil, for: .normal)
-    }
-    
-    @objc func emojiSelected(_ sender: UIButton) {
-        
-        guard let emoji = sender.titleLabel?.text else { return } // Abdul code from here
-        selectedEmoji = emoji
-        // If not liked yet, count it
-        if !isLikedByUser {
-            isLikedByUser = true
-            likeCount += 1
-        }
-        lblLikeCount.text = "\(likeCount)"
-        likebtn.setTitle(emoji, for: .normal)
-        likebtn.setImage(nil, for: .normal)
-        // Remove emoji view
-        sender.superview?.superview?.removeFromSuperview() // to here
-        
-        
-        
-        
-        
-        
-        //               guard let emoji = sender.titleLabel?.text else { return }
-        //               selectedEmoji = emoji
-        //               isLikedByUser = true
-        //               updateLikeWithEmoji()
-        //               sender.superview?.superview?.removeFromSuperview()
-    }
-    
-    func showEmojiSelectionView(button: UIButton) {
-        if let existingEmojiView = UIApplication.shared.windows.first?.viewWithTag(9999) {
-            existingEmojiView.removeFromSuperview()
-        }
-        
-        guard let rootView = UIApplication.shared.windows.first?.rootViewController?.view else { return }
-        let buttonFrame = button.convert(button.bounds, to: rootView)
-        
-        let emojiSelectionView = UIView(frame: CGRect(x: buttonFrame.midX - 2, y: buttonFrame.minY - 70, width: 300, height: 70))
-        emojiSelectionView.backgroundColor = .white
-        emojiSelectionView.layer.cornerRadius = 10
-        emojiSelectionView.layer.shadowColor = UIColor.black.cgColor
-        emojiSelectionView.layer.shadowOpacity = 0.5
-        emojiSelectionView.layer.shadowOffset = CGSize(width: 0, height: 2)
-        emojiSelectionView.layer.shadowRadius = 4
-        emojiSelectionView.tag = 9999
-        
-        let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳", "♡"]
-        let scrollView = UIScrollView(frame: emojiSelectionView.bounds)
-        scrollView.contentSize = CGSize(width: emojis.count * 50, height: 80)
-        scrollView.showsHorizontalScrollIndicator = false
-        
-        for (index, emoji) in emojis.enumerated() {
-            let button = UIButton(frame: CGRect(x: CGFloat(index) * 50, y: 0, width: 50, height: 70))
-            button.setTitle(emoji, for: .normal)
-            button.setTitleColor(.black, for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: 40)
-            button.addTarget(self, action: #selector(emojiSelected(_:)), for: .touchUpInside)
-            scrollView.addSubview(button)
-        }
-        
-        emojiSelectionView.addSubview(scrollView)
-        rootView.addSubview(emojiSelectionView)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            emojiSelectionView.removeFromSuperview()
-        }
-    }
-    
-    @objc func showEmojis(_ gesture: UILongPressGestureRecognizer) {
-        if gesture.state == .began {
-            if let button = gesture.view as? UIButton {
-                showEmojiSelectionView(button: button)
-            }
-        }
-    }
+        if profileData?.verfiedMsg == "User Verification is completed!" {
+                    likeUnLikeTab?()
+                    
+                    if selectedEmoji == nil {
+                        isLikedByUser.toggle()
+                        likeCount += isLikedByUser ? 1 : -1
+                        lblLikeCount.text = "\(likeCount)"
+                        likebtn.setImage(UIImage(named: isLikedByUser ? "Unlike" : "Like"), for: .normal)
+                    } else {
+                        updateLikeWithEmoji()
+                    }
+                } else {
+                    let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                    
+                    let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                    let messageAttributes: [NSAttributedString.Key: Any] = [
+                        .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                        .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                    ]
+                    
+                    let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                    let attributedMessage = NSAttributedString(
+                        string: "You have limited access till verification is complete. We thank you for your patience.",
+                        attributes: messageAttributes
+                    )
+                    
+                    alert.setValue(attributedTitle, forKey: "attributedTitle")
+                    alert.setValue(attributedMessage, forKey: "attributedMessage")
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                        alert.dismiss(animated: true, completion: nil)
+                    }))
+                    
+                    // Use parentViewController to present the alert
+                    if let parentVC = sender.parentViewController {
+                        parentVC.present(alert, animated: true, completion: nil)
+                    } else {
+                        print("❌ Could not find parent view controller.")
+                    }
+                }
+           }
+
+           func updateLikeWithEmoji() {
+               guard let emoji = selectedEmoji else { return }
+               if !isLikedByUser {
+                   likeCount += 1
+                   isLikedByUser = true
+               }
+               lblLikeCount.text = "\(likeCount)"
+               likebtn.setTitle(emoji, for: .normal)
+               likebtn.setImage(nil, for: .normal)
+           }
+
+           @objc func emojiSelected(_ sender: UIButton) {
+               guard let emoji = sender.titleLabel?.text else { return }
+               selectedEmoji = emoji
+               isLikedByUser = true
+               updateLikeWithEmoji()
+               sender.superview?.superview?.removeFromSuperview()
+           }
+
+           func showEmojiSelectionView(button: UIButton) {
+               if let existingEmojiView = UIApplication.shared.windows.first?.viewWithTag(9999) {
+                   existingEmojiView.removeFromSuperview()
+               }
+
+               guard let rootView = UIApplication.shared.windows.first?.rootViewController?.view else { return }
+               let buttonFrame = button.convert(button.bounds, to: rootView)
+
+               let emojiSelectionView = UIView(frame: CGRect(x: buttonFrame.midX - 2, y: buttonFrame.minY - 70, width: 300, height: 70))
+               emojiSelectionView.backgroundColor = .white
+               emojiSelectionView.layer.cornerRadius = 10
+               emojiSelectionView.layer.shadowColor = UIColor.black.cgColor
+               emojiSelectionView.layer.shadowOpacity = 0.5
+               emojiSelectionView.layer.shadowOffset = CGSize(width: 0, height: 2)
+               emojiSelectionView.layer.shadowRadius = 4
+               emojiSelectionView.tag = 9999
+
+               let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳", "♡"]
+               let scrollView = UIScrollView(frame: emojiSelectionView.bounds)
+               scrollView.contentSize = CGSize(width: emojis.count * 50, height: 80)
+               scrollView.showsHorizontalScrollIndicator = false
+
+               for (index, emoji) in emojis.enumerated() {
+                   let button = UIButton(frame: CGRect(x: CGFloat(index) * 50, y: 0, width: 50, height: 70))
+                   button.setTitle(emoji, for: .normal)
+                   button.setTitleColor(.black, for: .normal)
+                   button.titleLabel?.font = UIFont.systemFont(ofSize: 40)
+                   button.addTarget(self, action: #selector(emojiSelected(_:)), for: .touchUpInside)
+                   scrollView.addSubview(button)
+               }
+
+               emojiSelectionView.addSubview(scrollView)
+               rootView.addSubview(emojiSelectionView)
+
+               DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                   emojiSelectionView.removeFromSuperview()
+               }
+           }
+
+           @objc func showEmojis(_ gesture: UILongPressGestureRecognizer) {
+               if gesture.state == .began {
+                   if let button = gesture.view as? UIButton {
+                       showEmojiSelectionView(button: button)
+                   }
+               }
+           }
     
     
     @IBAction func commentsButtonTapped(_ sender: UIButton) {
@@ -440,11 +573,40 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     }
     
     @IBAction func shareButtonTapped(_ sender: UIButton) {
-        shareCount += 1
-        lblShareCount.text = "\(shareCount)"
-        let textToShare = "Check out this post!"
-        let activityVC = UIActivityViewController(activityItems: [textToShare], applicationActivities: nil)
-        UIApplication.shared.windows.first?.rootViewController?.present(activityVC, animated: true, completion: nil)
+        if profileData?.verfiedMsg == "User Verification is completed!" {
+                    shareCount += 1
+                    lblShareCount.text = "\(shareCount)"
+                    let textToShare = "Check out this post!"
+                    let activityVC = UIActivityViewController(activityItems: [textToShare], applicationActivities: nil)
+                    UIApplication.shared.windows.first?.rootViewController?.present(activityVC, animated: true, completion: nil)
+                } else {
+                    let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                    
+                    let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                    let messageAttributes: [NSAttributedString.Key: Any] = [
+                        .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                        .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                    ]
+                    
+                    let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                    let attributedMessage = NSAttributedString(
+                        string: "You have limited access till verification is complete. We thank you for your patience.",
+                        attributes: messageAttributes
+                    )
+                    
+                    alert.setValue(attributedTitle, forKey: "attributedTitle")
+                    alert.setValue(attributedMessage, forKey: "attributedMessage")
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                        alert.dismiss(animated: true, completion: nil)
+                    }))
+                    
+                    // Use parentViewController to present the alert
+                    if let parentVC = sender.parentViewController {
+                        parentVC.present(alert, animated: true, completion: nil)
+                    } else {
+                        print("❌ Could not find parent view controller.")
+                    }
+                }
     }
     
     @IBAction func favouriteButtonTapped(_ sender: UIButton) {
@@ -457,12 +619,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         btnFavourite.setImage(UIImage(named: imageName), for: .normal)
     }
     
-    
-    
-    
-    
-    
-    
+   
     
 }
 

@@ -3,7 +3,7 @@ import SVProgressHUD
 
 
 @available(iOS 16.0, *)
-class GroupDetailsViewController: BaseViewC, UITableViewDataSource, UITableViewDelegate, ConfirmNewDelegate  {
+class GroupDetailsViewController: BaseViewController, UITableViewDataSource, UITableViewDelegate, ConfirmNewDelegate  {
     
     @IBOutlet weak var tableviewDetails: UITableView!
     @IBOutlet weak var MembersLbl: UILabel!
@@ -42,13 +42,15 @@ class GroupDetailsViewController: BaseViewC, UITableViewDataSource, UITableViewD
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        updateColors()
         self.GroupNameLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.DescriptionLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         tableviewDetails.dataSource = self
         tableviewDetails.delegate = self
         NetworkMonitor.shared.startMonitoring()
         startRepeatingAPICall()
+        tableviewDetails.allowsSelection = false
+
         callDetailsGroupWebService{ [self] in
             SVProgressHUD.dismiss()
             self.GroupNameLbl.text = self.GrouDetailsData?.groupname
@@ -139,6 +141,12 @@ class GroupDetailsViewController: BaseViewC, UITableViewDataSource, UITableViewD
             SVProgressHUD.dismiss()
             self.GroupNameLbl.text = self.GrouDetailsData?.groupname
             self.DescriptionLbl.text = self.GrouDetailsData?.description
+          //  self.GroupNameLbl.text = self.GrouDetailsData?.membercount
+            if let memberCount = GrouDetailsData?.membercount {
+                self.MembersLbl.text = "\(memberCount) members"
+            } else {
+                self.MembersLbl.text = "N/A" // Or some default value
+            }
             
             print("Current status: \(GrouDetailsData?.membJoinStatus ?? -1)")
             print("Button hidden state before: \(btnJoin.isHidden)")
@@ -597,10 +605,11 @@ class GroupDetailsViewController: BaseViewC, UITableViewDataSource, UITableViewD
               }
           }
         }
+  //  memberUserId
     
     func callAcceptGroupWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
-        let idUser = UserDefaults.standard.string(forKey: "idUser")
+        let idUser = UserDefaults.standard.string(forKey: "memberUserId")
           let dictParams: Dictionary<String, Any> = [
                                                     "owner":id ?? "",
                                                     "groupname":self.GroupNameLbl.text ?? "",
@@ -637,11 +646,14 @@ class GroupDetailsViewController: BaseViewC, UITableViewDataSource, UITableViewD
             self.GrouDetailsData = data
               UserDefaults.standard.set(self.GrouDetailsData?.createdby, forKey: "usercr")
               UserDefaults.standard.set(self.GrouDetailsData?.groupname, forKey: "groupName")
-            //  UserDefaults.standard.set(self.GrouDetailsData?.groupusername, forKey: "usercr")
-          //    UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.name, forKey: "neighbrshood")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//              if let members = self.GrouDetailsData?.memberlist {
+//                         for (index, member) in members.enumerated() {
+//                             if let userid = member.userid {
+//                                 UserDefaults.standard.set(userid, forKey: "memberUserId_\(index)")
+//                             }
+//                         }
+//                     }
+          
 
             completionClosure()
           }
@@ -671,6 +683,14 @@ class GroupDetailsViewController: BaseViewC, UITableViewDataSource, UITableViewD
             
             print("New data received: \(data)")
             self.GrouListsData = data
+            
+            if let members = self.GrouListsData?.memberlist {
+                       for (index, member) in members.enumerated() {
+                           if let userid = member.userid {
+                               UserDefaults.standard.set(userid, forKey: "memberUserId")
+                           }
+                       }
+                   }
             
             DispatchQueue.main.async {
                 self.tableviewDetails.reloadData()

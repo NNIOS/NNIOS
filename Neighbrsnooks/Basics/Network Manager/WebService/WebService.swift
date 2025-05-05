@@ -122,7 +122,7 @@ class WebService {
     }
     
     
-    func callVerifyOTPWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: MatchOTPModel) -> ()) {
+    func callVerifyOTPWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: VerifyOTPModel) -> ()) {
           RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kVerifyOTP, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
           {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
             let dictResponse = FunctionsConstants.kShared.getDictionary(result)
@@ -132,7 +132,7 @@ class WebService {
                 let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
                   FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
  
-                  let data = try JSONDecoder().decode(MatchOTPModel.self, from: result!)
+                  let data = try JSONDecoder().decode(VerifyOTPModel.self, from: result!)
                  
                   
                 completionClosure(data)
@@ -3222,6 +3222,36 @@ class WebService {
         }
     
     
+    
+    func callForGotPasswordWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: ResetPasswordModel) -> ()) {
+              RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kForgotPassword, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+              {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+                switch statusCode {
+                case .SUCCESS:
+                  do {
+                    let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                      FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+     
+                      let data = try JSONDecoder().decode(ResetPasswordModel.self, from: result!)
+                     
+                      
+                    completionClosure(data)
+                  } catch {
+                    print(error.localizedDescription)
+                  }
+
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                  print("")
+                  self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                case .UNAUTHORIZED:
+                    print(error)
+               //   self.showLogoutAlert()
+                default:
+                  break
+                }
+              }
+        }
     
     
     

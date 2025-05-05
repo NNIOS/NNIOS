@@ -7,80 +7,80 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "D68D8592-F22E-4E25-9B93-3E4C29BD29AE"
+            uuid = "8C07FBE1-5041-41E5-BF3C-377A6C8D4F60"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/Controller/RegisterViewController.swift"
+            filePath = "Neighbrsnooks/Controller/RegisterSecondViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "497"
-            endingLineNumber = "497"
-            landmarkName = "callVerifyEmailAPI()"
+            startingLineNumber = "1547"
+            endingLineNumber = "1547"
+            landmarkName = "callNeighorhodStatusStateCity()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "B1E122B5-798A-44CC-8A7E-0203882F4FF7"
+            uuid = "9FBDC156-9930-4FC4-95E9-97ADCE083B31"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/Controller/RegisterViewController.swift"
+            filePath = "Neighbrsnooks/Controller/RegisterSecondViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "501"
-            endingLineNumber = "501"
-            landmarkName = "callVerifyEmailAPI()"
+            startingLineNumber = "1538"
+            endingLineNumber = "1538"
+            landmarkName = "callNeighorhodStatusStateCity()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "7483F131-014A-40A7-8211-8852BC8196CA"
+            uuid = "90F2397A-37BB-459F-8EF2-BDC7533B0E14"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/Controller/RegisterViewController.swift"
+            filePath = "Neighbrsnooks/Controller/RegisterSecondViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "507"
-            endingLineNumber = "507"
-            landmarkName = "callVerifyEmailAPI()"
+            startingLineNumber = "1539"
+            endingLineNumber = "1539"
+            landmarkName = "callNeighorhodStatusStateCity()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "C7C2F849-3274-4904-BB4D-D5F4860A69C7"
+            uuid = "D814BF5F-B171-4EC4-8AE8-4BEB320BBB6E"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/Controller/RegisterViewController.swift"
+            filePath = "Neighbrsnooks/Controller/RegisterSecondViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "520"
-            endingLineNumber = "520"
-            landmarkName = "callVerifyEmailAPI()"
+            startingLineNumber = "1509"
+            endingLineNumber = "1509"
+            landmarkName = "callSearchNeighbrWebService(location:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "E01A1BD9-380A-4ADA-AEC1-28753B48ECCA"
+            uuid = "F30ABC34-83A8-41AC-BE99-84C08CD92714"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/Controller/RegisterViewController.swift"
+            filePath = "Neighbrsnooks/Controller/RegisterSecondViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "527"
-            endingLineNumber = "527"
-            landmarkName = "callVerifyEmailAPI()"
+            startingLineNumber = "1495"
+            endingLineNumber = "1495"
+            landmarkName = "callSearchNeighbrWebService(location:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

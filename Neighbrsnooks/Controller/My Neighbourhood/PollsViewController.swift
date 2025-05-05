@@ -26,6 +26,7 @@ class PollsViewController: BaseViewController,UITextFieldDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.searchView.isHidden = true
         tfSearch.delegate = self
         self.tableviewMembers.reloadData()
@@ -184,8 +185,7 @@ class PollsViewController: BaseViewController,UITextFieldDelegate {
 
        }
     
-   
-
+ 
 }
 
 @available(iOS 16.0, *)

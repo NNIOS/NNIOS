@@ -87,7 +87,7 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        updateColors()
         openTimePicker()
         timePickerContainer.removeFromSuperview()
         
@@ -163,6 +163,16 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
             UploadImageView.backgroundColor = .black
             UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             UploadImageView.layer.borderWidth = 1.0
+            tfTitle.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfStartTime.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfEndTime.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfStartDatee.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfEndDate.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfDesc.textColor =  .white
+            
+            tfadd1.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfAdd2.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            
            
             
         } else {
@@ -567,44 +577,53 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         timePickerContainer.removeFromSuperview()
     }
     func openTimePicker() {
-        timePickerContainer.frame = CGRect(x: 0.0, y: (self.view.frame.height - 250), width: self.view.frame.width, height: 250.0)
-        timePickerContainer.backgroundColor = UIColor.white
+        timePickerContainer.frame = CGRect(x: 0.0,
+                                           y: (self.view.frame.height - 250),
+                                           width: self.view.frame.width,
+                                           height: 250.0)
+
+        let isDarkMode = traitCollection.userInterfaceStyle == .dark
+
+        timePickerContainer.backgroundColor = isDarkMode ? .black : .white
 
         let buttonHeight: CGFloat = 50.0
-        
+
         let doneButton = UIButton()
         doneButton.setTitle("Done", for: .normal)
-        doneButton.setTitleColor(UIColor(red: 0.0, green: 0.478, blue: 1.0, alpha: 1.0), for: .normal)
-        doneButton.addTarget(self, action: #selector(donePicker), for: .touchUpInside)
+        doneButton.setTitleColor(UIColor.systemBlue, for: .normal)
         doneButton.frame = CGRect(x: (self.view.frame.width - 100), y: 5.0, width: 70.0, height: 40.0)
         timePickerContainer.addSubview(doneButton)
+        doneButton.addTarget(self, action: #selector(donePicker), for: .touchUpInside)
 
         let cancelButton = UIButton()
         cancelButton.setTitle("Cancel", for: .normal)
-        cancelButton.setTitleColor(UIColor(red: 0.0, green: 0.478, blue: 1.0, alpha: 1.0), for: .normal)
-        cancelButton.addTarget(self, action: #selector(dismissPicker), for: .touchUpInside)
+        cancelButton.setTitleColor(UIColor.systemBlue, for: .normal)
         cancelButton.frame = CGRect(x: 20.0, y: 5.0, width: 70.0, height: 40.0)
         timePickerContainer.addSubview(cancelButton)
+        cancelButton.addTarget(self, action: #selector(dismissPicker), for: .touchUpInside)
 
-        // Separator Line
         let separatorLine = UIView()
         separatorLine.frame = CGRect(x: 0, y: buttonHeight, width: self.view.frame.width, height: 0.5)
-        separatorLine.backgroundColor = UIColor.lightGray
+        separatorLine.backgroundColor = isDarkMode ? UIColor.lightGray.withAlphaComponent(0.3) : UIColor.lightGray
         timePickerContainer.addSubview(separatorLine)
 
         timePicker.frame = CGRect(x: 0.0, y: buttonHeight + 0.5, width: self.view.frame.width, height: 200.0)
         timePicker.datePickerMode = .time
-        
+
         if #available(iOS 13.4, *) {
             timePicker.preferredDatePickerStyle = .wheels
         }
 
-        timePicker.backgroundColor = UIColor.white
-        timePicker.locale = Locale(identifier: "en_US") // Ensure 12-hour format with AM/PM
+        timePicker.backgroundColor = isDarkMode ? .black : .white
+        timePicker.setValue(UIColor.label, forKey: "textColor") // Applies text color in Dark/Light mode
+
+        timePicker.locale = Locale(identifier: "en_US") // For AM/PM
+
         timePickerContainer.addSubview(timePicker)
 
         self.view.addSubview(timePickerContainer)
     }
+
 
     
     func callCreateEventWebService(_ completionClosure: @escaping () -> ()) {

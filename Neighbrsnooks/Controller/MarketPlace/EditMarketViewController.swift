@@ -966,18 +966,18 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
 //        self.view.endEditing(true)
 //        self.showDropdownData(showOn: tfCategory, DropdownName: serviceDropdownData)
 //        serviceDropdownData.cellHeight = 35
-//        
+//
 //        serviceDropdownData.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
 //        //  serviceDropdownData.bottomOffset = CGPoint(x: 50, y: 24)
 //        // self.ServiceDescriptionLabel.text = self.ServiceTypeData?.data.seri
 //    }
-//    
+//
 //    private func showDropdownData(showOn textField: UITextField, DropdownName dropdown: DropDown) {
-//        
+//
 //        // Set the anchor and dropdown position
 //        dropdown.anchorView = textField
 //        dropdown.bottomOffset = CGPoint(x: 30, y: (dropdown.anchorView?.plainView.bounds.height)!)
-//        
+//
 //        // Set up the appearance for the dropdown
 //        dropdown.backgroundColor = UIColor.white
 //        dropdown.cellHeight = 35
@@ -985,7 +985,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
 //        dropdown.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
 //        DropDown.appearance().setupCornerRadius(10)
 //        dropdown.width = 200
-//        
+//
 //        // Apply the font settings for the first item
 //        dropdown.customCellConfiguration = { (index: Index, item: String, cell: DropDownCell) in
 //            if index == 0 {
@@ -994,7 +994,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
 //                cell.optionLabel.font = UIFont.systemFont(ofSize: 16) // Regular font for other items
 //            }
 //        }
-//        
+//
 //        // Set the selection action after the dropdown is shown
 //        dropdown.selectionAction = { [unowned self] (index: Int, item: String) in
 //            if index != 0 {
@@ -1002,13 +1002,13 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
 //            } else {
 //                self.tfCategory.text = ""
 //            }
-//            
+//
 //            UserDefaults.standard.set(self.serviceName[index], forKey: "id")
 //            if index != 0 {
 //                UserDefaults.standard.set(self.MarketCatDataNew?.category?[index - 1].id, forKey: "idCategoryMarket")
 //            }
 //        }
-//        
+//
 //        // Show the dropdown
 //        dropdown.show()
 //    }
@@ -1077,4 +1077,4 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     }
     
 }
-//pin
+//pin Sell

@@ -10,9 +10,6 @@ import SVProgressHUD
 
 @available(iOS 16.0, *)
 class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, UICollectionViewDataSource, ConfirmfollowDelegate, UICollectionViewDelegateFlowLayout {
-   
-    
-   
     
     
     @IBOutlet weak var collectionViewDirectory: UICollectionView!
@@ -60,6 +57,7 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
        
         self.EventsLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.lblTotalMember.font = UIFont(name: "Montserrat-Regular", size: 13)
@@ -148,19 +146,19 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
             // Dark mode colors
            
             NeighbourhoddView.backgroundColor = .black
-            LblMemberText.textColor = .white
-            LblGroupsText.textColor = .white
-            LblEventText.textColor = .white
-            LblPollText.textColor = .white
-            LblBussinessText.textColor = .white
-            LblEventText.textColor = .white
-            LblPostText.textColor = .white
-            LblMyNeighbrhoods.textColor = .white
-            lblMember.textColor = .white
-            PrimaryNeighrhoodLbl.textColor = .white
+            LblMemberText.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblGroupsText.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblEventText.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblPollText.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblBussinessText.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblEventText.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblPostText.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            LblMyNeighbrhoods.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblMember.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            PrimaryNeighrhoodLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
             
-            MyNearByLbl.textColor = .white
-            lblTotalMember.textColor = .white
+            MyNearByLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            lblTotalMember.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
            
             MembersView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
            

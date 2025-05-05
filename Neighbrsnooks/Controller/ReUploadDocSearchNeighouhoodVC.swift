@@ -11,7 +11,7 @@ import GooglePlaces
 import Network
 import GoogleMaps
 @available(iOS 16.0, *)
-class ReUploadDocSearchNeighouhoodVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, CLLocationManagerDelegate, ReloadLocationDelegate {
+class ReUploadDocSearchNeighouhoodVC: BaseViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, CLLocationManagerDelegate, ReloadLocationDelegate {
 
 
     var savedProfileData: ProfileModel?
@@ -68,7 +68,9 @@ class ReUploadDocSearchNeighouhoodVC: UIViewController, UITableViewDelegate, UIT
     
     
     
-    deinit {
+     
+ 
+     deinit {
            // Stop monitoring when the view controller is deallocated
            NetworkMonitor.shared.stopMonitoring()
        }
@@ -87,11 +89,7 @@ class ReUploadDocSearchNeighouhoodVC: UIViewController, UITableViewDelegate, UIT
         }
     }
 
-
-
-
-
-    
+ 
     func fetchAutocompleteSuggestions(query: String) {
             let placesClient = GMSPlacesClient.shared()
             let filter = GMSAutocompleteFilter()
@@ -144,10 +142,7 @@ class ReUploadDocSearchNeighouhoodVC: UIViewController, UITableViewDelegate, UIT
         tableView.deselectRow(at: indexPath, animated: true)
     }
 
-
-  
-    
-    
+ 
     // Get current location and update the label
     @IBAction func getCurrentLocationTapped(_ sender: Any) {
         activityIndicator.startAnimating() // Start loader

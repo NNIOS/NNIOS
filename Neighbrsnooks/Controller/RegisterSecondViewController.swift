@@ -14,6 +14,7 @@ import SVProgressHUD
 import AVKit
 import SystemConfiguration
 import Alamofire
+import Vision
 
 protocol neigSelectionDelegate: AnyObject {
     func didSelectItems(selectedItems: [String], forLabel tag: Int)
@@ -26,7 +27,7 @@ protocol LocationDelegate: AnyObject {
 
 
 @available(iOS 16.0, *)
-class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
+class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
     
     @IBOutlet weak var tabNeighourhoodView: UIView!
     @IBOutlet weak var lblSector: UILabel!
@@ -34,6 +35,7 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     var selectedLocation: String?
     weak var delegateSe: LocationDelegate?
     
+    @IBOutlet weak var addressProofViewheight: NSLayoutConstraint!
     @IBOutlet weak var yourneighbourhoodViewCornR: UIView!
     @IBOutlet weak var yourneighbourhoodTblViewCornRe: UIView!
     @IBOutlet weak var neighbourhoodDataShowTableView: UITableView!
@@ -63,6 +65,8 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     @IBOutlet weak var cityView: UIView!
     
     
+    @IBOutlet weak var lblForNeighourhood_ID: UILabel!
+    @IBOutlet weak var lblForNeighourhood_Address: UILabel!
     @IBOutlet weak var tfCountry: UITextField!
     @IBOutlet weak var tfState: UITextField!
     @IBOutlet weak var tfCity: UITextField!
@@ -171,30 +175,43 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     var secname: String?
     var from = 0
     var serch = 0
-    
-    
     var city: String?
     var state: String?
     var zipcode: String = ""
+    var userId: String?
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setUp()
+        
+        
         self.navigationItem.hidesBackButton = true
+        callDeviceInfoWebService() // Save device Info
         if !isComingFromSearchVC {
             startLocationUpdates()
             locationManager.delegate = self
             requestLocationAuthorization()
-            
+            callCurrentSearchNeighbrWebService()
             self.locationManager.requestAlwaysAuthorization()
-            
             // For use in foreground
             self.locationManager.requestWhenInUseAuthorization()
-            
         }
         
+        // Location authorize aur fetch karne ke liye
+        requestLocationAuthorization()
+        startLocationUpdates()
+        
+        // Location manager setup
+        //           locationManager.delegate = self
+        //           locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        //           locationManager.requestWhenInUseAuthorization()
+        //           locationManager.startUpdatingLocation()
     }
+    
+    
+    
+    
     func setUp(){
         frontImageView.isHidden = true
         backImageView.isHidden = true
@@ -215,7 +232,6 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
             // Directly set the full address to lblSector
             lblSector.text = location
             
-            // Optional: You can still split the address if you need individual components for other purposes
             let components = location.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             print("Components: \(components)") // Debugging
             
@@ -223,12 +239,17 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
             if components.count > 1 {
                 // Assuming sub locality is in the second index (components[1])
                 lblArea.text = components[1]
+                lblForNeighourhood_ID.text = ("(For \(components[1]))")
+                lblForNeighourhood_Address.text = ("(For \(components[1]))")
+                self.callRegSecWebService{}
+                callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: latitudeS ?? 0.0, longitude: longitudeS ?? 0.0))
             } else {
                 lblArea.text = "Sub Locality not found"
             }
+            
+            
         }
         
-        callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: latitudeS ?? 0.0, longitude: longitudeS ?? 0.0))
         tabNeighourhoodView.layer.cornerRadius = 10
         tabNeighourhoodView.clipsToBounds = true
         yourneighbourhoodViewCornR.layer.cornerRadius = 20 // Adjust the value as needed
@@ -315,8 +336,7 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
             }
         }
         
-        
-        // self.lblresi.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+         // self.lblresi.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
         //        callCountryWebService()
         tfFlat.autocapitalizationType = .words
         tfStreet.autocapitalizationType = .words
@@ -328,7 +348,7 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
         SVProgressHUD.dismiss()
         //     callRegSecWebService()
         //         getCurrentLocation()
-        self.callNeighorhodStatusStateCity()
+       
         let areaTapGesture = UITapGestureRecognizer(target: self, action: #selector(areaLabelTapped))
         tabNeighourhoodView.isUserInteractionEnabled = true
         tabNeighourhoodView.addGestureRecognizer(areaTapGesture)
@@ -359,7 +379,67 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     
     
     
+    func detectText(in image: UIImage, completion: @escaping ([VNRecognizedTextObservation]) -> Void) {
+        guard let cgImage = image.cgImage else { return }
+        
+        let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+        let request = VNRecognizeTextRequest { (request, error) in
+            if let observations = request.results as? [VNRecognizedTextObservation] {
+                completion(observations)
+            }
+        }
+        
+        request.recognitionLevel = .accurate
+        request.recognitionLanguages = ["en-IN"]
+        request.usesLanguageCorrection = true
+        
+        try? requestHandler.perform([request])
+    }
     
+    
+    func findAadhaarNumbers(in observations: [VNRecognizedTextObservation]) -> [(text: String, boundingBox: CGRect)] {
+        var result: [(text: String, boundingBox: CGRect)] = []
+        
+        for observation in observations {
+            guard let candidate = observation.topCandidates(1).first else { continue }
+            let text = candidate.string.replacingOccurrences(of: " ", with: "")
+            
+            if text.range(of: #"^\d{12}$"#, options: .regularExpression) != nil {
+                result.append((candidate.string, observation.boundingBox))
+            }
+        }
+        
+        return result
+    }
+    
+    
+    func maskDigits(in image: UIImage, from observations: [VNRecognizedTextObservation]) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(image.size, false, 0)
+        image.draw(at: .zero)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        
+        for obs in observations {
+            guard let candidate = obs.topCandidates(1).first else { continue }
+            let fullText = candidate.string.replacingOccurrences(of: " ", with: "")
+            
+            if fullText.count == 12 {
+                let box = obs.boundingBox
+                let imageSize = image.size
+                let rect = CGRect(x: box.origin.x * imageSize.width,
+                                  y: (1 - box.origin.y - box.size.height) * imageSize.height,
+                                  width: box.size.width * imageSize.width,
+                                  height: box.size.height * imageSize.height)
+                let digitWidth = rect.width / 12.0
+                let maskRect = CGRect(x: rect.origin.x, y: rect.origin.y, width: digitWidth * 8, height: rect.height)
+                context.setFillColor(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1))
+                context.fill(maskRect)
+            }
+        }
+        
+        let resultImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resultImage
+    }
     
     
     func convertImageToBase64(image: UIImage) -> String? {
@@ -416,7 +496,7 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
         voterIDButton.setAttributedTitle(voterIDAttributedTitle, for: .normal)
         
         // Driving License Button
-        let drivingLicenseTitle = "Driving Licence "
+        let drivingLicenseTitle = "DL"
         let drivingLicenseAttributes: [NSAttributedString.Key: Any] = [
             .font: font as Any
         ]
@@ -424,12 +504,20 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
         drivingLicenseButton.setAttributedTitle(drivingLicenseAttributedTitle, for: .normal)
         
         //
-        let rentdocTitle = "Rent Agreement"
+        let rentdocTitle = "Rent Lease\nElectricity Bill"
         let rentdocAttributes: [NSAttributedString.Key: Any] = [
-            .font: font as Any
+            .font: font as Any,
+            .foregroundColor: UIColor.black // optional
         ]
+        
         let rentdocAttributedTitle = NSAttributedString(string: rentdocTitle, attributes: rentdocAttributes)
         rentdocsButton.setAttributedTitle(rentdocAttributedTitle, for: .normal)
+        
+        // MULTILINE SUPPORT
+        rentdocsButton.titleLabel?.lineBreakMode = .byWordWrapping
+        rentdocsButton.titleLabel?.textAlignment = .center
+        rentdocsButton.titleLabel?.numberOfLines = 2
+        
         
         
     }
@@ -521,11 +609,6 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     
     
     
-    
-    
-    
-    
-    
     // Update buttons and image views states
     func updateButtonStates() {
         let buttons: [(UIButton?, SelectedDocument)] = [
@@ -570,17 +653,7 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
         }
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+ 
     
     // Front image view tap gesture
     @objc private func frontImageTapped() {
@@ -732,24 +805,34 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        // Retrieve the edited (cropped) image
-        if let editedImage = info[.editedImage] as? UIImage {
-            // Set the cropped image to the selected image view
-            imageViewToUpdate?.image = editedImage
-        } else if let originalImage = info[.originalImage] as? UIImage {
-            // Fallback to original image if editing was not done
-            imageViewToUpdate?.image = originalImage
+        picker.dismiss(animated: true, completion: nil)
+        
+        // Prefer edited image, fallback to original
+        let selectedImage = (info[.editedImage] as? UIImage) ?? (info[.originalImage] as? UIImage)
+        
+        guard let image = selectedImage else {
+            print("No image found")
+            return
         }
         
-        // Dismiss the picker
-        picker.dismiss(animated: true, completion: nil)
-        guard let image = info[.editedImage] as? UIImage else { return }
-        
-        // Set the uploaded image in the correct UIImageView
-        imageViewToUpdate?.image = image
-        imageViewToUpdate = nil
+        // Run OCR and masking
+        detectText(in: image) { observations in
+            let aadhaarTexts = self.findAadhaarNumbers(in: observations)
+            
+            if let maskedImage = self.maskDigits(in: image, from: observations) {
+                DispatchQueue.main.async {
+                    self.imageViewToUpdate?.image = maskedImage
+                    self.imageViewToUpdate = nil
+                }
+            } else {
+                // No Aadhaar number found or failed to mask — fallback to original image
+                DispatchQueue.main.async {
+                    self.imageViewToUpdate?.image = image
+                    self.imageViewToUpdate = nil
+                }
+            }
+        }
     }
-    
     
     
     
@@ -762,8 +845,6 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
         imageViewToUpdate = nil
     }
     
-    
-    
     // Function to present the image picker
     func showImagePicker(for side: ImageSide) {
         let imagePicker = UIImagePickerController()
@@ -771,11 +852,6 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
         imagePicker.sourceType = .photoLibrary // You can also use .camera if needed
         present(imagePicker, animated: true, completion: nil)
     }
-    
-    
-    
-    
-    
     
     func setupDatePicker() {
         // Set the date picker mode to date only
@@ -882,11 +958,22 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
         return flags.contains(.reachable) && !flags.contains(.connectionRequired)
     }
     
-    //    @IBAction func backAction(_ sender: Any) {
-    //        let vc = storyboard?.instantiateViewController(withIdentifier: "RegisterViewController") as! RegisterViewController
-    //
-    //        self.navigationController?.popViewController(animated: true)
-    //    }
+    @IBAction func backAction(_ sender: Any) {
+        let alert = UIAlertController(title: "Confirmation",
+                                      message: "Are you sure you want to go back?\nUnsaved changes might be lost.",
+                                      preferredStyle: .alert)
+        
+        let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
+        
+        let yesAction = UIAlertAction(title: "Yes", style: .destructive) { _ in
+            if let navigationController = self.navigationController {
+                navigationController.popViewController(animated: true)
+            } else {
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
+        
+    }
     
     @IBAction func actionReachout(_ sender: Any) {
         
@@ -938,7 +1025,6 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
             self.tfCountry.isHidden = true
         }
     }
-    
     
     
     
@@ -1019,144 +1105,20 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     
     
     
-    /*
-     
-     //    *************---------------********* API Call ********--------
-     
-     // Create a dictionary mapping abbreviations to full names
-     func fullNameForState(abbreviation: String) -> String {
-     let stateAbbreviationToFullName: [String: String] = [
-     "AP": "Andhra Pradesh",
-     "AR": "Arunachal Pradesh",
-     "AS": "Assam",
-     "BR": "Bihar",
-     "OR": "Orissa",
-     "CG": "Chhattisgarh",
-     "DL": "Delhi",
-     "GA": "Goa",
-     "GJ": "Gujarat",
-     "HR": "Haryana",
-     "HP": "Himachal Pradesh",
-     "JK": "Jammu and Kashmir",
-     "JH": "Jharkhand",
-     "KA": "Karnataka",
-     "KL": "Kerala",
-     "MP": "Madhya Pradesh",
-     "MH": "Maharashtra",
-     "MN": "Manipur",
-     "ML": "Meghalaya",
-     "MZ": "Mizoram",
-     "NL": "Nagaland",
-     "OD": "Odisha",
-     "PB": "Punjab",
-     "RJ": "Rajasthan",
-     "SK": "Sikkim",
-     "TN": "Tamil Nadu",
-     "TG": "Telangana",
-     "TR": "Tripura",
-     "UP": "Uttar Pradesh",
-     "UT": "Uttarakhand",
-     "WB": "West Bengal",
-     "AN": "Andaman and Nicobar Islands",
-     "CH": "Chandigarh",
-     "DD": "Dadra and Nagar Haveli and Daman and Diu",
-     "LD": "Lakshadweep",
-     "PY": "Puducherry"
-     
-     
-     // Add other states and UTs as needed
-     ]
-     return stateAbbreviationToFullName[abbreviation] ?? abbreviation
-     }
-     
-     func getAddressFromLatLon(latitude: Double, longitude: Double, handler completionBlock: @escaping ( _ formattedAddress: String?, _ city: String?,_ zipcode: String?,_ state: String?,_ street: String?, _ addressString: String?) -> ())  { // Call this function
-     
-     let geoCoder = CLGeocoder.init()
-     geoCoder.reverseGeocodeLocation(CLLocation.init(latitude: latitude, longitude:longitude)) { [self] (places, error) in
-     
-     if let error = error as? CLError {
-     switch error.code {
-     case .network:
-     print("Network error - WiFi connection might be restricted.")
-     case .denied:
-     print("Location access denied.")
-     default:
-     print("Geocoding error: \(error.localizedDescription)")
-     }
-     return
-     }
-     
-     
-     
-     
-     if error == nil{
-     let placeMark = places! as [CLPlacemark]
-     if placeMark.count > 0 {
-     let placeMark = placeMark[0]
-     var addressString: String = ""
-     var city: String = ""
-     var street: String = ""
-     var location: String = ""
-     var zip: String = ""
-     var state: String = ""
-     var streetAddress: String = ""
-     var country: String = ""
-     var name: String = ""
-     let address = placeMark.name
-     if placeMark.subThoroughfare != nil {
-     addressString = addressString + placeMark.subThoroughfare! + ", "
-     }
-     if placeMark.thoroughfare != nil {
-     streetAddress = placeMark.thoroughfare! + ", "
-     addressString = addressString + placeMark.thoroughfare! + ", "
-     }
-     if placeMark.subLocality != nil {
-     addressString = addressString + placeMark.subLocality! + ", "
-     self.shortAddress = placeMark.subLocality!
-     }
-     if placeMark.locality != nil {
-     city = placeMark.locality!
-     addressString = addressString + placeMark.locality! + ", "
-     }
-     if placeMark.administrativeArea != nil {
-     state = fullNameForState(abbreviation: placeMark.administrativeArea!) // Convert abbreviation to full name
-     addressString = addressString + state + ", "
-     }
-     if placeMark.country != nil {
-     addressString = addressString + placeMark.country! + ", "
-     }
-     if placeMark.postalCode != nil {
-     zip = placeMark.postalCode! + " "
-     addressString = addressString + placeMark.postalCode! + " "
-     }
-     UserDefaults.standard.setValue(addressString, forKey: "FULLADDRESS")
-     print(addressString)
-     
-     // Call completion block with the address components
-     completionBlock(addressString, city, zip, state, street, streetAddress)
-     }
-     } else {
-     print("Geocoding error: \(error?.localizedDescription ?? "Unknown error")")
-     }
-     
-     }
-     }
-     */
     
     
     
     
     
     
-    
-    //       call apni with irshad malik
+    //MARK: -       call apni with irshad malik
     
     // Function to upload selected document and call web service
     
     func callRegSecWebService(_ completionClosure: @escaping () -> ()) {
         let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
-        let latString = lat != nil ? String(lat!) : ""
-        let longString = long != nil ? String(long!) : ""
+        let latString = latitudeS != nil ? String(latitudeS!) : ""
+        let longString = longitudeS != nil ? String(longitudeS!) : ""
         
         // Gender ko numeric value mein map karein (1 for Male, 2 for Female)
         var genderValue: String = ""
@@ -1492,7 +1454,95 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     
     
     
-    // ---------***********   Neighborhood Status By State/City/Pincode api  post ---------------**************/
+    
+    
+    //MARK: - Function to show alert
+    
+    func showNeighborhoodAlert(withMessage message: String) {
+        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+        
+        // Title attributed
+        let title = "Neighborhood"
+        let titleFont = [NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 16)!,
+                         NSAttributedString.Key.foregroundColor: UIColor.darkGray]
+        let attributedTitle = NSAttributedString(string: title, attributes: titleFont)
+        alert.setValue(attributedTitle, forKey: "attributedTitle")
+
+        // Message attributed
+        let messageFont = [NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 14)!,
+                           NSAttributedString.Key.foregroundColor: UIColor.darkGray]
+        let attributedMessage = NSAttributedString(string: message, attributes: messageFont)
+        alert.setValue(attributedMessage, forKey: "attributedMessage")
+
+        if let topController = UIApplication.shared.keyWindow?.rootViewController {
+            topController.present(alert, animated: true) {
+                // Auto-dismiss after 2 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    alert.dismiss(animated: true, completion: nil)
+                }
+            }
+        } else {
+            print("Failed to find a view controller to present the alert.")
+        }
+    }
+
+
+    
+    
+    
+    //MARK: - call Search Neighborhood api
+    
+    func callSearchNeighbrWebService(location: CLLocationCoordinate2D) {
+        let dictParams: [String: Any] = [
+            "lati": latitudeS ?? 0.0,
+            "longi": longitudeS ?? 0.0,
+            "areas": lblArea.text ?? ""
+        ]
+        print(dictParams)
+        self.callNeighorhodStatusStateCity()
+        
+        WebService.sharedInstance.callSearchNeighbrWebService(withParams: dictParams) { [weak self] data in
+            guard let self = self else { return }
+            
+            // Clear previous data
+            self.NeighbrhdData?.data.removeAll()
+            print("API Status:", data.status)
+
+            self.callNeighorhodStatusStateCity()
+            DispatchQueue.main.async {
+                if data.status == "success" {
+                    if !data.data.isEmpty {
+                        self.NeighbrhdData = data
+                        self.btnReachout.isHidden = true
+                        self.saveButton.isHidden = false
+                    } else {
+                        self.NeighbrhdData = nil
+                        self.btnReachout.isHidden = false
+                        self.saveButton.isHidden = true
+                    }
+                } else {
+                    self.NeighbrhdData = nil
+                    self.btnReachout.isHidden = false
+                    self.saveButton.isHidden = true
+                    self.callNeighorhodStatusStateCity()
+                }
+                
+                // Reload table view and update height
+                self.neighbourhoodDataShowTableView.reloadData()
+                self.updateTableViewHeight()
+                
+                // Call this in all cases
+                self.callStateWebService()
+                self.callCityWebService()
+               
+            }
+           
+        }
+    }
+
+    
+ 
+    // MARK: - ---------***********   Neighborhood Status By State/City/Pincode api  post ---------------**************
     
     func callNeighorhodStatusStateCity() {
         let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
@@ -1507,87 +1557,21 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
         
         print("Calling API with parameters:", dictParams)
         
-        // Directly expect NeighborhoodStatusByStateModel type
         WebService.sharedInstance.callNeighborhoodStatusByState(withParams: dictParams) { [weak self] (responseModel: NeighborhoodStatusByStateModel) in
             guard let self = self else { return }
-            
+
             print("API Response - Status: \(responseModel.status), Message: \(responseModel.message)")
-            
-            // Check the status and message to show popup
-            if responseModel.status == "success" && responseModel.message == "Oops! Seems like we missed your area. Please share your address details and we will have a neighborhood created for you." {
-                
-                // Show popup alert on the main thread
-                DispatchQueue.main.async {
-                    self.showNeighborhoodAlert(withMessage: responseModel.message)
-                }
-            }
-        }
-    }
-    
-    
-    
-    // Function to show alert
-    func showNeighborhoodAlert(withMessage message: String) {
-        let alert = UIAlertController(title: "Neighborhood", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        
-        if let topController = UIApplication.shared.keyWindow?.rootViewController {
-            topController.present(alert, animated: true, completion: nil)
-        } else {
-            print("Failed to find a view controller to present the alert.")
-        }
-    }
-    
-    
-    
-    // call Search Neighborhood api
-    func callSearchNeighbrWebService(location: CLLocationCoordinate2D) {
-        let dictParams: [String: Any] = [
-            "lati": latitudeS ?? 0.0,
-            "longi": longitudeS ?? 0.0,
-            "areas": lblArea.text ?? ""
-        ]
-        print(dictParams)
-        
-        // API Call
-        WebService.sharedInstance.callSearchNeighbrWebService(withParams: dictParams) { [weak self] data in
-            guard let self = self else { return }
-            
-            // Clear previous data and load new data
-            self.NeighbrhdData?.data.removeAll()
-            
-            // Call other web services
-            self.callStateWebService()
-            self.callCityWebService()
-            
-            
+
+            // Always show the message
             DispatchQueue.main.async {
-                // Check if data is successful and not empty
-                if data.status == "success" {
-                    if !data.data.isEmpty {
-                        self.NeighbrhdData = data
-                        self.btnReachout.isHidden = true
-                        self.saveButton.isHidden = false
-                    } else {
-                        // Handle case where no data is found for the given parameters
-                        self.NeighbrhdData = nil
-                        self.btnReachout.isHidden = false
-                        self.saveButton.isHidden = true
-                    }
-                } else {
-                    // Handle failure case when status is not "success"
-                    self.NeighbrhdData = nil
-                    self.btnReachout.isHidden = false
-                    self.saveButton.isHidden = true
-                }
-                
-                
-                // Reload table view and update height
-                self.neighbourhoodDataShowTableView.reloadData()
-                self.updateTableViewHeight()
+                self.showNeighborhoodAlert(withMessage: responseModel.message)
             }
         }
     }
+
+    
+    
+    //MARK: - CurrentSearch location
     
     func callCurrentSearchNeighbrWebService() {
         let dictParams: [String: Any] = [
@@ -1595,21 +1579,13 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
             "lati": lat ?? 0.0,
             "longi": long ?? 0.0
         ]
-        
-        // API Call
+        print(dictParams)
+         // API Call
         WebService.sharedInstance.callCurrentSearchNeighbrWebService(withParams: dictParams) { [weak self] data in
             guard let self = self else { return }
-            
-            // Clear previous data and load new data
+             // Clear previous data and load new data
             self.NeighbrhdData?.data.removeAll()
-            
-            // Call other web services
-            self.callNeighorhodStatusStateCity()
-            self.callStateWebService()
-            self.callCityWebService()
-            
-            
-            DispatchQueue.main.async {
+             DispatchQueue.main.async {
                 // Update neighbourhood data
                 self.NeighbrhdData = data
                 
@@ -1630,6 +1606,7 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     }
     
     
+    // MARK: - Address api call
     
     func callAddressWebService() {
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -1648,6 +1625,7 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
                 "userid": id ?? ""
             ]
             
+            print(dictParams)
             WebService.sharedInstance.callAddressWebService(withParams: dictParams) { data in
                 self.AddressData = data
                 self.callStateWebService()
@@ -1679,16 +1657,11 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
                 "cityid":cityId ?? "",
                 "pincode":self.tfPincode.text ?? "",
                 "userid": id ?? ""
-                
             ]
-            
-            
             WebService.sharedInstance.callAddressWebService(withParams: dictParams) { data in
                 self.AddressData = data
-                
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
-                
-                vc.name = self.name ?? ""
+                 let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
+                 vc.name = self.name ?? ""
                 vc.secname = self.secname ?? ""
                 //                vc.Neighbourname = self.lblNeighbr.text ?? ""
                 if let selectedIndexPath = self.selectedIndexPath {
@@ -1696,8 +1669,6 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
                 } else {
                     vc.Neighbourname = "" // Default value
                 }
-                
-                
                 self.navigationController?.pushViewController(vc, animated: false)
                 //
             }
@@ -1706,17 +1677,12 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
     }
     
     
-    // MARK: -  CALL API FOR USER LOCATION   UserLocation
-    
-    
+    // MARK: -  CALL API FOR USER LOCATION   UserLocation current
     
     func callUserLocationWebService() {
-        guard let id = UserDefaults.standard.string(forKey: "userid"), !id.isEmpty else {
-            print("🚨 User ID is missing!")
-            return
-        }
+        let id = UserDefaults.standard.string(forKey: "userid")
+        print("✅ User ID after login: \(id ?? "Not Found")")
         let url = "https://dev.neighbrsnook.com/admin/api/user-location"
-        
         let params: [String: Any] = [
             "userid": id,
             "latitude": lat ?? 0.0,
@@ -1729,7 +1695,7 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
             "city_name": self.tfCity.text ?? "",
             "pincode": Int(self.tfPincode.text ?? "0") ?? 0
         ]
-        
+        print(params)
         AF.request(url, method: .post, parameters: params, encoding: JSONEncoding.default, headers: ["Content-Type": "application/json"]).responseJSON { response in
             switch response.result {
             case .success(let data):
@@ -1737,6 +1703,33 @@ class RegisterSecondViewController: UIViewController, UIPickerViewDelegate, UIPi
             case .failure(let error):
                 print("❌ API Error: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    
+    
+    
+    // MARK: - API call to post device information
+    
+    func callDeviceInfoWebService() {
+        let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
+        
+        // Get device information
+        let deviceInfo = getDeviceInfo()
+        
+        // Set up parameters for API
+        let dictParams: [String: Any] = [
+            "device_model": deviceInfo.deviceModel,
+            "device_imei": deviceInfo.deviceIMEI,  // This will contain UUID
+            "device_platform": deviceInfo.devicePlatform,
+            "device_id": deviceInfo.deviceID,
+            "user_id": userId
+        ]
+        
+        // Call the Web Service
+        WebService.sharedInstance.callDeviceInfo(withParams: dictParams) { data in
+            // Handle the response here
+            print("Device info posted successfully")
         }
     }
     
@@ -1805,16 +1798,29 @@ extension RegisterSecondViewController: CLLocationManagerDelegate {
             let country = placemark.country ?? "Country Not Found"
             
             DispatchQueue.main.async {
-                // lblSector format: "Sector 16A, Sector 16A, Noida, Uttar Pradesh, 201301, India."
-                self.lblSector.text = "\(sector), \(sector), \(city), \(state), \(postalCode), \(country)"
+                // ✅ Save to your variables
+                self.lat = location.coordinate.latitude
+                self.long = location.coordinate.longitude
+                self.city = city
+                self.state = state
+                self.zipcode = postalCode
                 
-                // lblArea format: "Sector 16A."
-                self.lblArea.text = "\(sector)."
-                self.tfCity.text = "\(city)"
-                self.tfState.text = "\(state)"
-                self.tfPincode.text = "\(postalCode)"
+                // ✅ Set UI values
+                self.lblSector.text = "\(sector), \(city), \(state), \(postalCode), \(country)"
+                self.lblArea.text = "\(sector)"
+                self.tfCity.text = city
+                self.tfState.text = state
+                self.tfPincode.text = postalCode
+                self.lblForNeighourhood_ID.text = "(For \(sector).)"
+                self.lblForNeighourhood_Address.text = "(For \(sector).)"
                 self.callUserLocationWebService()
                 
+                // ✅ Move your print statements here
+                print("City in RegisterSecondVC: \(self.city ?? "No City")")
+                print("State in RegisterSecondVC: \(self.state ?? "No State")")
+                print("Zipcode in RegisterSecondVC: \(self.zipcode ?? "No Zipcode")")
+                print("Received Latitude: \(self.lat ?? 0.0)")
+                print("Received Longitude: \(self.long ?? 0.0)")
             }
         }
     }
@@ -1848,22 +1854,17 @@ extension RegisterSecondViewController: UITableViewDataSource, UITableViewDelega
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "NeighbourhoodDataShowTableViewCell", for: indexPath) as! NeighbourhoodDataShowTableViewCell
-        
         let data = NeighbrhdData?.data[indexPath.row]
         cell.textLabel?.text = data?.nbdName // Set name in the cell
-        
         cell.textLabel?.textColor = UIColor.darkGray
         cell.textLabel?.font = UIFont(name: "Montserrat-Regular", size: 16)
-        
         // If there's only one item, automatically select it
         if NeighbrhdData?.data.count == 1 {
             selectedIndexPath = indexPath // Set first row as selected
         }
-        
         // Update checkbox appearance based on selection
         cell.isCheckedNeig = (selectedIndexPath == indexPath) // Update selection
         cell.updateButtonAppearanceN() // Update button appearance
-        
         // If cell is selected, change label color to green
         if selectedIndexPath == indexPath {
             cell.textLabel?.textColor = UIColor(red: 0.0, green: 128/255.0, blue: 0.0, alpha: 1.0) // Green for selected

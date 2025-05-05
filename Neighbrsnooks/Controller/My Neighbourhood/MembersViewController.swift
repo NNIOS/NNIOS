@@ -13,13 +13,14 @@ class MembersViewController: UIViewController {
     
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var MembersLbl: UILabel!
+    @IBOutlet weak var DMView: UIView!
     
     var MemberListData : MembersModel?
     var selectedNeighborhoodId: String? // Property to receive the selected ID
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        updateColors()
         // Do any additional setup after loading the view.
     }
     
@@ -48,7 +49,25 @@ class MembersViewController: UIViewController {
         _ = navigationController?.popViewController(animated: true)
 
     }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
     
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+            DMView.backgroundColor = .black
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+           
+
+            // Light mode mein PollsView ka background red karna
+            DMView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            tableviewMembers.separatorStyle = .none
+        }
+    }
 
 
 }

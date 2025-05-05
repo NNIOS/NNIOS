@@ -13,6 +13,7 @@ protocol PopupSelectionDelegate: AnyObject {
 }
 
 
+@available(iOS 16.0, *)
 class RegisterFirstPopupVC: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     
@@ -78,6 +79,12 @@ class RegisterFirstPopupVC: UIViewController, UITableViewDelegate, UITableViewDa
         self.view.isOpaque = false
         
      }
+    
+    
+    
+    //MARK: - tab bar hide
+   
+    
     
     
     deinit {

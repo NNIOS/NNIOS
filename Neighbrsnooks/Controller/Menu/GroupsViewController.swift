@@ -57,6 +57,7 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.searchView.isHidden = true
         tfSearch.delegate = self
         

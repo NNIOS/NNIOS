@@ -11,6 +11,7 @@ import CoreLocation
 import GooglePlaces
 import Network
 import GoogleMaps
+import SVProgressHUD
 
 @available(iOS 16.0, *)
 class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, CLLocationManagerDelegate, ProfileLocationDelegate{
@@ -38,6 +39,7 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
     var selectedLocation: String?
     var selectedLatitude: Double?
     var selectedLongitude: Double?
+    var profileData: ProfileModel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,12 +53,17 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
         tableView.delegate = self
         tableView.dataSource = self
         
-        // Set delegates
-        locationManager.delegate = self
-        locationManager.requestWhenInUseAuthorization()
+//        // Set delegates
+//        locationManager.delegate = self
+//        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+//        locationManager.requestWhenInUseAuthorization()
+//        
+//        // Request current location
+//        locationManager.requestLocation()
         
-        // Request current location
-        locationManager.requestLocation()
+        callUserProfileWebService{ [self] in
+            SVProgressHUD.dismiss()
+        }
     }
     
     
@@ -133,63 +140,72 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
     
     // Get current location and update the label
     @IBAction func getCurrentLocationTapped(_ sender: Any) {
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
         activityIndicator.startAnimating() // Start loader
         print("tab Current button\(locationManager)")
-        locationManager.requestLocation()// Fetch current location
-        // Navigate after successfully fetching location
-        self.navigateToRegisterSecondVC()
-        
+        locationManager.requestLocation()
+        locationManager.startUpdatingLocation()
+       
     }
-    
+   
     
     // CLLocationManagerDelegate methods
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // Stop the activity indicator once location is updated
-        activityIndicator.stopAnimating()
-        
-        
-        if let location = locations.first {
-            lat = location.coordinate.latitude
-            long = location.coordinate.longitude
-            
-            print("Latitude: \(lat!), Longitude: \(long!)") // Debugging print
-            
+            guard let currentLocation = locations.first else {
+                activityIndicator.stopAnimating()
+                print("Error: Could not retrieve current location.")
+                return
+            }
+
+            // Stop updating location (for a single fetch)
+            locationManager.stopUpdatingLocation()
+
             let geocoder = CLGeocoder()
-            geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            geocoder.reverseGeocodeLocation(currentLocation) { [weak self] (placemarks, error) in
+                guard let self = self else { return }
+                self.activityIndicator.stopAnimating()
+
                 if let error = error {
-                    
-                    print("Geocoding error: \(error.localizedDescription)")
-                    self.lblCurrentLocationDataShow.text = "Failed to fetch address"
-                    self.retryLocationFetch(withDelay: 5)
+                    print("Error in reverse geocoding: \(error.localizedDescription)")
                     return
                 }
-                
+
                 if let placemark = placemarks?.first {
                     self.city = placemark.locality
                     self.state = placemark.administrativeArea
                     self.zipcode = placemark.postalCode
-                    
+
+                    let locality = placemark.subLocality ?? "N/A"
+
                     let address = [
                         placemark.name,
-                        placemark.subLocality,
+                        locality,
                         self.city,
                         self.state,
                         self.zipcode,
                         placemark.country
                     ].compactMap { $0 }.joined(separator: ", ")
-                    
+
                     self.lblCurrentLocationDataShow.text = address
                     self.selectedLocation = address
-                    self.isSearchLocation = false
-                    
-                    print("Current Location Address: \(address)") // Debugging print
+                    self.isSearchLocation = true
+
+                    // Store latitude and longitude
+                    self.selectedLatitude = currentLocation.coordinate.latitude
+                    self.selectedLongitude = currentLocation.coordinate.longitude
+                    print("Abdul Latitude: \(self.selectedLatitude!), Abdul Longitude: \(self.selectedLongitude!)")
+
+                    if !self.isNavigated {
+                        self.isNavigated = true
+                        DispatchQueue.main.async {
+                            self.navigateToRegisterSecondVC()
+                        }
+                    }
                 }
             }
-        } else {
-            print("No location found") // Debugging print
-            lblCurrentLocationDataShow.text = "Location not available"
         }
-    }
         
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -211,6 +227,7 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
             registerSecondVC.latitudeS = self.selectedLatitude ?? 0.0
             registerSecondVC.longitudeS = self.selectedLongitude ?? 0.0
             registerSecondVC.isFromProfile = true
+            registerSecondVC.profileData = profileData
             
             // Debugging to ensure the data being passed
             print("Passing latitude: \(registerSecondVC.latitudeS), longitude: \(registerSecondVC.longitudeS)")
@@ -231,6 +248,27 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
             print("Longitude: \(self.selectedLongitude ?? 0.0)")
             
             navigationController?.pushViewController(registerSecondVC, animated: true)
+        }
+    }
+    
+    
+    func callUserProfileWebService(_ completionClosure: @escaping () -> ()) {
+        let id = UserDefaults.standard.string(forKey: "userid")
+        let idCr = UserDefaults.standard.string(forKey: "idOther")
+        var dictParams: [String: Any] = [:]
+        dictParams = [
+            "userid": id ?? "",
+            "loggeduser": id ?? ""
+        ]
+        
+        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+            self.profileData = data
+            print("Abdul data is : \(self.profileData ?? data)")
+            
+            UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
+            UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
+            UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
+            completionClosure()
         }
     }
 

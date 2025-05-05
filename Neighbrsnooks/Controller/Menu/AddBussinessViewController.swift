@@ -62,6 +62,20 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     @IBOutlet weak var lblNeighborhood: UILabel!
     
     @IBOutlet weak var lblCountPdfFile: UILabel!
+    @IBOutlet weak var BussinesssView: UIView!
+    
+    @IBOutlet weak var BusinesNameView: UIView!
+    @IBOutlet weak var TagLineView: UIView!
+    @IBOutlet weak var CategoryView: UIView!
+  //  @IBOutlet weak var DescView: UIView!
+    
+    @IBOutlet weak var UploadImgView: UIView!
+    @IBOutlet weak var BussinessHoursView: UIView!
+    @IBOutlet weak var DocTypeView: UIView!
+    @IBOutlet weak var BussinessAddView: UIView!
+    
+    @IBOutlet weak var FlatView: UIView!
+    @IBOutlet weak var StreetView: UIView!
     
     //    let doPickerView = UIPickerView()
     let pickerView = UIPickerView()
@@ -104,8 +118,10 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     let endTimePicker = UIDatePicker()
     let hiddenTextField = UITextField()
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         setupTextView()
         btnOpenOnAllDay.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle
         btnSelectWeekyOf.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle
@@ -120,7 +136,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         self.serviceName.append("Bussiness Categories")
         tfBussinessName.autocapitalizationType = .words
         tfTag.autocapitalizationType = .words
-        tvDescribe.autocapitalizationType = .none
+//        tvDescribe.autocapitalizationType = .words
         tfAdd1.autocapitalizationType = .words
         tfAdd2.autocapitalizationType = .words
         tfWeb.autocapitalizationType = .words
@@ -196,6 +212,97 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateColors()
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+           
+           
+            BussinesssView.backgroundColor = .black
+            BusinesNameView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            TagLineView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            CategoryView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            UploadImgView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            BussinessHoursView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            DocTypeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            BussinessAddView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            viewWeekly.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            tvDescribe.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            BusinesNameView.backgroundColor = .black
+            TagLineView.backgroundColor = .black
+            CategoryView.backgroundColor = .black
+            UploadImgView.backgroundColor = .black
+            BussinessHoursView.backgroundColor = .black
+            DocTypeView.backgroundColor = .black
+            BussinessAddView.backgroundColor = .black
+            viewWeekly.backgroundColor = .black
+            tvDescribe.backgroundColor = .black
+            FlatView.backgroundColor = .black
+            StreetView.backgroundColor = .black
+            
+            BusinesNameView.layer.borderWidth = 1.0 // Enable border in dark mode
+            TagLineView.layer.borderWidth = 1.0
+            CategoryView.layer.borderWidth = 1.0
+            
+            UploadImgView.layer.borderWidth = 1.0 // Enable border in dark mode
+            BussinessHoursView.layer.borderWidth = 1.0
+            DocTypeView.layer.borderWidth = 1.0
+            BussinessAddView.layer.borderWidth = 1.0
+            viewWeekly.layer.borderWidth = 1.0
+            tvDescribe.layer.borderWidth = 1.0
+            
+        } else {
+           
+            BussinesssView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            BusinesNameView.isUserInteractionEnabled = true
+            TagLineView.isUserInteractionEnabled = true
+            CategoryView.isUserInteractionEnabled = true
+                   
+            UploadImgView.isUserInteractionEnabled = true
+            BussinessHoursView.isUserInteractionEnabled = true
+            DocTypeView.isUserInteractionEnabled = true
+            BussinessAddView.isUserInteractionEnabled = true
+            tvDescribe.isUserInteractionEnabled = true
+            
+            BusinesNameView.layer.borderWidth = 0 // Remove border in light mode
+            TagLineView.layer.borderWidth = 0
+            CategoryView.layer.borderWidth = 0
+            
+            UploadImgView.layer.borderWidth = 0 // Remove border in light mode
+            BussinessHoursView.layer.borderWidth = 0
+            DocTypeView.layer.borderWidth = 0
+            BussinessAddView.layer.borderWidth = 0
+            viewWeekly.layer.borderWidth = 0
+            tvDescribe.layer.borderWidth = 0
+            
+            BusinesNameView.backgroundColor = .white
+            TagLineView.backgroundColor = .white
+            CategoryView.backgroundColor = .white
+            UploadImgView.backgroundColor = .white
+            BussinessHoursView.backgroundColor = .white
+            DocTypeView.backgroundColor = .white
+            BussinessAddView.backgroundColor = .white
+            viewWeekly.backgroundColor = .white
+            FlatView.backgroundColor = .white
+            StreetView.backgroundColor = .white
+            
+        }
+      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateColors()
+        }
+    }
+    
     
     // Start Time label click event
     @objc func startTimeTapped() {
@@ -224,8 +331,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
 
         alert.addAction(selectAction)
         alert.addAction(cancelAction)
-
-        present(alert, animated: true)
+         present(alert, animated: true)
     }
 
     
@@ -240,11 +346,9 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let popupVC = storyboard.instantiateViewController(withIdentifier: "SelectWeekDaysPopupVC") as? SelectWeekDaysPopupVC {
             popupVC.delegate = self
-//            popupVC.modalPresentationStyle = .overFullScreen  // ✅ Full screen transparent modal
-//            popupVC.modalTransitionStyle = .crossDissolve    // ✅ Smooth animation
-//            popupVC.modalPresentationStyle = .overCurrentContext
             popupVC.modalPresentationStyle = .overFullScreen
             popupVC.modalTransitionStyle = .crossDissolve
+            
 
             self.present(popupVC, animated: true)
         }
@@ -256,8 +360,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         lblSelectWeeklyOfDay.text = selectedDays.joined(separator: ", ")
         lblSelectWeeklyOfDay.text = selectedDays.isEmpty ? "Select day" : selectedDays.joined(separator: ", ")
         updateViewHeight() // ✅ Dynamically UIView ki height adjust karein
-        
-    }
+     }
     
     // MARK: - deleteMedia Protocol Method
     func didUpdateMedia(imageArray: [UIImage], videoArray: [URL]) {
@@ -270,8 +373,11 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     func updateMediaCount() {
         let totalMedia = imageArray.count + videoArray.count
         lblMediaCount.text = "\(totalMedia) preview"
-        lblMediaCount.isHidden = totalMedia == 0 // Hide the label if no media
+        lblMediaCount.isHidden = totalMedia == 0
     }
+
+    
+
     
     
     @objc func previewLabelTapped() {
@@ -335,13 +441,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         _ = navigationController?.popViewController(animated: true)
         
     }
-    
-    
-    
-    
-    
-    
-    
+   
     
     @objc func imageViewTapped(_ sender:AnyObject){
         //   selectPictureThroughPhotoGallery()
@@ -352,9 +452,13 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     
     
     @IBAction func selectDocPhotos(_ sender: UIButton) {
+        if imageArray.count >= 2 && videoArray.count >= 1 {
+            showAlert(message: "You can only add up to 3 media items (1 video and 2 images).")
+            return
+        }
+        // Warna permission check karke image/video select karne dena hai
         checkCameraPermission { [weak self] granted in
             guard let self = self else { return }
-            
             if granted {
                 self.selectImages()
             }
@@ -362,9 +466,12 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     }
     
     
-    //-------------------- opne tha camra and upload image and videos ---------
-    
     @objc func selectImages() {
+        if imageArray.count >= getImageLimit() && videoArray.count >= getVideoLimit() {
+            showAlert(message: "You have reached the maximum media limit.")
+            return
+        }
+
         let actionSheet = UIAlertController()
         
         actionSheet.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
@@ -382,8 +489,28 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         }))
         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
-        present(actionSheet, animated: true, completion: nil)
+        self.present(actionSheet, animated: true, completion: nil)
     }
+
+    
+    func getImageLimit() -> Int {
+        return Int(UserDefaults.standard.string(forKey: "imageLimit") ?? "0") ?? 0
+    }
+
+    func getVideoLimit() -> Int {
+        return Int(UserDefaults.standard.string(forKey: "videoLimit") ?? "0") ?? 0
+    }
+
+    
+    func didCrop(image: UIImage) {
+        if imageArray.count >= getImageLimit() {
+            showAlert(message: "You can only add \(getImageLimit()) image(s).")
+            return
+        }
+        imageArray.append(image)
+         
+    }
+
     
     func openCamera() {
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
@@ -404,7 +531,6 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         var config = PHPickerConfiguration()
         config.selectionLimit = 0 // 0 means no limit
         config.filter = .images
-        
         let picker = PHPickerViewController(configuration: config)
         picker.delegate = self
         present(picker, animated: true, completion: nil)
@@ -429,67 +555,85 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         present(videoPickerController, animated: true, completion: nil)
     }
     
+     
     
-    
-    
-    func presentCropViewController(image: UIImage) {
-        let cropViewController = TOCropViewController(image: image)
-        cropViewController.delegate = self
-        self.present(cropViewController, animated: true, completion: nil)
+    func resetMediaArrays() {
+        imageArray.removeAll()  // Clear all images
+        videoArray.removeAll()  // Clear all videos
+        DispatchQueue.main.async {
+            self.updateMediaCount()  // Update the media count to 0
+        }
     }
     
-    
-    
+
+
+
+// MARK: - Image Picker Delegates (Keep your original code exactly as is)
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true, completion: nil)
-        
-        if let image = info[.originalImage] as? UIImage {
-            // Crop karne ke liye function ko call karein
-            presentCropViewController(image: image)
-            // Add image to the image array
-            imageArray.append(image)
-            DispatchQueue.main.async {
-                self.updateMediaCount()
-            }
-        } else if let videoURL = info[.mediaURL] as? URL {
-            // Add video to the video array
-            videoArray.append(videoURL)
-            DispatchQueue.main.async {
-                self.updateMediaCount() // ✅ Video count update ho jayega
+
+        if let mediaType = info[.mediaType] as? String {
+            if mediaType == "public.image" {
+                if let image = info[.originalImage] as? UIImage {
+                    if imageArray.count >= getImageLimit() {
+                        showAlert(message: "Only \(getImageLimit()) image(s) allowed.")
+                        return
+                    }
+                    showCrop(image: image)
+                }
+            } else if mediaType == "public.movie" {
+                if videoArray.count >= getVideoLimit() {
+                    showAlert(message: "Only \(getVideoLimit()) video(s) allowed.")
+                    return
+                }
+
+                if let videoURL = info[.mediaURL] as? URL {
+                    self.videoArray.append(videoURL)
+                 }
             }
         }
     }
+
+
+func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+    picker.dismiss(animated: true, completion: nil)
     
+    let selectedImages = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) }
+    let selectedVideos = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) }
     
+    if imageArray.count + selectedImages.count > 3 {
+        showAlert(message: "You can only upload a maximum of 3 images.")
+        return
+    }
     
-    
-    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true, completion: nil)
-        for result in results {
-            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
-                result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
-                    if let imageNew = object as? UIImage {
-                        DispatchQueue.main.async {
-                            self.imageArray.append(imageNew)
-                            self.updateMediaCount() // ✅ Media count update ho raha hai
-                            self.presentCropViewController(image: imageNew)
-                        }
+    if videoArray.count + selectedVideos.count > 1 {
+        showAlert(message: "You can only upload a maximum of 1 video.")
+        return
+    }
+
+    for result in results {
+        if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+            result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
+                if let imageNew = object as? UIImage {
+                    DispatchQueue.main.async {
+                        self.showCrop(image: imageNew)
                     }
                 }
-            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
-                result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
-                    if let videoURL = url {
-                        DispatchQueue.main.async {
+            }
+        } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
+            result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
+                if let videoURL = url {
+                    DispatchQueue.main.async {
+                        if self.videoArray.count < 1 {
                             self.videoArray.append(videoURL)
-                            self.updateMediaCount() // ✅ Video count update ho jayega
+                            self.updateMediaCount()
                         }
                     }
                 }
             }
         }
     }
-    
-    
+}
     
     
     
@@ -607,9 +751,6 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     
     
     
-    
-    
-    
     @IBAction func serviceBtnAction(_ sender: UIButton) {
         self.view.endEditing(true)
         //        self.showDropdownData(showOn: tfCategory, DropdownName: serviceDropdownData)
@@ -639,30 +780,33 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     }
     
      
+    // MARK: - call api callCatBussinessWebService for image limit video limit
     
     func callCatBussinessWebService() {
-        
         let dictParams: Dictionary<String, Any> = ["":""]
-        
         WebService.sharedInstance.callCatBussinessWebService(withParams: dictParams) { data in
             self.AddPCategoryData = data
             UserDefaults.standard.set(self.AddPCategoryData?.nbdata.first?.id, forKey: "id")
             UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
+            
+            // ✅ Save image and video limits here
+            
+            UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
+            UserDefaults.standard.set(self.AddPCategoryData?.businessVideoSize, forKey: "videoLimit")
+            
             for value in self.AddPCategoryData?.nbdata ?? [] {
                 self.serviceName.append(value.businessTitle ?? "")
             }
-//            self.serviceDropdownData.dataSource = self.serviceName
-            
             
         }
     }
     
     
     
-    func textViewDidChange(_ textView: UITextView) {
-        let text = textView.text.lowercased() // Pehle sab lowercase me convert kar lo
-        textView.text = text.capitalizingFirstLetterOfSentence()
-    }
+//    func textViewDidChange(_ textView: UITextView) {
+//        let text = textView.text.lowercased() // Pehle sab lowercase me convert kar lo
+//        textView.text = text.capitalizingFirstLetterOfSentence()
+//    }
     
     
     func selectPDF() {
@@ -881,15 +1025,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     }
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
+     
     
     func callsendImageAPI(param:[String: Any],arrImage:[UIImage],imageKey:String,URlName:String, withblock:@escaping ()->Void){
         
@@ -993,24 +1129,37 @@ extension AddBussinessViewController: UIImagePickerControllerDelegate, UINavigat
 
 @available(iOS 16.0, *)
 extension AddBussinessViewController: TOCropViewControllerDelegate {
-    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, withRect cropRect: CGRect, angle: Int)
-    
-    {
-        self.imageArray.append(image)
-        self.images.append(image)
-        cropViewController.dismiss(animated: true, completion: nil)
+    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, withRect cropRect: CGRect, angle: Int) {
+        print("Crop completed successfully!")
+        cropViewController.dismiss(animated: true) {
+            if self.imageArray.count < 2 {
+                self.imageArray.append(image)
+                print("Image added to array. Current count: \(self.imageArray.count)")
+                self.updateMediaCount()
+            } else {
+                print("Image count limit reached!")
+            }
+        }
     }
     
     
-    
-    @nonobjc func cropViewController(_ cropViewController: TOCropViewController, didFinishCancelled cancelled: Bool) {
-        cropViewController.dismiss(animated: true, completion: nil)
+    func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+        print("Crop completed successfully!")
+        cropViewController.dismiss(animated: true) {
+            if self.imageArray.count < 2 {
+                self.imageArray.append(image)
+                print("Image added to array. Current count: \(self.imageArray.count)")
+                self.updateMediaCount()
+            } else {
+                print("Image count limit reached!")
+            }
+        }
     }
+
 }
 
 
-
-
+ 
 
  
 

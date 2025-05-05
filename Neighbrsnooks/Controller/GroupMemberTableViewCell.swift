@@ -33,6 +33,7 @@ class GroupMemberTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+        defaultTextColor = lblName.textColor
         updateColors()
     }
 

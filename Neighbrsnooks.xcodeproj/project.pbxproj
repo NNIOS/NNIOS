@@ -64,7 +64,6 @@
 		0491B6C82DA7BDD400955502 /* CamPostCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B6B12DA7BDD400955502 /* CamPostCollectionViewCell.swift */; };
 		0491B6C92DA7BDD400955502 /* UploadEventDetailModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B6BE2DA7BDD400955502 /* UploadEventDetailModel.swift */; };
 		0491B6CA2DA7BDD400955502 /* PostDetailsCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B6B62DA7BDD400955502 /* PostDetailsCollectionViewCell.swift */; };
-		0491B6CB2DA7BDD400955502 /* PostDetailscommentVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B6B72DA7BDD400955502 /* PostDetailscommentVC.swift */; };
 		0491B6CC2DA7BDD400955502 /* PostDetailsShowDataCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B6B92DA7BDD400955502 /* PostDetailsShowDataCollectionViewCell.swift */; };
 		0491B6CD2DA7BDD400955502 /* PostDotViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B6BB2DA7BDD400955502 /* PostDotViewController.swift */; };
 		0491B6CE2DA7BDD400955502 /* PostViewShowImgVideosColleViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B6AD2DA7BDD400955502 /* PostViewShowImgVideosColleViewCell.swift */; };
@@ -460,6 +459,7 @@
 		04C2BD672DA92FE8000D967E /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD662DA92FE8000D967E /* FirebaseStorage */; };
 		04C2BD692DA92FE8000D967E /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD682DA92FE8000D967E /* FirebaseStorageCombine-Community */; };
 		04C2BD6B2DA92FE8000D967E /* FirebaseVertexAI in Frameworks */ = {isa = PBXBuildFile; productRef = 04C2BD6A2DA92FE8000D967E /* FirebaseVertexAI */; };
+		04CAA8CE2DB9148F00BA73C8 /* ResetPasswordVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04CAA8CD2DB9148F00BA73C8 /* ResetPasswordVC.swift */; };
 		04DB4B8C2DA79CFA00A4CC0C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04DB4B8B2DA79CFA00A4CC0C /* Assets.xcassets */; };
 		04ED67172DAD341300822687 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 04ED67162DAD341300822687 /* GoogleService-Info.plist */; };
 		9E94EBEF2DA7802500DD28FD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E94EBEE2DA7802500DD28FD /* AppDelegate.swift */; };
@@ -543,7 +543,6 @@
 		0491B6B42DA7BDD400955502 /* PostBannerEnlCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostBannerEnlCollectionViewCell.swift; sourceTree = "<group>"; };
 		0491B6B52DA7BDD400955502 /* PostBannerEnlViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostBannerEnlViewController.swift; sourceTree = "<group>"; };
 		0491B6B62DA7BDD400955502 /* PostDetailsCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailsCollectionViewCell.swift; sourceTree = "<group>"; };
-		0491B6B72DA7BDD400955502 /* PostDetailscommentVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailscommentVC.swift; sourceTree = "<group>"; };
 		0491B6B82DA7BDD400955502 /* PostDetailsMainTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailsMainTableViewCell.swift; sourceTree = "<group>"; };
 		0491B6B92DA7BDD400955502 /* PostDetailsShowDataCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailsShowDataCollectionViewCell.swift; sourceTree = "<group>"; };
 		0491B6BA2DA7BDD400955502 /* PostDetailsShowDataViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailsShowDataViewController.swift; sourceTree = "<group>"; };
@@ -920,6 +919,7 @@
 		0491BA2F2DA7D8F600955502 /* AddressModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressModel.swift; sourceTree = "<group>"; };
 		0491BA312DA7DE0600955502 /* GroupMessageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupMessageViewController.swift; sourceTree = "<group>"; };
 		04AB900E2DB12894008761C9 /* EmailVerifyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailVerifyModel.swift; sourceTree = "<group>"; };
+		04CAA8CD2DB9148F00BA73C8 /* ResetPasswordVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResetPasswordVC.swift; sourceTree = "<group>"; };
 		04DB4B8B2DA79CFA00A4CC0C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		04ED67152DAD1A6700822687 /* Neighbrsnooks.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Neighbrsnooks.entitlements; sourceTree = "<group>"; };
 		04ED67162DAD341300822687 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -1011,6 +1011,7 @@
 		0491B6592DA7ABF900955502 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				04CAA8CD2DB9148F00BA73C8 /* ResetPasswordVC.swift */,
 				0491B98C2DA7BF1600955502 /* AdressProofModel.swift */,
 				0491B98D2DA7BF1600955502 /* AnnouncementTableViewCell.swift */,
 				0491B98E2DA7BF1600955502 /* BusinessRatingModel.swift */,
@@ -1173,7 +1174,6 @@
 				0491B6B42DA7BDD400955502 /* PostBannerEnlCollectionViewCell.swift */,
 				0491B6B52DA7BDD400955502 /* PostBannerEnlViewController.swift */,
 				0491B6B62DA7BDD400955502 /* PostDetailsCollectionViewCell.swift */,
-				0491B6B72DA7BDD400955502 /* PostDetailscommentVC.swift */,
 				0491B6B82DA7BDD400955502 /* PostDetailsMainTableViewCell.swift */,
 				0491B6B92DA7BDD400955502 /* PostDetailsShowDataCollectionViewCell.swift */,
 				0491B6BA2DA7BDD400955502 /* PostDetailsShowDataViewController.swift */,
@@ -2354,6 +2354,7 @@
 				0491B7F42DA7BE1900955502 /* BussinessDataCollectionViewCell.swift in Sources */,
 				0491B7F52DA7BE1900955502 /* MyProfileGroupViewController.swift in Sources */,
 				0491B7F62DA7BE1900955502 /* MennuPostViewController.swift in Sources */,
+				04CAA8CE2DB9148F00BA73C8 /* ResetPasswordVC.swift in Sources */,
 				0491B7F72DA7BE1900955502 /* NeighbourhoodViewController.swift in Sources */,
 				0491B7F82DA7BE1900955502 /* UnlikePostModel.swift in Sources */,
 				0491B7F92DA7BE1900955502 /* SelectWeekDaysPopupVC.swift in Sources */,
@@ -2408,7 +2409,6 @@
 				0491B6C82DA7BDD400955502 /* CamPostCollectionViewCell.swift in Sources */,
 				0491B6C92DA7BDD400955502 /* UploadEventDetailModel.swift in Sources */,
 				0491B6CA2DA7BDD400955502 /* PostDetailsCollectionViewCell.swift in Sources */,
-				0491B6CB2DA7BDD400955502 /* PostDetailscommentVC.swift in Sources */,
 				0491B6CC2DA7BDD400955502 /* PostDetailsShowDataCollectionViewCell.swift in Sources */,
 				0491B6CD2DA7BDD400955502 /* PostDotViewController.swift in Sources */,
 				0491B6CE2DA7BDD400955502 /* PostViewShowImgVideosColleViewCell.swift in Sources */,
@@ -2585,6 +2585,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2626,6 +2627,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Automatic;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

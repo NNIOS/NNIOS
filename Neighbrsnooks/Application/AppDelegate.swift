@@ -25,6 +25,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     var shouldSupportAllOrientations = false
     var lastNotificationIdentifier: String?
     var fireBaseToken : UpdateTokenModel?
+    var HomeNewData : HomeAllModel?
     
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         return OrientationManager.shared.shouldSupportAllOrientations ? .all : .portrait
@@ -45,9 +46,48 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         NetworkMonitor.shared.startMonitoring()
         
+        NotificationCenter.default.addObserver(self, selector: #selector(showVerificationPopup), name: Notification.Name("ShowVerificationPopup"), object: nil)
+
+
         FirebaseApp.configure()
         Messaging.messaging().delegate = self
-        //  UITextField.appearance().autocapitalizationType = .sentences
+        UNUserNotificationCenter.current().delegate = self
+        
+         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+               if granted {
+                   print("✅ Notification permission granted")
+               } else {
+                   print("❌ Notification permission denied")
+               }
+           }
+        
+        
+        application.registerForRemoteNotifications()
+
+        func updateFCMToken() {
+            Messaging.messaging().token { token, error in
+                if let error = error {
+                    print("❌ Error fetching FCM token: \(error.localizedDescription)")
+                } else if let token = token {
+                    print("✅ Refreshed FCM token: \(token)")
+                    self.sendTokenToServer(token)
+                }
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+              Messaging.messaging().token { token, error in
+                  if let token = token {
+                      print("🔥 Got token manually: \(token)")
+                      if let userId = UserDefaults.standard.string(forKey: "userid") {
+                          self.callUpdateFirebaseTokenPostWebService(userId: userId, firebaseToken: token) {
+                              print("📡 Token updated on server manually")
+                          }
+                      }
+                  }
+              }
+          }
+        
         
         GMSServices.provideAPIKey("AIzaSyD7gl7LrxtbTjlplCXphN2EJi7HRi9s_8Y")
         GMSPlacesClient.provideAPIKey("AIzaSyBWpyfvSIauIk1wgzWU4PhnZuYe-doOv1I")
@@ -96,6 +136,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // Stop monitoring when the view controller is deallocated
         NetworkMonitor.shared.stopMonitoring()
     }
+    
+    
+    // MARK: - Custom Verification Popup
+       @objc func showVerificationPopup() {
+           DispatchQueue.main.async {
+               guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                     let window = windowScene.windows.first,
+                     let rootVC = window.rootViewController else {
+                   return
+               }
+
+               let topVC = self.getTopViewController(rootVC)
+               
+               let alert = UIAlertController(title: "Welcome!",
+                                             message: "You are now a verified member.\nHappy Neighbrsnooking!!!",
+                                             preferredStyle: .alert)
+               alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                   // Optional: Call your verification API here
+               }))
+               
+               topVC?.present(alert, animated: true, completion: nil)
+           }
+       }
+
+       // Helper to get top visible ViewController
+       private func getTopViewController(_ rootVC: UIViewController?) -> UIViewController? {
+           if let presented = rootVC?.presentedViewController {
+               return getTopViewController(presented)
+           }
+           if let nav = rootVC as? UINavigationController {
+               return getTopViewController(nav.visibleViewController)
+           }
+           if let tab = rootVC as? UITabBarController {
+               return getTopViewController(tab.selectedViewController)
+           }
+           return rootVC
+       }
+    
+    
     
     
     func customizeAppearance() {
@@ -196,6 +275,9 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 @available(iOS 16.0, *)
 extension AppDelegate: MessagingDelegate {
+    
+    
+    
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("🌐 Firebase registration token: \(fcmToken ?? "")")
         if let token = fcmToken {
@@ -205,6 +287,9 @@ extension AppDelegate: MessagingDelegate {
 
     func sendTokenToServer(_ fcmToken: String) {
         guard let userId = UserDefaults.standard.string(forKey: "userid") else { return }
+        callUpdateFirebaseTokenPostWebService(userId: userId, firebaseToken: fcmToken) {
+            print("📡 Token updated to server successfully")
+        }
 
         let url = URL(string: "https://yourdomain.com/api/store-fcm-token")!
         var request = URLRequest(url: url)

@@ -667,7 +667,7 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
             "created_by": id ?? "",
             "p_title": title,
             "p_description": description,
-            "sale_type": "product",
+            "sale_type": docType,
             "sale_price": salePrice,
             "total_price": "0",
             "brand_name": "Puma",
@@ -790,18 +790,18 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
 //        self.view.endEditing(true)
 //        self.showDropdownData(showOn: tfCategory, DropdownName: serviceDropdownData)
 //        serviceDropdownData.cellHeight = 35
-//        
+//
 //        serviceDropdownData.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
 //      //  serviceDropdownData.bottomOffset = CGPoint(x: 50, y: 24)
 //       // self.ServiceDescriptionLabel.text = self.ServiceTypeData?.data.seri
 //    }
-//    
+//
 //    private func showDropdownData(showOn textField: UITextField, DropdownName dropdown: DropDown) {
 //
 //        // Set the anchor and dropdown position
 //        dropdown.anchorView = textField
 //        dropdown.bottomOffset = CGPoint(x: 30, y: (dropdown.anchorView?.plainView.bounds.height)!)
-//        
+//
 //        // Set up the appearance for the dropdown
 //        dropdown.backgroundColor = UIColor.white
 //        dropdown.cellHeight = 35
@@ -809,7 +809,7 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
 //        dropdown.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
 //        DropDown.appearance().setupCornerRadius(10)
 //        dropdown.width = 200
-//        
+//
 //        // Apply the font settings for the first item
 //        dropdown.customCellConfiguration = { (index: Index, item: String, cell: DropDownCell) in
 //            if index == 0 {
@@ -881,6 +881,8 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
 //        }
 //    }
     
+
+    
     func callMarketCatWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/category"
          let dictParams: Dictionary<String, Any> = ["":""]
@@ -905,8 +907,20 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
                         // Update MarketWDetailData with fetched data
                         // Example data assignment
                         self.MarketCatDataNew = data // Your actual data fetching logic
-                        for value in self.MarketCatDataNew?.category ?? [] {
+//                        for value in self.MarketCatDataNew?.category ?? [] {
+//                            self.serviceName.append(value.catTitle ?? "")
+//                        }
+                        
+                        
+
+                        
+                        for (index, value) in self.MarketCatDataNew?.category?.enumerated() ?? [].enumerated() {
                             self.serviceName.append(value.catTitle ?? "")
+
+                            // For example: saving the first category id (you can customize this based on user selection)
+                            if index == 0 {
+                                UserDefaults.standard.setValue(value.id ?? "", forKey: "idCategoryMarket")
+                            }
                         }
                          
                         DispatchQueue.main.async {

@@ -7,7 +7,7 @@
 
 import UIKit
 import SVProgressHUD
-//BaseViewC
+ 
 
 @available(iOS 16.0, *)
 class DirectMessageViewController: BaseViewController {
@@ -23,6 +23,7 @@ class DirectMessageViewController: BaseViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         NetworkMonitor.shared.startMonitoring()
+        updateColors()
       //  setupBottomPanel()
         // Do any additional setup after loading the view.
     }

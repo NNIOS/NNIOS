@@ -24,9 +24,11 @@ class EventHomeTableViewCell: UITableViewCell {
     @IBOutlet weak var ProfileImgView : UIImageView!
    
     @IBOutlet weak var lblCreateOn: UILabel!
-    
+    @IBOutlet weak var lblStartEvent: UILabel!
+    @IBOutlet weak var btnDotsImg : UIButton!
     
     weak var delegateFav: ProfileFavTapDelegate?
+    private var defaultTextColor: UIColor?
 
     var eventCallAction : ((UIButton) -> Void)?
     var DotCallback : ((UIButton) -> Void)?
@@ -37,6 +39,8 @@ class EventHomeTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        updateColors()
+        defaultTextColor = lblName.textColor
         ProfileImgView.layer.cornerRadius = ProfileImgView.frame.height/2
         addTapGestureToProfile()
          
@@ -46,6 +50,32 @@ class EventHomeTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
+    }
+    
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblSector.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblEventTitle.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblStartDate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblEndDate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblCreateOn.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblStartEvent.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            btnDotsImg.tintColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            
+        } else {
+            // Light mode
+            lblName.textColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+            lblSector.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+            lblEventTitle.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+            lblStartDate.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+            lblEndDate.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+            lblCreateOn.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+            lblStartEvent.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+            btnDotsImg.tintColor = .black
+            
+        }
     }
     
     @IBAction func eventAction(_ sender: Any) {

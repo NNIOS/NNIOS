@@ -41,8 +41,10 @@ import Foundation
 
 // MARK: - Welcome
 struct LoginModel: Codable {
+    
     let status, message: String?
     let logindata: loginData?  // Optional banaya
+    let id: String? 
 }
 
 // MARK: - Logindata
@@ -64,4 +66,27 @@ struct loginData: Codable {
         case membercount, userphoto, logintype, andlink, ioslink, neighbrshood
         case reqNdbstatus = "req_ndbstatus"
     }
+}
+
+
+//MARK: - ResetPasswordModel
+
+
+struct ResetPasswordModel: Codable {
+    let status: String?
+    let message: String?
+}
+
+
+
+
+//MARK: - Model for the inner description
+struct VerifyOTPDescription: Codable {
+    let desc: String?
+}
+
+// Main model for the response
+struct VerifyOTPModel: Codable {
+    let status: String?
+    let description: VerifyOTPDescription
 }

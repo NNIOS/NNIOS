@@ -235,25 +235,24 @@ class MyProfileViewController: BaseViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-       
-      
+ 
         lblHeading.text = headingTitle
         if let id = UserDefaults.standard.string(forKey: "userid"),
            let idCr = UserDefaults.standard.string(forKey: "idOther") {
             print("id: \(id), idCr: \(idCr)") // Debugging output
             
-            if id == idCr {
-                self.btnInfo.isHidden = false
-                self.btnAdress.isHidden = false
-                self.btnEmergency.isHidden = false
-               
-            } else {
-                self.btnInfo.isHidden = true
-                self.btnAdress.isHidden = true
-                self.btnEmergency.isHidden = true
-               
-               
-            }
+//            if id == idCr {
+//                self.btnInfo.isHidden = false
+//                self.btnAdress.isHidden = false
+//                self.btnEmergency.isHidden = false
+//               
+//            } else {
+//                self.btnInfo.isHidden = true
+//                self.btnAdress.isHidden = true
+//                self.btnEmergency.isHidden = true
+//               
+//               
+//            }
         } else {
             print("UserDefaults values are nil") // Handle nil case
         }
@@ -697,12 +696,12 @@ class MyProfileViewController: BaseViewController {
        }
     
     @IBAction func btnDetails(_ : UIButton){
-
-    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterSecondViewController") as? RegisterSecondViewController else {return}
-
-    self.navigationController?.pushViewController(vc, animated: true)
-
-       }
+        
+        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileEditViewController") as? MyProfileEditViewController else {return}
+        vc.profileData = profileData
+        self.navigationController?.pushViewController(vc, animated: true)
+        
+    }
     
     @IBAction func btnEditProfile(_ : UIButton){
 

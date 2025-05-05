@@ -11,7 +11,7 @@ import SVProgressHUD
 import FirebaseMessaging
 @available(iOS 16.0, *)
 
-class RegisterViewController: BaseViewC {
+class RegisterViewController: BaseViewController {
     
     @IBOutlet weak var tfPassword: UITextField!
     @IBOutlet weak var tfConfirmPassword: UITextField!
@@ -23,7 +23,7 @@ class RegisterViewController: BaseViewC {
     @IBOutlet weak var tfEmail: UITextField!
     @IBOutlet weak var tfOtp1: UITextField!
     @IBOutlet weak var tfOtp2: UITextField!
-    @IBOutlet weak var tfOtp3: UITextField! 
+    @IBOutlet weak var tfOtp3: UITextField!
     @IBOutlet weak var tfOtp4: UITextField!
     @IBOutlet weak var tfOtp5: UITextField!
     @IBOutlet weak var tfOtp6: UITextField!
@@ -38,7 +38,7 @@ class RegisterViewController: BaseViewC {
     @IBOutlet var checkOTP: UIImageView!
     @IBOutlet weak var lblStrongPass: UILabel!
     @IBOutlet weak var stackView: UIStackView!
-
+    
     
     var lastSentOTP: String? = nil
     var SendOTPData : OtpModel?
@@ -55,7 +55,7 @@ class RegisterViewController: BaseViewC {
     var otpFromAPI: String = ""
     var isOTPVerified: Bool = false
     
-
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,19 +74,19 @@ class RegisterViewController: BaseViewC {
         self.navigationItem.hidesBackButton = true
         setupTextFields()
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapLoginLabel))
-           lblIalredyhaveAnAccount.isUserInteractionEnabled = true
-           lblIalredyhaveAnAccount.addGestureRecognizer(tapGesture)
+        lblIalredyhaveAnAccount.isUserInteractionEnabled = true
+        lblIalredyhaveAnAccount.addGestureRecognizer(tapGesture)
         // First label after first view
         stackView.insertArrangedSubview(createInfoLabel(), at: 1)
         stackView.setCustomSpacing(0, after: stackView.arrangedSubviews[0])
-
+        
         // Second label after second view
         stackView.insertArrangedSubview(createInfoLabel(), at: 3) // adjust index if needed
         stackView.setCustomSpacing(0, after: stackView.arrangedSubviews[2])
         tfPassword.addTarget(self, action: #selector(passwordDidChange), for: .editingChanged)
-
-      
-     }
+        
+        
+    }
     
     
     func createInfoLabel() -> UIView {
@@ -104,16 +104,16 @@ class RegisterViewController: BaseViewC {
             label.topAnchor.constraint(equalTo: container.topAnchor),
             label.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         ])
-
+        
         return container
     }
-     @objc func didTapLoginLabel() {
+    @objc func didTapLoginLabel() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
             self.navigationController?.pushViewController(loginVC, animated: true)
         }
     }
-
+    
     
     // MARK: - passwordDidChange pass week medm and strong
     @objc func passwordDidChange(_ textField: UITextField) {
@@ -126,8 +126,8 @@ class RegisterViewController: BaseViewC {
         
         lblStrongPass.text = checkPasswordStrength(password)
     }
-
-
+    
+    
     func checkPasswordStrength(_ password: String) -> String {
         let length = password.count
         let hasUpperCase = NSPredicate(format: "SELF MATCHES %@", ".*[A-Z]+.*").evaluate(with: password)
@@ -141,7 +141,7 @@ class RegisterViewController: BaseViewC {
         if hasLowerCase { strength += 1 }
         if hasNumber { strength += 1 }
         if hasSpecial { strength += 1 }
-
+        
         switch strength {
         case 0...2:
             lblStrongPass.textColor = .red
@@ -157,19 +157,21 @@ class RegisterViewController: BaseViewC {
             return ""
         }
     }
-
-
+    
+    
+    
+    
     
     // MARK: - Setup TextFields
-       func setupTextFields() {
-           let textFields = [tfOtp1, tfOtp2, tfOtp3, tfOtp4, tfOtp5, tfOtp6]
-           for tf in textFields {
-               tf?.delegate = self
-               tf?.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-           }
-       }
-       
-       // MARK: - TextField Change Tracking
+    func setupTextFields() {
+        let textFields = [tfOtp1, tfOtp2, tfOtp3, tfOtp4, tfOtp5, tfOtp6]
+        for tf in textFields {
+            tf?.delegate = self
+            tf?.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        }
+    }
+    
+    // MARK: - TextField Change Tracking
     @objc func textFieldDidChange(_ textField: UITextField) {
         if let text = textField.text, text.count == 1 {
             switch textField {
@@ -195,10 +197,10 @@ class RegisterViewController: BaseViewC {
             }
         }
     }
-
-     
-
-
+    
+    
+    
+    
     
     deinit {
         // Stop monitoring when the view controller is deallocated
@@ -225,7 +227,7 @@ class RegisterViewController: BaseViewC {
         timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
     }
     
-     
+    
     
     
     
@@ -312,7 +314,7 @@ class RegisterViewController: BaseViewC {
         
     }
     
-//     send OTP Button
+    //     send OTP Button
     @IBAction func SendOTPBtn(_ sender: UIButton){
         
         if tfMobile.text == "" {
@@ -324,8 +326,20 @@ class RegisterViewController: BaseViewC {
         else{
             callOTPWebService{
                 
+                // ✅ Show alert
+                let successAlert = UIAlertController(title: "", message: "OTP has been sent", preferredStyle: .alert)
+                self.present(successAlert, animated: true)
+                
+                // ✅ Dismiss after 3 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    successAlert.dismiss(animated: true, completion: {
+                        // ✅ Focus on OTP field after alert dismisses
+                        self.tfOtp1.becomeFirstResponder()
+                    })
+                }
+                
+                // ✅ Start counter/resend setup
                 self.otpCounterAndResendButton()
-                self.tfOtp1.becomeFirstResponder()
             }
         }
     }
@@ -345,8 +359,6 @@ class RegisterViewController: BaseViewC {
     
     
     @IBAction func createBtn(_ sender: UIButton){
-      
-        
         // Validate First Name
         if tfFirstName.text?.isEmpty == true {
             showAlert(title: "", message: "Please enter first name")
@@ -360,108 +372,113 @@ class RegisterViewController: BaseViewC {
         }
         
         // Validate Email
-        if tfEmail.text?.isEmpty == true {
-            showAlert(title: "", message: "Please enter email")
-            return
-        } else if !tfEmail.text!.isValidEmail() {
-            showAlert(title: "", message: "Please enter valid email")
-            return
-        }
+        //        if tfEmail.text?.isEmpty == true {
+        //            showAlert(title: "", message: "Please enter email")
+        //            return
+        //        } else if !tfEmail.text!.isValidEmail() {
+        //            showAlert(title: "", message: "Please enter valid email")
+        //            return
+        //        }
         
-        
-        callVerifyEmailAPI()
-        
-        
-        // Validate Mobile Number
-        if tfMobile.text?.isEmpty == true {
-            showAlert(title: "", message: "Please enter mobile number")
-            return
-        } else if tfMobile.text!.count < 10 {
-            showAlert(title: "", message: "Please enter valid mobile number")
+        // Validate Email
+        guard let email = tfEmail.text, !email.isEmpty else {
+            showAlert(message: "Please enter email")
             return
         }
         
-        
-        if !isOTPVerified {
-               showAlert(title: "", message: "Please verify your OTP before proceeding.")
-               return
-           }
-        
-        // Validate OTP
-        if tfOtp1.text?.isEmpty == true {
-            showAlert(title: "", message: "Please enter OTP")
+        guard email.isValidEmail() else {
+            showAlert(message: "Please enter a valid email address")
             return
         }
         
-        // Validate Password and Confirm Password with regex
-        let passwordRegex = "^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$"
-        
-        if let password = tfPassword.text, let confirmPassword = tfConfirmPassword.text {
-            let passwordTest = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+        // ✅ Call email verification API
+        callVerifyEmailAPI { [weak self] isEmailValid in
+            guard let self = self else { return }
             
-            // Check if password is empty
-            if password.isEmpty {
-                showAlert(title: "", message: "Please enter password")
-                return
-            }
-            
-            // Check if confirm password is empty
-            if confirmPassword.isEmpty {
-                showAlert(title: "", message: "Please confirm your password")
-                return
-            }
-            
-            // Validate password with regex
-            if !passwordTest.evaluate(with: password) {
-                // Show weak password error message in a popup
-                showAlert(title: "Weak password", message: "Your password must be at least 8 characters long and include a number, an uppercase letter and a lowercase letter.")
-                return
-            }
-            
-            // Check if passwords match
-            if password != confirmPassword {
-                showAlert(title: "Password mismatch", message: "Passwords you entered didn't match.")
-                return
+            if isEmailValid {
+                DispatchQueue.main.async {
+                    // ✅ Email is valid, now continue validation
+                    
+                    // Validate Mobile Number
+                    if self.tfMobile.text?.isEmpty == true {
+                        self.showAlert(title: "", message: "Please enter mobile number")
+                        return
+                    } else if self.tfMobile.text!.count < 10 {
+                        self.showAlert(title: "", message: "Please enter valid mobile number")
+                        return
+                    }
+                    if self.tfOtp1.text?.isEmpty == true {
+                        self.showAlert(title: "", message: "Please enter OTP")
+                        return
+                    }
+                    if self.isOTPVerified == false {
+                        self.showAlert(title: "", message: "Please verify your OTP before proceeding.")
+                        return
+                    }
+                    let passwordRegex = "^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$"
+                    if let password = self.tfPassword.text, let confirmPassword = self.tfConfirmPassword.text {
+                        let passwordTest = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+                        
+                        if password.isEmpty {
+                            self.showAlert(title: "", message: "Please enter password")
+                            return
+                        }
+                        
+                        if confirmPassword.isEmpty {
+                            self.showAlert(title: "", message: "Please confirm your password")
+                            return
+                        }
+                        
+                        if !passwordTest.evaluate(with: password) {
+                            self.showAlert(title: "Weak password", message: "Your password must be at least 8 characters long and include a number, an uppercase letter and a lowercase letter.")
+                            return
+                        }
+                        
+                        if password != confirmPassword {
+                            self.showAlert(title: "Password mismatch", message: "Passwords you entered didn't match.")
+                            return
+                        }
+                    }
+                    
+                    if self.checkBox.image == UIImage(systemName: "square") {
+                        self.showAlert(title: "", message: "Please read and accept terms & conditions")
+                        return
+                    }
+                    
+                    // ✅ All validations pass
+                    //    UIHelper.showLoader(on: sender, show: true)
+                    
+                    Messaging.messaging().token { token, error in
+                        if let error = error {
+                            print("❌ Error fetching FCM token: \(error)")
+                            UIHelper.showLoader(on: sender, show: false)
+                        } else if let token = token {
+                            print("📱 FCM Token fetched: \(token)")
+                            
+                            self.callRegisterWebService(firebaseToken: token) {
+                                DispatchQueue.main.async { [self] in
+                                    UIHelper.showLoader(on: sender, show: false)
+                                    SVProgressHUD.show()
+                                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterSecondViewController") as! RegisterSecondViewController
+                                    let firstName = self.tfFirstName.text ?? ""
+                                    let lastName = self.tfLastName.text ?? ""
+                                    UserDefaults.standard.set(firstName, forKey: "userFirstName")
+                                    UserDefaults.standard.set(lastName, forKey: "userLastName")
+                                    print(firstName)
+                                    print(lastName)
+                                    print("Name saved: \(self.tfFirstName.text ?? "") \(self.tfLastName.text ?? "")")
+                                    self.navigationController?.pushViewController(vc, animated: false)
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                print("❌ Email not valid, not proceeding")
+                // Alert already shown inside the API
             }
         }
-        
-        // Validate Terms & Conditions Checkbox
-        if self.checkBox.image == UIImage(systemName: "square") {
-            showAlert(title: "", message: "Please read and accept terms & conditions")
-            return
-        }
-        
-        // **Show Loader on Button**
-           UIHelper.showLoader(on: sender, show: true)
-
-        // Fetch FCM Token before proceeding
-        Messaging.messaging().token { token, error in
-               if let error = error {
-                   print("❌ Error fetching FCM token: \(error)")
-                   UIHelper.showLoader(on: sender, show: false)
-               } else if let token = token {
-                   print("📱 FCM Token fetched: \(token)")
-                   
-                   self.callRegisterWebService(firebaseToken: token) {
-                       DispatchQueue.main.async {
-                           UIHelper.showLoader(on: sender, show: false)
-                           
-                           SVProgressHUD.show()
-                           let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterSecondViewController") as! RegisterSecondViewController
-                           vc.name = self.tfFirstName.text ?? ""
-                           vc.secname = self.tfLastName.text ?? ""
-                           
-                           UserDefaults.standard.set(self.tfFirstName.text ?? "", forKey: "FirstName")
-                           UserDefaults.standard.set(self.tfLastName.text ?? "", forKey: "LastName")
-                           
-                           print("Name saved: \(self.tfFirstName.text ?? "") \(self.tfLastName.text ?? "")")
-                           self.navigationController?.pushViewController(vc, animated: false)
-                       }
-                   }
-               }
-           }
-       }
-    
+    }
     
     func callRegisterWebService(firebaseToken: String, completionClosure: @escaping () -> ()) {
         let dictParams: [String: Any] = [
@@ -475,7 +492,7 @@ class RegisterViewController: BaseViewC {
             "confirm_password": self.tfConfirmPassword.text ?? "",
             "term": "1"
         ]
-
+        
         WebService.sharedInstance.callRegisterWebService(withParams: dictParams) { data in
             self.registerData = data
             UserDefaults.standard.set(self.registerData?.userid, forKey: "userid")
@@ -487,59 +504,82 @@ class RegisterViewController: BaseViewC {
             }
         }
     }
-
-
     
     
-    // MARK: - Call api
-    func callVerifyEmailAPI() {
+    
+    
+    // MARK: - Call api VerifyEmail
+    
+    func callVerifyEmailAPI(completion: @escaping (Bool) -> Void) {
         guard let email = self.tfEmail.text, !email.isEmpty else {
-            print("Email field is empty")
+            self.showAlert(message: "Please enter a valid email address")
+            completion(false)
             return
         }
-
+        
+        guard email.isValidEmail() else {
+            self.showAlert(message: "Please enter a valid email address")
+            completion(false)
+            return
+        }
+        
         let url = URL(string: "https://dev.neighbrsnook.com/admin/api/verify-email")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
         let parameters = ["email": email]
-
+        
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters, options: [])
         } catch {
             print("Failed to encode parameters: \(error)")
+            completion(false)
             return
         }
-
+        
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("Error: \(error.localizedDescription)")
-                return
-            }
-
-            guard let data = data else {
-                print("No data received")
-                return
-            }
-
-            do {
-                let decodedResponse = try JSONDecoder().decode(EmailVerifyModel.self, from: data)
-                print("Status: \(decodedResponse.status)")
-                print("Message: \(decodedResponse.message)")
-            } catch {
-                print("Decoding error: \(error)")
-                // Agar response plain text hai to:
-                if let responseString = String(data: data, encoding: .utf8) {
-                    print("Raw response: \(responseString)")
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Error: \(error.localizedDescription)")
+                    self.showAlert(message: "Network error occurred. Please try again.")
+                    completion(false)
+                    return
+                }
+                
+                guard let data = data else {
+                    print("No data received")
+                    self.showAlert(message: "No response from server. Please try again.")
+                    completion(false)
+                    return
+                }
+                
+                do {
+                    let decodedResponse = try JSONDecoder().decode(EmailVerifyModel.self, from: data)
+                    print("Status: \(decodedResponse.status)")
+                    print("Message: \(decodedResponse.message)")
+                    
+                    if decodedResponse.status == false {
+                        self.showAlert(message: "Please enter a valid email address") // Always show fixed message
+                        completion(false)
+                        return
+                    } else {
+                        completion(true)
+                    }
+                    
+                    
+                } catch {
+                    print("Decoding error: \(error)")
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        print("Raw response: \(responseString)")
+                    }
+                    self.showAlert(message: "Invalid response from server. Please try again.")
+                    completion(false)
+                    return
                 }
             }
         }
-
         task.resume()
     }
-
-    
     
     
     func callOTPWebService(_ completionClosure: @escaping () -> ()) {
@@ -552,102 +592,38 @@ class RegisterViewController: BaseViewC {
             print("📢 Full API Response: \(data)") // ✅ Full API Response Debug
             
             self.SendOTPData = data
-
-            // 🔍 Direct Dictionary Response Print Karo
+            
             if let dictData = data as? [String: Any] {
                 print("📢 Dictionary Response: \(dictData)")
             } else {
                 print("❌ API Response is NOT a Dictionary")
             }
-
-            // ✅ OTP Print Karna
+            
             if self.SendOTPData?.status == "success" {
                 if let otp = self.SendOTPData?.otp {
-                    print("✅ OTP Sent to Mobile: \(otp)") // ✅ Yehi OTP Mobile pe gaya hai
+                    print("✅ OTP Sent to Mobile: \(otp)")
                 } else {
-                    print("❌ OTP NOT FOUND in API Response") // ❌ OTP missing hai
+                    print("❌ OTP NOT FOUND in API Response")
                 }
+                
+                // ✅ Show success alert for 2 seconds
+                self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "OTP Sent Successfully")
                 completionClosure()
+                
             } else {
-                print("❌ API Error: \(self.SendOTPData?.message ?? "No error message")")
-                self.showAlert(Message: self.SendOTPData?.message ?? "")
+                // ❌ Show error alert for 2 seconds
+                self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "Something went wrong")
             }
         }
-
-    }
-
-
-    //MARK: - -------------------------    get Device info Irshad malik --------------------/
-    
-    func getDeviceInfo() -> (deviceModel: String, deviceIMEI: String, devicePlatform: String, deviceID: String) {
-        let device = UIDevice.current
-        
-        // Operating system name (e.g., "iOS")
-        let systemName = device.systemName
-        
-        // Unique device identifier (UUID)
-        let uuid = device.identifierForVendor?.uuidString ?? "N/A"
-        
-        // Get specific model name
-        let modelName = getDeviceModelName()
-        
-        return (deviceModel: modelName, deviceIMEI: uuid, devicePlatform: systemName, deviceID: uuid)
     }
     
-    // Helper function to get the specific model name using hardware identifier
-    func getDeviceModelName() -> String {
-        var systemInfo = utsname()
-        uname(&systemInfo)
-        let modelCode = withUnsafePointer(to: &systemInfo.machine) {
-            $0.withMemoryRebound(to: CChar.self, capacity: 1) {
-                String(validatingUTF8: $0)
-            }
-        }
-        
-        // Mapping of model codes to specific iPhone models (only some examples shown here)
-        let modelMap: [String: String] = [
-            "iPhone14,2": "iPhone 13 Pro",
-            "iPhone14,3": "iPhone 13 Pro Max",
-            "iPhone13,4": "iPhone 12 Pro Max",
-            "iPhone13,3": "iPhone 12 Pro",
-            // Add more models here as needed
-        ]
-        
-        if let modelName = modelMap[modelCode ?? ""] {
-            return modelName
-        } else {
-            return modelCode ?? "Unknown iPhone"
-        }
-    }
     
-    // API call to post device information
-    func callDeviceInfoWebService() {
-        let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
-        
-        // Get device information
-        let deviceInfo = getDeviceInfo()
-        
-        // Set up parameters for API
-        let dictParams: [String: Any] = [
-            "device_model": deviceInfo.deviceModel,
-            "device_imei": deviceInfo.deviceIMEI,  // This will contain UUID
-            "device_platform": deviceInfo.devicePlatform,
-            "device_id": deviceInfo.deviceID,
-            "user_id": userId
-        ]
-        
-        // Call the Web Service
-        WebService.sharedInstance.callDeviceInfo(withParams: dictParams) { data in
-            // Handle the response here
-            print("Device info posted successfully")
-        }
-    }
-
-
- 
     
-  
- 
+    
+    
+    
+    
+    
     // MARK: - API Call to Verify OTP
     func verifyOTP() {
         guard let otp1 = tfOtp1.text, let otp2 = tfOtp2.text, let otp3 = tfOtp3.text,
@@ -665,127 +641,129 @@ class RegisterViewController: BaseViewC {
                 self.showAlert(title: title, message: message)
                 
                 if isVerified {
-                    self.isOTPVerified = true // ✅ OTP Verified, now allow registration
+                    self.isOTPVerified = true
+                    
                 } else {
                     self.isOTPVerified = false
+                    
                 }
+                
             }
         }
     }
-
-
-    // ✅ API Call to Verify OTP
+    
+    
+    //MARK: - ✅ API Call to Verify OTP
+    
     func callVerifyOTPWebService(userOTP: String, completion: @escaping (Bool, String) -> Void) {
         guard let mobileNumber = tfMobile.text, !mobileNumber.isEmpty else {
             completion(false, "Mobile number is missing.")
             return
         }
-
+        
         let dictParams: [String: Any] = [
             "otpvarify": userOTP,
             "reqestmobileno": mobileNumber
         ]
+        
         print("📌 Sending OTP Verification with Params: \(dictParams)")
-
+        
         WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { response in
-            print("📌 Received response: \(String(describing: response))") // ✅ Check karo response me kya aa raha hai
+            print("📌 Received response: \(String(describing: response))")
             print("📌 Type of response received: \(type(of: response))")
-
-            // ✅ Check karo ki response `MatchOTPModel` hai ya nahi
-            guard let responseModel = response as? MatchOTPModel else {
-                print("❌ Response is not of type MatchOTPModel. Actual Type: \(type(of: response))")
+            
+            guard let responseModel = response as? VerifyOTPModel else {
+                print("❌ Response is not of type VerifyOTPModel. Actual Type: \(type(of: response))")
                 completion(false, "Invalid response from server.")
                 return
             }
-
-            // ✅ Model ka data check karo
-            print("📌 Parsed Model: Status = \(String(describing: responseModel.status)), Description = \(String(describing: responseModel.description?.desc))")
-
+            
+            print("📌 Parsed Model: Status = \(String(describing: responseModel.status)), Description = \(String(describing: responseModel.description.desc))")
+            
             if responseModel.status == "success" {
-                completion(true, responseModel.description?.desc ?? "OTP Verified Successfully.")
+                if responseModel.description.desc == "Code does not match." {
+                    self.isOTPVerified = false
+                } else {
+                    self.isOTPVerified = true
+                }
+                print("Isvarified is : \(self.isOTPVerified)")
+                completion(true, responseModel.description.desc ?? "OTP Verified Successfully.")
             } else {
-                completion(false, responseModel.description?.desc ?? "Invalid OTP.")
+                completion(false, responseModel.description.desc ?? "Invalid OTP.")
             }
         }
     }
-
-
+    
+    
     
     
 }
 @available(iOS 16.0, *)
 extension RegisterViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-           // Mobile number field ke liye limit lagana (max 10 digits)
-           if textField == tfMobile {
-               let currentText = textField.text ?? ""
-               let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
-               return newText.count <= 10
-           }
-
-           // OTP fields me sirf ek character allow karna
-           if [tfOtp1, tfOtp2, tfOtp3, tfOtp4, tfOtp5, tfOtp6].contains(textField) {
-               if string.count > 0 { // ✅ Naya character enter ho raha hai
-                   textField.text = string // ✅ Entered digit set karo
-                   
-                   // ✅ Next OTP field me cursor move karo
-                   if textField == tfOtp1 { tfOtp2.becomeFirstResponder() }
-                   else if textField == tfOtp2 { tfOtp3.becomeFirstResponder() }
-                   else if textField == tfOtp3 { tfOtp4.becomeFirstResponder() }
-                   else if textField == tfOtp4 { tfOtp5.becomeFirstResponder() }
-                   else if textField == tfOtp5 { tfOtp6.becomeFirstResponder() }
-                   else if textField == tfOtp6 {
-                       textField.resignFirstResponder() // ✅ Last field pe keyboard dismiss
-
-                       // ✅ API Call for OTP Verification
-                       let enteredOTP = "\(tfOtp1.text ?? "")\(tfOtp2.text ?? "")\(tfOtp3.text ?? "")\(tfOtp4.text ?? "")\(tfOtp5.text ?? "")\(tfOtp6.text ?? "")"
-                       callVerifyOTPWebService(userOTP: enteredOTP) { success, message in
-                           DispatchQueue.main.async {
-                               if success {
-                                   print("✅ OTP Verified: \(message)")
-                                   self.showToast(message: message)
-                               } else {
-                                   print("❌ OTP Verification Failed: \(message)")
-                                   self.clearOTPFields() // ✅ Galat OTP pe saare fields clear honge
-                                   self.showToast(message: message)
-                               }
-                           }
-                       }
-                   }
-                   return false // ✅ Default behavior disable
-               } else if string.isEmpty { // ✅ Agar user backspace dabaye
-                   textField.text = "" // ✅ Current field clear kare
-                   
-                   // ✅ Previous OTP field pe cursor move kare
-                   if textField == tfOtp6 { tfOtp5.becomeFirstResponder() }
-                   else if textField == tfOtp5 { tfOtp4.becomeFirstResponder() }
-                   else if textField == tfOtp4 { tfOtp3.becomeFirstResponder() }
-                   else if textField == tfOtp3 { tfOtp2.becomeFirstResponder() }
-                   else if textField == tfOtp2 { tfOtp1.becomeFirstResponder() }
-
-                   return false // ✅ Default behavior disable
-               }
-           }
-           return true
-       }
-   
-
-
-    // ✅ Function to Clear OTP Fields on Error
-    func clearOTPFields() {
-        DispatchQueue.main.async {
-            self.tfOtp1.text = ""
-            self.tfOtp2.text = ""
-            self.tfOtp3.text = ""
-            self.tfOtp4.text = ""
-            self.tfOtp5.text = ""
-            self.tfOtp6.text = ""
-
-            self.tfOtp1.becomeFirstResponder() // ✅ Pehla field active kare
+        // Mobile number field ke liye limit lagana (max 10 digits)
+        if textField == tfMobile {
+            let currentText = textField.text ?? ""
+            let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
+            return newText.count <= 10
         }
-    }
+        
+        // OTP fields me sirf ek character allow karna
+        if [tfOtp1, tfOtp2, tfOtp3, tfOtp4, tfOtp5, tfOtp6].contains(textField) {
+            if string.count > 0 { // ✅ Naya character enter ho raha hai
+                textField.text = string // ✅ Entered digit set karo
+                
+                // ✅ Next OTP field me cursor move karo
+                if textField == tfOtp1 { tfOtp2.becomeFirstResponder() }
+                else if textField == tfOtp2 { tfOtp3.becomeFirstResponder() }
+                else if textField == tfOtp3 { tfOtp4.becomeFirstResponder() }
+                else if textField == tfOtp4 { tfOtp5.becomeFirstResponder() }
+                else if textField == tfOtp5 { tfOtp6.becomeFirstResponder() }
+                else if textField == tfOtp6 {
+                    textField.resignFirstResponder() // ✅ Last field pe keyboard dismiss
+                    // ✅ API Call for OTP Verification
+                    let enteredOTP = "\(tfOtp1.text ?? "")\(tfOtp2.text ?? "")\(tfOtp3.text ?? "")\(tfOtp4.text ?? "")\(tfOtp5.text ?? "")\(tfOtp6.text ?? "")"
+                    callVerifyOTPWebService(userOTP: enteredOTP) { success, message in
+                        DispatchQueue.main.async {
+                            self.checkOTP.isHidden = false
+                            
+                            // Manually check for 'code does not match'
+                            let isCorrectOTP = !message.lowercased().contains("code does not match")
 
- 
+                            if isCorrectOTP {
+                                print("✅ OTP Verified: \(message)")
+                                self.showToast(message: "OTP Verified Successfully")
+                                self.checkOTP.image = UIImage(named: "check") // ✅ Show check image
+                            } else {
+                                print("❌ OTP Incorrect: \(message)")
+                                self.showToast(message: "Incorrect OTP")
+                                self.checkOTP.image = UIImage(named: "CrossOtp") // ❌ Show cross image
+                            }
+                        }
+                    }
+
+
+                    
+                }
+                return false // ✅ Default behavior disable
+            } else if string.isEmpty { // ✅ Agar user backspace dabaye
+                textField.text = "" // ✅ Current field clear kare
+                
+                // ✅ Previous OTP field pe cursor move kare
+                if textField == tfOtp6 { tfOtp5.becomeFirstResponder() }
+                else if textField == tfOtp5 { tfOtp4.becomeFirstResponder() }
+                else if textField == tfOtp4 { tfOtp3.becomeFirstResponder() }
+                else if textField == tfOtp3 { tfOtp2.becomeFirstResponder() }
+                else if textField == tfOtp2 { tfOtp1.becomeFirstResponder() }
+                
+                return false // ✅ Default behavior disable
+            }
+        }
+        return true
+    }
+    
+    
+    
     
     func showToast(message: String) {
         let toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2 - 150, y: self.view.frame.size.height-100, width: 300, height: 40))
@@ -798,16 +776,39 @@ extension RegisterViewController: UITextFieldDelegate {
         toastLabel.layer.cornerRadius = 10
         toastLabel.clipsToBounds = true
         self.view.addSubview(toastLabel)
-
+        
         UIView.animate(withDuration: 2.0, delay: 2.0, options: .curveEaseOut, animations: {
             toastLabel.alpha = 0.0
         }) { (isCompleted) in
             toastLabel.removeFromSuperview()
         }
     }
+    
+    
+}
 
-    
-    
-    
-    
+extension UIViewController {
+    func showAutoDismissAlert(message: String) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        
+        // Customize font and color
+        let messageFont = UIFont(name: "Montserrat-Regular", size: 14) ?? UIFont.systemFont(ofSize: 14)
+        let messageAttrString = NSAttributedString(
+            string: message,
+            attributes: [
+                .font: messageFont,
+                .foregroundColor: UIColor.darkGray // 🔁 Change to your desired color
+            ]
+        )
+        alert.setValue(messageAttrString, forKey: "attributedMessage")
+        
+        // Present alert
+        self.present(alert, animated: true)
+        
+        // Auto dismiss after 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            alert.dismiss(animated: true, completion: nil)
+        }
+    }
+
 }

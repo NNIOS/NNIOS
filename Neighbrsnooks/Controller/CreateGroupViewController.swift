@@ -3,7 +3,7 @@ import Alamofire
 import Photos
 
 @available(iOS 16.0, *)
-class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, UITextViewDelegate {
+class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, UITextViewDelegate, UITextFieldDelegate {
     
     
     @IBOutlet weak var tfGroupName: UITextField!
@@ -43,7 +43,9 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         NetworkMonitor.shared.startMonitoring()
+        tfGroupName.delegate = self
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         
         self.tfGroupName.font = UIFont(name: "Montserrat-Regular", size: 17)
@@ -210,6 +212,31 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
         
         self.present(alert, animated: true, completion: nil)
     }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        
+        if textField == tfGroupName {
+            // Get the current text in the text field
+            let currentText = textField.text ?? ""
+            
+            // Create the new string after applying the replacement
+            guard let stringRange = Range(range, in: currentText) else { return false }
+            let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+            
+            // If the character count exceeds 22, prevent further changes
+            if updatedText.count > 22 {
+                return false
+            }
+            
+            return true
+        }
+        
+        return true
+    }
+
+
+
+
 
     
     func callCreateGroupWebService(_ completionClosure: @escaping () -> ()) {

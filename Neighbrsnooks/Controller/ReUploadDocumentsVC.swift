@@ -6,13 +6,17 @@
 //
 
 import UIKit
- 
+
 import CoreLocation
 import GoogleMaps
 import GooglePlaces
 import SVProgressHUD
 import AVKit
 import SystemConfiguration
+import Vision
+import Alamofire
+
+
 
 protocol ReloadNeigSelectionDelegate: AnyObject {
     func didSelectItems(selectedItems: [String], forLabel tag: Int)
@@ -23,7 +27,7 @@ protocol ReloadLocationDelegate: AnyObject {
 }
 
 @available(iOS 16.0, *)
-class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
+class ReUploadDocumentsVC: BaseViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
     
     @IBOutlet weak var tabNeighourhoodView: UIView!
     @IBOutlet weak var lblSector: UILabel!
@@ -96,6 +100,8 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     
     @IBOutlet weak var lblBack: UILabel!
     @IBOutlet weak var lblFront: UILabel!
+    @IBOutlet weak var lblForNeighourhood_ID: UILabel!
+    @IBOutlet weak var lblForNeighourhood_Address: UILabel!
     
     
     
@@ -114,9 +120,9 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     enum SelectedDocumentType {
         case aadhar, passport, voterID, drivingLicense,RentDoc, none
     }
-
+    
     var selectedDocumentType: DocumentType?
-
+    
     // Default images for front and back
     let defaultFrontImage = UIImage(named: "PhotoIDProof")
     let defaultBackImage = UIImage(named: "PhotoIDProof")
@@ -127,7 +133,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     var allowMultipleSelection: Bool = true
     var data: [String] = []
     var selectedItems: [String] = []
-     
+    
     var labelTag: Int = 0
     var selectedIndexPath: IndexPath?
     
@@ -162,11 +168,11 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     var countryData : CountryModel?
     var stateData : StateModel?
     var cityData : cityModel?
-//    var countryDropdownData = DropDown()
+    //    var countryDropdownData = DropDown()
     var countryName = [String]()
-//    var stateDropdownData = DropDown()
+    //    var stateDropdownData = DropDown()
     var stateName = [String]()
-//    var cityDropdownData = DropDown()
+    //    var cityDropdownData = DropDown()
     var cityName = [String]()
     var nbdName = [String]()
     var shortAddress : String?
@@ -193,7 +199,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     var stateL: String?
     var zipcodeL: String = ""
     
- 
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUp()
@@ -220,9 +226,11 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             }
         }
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+       
         
         print("Profile Data:", profileData ?? "No Data") // Debugging
         
@@ -232,12 +240,16 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             let components = newLocation.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             if components.count > 1 {
                 lblArea.text = components[1] // Sub locality ya street ko set karo
+                lblForNeighourhood_ID.text = ("(For \(components[1]))")
+                lblForNeighourhood_Address.text = ("(For \(components[1]))")
             } else {
                 lblArea.text = "Sub Locality not found"
             }
         } else {
             if let profileData = profileData {
                 lblArea.text = profileData.neighborhood
+                lblForNeighourhood_ID.text = ("For \(profileData.neighborhood)")
+                lblForNeighourhood_Address.text = ("For \(profileData.neighborhood)")
                 lblSector.text = "\(profileData.addlineone ?? ""), \(profileData.addlinetwo ?? "")"
                 tfFlat.text = profileData.addlineone
                 tfStreet.text = profileData.addlinetwo
@@ -250,35 +262,51 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
                 print("⚠️ profileData is nil")
             }
         }
-
+        
         // ✅ Ensure updated `lblArea.text` is being used
         print("🔹 lblArea.text before API call:", lblArea.text ?? "No Value")
         callCurrentSearchNeighbrWebService()  // API call viewWillAppear ke andar ho
     }
     
+    
+    
+     
+
+    
+  
+    
+    
     func setUp(){
         tfCity.text = cityL ?? ""
         tfState.text = stateL ?? ""
         tfPincode.text = zipcodeL
-
-           print("City in RegisterSecondVC: \(cityL ?? "No City")")
-           print("State in RegisterSecondVC: \(stateL ?? "No State")")
-           print("Zipcode in RegisterSecondVC: \(zipcodeL ?? "No Zipcode")")
-           print("Received Latitude: \(latitudeS ?? 0.0)")
-           print("Received Longitude: \(longitudeS ?? 0.0)")
-
-           if let location = selectedLocation {
-               lblSector.text = location
-               let components = location.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-               print("Components: \(components)")
-
-               if components.count > 1 {
-                   lblArea.text = components[1]
-               } else {
-                   lblArea.text = "Sub Locality not found"
-               }
-           }
-       
+        
+        print("City in RegisterSecondVC: \(cityL ?? "No City")")
+        print("State in RegisterSecondVC: \(stateL ?? "No State")")
+        print("Zipcode in RegisterSecondVC: \(zipcodeL ?? "No Zipcode")")
+        print("Received Latitude: \(latitudeS ?? 0.0)")
+        print("Received Longitude: \(longitudeS ?? 0.0)")
+        
+        if let location = selectedLocation {
+            // Directly set the full address to lblSector
+            lblSector.text = location
+            // bv cgx              // Optional: You can still split the address if you need individual components for other purposes
+            let components = location.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            print("Components: \(components)") // Debugging
+            
+            // Sub Locality ko lblArea par set karo
+            if components.count > 1 {
+                // Assuming sub locality is in the second index (components[1])
+                lblArea.text = components[1]
+                lblForNeighourhood_ID.text = ("(For \(components[1]))")
+                lblForNeighourhood_Address.text = ("(For \(components[1]))")
+            } else {
+                lblArea.text = "Sub Locality not found"
+            }
+            
+            
+        }
+        
         
         callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: latitudeS ?? 0.0, longitude: longitudeS ?? 0.0))
         tabNeighourhoodView.layer.cornerRadius = 10
@@ -366,20 +394,20 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         drivingLicenseButton.clipsToBounds = true
         
         
-//        // By default image set karo jab view load ho
-//        frontImageView.image = UIImage(named: "PhotoIDProof") // Yaha apni default image ka naam lagao
-//        backImageView.image = UIImage(named: "PhotoIDProof")  // Yaha apni default image ka naam lagao
-//
+        //        // By default image set karo jab view load ho
+        //        frontImageView.image = UIImage(named: "PhotoIDProof") // Yaha apni default image ka naam lagao
+        //        backImageView.image = UIImage(named: "PhotoIDProof")  // Yaha apni default image ka naam lagao
+        //
         
         
         
         // Add tap gesture recognizers to image views
         let frontTapGesture = UITapGestureRecognizer(target: self, action: #selector(frontImageTapped))
-//        frontImageView.isUserInteractionEnabled = true
+        //        frontImageView.isUserInteractionEnabled = true
         frontImageView.addGestureRecognizer(frontTapGesture)
         
         let backTapGesture = UITapGestureRecognizer(target: self, action: #selector(backImageTapped))
-//        backImageView.isUserInteractionEnabled = true
+        //        backImageView.isUserInteractionEnabled = true
         backImageView.addGestureRecognizer(backTapGesture)
         
         
@@ -387,8 +415,6 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         setupDatePicker()
         updateButtonStates()
         setupImageViews()
-        locationManager.delegate = self
-        requestLocationAuthorization()
         
         self.locationManager.requestAlwaysAuthorization()
         
@@ -396,7 +422,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         self.locationManager.requestWhenInUseAuthorization()
         DispatchQueue.main.async {
             if CLLocationManager.locationServicesEnabled() {
-                self.locationManager.delegate = self
+                
                 self.locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
                 self.locationManager.startUpdatingLocation()
                 self.neighbourhoodDataShowTableView.reloadData()
@@ -408,20 +434,20 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         //        callCountryWebService()
         tfFlat.autocapitalizationType = .words
         tfStreet.autocapitalizationType = .words
-         
-//         search old code neighborhood
-         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-//             self.getCurrentLocation()
-         }
-         SVProgressHUD.dismiss()
-         //        callRegSecWebService()
-//         getCurrentLocation()
-         
+        
+        //         search old code neighborhood
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            //             self.getCurrentLocation()
+        }
+        SVProgressHUD.dismiss()
+        //        callRegSecWebService()
+        //         getCurrentLocation()
         
         
         
         
-    
+        
+        
         
         
         self.callNeighorhodStatusStateCity()
@@ -437,9 +463,9 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     
     
     deinit {
-           // Stop monitoring when the view controller is deallocated
-           NetworkMonitor.shared.stopMonitoring()
-       }
+        // Stop monitoring when the view controller is deallocated
+        NetworkMonitor.shared.stopMonitoring()
+    }
     
     @objc func areaLabelTapped() {
         openLocationSearchScreen(for: "Area")
@@ -487,33 +513,33 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         
         return nil
     }
-
-        // Function to load an image from a URL
-        func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
-            guard let url = URL(string: urlString) else {
-                print("Invalid URL: \(urlString)")
+    
+    // Function to load an image from a URL
+    func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL: \(urlString)")
+            completion(nil)
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("Error loading image: \(error)")
                 completion(nil)
                 return
             }
-
-            URLSession.shared.dataTask(with: url) { data, response, error in
-                if let error = error {
-                    print("Error loading image: \(error)")
-                    completion(nil)
-                    return
-                }
-
-                guard let data = data, let image = UIImage(data: data) else {
-                    print("Failed to convert data to image.")
-                    completion(nil)
-                    return
-                }
-
-                DispatchQueue.main.async {
-                    completion(image)
-                }
-            }.resume()
-        }
+            
+            guard let data = data, let image = UIImage(data: data) else {
+                print("Failed to convert data to image.")
+                completion(nil)
+                return
+            }
+            
+            DispatchQueue.main.async {
+                completion(image)
+            }
+        }.resume()
+    }
     
     
     
@@ -542,92 +568,92 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     
     
     // 🔹 Function to find the first available document type
-       func getAvailableDocumentType() -> String? {
-           guard let docs = uploadDoc?.docsdata else { return nil }
-           
-           let documentMapping: [(String, String)] = [
-               ("passport", docs.passportFront),
-               ("aadhar", docs.aadharFront),
-               ("voterid", docs.voteridFront),
-               ("drivingLicense", docs.drivingLicenseFront),
-               ("rentDocs", docs.rentDocs)
-           ]
-           
-           for (docType, docURL) in documentMapping {
-               if !docURL.isEmpty { return docType }
-           }
-           
-           return nil // No available document found
-       }
-
-       // 🔹 Function to display uploaded images dynamically
-       func displayUploadedImages(for documentType: String) {
-           guard let docs = uploadDoc?.docsdata else {
-               print("❌ docsdata is nil")
-               return
-           }
-
-           let frontImageUrl: String?
-           let backImageUrl: String?
-
-           switch documentType {
-           case "passport":
-               frontImageUrl = docs.passportFront
-               backImageUrl = docs.passportBack
-           case "aadhar":
-               frontImageUrl = docs.aadharFront
-               backImageUrl = docs.aadharBack
-           case "voterid":
-               frontImageUrl = docs.voteridFront
-               backImageUrl = docs.voteridBack
-           case "drivingLicense":
-               frontImageUrl = docs.drivingLicenseFront
-               backImageUrl = docs.drivingLicenseBack
-           case "rentDocs":
-               frontImageUrl = docs.rentDocs
-               backImageUrl = nil
-           default:
-               return
-           }
-
-           print("🔍 Front Image URL: \(frontImageUrl ?? "No URL")")
-           print("🔍 Back Image URL: \(backImageUrl ?? "No URL")")
-
-           // Load Front Image
-           if let frontUrl = frontImageUrl, !frontUrl.isEmpty {
-               loadImage(from: frontUrl, into: frontImageView, isFront: true)
-           } else {
-               print("⚠️ Front Image URL is empty, showing placeholder")
-               frontImageView.image = UIImage(named: "placeholder")
-           }
-
-           // Load Back Image
-           if let backUrl = backImageUrl, !backUrl.isEmpty {
-               loadImage(from: backUrl, into: backImageView, isFront: false)
-           } else {
-               print("⚠️ Back Image URL is empty, showing placeholder")
-               backImageView.image = UIImage(named: "placeholder")
-           }
-       }
-
-       // ✅ Function to Load Image with Error Handling
-       func loadImage(from urlString: String, into imageView: UIImageView, isFront: Bool) {
-           let formattedUrl = urlString.hasPrefix("http") ? urlString : "https://" + urlString
-
-           guard let url = URL(string: formattedUrl) else {
-               print("❌ Invalid URL: \(urlString)")
-               return
-           }
-
-           imageView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder")) { result in
-               switch result {
-               case .success(let value):
-                   print("✅ \(isFront ? "Front" : "Back") Image Loaded: \(value.source.url?.absoluteString ?? "")")
-               case .failure(let error):
-                   print("❌ \(isFront ? "Front" : "Back") Image Error: \(error.localizedDescription)")
-               }
-           }
-       }
+    func getAvailableDocumentType() -> String? {
+        guard let docs = uploadDoc?.docsdata else { return nil }
+        
+        let documentMapping: [(String, String)] = [
+            ("passport", docs.passportFront),
+            ("aadhar", docs.aadharFront),
+            ("voterid", docs.voteridFront),
+            ("drivingLicense", docs.drivingLicenseFront),
+            ("rentDocs", docs.rentDocs)
+        ]
+        
+        for (docType, docURL) in documentMapping {
+            if !docURL.isEmpty { return docType }
+        }
+        
+        return nil // No available document found
+    }
+    
+    // 🔹 Function to display uploaded images dynamically
+    func displayUploadedImages(for documentType: String) {
+        guard let docs = uploadDoc?.docsdata else {
+            print("❌ docsdata is nil")
+            return
+        }
+        
+        let frontImageUrl: String?
+        let backImageUrl: String?
+        
+        switch documentType {
+        case "passport":
+            frontImageUrl = docs.passportFront
+            backImageUrl = docs.passportBack
+        case "aadhar":
+            frontImageUrl = docs.aadharFront
+            backImageUrl = docs.aadharBack
+        case "voterid":
+            frontImageUrl = docs.voteridFront
+            backImageUrl = docs.voteridBack
+        case "drivingLicense":
+            frontImageUrl = docs.drivingLicenseFront
+            backImageUrl = docs.drivingLicenseBack
+        case "rentDocs":
+            frontImageUrl = docs.rentDocs
+            backImageUrl = nil
+        default:
+            return
+        }
+        
+        print("🔍 Front Image URL: \(frontImageUrl ?? "No URL")")
+        print("🔍 Back Image URL: \(backImageUrl ?? "No URL")")
+        
+        // Load Front Image
+        if let frontUrl = frontImageUrl, !frontUrl.isEmpty {
+            loadImage(from: frontUrl, into: frontImageView, isFront: true)
+        } else {
+            print("⚠️ Front Image URL is empty, showing placeholder")
+            frontImageView.image = UIImage(named: "placeholder")
+        }
+        
+        // Load Back Image
+        if let backUrl = backImageUrl, !backUrl.isEmpty {
+            loadImage(from: backUrl, into: backImageView, isFront: false)
+        } else {
+            print("⚠️ Back Image URL is empty, showing placeholder")
+            backImageView.image = UIImage(named: "placeholder")
+        }
+    }
+    
+    // ✅ Function to Load Image with Error Handling
+    func loadImage(from urlString: String, into imageView: UIImageView, isFront: Bool) {
+        let formattedUrl = urlString.hasPrefix("http") ? urlString : "https://" + urlString
+        
+        guard let url = URL(string: formattedUrl) else {
+            print("❌ Invalid URL: \(urlString)")
+            return
+        }
+        
+        imageView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder")) { result in
+            switch result {
+            case .success(let value):
+                print("✅ \(isFront ? "Front" : "Back") Image Loaded: \(value.source.url?.absoluteString ?? "")")
+            case .failure(let error):
+                print("❌ \(isFront ? "Front" : "Back") Image Error: \(error.localizedDescription)")
+            }
+        }
+    }
     
     
     //    fetchDataFromAPI
@@ -645,7 +671,9 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         self.frontLabel.font = UIFont(name: "Montserrat-SemiBold", size: 14)
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.lblresi.font = UIFont(name: "Montserrat-Regular", size: 16)
+        
         let font = UIFont(name: "Montserrat-Regular", size: 12) // Apna font aur size specify karein
+        
         // Aadhaar Button
         let aadhaarTitle = "Aadhar"
         let aadhaarAttributes: [NSAttributedString.Key: Any] = [
@@ -671,7 +699,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         voterIDButton.setAttributedTitle(voterIDAttributedTitle, for: .normal)
         
         // Driving License Button
-        let drivingLicenseTitle = "Driving Licence "
+        let drivingLicenseTitle = "DL"
         let drivingLicenseAttributes: [NSAttributedString.Key: Any] = [
             .font: font as Any
         ]
@@ -679,12 +707,21 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         drivingLicenseButton.setAttributedTitle(drivingLicenseAttributedTitle, for: .normal)
         
         //
-        let rentdocTitle = "Rent Agreement"
+        let rentdocTitle = "Rent Lease\nElectricity Bill"
         let rentdocAttributes: [NSAttributedString.Key: Any] = [
-            .font: font as Any
+            .font: font as Any,
+            .foregroundColor: UIColor.black // optional
         ]
+
         let rentdocAttributedTitle = NSAttributedString(string: rentdocTitle, attributes: rentdocAttributes)
         rentdocsButton.setAttributedTitle(rentdocAttributedTitle, for: .normal)
+
+        // MULTILINE SUPPORT
+        rentdocsButton.titleLabel?.lineBreakMode = .byWordWrapping
+        rentdocsButton.titleLabel?.textAlignment = .center
+        rentdocsButton.titleLabel?.numberOfLines = 2
+
+        
         
     }
     
@@ -716,8 +753,8 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             return
         }
     }
-
- 
+    
+    
     @IBAction func documentButtonClicked(_ sender: UIButton) {
         switch sender.tag {
         case 1:
@@ -755,7 +792,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         // Aadhaar, passport, voter ID, ya driving license ke liye dono images enable honi chahiye
         frontImageView.isUserInteractionEnabled = true
         lblFront.isUserInteractionEnabled = true
-
+        
         if document == .RentDoc {
             backImageView.isHidden = true
             lblBack.isHidden = true
@@ -768,7 +805,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             lblBack.isUserInteractionEnabled = true
         }
     }
-
+    
     
     
     @IBAction func aadhaarButtonTapped(_ sender: UIButton) {
@@ -795,7 +832,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     func showImageViews() {
         frontImageView.isHidden = false
         lblFront.isHidden = false
-
+        
         // Agar selectedDocumentType RentDoc hai toh back wale elements hide karo
         if selectedDocumentType == .RentDoc {
             backImageView.isHidden = true
@@ -805,15 +842,15 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             lblBack.isHidden = false
         }
     }
-
-
     
     
     
     
     
     
-     
+    
+    
+    
     // Update buttons and image views states
     func updateButtonStates() {
         let buttons: [(UIButton?, SelectedDocument)] = [
@@ -823,7 +860,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             (drivingLicenseButton, .drivingLicense),
             (rentdocsButton, .RentDoc)
         ]
-
+        
         for (button, document) in buttons {
             guard let button = button else { continue }
             
@@ -840,86 +877,86 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
                 button.setImage(unselectedImage, for: .normal)
                 button.tintColor = .black
             }
-
+            
             button.imageEdgeInsets = UIEdgeInsets(top: 0, left: -1, bottom: 0, right: 1)
             button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 1, bottom: 0, right: -1)
         }
-
+        
         // Update image views' state
         let isDocumentSelected = selectedDocument != .none
         frontImageView.isUserInteractionEnabled = isDocumentSelected
         backImageView.isUserInteractionEnabled = isDocumentSelected
-
+        
         if !isDocumentSelected {
             frontImageView.image = UIImage(named: "PhotoIDProof")
             backImageView.image = UIImage(named: "PhotoIDProof")
         }
     }
-
-
-       
-       // MARK: - Helper Methods
-       func loadImage(from urlString: String?, into imageView: UIImageView) {
-           guard let urlString = urlString, let url = URL(string: urlString) else { return }
-           URLSession.shared.dataTask(with: url) { (data, response, error) in
-               guard let data = data, error == nil else { return }
-               DispatchQueue.main.async {
-                   imageView.image = UIImage(data: data)
-               }
-           }.resume()
-       }
+    
+    
+    
+    // MARK: - Helper Methods
+    func loadImage(from urlString: String?, into imageView: UIImageView) {
+        guard let urlString = urlString, let url = URL(string: urlString) else { return }
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
+            guard let data = data, error == nil else { return }
+            DispatchQueue.main.async {
+                imageView.image = UIImage(data: data)
+            }
+        }.resume()
+    }
     
     
     
     
     
-//    func selectDocumentButton(for documentName: String) {
-//        switch documentName.lowercased() {
-//        case "aadhaar":
-//            selectedDocument = .aadhaar
-//            aadhaarButton.isSelected = true
-//            passportButton.isSelected = false
-//            voterIDButton.isSelected = false
-//            drivingLicenseButton.isSelected = false
-//            rentdocsButton.isSelected = false
-//        case "passport":
-//            selectedDocument = .passport
-//            aadhaarButton.isSelected = false
-//            passportButton.isSelected = true
-//            voterIDButton.isSelected = false
-//            drivingLicenseButton.isSelected = false
-//            rentdocsButton.isSelected = false
-//        case "voterid":
-//            selectedDocument = .voterID
-//            aadhaarButton.isSelected = false
-//            passportButton.isSelected = false
-//            voterIDButton.isSelected = true
-//            drivingLicenseButton.isSelected = false
-//            rentdocsButton.isSelected = false
-//        case "drivinglicense":
-//            selectedDocument = .drivingLicense
-//            aadhaarButton.isSelected = false
-//            passportButton.isSelected = false
-//            voterIDButton.isSelected = false
-//            drivingLicenseButton.isSelected = true
-//            rentdocsButton.isSelected = false
-//        case "rentdoc":
-//            selectedDocument = .RentDoc
-//            aadhaarButton.isSelected = false
-//            passportButton.isSelected = false
-//            voterIDButton.isSelected = false
-//            drivingLicenseButton.isSelected = false
-//            rentdocsButton.isSelected = true
-//        default:
-//            selectedDocument = .none
-//            aadhaarButton.isSelected = false
-//            passportButton.isSelected = false
-//            voterIDButton.isSelected = false
-//            drivingLicenseButton.isSelected = false
-//            rentdocsButton.isSelected = false
-//        }
-//        updateButtonStates()
-//    }
+    //    func selectDocumentButton(for documentName: String) {
+    //        switch documentName.lowercased() {
+    //        case "aadhaar":
+    //            selectedDocument = .aadhaar
+    //            aadhaarButton.isSelected = true
+    //            passportButton.isSelected = false
+    //            voterIDButton.isSelected = false
+    //            drivingLicenseButton.isSelected = false
+    //            rentdocsButton.isSelected = false
+    //        case "passport":
+    //            selectedDocument = .passport
+    //            aadhaarButton.isSelected = false
+    //            passportButton.isSelected = true
+    //            voterIDButton.isSelected = false
+    //            drivingLicenseButton.isSelected = false
+    //            rentdocsButton.isSelected = false
+    //        case "voterid":
+    //            selectedDocument = .voterID
+    //            aadhaarButton.isSelected = false
+    //            passportButton.isSelected = false
+    //            voterIDButton.isSelected = true
+    //            drivingLicenseButton.isSelected = false
+    //            rentdocsButton.isSelected = false
+    //        case "drivinglicense":
+    //            selectedDocument = .drivingLicense
+    //            aadhaarButton.isSelected = false
+    //            passportButton.isSelected = false
+    //            voterIDButton.isSelected = false
+    //            drivingLicenseButton.isSelected = true
+    //            rentdocsButton.isSelected = false
+    //        case "rentdoc":
+    //            selectedDocument = .RentDoc
+    //            aadhaarButton.isSelected = false
+    //            passportButton.isSelected = false
+    //            voterIDButton.isSelected = false
+    //            drivingLicenseButton.isSelected = false
+    //            rentdocsButton.isSelected = true
+    //        default:
+    //            selectedDocument = .none
+    //            aadhaarButton.isSelected = false
+    //            passportButton.isSelected = false
+    //            voterIDButton.isSelected = false
+    //            drivingLicenseButton.isSelected = false
+    //            rentdocsButton.isSelected = false
+    //        }
+    //        updateButtonStates()
+    //    }
     
     
     
@@ -1072,41 +1109,110 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         present(imagePicker, animated: true, completion: nil)
     }
     
+    func detectText(in image: UIImage, completion: @escaping ([VNRecognizedTextObservation]) -> Void) {
+        guard let cgImage = image.cgImage else { return }
+        
+        let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+        let request = VNRecognizeTextRequest { (request, error) in
+            if let observations = request.results as? [VNRecognizedTextObservation] {
+                completion(observations)
+            }
+        }
+        
+        request.recognitionLevel = .accurate
+        request.recognitionLanguages = ["en-IN"]
+        request.usesLanguageCorrection = true
+        
+        try? requestHandler.perform([request])
+    }
     
+    
+    func findAadhaarNumbers(in observations: [VNRecognizedTextObservation]) -> [(text: String, boundingBox: CGRect)] {
+        var result: [(text: String, boundingBox: CGRect)] = []
+        
+        for observation in observations {
+            guard let candidate = observation.topCandidates(1).first else { continue }
+            let text = candidate.string.replacingOccurrences(of: " ", with: "")
+            
+            if text.range(of: #"^\d{12}$"#, options: .regularExpression) != nil {
+                result.append((candidate.string, observation.boundingBox))
+            }
+        }
+        
+        return result
+    }
+    
+    
+    func maskDigits(in image: UIImage, from observations: [VNRecognizedTextObservation]) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(image.size, false, 0)
+        image.draw(at: .zero)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        
+        for obs in observations {
+            guard let candidate = obs.topCandidates(1).first else { continue }
+            let fullText = candidate.string.replacingOccurrences(of: " ", with: "")
+            
+            if fullText.count == 12 {
+                let box = obs.boundingBox
+                let imageSize = image.size
+                let rect = CGRect(x: box.origin.x * imageSize.width,
+                                  y: (1 - box.origin.y - box.size.height) * imageSize.height,
+                                  width: box.size.width * imageSize.width,
+                                  height: box.size.height * imageSize.height)
+                let digitWidth = rect.width / 12.0
+                let maskRect = CGRect(x: rect.origin.x, y: rect.origin.y, width: digitWidth * 8, height: rect.height)
+                context.setFillColor(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1))
+                context.fill(maskRect)
+            }
+        }
+        
+        let resultImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resultImage
+    }
     
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            // Retrieve the edited (cropped) image
-            if let editedImage = info[.editedImage] as? UIImage {
-                // Set the cropped image to the selected image view
-                imageViewToUpdate?.image = editedImage
-            } else if let originalImage = info[.originalImage] as? UIImage {
-                // Fallback to original image if editing was not done
-                imageViewToUpdate?.image = originalImage
-            }
-            
-            // Dismiss the picker
-            picker.dismiss(animated: true, completion: nil)
-        guard let image = info[.editedImage] as? UIImage else { return }
+        picker.dismiss(animated: true, completion: nil)
         
-        // Set the uploaded image in the correct UIImageView
-        imageViewToUpdate?.image = image
-        imageViewToUpdate = nil
+        // Prefer edited image, fallback to original
+        let selectedImage = (info[.editedImage] as? UIImage) ?? (info[.originalImage] as? UIImage)
+        
+        guard let image = selectedImage else {
+            print("No image found")
+            return
         }
-
-       
+        
+        // Run OCR and masking
+        detectText(in: image) { observations in
+            let aadhaarTexts = self.findAadhaarNumbers(in: observations)
+            
+            if let maskedImage = self.maskDigits(in: image, from: observations) {
+                DispatchQueue.main.async {
+                    self.imageViewToUpdate?.image = maskedImage
+                    self.imageViewToUpdate = nil
+                }
+            } else {
+                // No Aadhaar number found or failed to mask — fallback to original image
+                DispatchQueue.main.async {
+                    self.imageViewToUpdate?.image = image
+                    self.imageViewToUpdate = nil
+                }
+            }
+        }
+    }
     
     
-//    // Image picker method for uploading
-//    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-//        picker.dismiss(animated: true, completion: nil)
-//
-//        guard let image = info[.editedImage] as? UIImage else { return }
-//
-//        // Set the uploaded image in the correct UIImageView
-//        imageViewToUpdate?.image = image
-//        imageViewToUpdate = nil
-//    }
+    //    // Image picker method for uploading
+    //    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    //        picker.dismiss(animated: true, completion: nil)
+    //
+    //        guard let image = info[.editedImage] as? UIImage else { return }
+    //
+    //        // Set the uploaded image in the correct UIImageView
+    //        imageViewToUpdate?.image = image
+    //        imageViewToUpdate = nil
+    //    }
     
     
     
@@ -1217,16 +1323,16 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     
     
     
-   
+    
     
     //    ---------------------------------------- current button tab -------------------------------------------/
     /*
-    search old code neighborhood
-    @IBAction func btnCurrentLocation(_ : UIButton){
-        from = 2
-        getCurrentLocation()
-    }
-    */
+     search old code neighborhood
+     @IBAction func btnCurrentLocation(_ : UIButton){
+     from = 2
+     getCurrentLocation()
+     }
+     */
     func isConnectedToNetwork() -> Bool {
         var zeroAddress = sockaddr_in()
         zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
@@ -1248,18 +1354,18 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         
         
         if let navigationController = self.navigationController {
-               for controller in navigationController.viewControllers {
-                   if controller is MyProfileViewController {
-                       navigationController.popToViewController(controller, animated: true)
-                       return
-                   }
-               }
-           }
-           // Agar `MyProfileViewController` stack me nahi hai, toh manually push karein
-           let storyboard = UIStoryboard(name: "Main", bundle: nil)
-           if let profileVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController {
-               navigationController?.pushViewController(profileVC, animated: true)
-           }
+            for controller in navigationController.viewControllers {
+                if controller is MyProfileViewController {
+                    navigationController.popToViewController(controller, animated: true)
+                    return
+                }
+            }
+        }
+        // Agar `MyProfileViewController` stack me nahi hai, toh manually push karein
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let profileVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController {
+            navigationController?.pushViewController(profileVC, animated: true)
+        }
         
         
         
@@ -1274,12 +1380,12 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         self.navigationController?.pushViewController(vc, animated: true)
         
     }
-  
- 
+    
+    
     
     @IBAction func stateBtnAction(_ sender: UIButton) {
         self.view.endEditing(true)
- 
+        
     }
     
     
@@ -1305,28 +1411,103 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     @IBAction func nextBtn(_ sender: UIButton){
         
         if let validationMessage = validateForm() {
-                // Agar form valid nahi hai, to alert show karo
-                showAlert(message: validationMessage)
-                return
-            }
-
-            // Sab checks pass hone ke baad API call karein
-            callRegSecWebService {
-                print("Call API")
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "HomeViewController") as! HomeViewController
-                vc.name = self.name ?? ""
-                vc.secname = self.secname ?? ""
-                if let selectedIndexPath = self.selectedIndexPath {
-                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
-                } else {
-                    vc.Neighbourname = "" // Default value
-                }
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
+            // Agar form valid nahi hai, to alert show karo
+            showAlert(message: validationMessage)
+            return
         }
+        
+        let addressDetails = lblArea.text ?? "Address not available"
+        let messageText = "Please confirm that the address proof is for your address in\n\(addressDetails)"
+
+        // Create alert
+        let alert = UIAlertController(title: nil, message: messageText, preferredStyle: .alert)
+
+        // Customize message font and color
+        let messageFont = [NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 13)!,
+                           NSAttributedString.Key.foregroundColor: UIColor.darkGray]
+
+        let messageAttrString = NSAttributedString(string: messageText, attributes: messageFont)
+        alert.setValue(messageAttrString, forKey: "attributedMessage")
+
+        // Confirm button (green)
+        let confirmAction = UIAlertAction(title: "Confirm", style: .default, handler: { _ in
+            self.callRegSecWebService {
+                print("API call successful")
+                
+                // After the API call is successful, show the thank you message
+                self.showThankYouAlert()
+            }
+        })
+        confirmAction.setValue(UIColor(hex: "#008000"), forKey: "titleTextColor")
+
+        // Cancel button (red)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        cancelAction.setValue(UIColor.red, forKey: "titleTextColor")
+
+        // Add actions
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+
+        self.present(alert, animated: true, completion: nil)
+
+    }
+    
+    
+    
+    
+//    func callAfterConfirmation() {
+//        if let validationMessage = validateForm() {
+//            showAlert(message: validationMessage)
+//            return
+//        }
+//        
+//        // API call and navigation
+//        callRegSecWebService {
+//            print("Call API")
+//            let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as! NeigbrnookViewController
+//            vc.name = self.name ?? ""
+//            vc.secname = self.secname ?? ""
+//            
+//            if let selectedIndexPath = self.selectedIndexPath {
+//                vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+//            } else {
+//                vc.Neighbourname = ""
+//            }
+//            
+//            self.navigationController?.pushViewController(vc, animated: true)
+//        }
+//    }
 
     
-    
+    // Function to show the "Thank You" alert
+    func showThankYouAlert() {
+        let alert = UIAlertController(title: "Thank You", message: "Thank you for choosing Neighbournook. Your account will be active after a quick verification.", preferredStyle: .alert)
+        
+        // OK button to dismiss the alert and move to the next screen
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+            // Push to the next view controller after the user clicks "OK"
+            self.pushToNeighbournookViewController()
+        }))
+        
+        // Present the alert
+        self.present(alert, animated: true, completion: nil)
+    }
+
+    // Function to push to NeighbournookViewController
+    func pushToNeighbournookViewController() {
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as! NeigbrnookViewController
+        vc.name = self.name ?? ""
+        vc.secname = self.secname ?? ""
+        
+        if let selectedIndexPath = self.selectedIndexPath {
+            vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+        } else {
+            vc.Neighbourname = "" // Default value
+        }
+        
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+
     
     
     func validateForm() -> String? {
@@ -1341,15 +1522,15 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         } else if selectedIndexPath == nil {
             return "Please select the neighbourhood"
             
-//        } else if selectedDocumentType == nil {
-//            return "Please select the document name"
-//        } else if selectedDocumentType != .none {
-//            if frontImageView.image == nil || frontImageView.image == UIImage(named: "PhotoIDProof") {
-//                return "Please upload Front image"
-//            }
-//            if backImageView.image == nil || backImageView.image == UIImage(named: "PhotoIDProof") {
-//                return "Please upload Back image"
-//            }
+            //        } else if selectedDocumentType == nil {
+            //            return "Please select the document name"
+            //        } else if selectedDocumentType != .none {
+            //            if frontImageView.image == nil || frontImageView.image == UIImage(named: "PhotoIDProof") {
+            //                return "Please upload Front image"
+            //            }
+            //            if backImageView.image == nil || backImageView.image == UIImage(named: "PhotoIDProof") {
+            //                return "Please upload Back image"
+            //            }
         }
         
         
@@ -1360,7 +1541,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         }
         return nil
     }
-
+    
     
     
     @IBAction func actionUpdate(_ sender: Any) {
@@ -1368,7 +1549,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     }
     
     
- 
+    
     
     func callRegSecWebService(_ completionClosure: @escaping () -> ()) {
         let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
@@ -1406,86 +1587,86 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
         
         // Handle document type selection and image upload logic
         var images: [(key: String, image: UIImage?)] = []
-//        
-//        switch selectedDocumentType {
-//        case .aadhar:
-//            if let frontImage = self.frontImageView.image {
-//                images.append(("aadharFront", frontImage))
-//            } else {
-//                print("Aadhaar Front image upload karein")
-//                return
-//            }
-//            
-//            if let backImage = self.backImageView.image {
-//                images.append(("aadharBack", backImage))
-//            } else {
-//                print("Aadhaar Back image upload karein")
-//                return
-//            }
-//            
-//        case .passport:
-//            if let frontImage = self.frontImageView.image {
-//                images.append(("passportFront", frontImage))
-//            } else {
-//                print("Passport Front image upload karein")
-//                return
-//            }
-//            
-//            if let backImage = self.backImageView.image {
-//                images.append(("passportBack", backImage))
-//            } else {
-//                print("Passport Back image upload karein")
-//                return
-//            }
-//            
-//        case .voterID:
-//            if let frontImage = self.frontImageView.image {
-//                images.append(("voterFront", frontImage))
-//            } else {
-//                print("Voter ID Front image upload karein")
-//                return
-//            }
-//            
-//            if let backImage = self.backImageView.image {
-//                images.append(("voterBack", backImage))
-//            } else {
-//                print("Voter ID Back image upload karein")
-//                return
-//            }
-//            
-//        case .drivingLicense:
-//            if let frontImage = self.frontImageView.image {
-//                images.append(("dlFront", frontImage))
-//            } else {
-//                print("Driving License Front image upload karein")
-//                return
-//            }
-//            
-//            if let backImage = self.backImageView.image {
-//                images.append(("dlBack", backImage))
-//            } else {
-//                print("Driving License Back image upload karein")
-//            }
-//            
-//            
-//        case .RentDoc:
-//            if let frontImage = self.frontImageView.image {
-//                images.append(("rentdocs", frontImage))
-//            } else {
-//                print("RentDoc Front image upload karein")
-//                return
-//            }
-//            
-//            if let backImage = self.backImageView.image {
-//                images.append(("rentdocs", backImage))
-//            } else {
-//                print("RentDoc Back image upload karein")
-//            }
-//            
-//        default:
-//            print("Koi document selected nahi hai")
-//            return
-//        }
+        
+        switch selectedDocumentType {
+        case .aadhar:
+            if let frontImage = self.frontImageView.image {
+                images.append(("aadharFront", frontImage))
+            } else {
+                print("Aadhaar Front image upload karein")
+                return
+            }
+            
+            if let backImage = self.backImageView.image {
+                images.append(("aadharBack", backImage))
+            } else {
+                print("Aadhaar Back image upload karein")
+                return
+            }
+            
+        case .passport:
+            if let frontImage = self.frontImageView.image {
+                images.append(("passportFront", frontImage))
+            } else {
+                print("Passport Front image upload karein")
+                return
+            }
+            
+            if let backImage = self.backImageView.image {
+                images.append(("passportBack", backImage))
+            } else {
+                print("Passport Back image upload karein")
+                return
+            }
+            
+        case .voterID:
+            if let frontImage = self.frontImageView.image {
+                images.append(("voterFront", frontImage))
+            } else {
+                print("Voter ID Front image upload karein")
+                return
+            }
+            
+            if let backImage = self.backImageView.image {
+                images.append(("voterBack", backImage))
+            } else {
+                print("Voter ID Back image upload karein")
+                return
+            }
+            
+        case .drivingLicense:
+            if let frontImage = self.frontImageView.image {
+                images.append(("dlFront", frontImage))
+            } else {
+                print("Driving License Front image upload karein")
+                return
+            }
+            
+            if let backImage = self.backImageView.image {
+                images.append(("dlBack", backImage))
+            } else {
+                print("Driving License Back image upload karein")
+            }
+            
+            
+        case .RentDoc:
+            if let frontImage = self.frontImageView.image {
+                images.append(("rentdocs", frontImage))
+            } else {
+                print("RentDoc Front image upload karein")
+                return
+            }
+            
+            if let backImage = self.backImageView.image {
+                images.append(("rentdocs", backImage))
+            } else {
+                print("RentDoc Back image upload karein")
+            }
+            
+        default:
+            print("Koi document selected nahi hai")
+            return
+        }
         
         // Set URL
         guard let url = URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=reg-step-II") else {
@@ -1585,7 +1766,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             for value in self.countryData?.nbdata ?? [] {
                 self.countryName.append(value.countryname ?? "")
             }
-//            self.countryDropdownData.dataSource = self.countryName
+            //            self.countryDropdownData.dataSource = self.countryName
             //    self.ServiceDescriptionLabel.text = self.ServiceTypeData?.data.servicede
             
             
@@ -1621,7 +1802,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
                 print("State Name: \(value.stateName), State ID: \(value.id)") // Debugging print
                 self.stateName.append(value.stateName)
             }
-//            self.stateDropdownData.dataSource = self.stateName
+            //            self.stateDropdownData.dataSource = self.stateName
         }
     }
     
@@ -1649,10 +1830,10 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
                 print("City Name: \(value.cityName), City ID: \(value.id)") // Debugging print
                 self.cityName.append(value.cityName)
             }
-//            self.cityDropdownData.dataSource = self.cityName
+            //            self.cityDropdownData.dataSource = self.cityName
         }
     }
-
+    
     
     
     func setStateAndCallCity(stateId: String) {
@@ -1737,7 +1918,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             }
         }
     }
-
+    
     
     
     // Function to show alert
@@ -1793,7 +1974,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
                     self.btnReachout.isHidden = false
                     self.saveButton.isHidden = true
                 }
-
+                
                 
                 // Reload table view and update height
                 self.neighbourhoodDataShowTableView.reloadData()
@@ -1801,7 +1982,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             }
         }
     }
-
+    
     func callCurrentSearchNeighbrWebService() {
         let dictParams: [String: Any] = [
             "areas": lblArea.text ?? "",
@@ -1840,7 +2021,7 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
             }
         }
     }
-
+    
     
     
     func callAddressWebService() {
@@ -1918,71 +2099,120 @@ class ReUploadDocumentsVC: UIViewController, UIPickerViewDelegate, UIPickerViewD
     }
     
     
-   
+    // MARK: -  CALL API FOR USER LOCATION   UserLocation
     
-    
-    
-    
-    
-}
-
-
-@available(iOS 16.0, *)
-extension ReUploadDocumentsVC: CLLocationManagerDelegate {
-    func requestLocationAuthorization() {
-        locationManager.requestWhenInUseAuthorization()
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        switch status {
-        case .authorizedWhenInUse, .authorizedAlways:
-            // Location access is granted, start updating the location
-            manager.startUpdatingLocation()
-        case .denied, .restricted:
-            // Handle denied access
-            break
-        case .notDetermined:
-            // Request permission
-            manager.requestWhenInUseAuthorization()
-        default:
-            break
+    func callUserLocationWebService() {
+        guard let id = UserDefaults.standard.string(forKey: "userid"), !id.isEmpty else {
+            print("🚨 User ID is missing!")
+            return
+        }
+        let url = "https://dev.neighbrsnook.com/admin/api/user-location"
+        
+        let params: [String: Any] = [
+            "userid": id,
+            "latitude": lat ?? 0.0,
+            "longitude": long ?? 0.0,
+            "area_name": (self.lblArea.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
+            "addlineone": self.tfFlat.text ?? "",
+            "addlinetwo": self.tfStreet.text ?? "",
+            "country_name": "India",
+            "state_name": self.tfState.text ?? "",
+            "city_name": self.tfCity.text ?? "",
+            "pincode": Int(self.tfPincode.text ?? "0") ?? 0
+        ]
+        print(params)
+        
+        AF.request(url, method: .post, parameters: params, encoding: JSONEncoding.default, headers: ["Content-Type": "application/json"]).responseJSON { response in
+            switch response.result {
+            case .success(let data):
+                print("✅ Response: \(data)")
+            case .failure(let error):
+                print("❌ API Error: \(error.localizedDescription)")
+            }
         }
     }
     
     
     
     
-    // Start location updates
-    func startLocationUpdates() {
-        locationManager.startUpdatingLocation()
-    }
-    
-    // Show alert for permission denial
-    func showPermissionDeniedAlert() {
-        let alert = UIAlertController(title: "Location Access Denied", message: "Please enable location access in settings.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
-    }
     
     
-    
-    
-    
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate else { return }
-        print("locations = \(locValue.latitude) \(locValue.longitude)")
-        lat = (locValue.latitude)
-        long = (locValue.longitude)
-        //  lblLocation.text = " \(locValue.latitude), \(locValue.longitude)"
-        
-        
-        
-        //  getAddressFromLatLon(volumeMountFromLocation)
-    }
 }
 
- 
+//
+//@available(iOS 16.0, *)
+//extension ReUploadDocumentsVC: CLLocationManagerDelegate {
+//
+//    func requestLocationAuthorization() {
+//        locationManager.requestWhenInUseAuthorization()
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+//        switch status {
+//        case .authorizedWhenInUse, .authorizedAlways:
+//            manager.startUpdatingLocation()
+//        case .denied, .restricted:
+//            showPermissionDeniedAlert()
+//        case .notDetermined:
+//            manager.requestWhenInUseAuthorization()
+//        default:
+//            break
+//        }
+//    }
+//
+//    func startLocationUpdates() {
+//        locationManager.startUpdatingLocation()
+//    }
+//
+//    func showPermissionDeniedAlert() {
+//        let alert = UIAlertController(title: "Location Access Denied",
+//                                      message: "Please enable location access in settings.",
+//                                      preferredStyle: .alert)
+//        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+//        present(alert, animated: true, completion: nil)
+//    }
+//
+//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//        guard let location = locations.last else { return }
+//
+//        lat = location.coordinate.latitude
+//        long = location.coordinate.longitude
+//
+//        fetchAddress(from: location)
+//        locationManager.stopUpdatingLocation()
+//    }
+//
+//    func fetchAddress(from location: CLLocation) {
+//        let geocoder = CLGeocoder()
+//        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+//            guard let placemark = placemarks?.first, error == nil else {
+//                print("Error in reverse geocoding: \(error?.localizedDescription ?? "Unknown error")")
+//                return
+//            }
+//
+//            let sector = placemark.subLocality ?? "Sector Not Found"
+//            let city = placemark.locality ?? "City Not Found"
+//            let state = placemark.administrativeArea ?? "State Not Found"
+//            let postalCode = placemark.postalCode ?? "PIN Not Found"
+//            let country = placemark.country ?? "Country Not Found"
+//
+//            DispatchQueue.main.async {
+//                // lblSector format: "Sector 16A, Noida, Uttar Pradesh, 201301, India."
+//                self.lblSector.text = "\(sector), \(city), \(state), \(postalCode), \(country)"
+//
+//                // lblArea format: "Sector 16A."
+//                self.lblArea.text = "\(sector)."
+//                self.tfCity.text = "\(city)"
+//                self.tfState.text = "\(state)"
+//                self.tfPincode.text = "\(postalCode)"
+//                 self.callUserLocationWebService()
+//
+//            }
+//        }
+//    }
+//}
+//
+//
 
 @available(iOS 16.0, *)
 extension ReUploadDocumentsVC: UITableViewDataSource, UITableViewDelegate{
@@ -2086,3 +2316,6 @@ extension ReUploadDocumentsVC: UITableViewDataSource, UITableViewDelegate{
         }
     }
 }
+
+
+

@@ -37,7 +37,7 @@ class NotificationViewController: BaseViewController {
         super.viewDidLoad()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         NetworkMonitor.shared.startMonitoring()
-//        closeSideMenu()
+        updateColors()
        
 //        setdata()
 //        view.backgroundColor = .white

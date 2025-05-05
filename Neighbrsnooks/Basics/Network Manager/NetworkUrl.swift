@@ -43,10 +43,12 @@ let kSharedUserDefaults = UserDefaults.standard
  *	--------------------------------------------------------
  *///   https://vensemart.com/Vensemart/api/
 struct WebServiceName {
+     
     
     static let kLogin = "login"
     static let kOtp = "master?flag=sendotp"
-    static let kForgetOtp = "master?flag=forget"
+    static let kForgetOtp = "otpverification"
+    static let kForgotPassword = "master?flag=forgotpassword"
     static let kRegister = "master?flag=createuser"
     static let kVerifyOTP = "otpverification?flag=verification"
     static let kProffesion = "master?flag=profession"
@@ -142,7 +144,10 @@ struct WebServiceName {
     static let kNeighborhoodStatusByState = "master?flag=neighborhoodstatus"
     static let kFAQ = "master?flag=faq"
     static let kpollCreate = "poll?flag=createpoll"
-    static let kNotificationCounta = "notificationcount.php?flag=counter&appkey=abc1239&userid=1510"
+    static var kNotificationCounta: String {
+            let userid = UserDefaults.standard.string(forKey: "userid") ?? ""
+            return "notificationcount.php?flag=counter&appkey=abc1239&userid=\(userid)"
+        }  
     static let kpopVerify = "master?flag=popupVerifiedStatus"
     static let kpostDetail = "posting?flag=postdetails"
     static let kDeletePost = "posting?flag=deletepostbyuser"
@@ -156,7 +161,7 @@ struct WebServiceName {
     static let kEventLikeList = "event?flag=eventlikeslist"
     static let kUpdateToken = "update-token"
     static let kEmailVerify = "verify-email"
-    
+     
     
     
     

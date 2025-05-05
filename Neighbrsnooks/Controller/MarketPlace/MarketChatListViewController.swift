@@ -6,8 +6,8 @@
 //
 
 import UIKit
-
-class MarketChatListViewController: UIViewController {
+@available(iOS 16.0, *)
+class MarketChatListViewController: BaseViewController {
     
    
     @IBOutlet weak var lblHeading: UILabel!
@@ -17,6 +17,7 @@ class MarketChatListViewController: UIViewController {
     var MarketChatListData : MarketChatList?
     var Productid = ""
     var NewidD = ""
+    var isFromChatList: Bool = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -105,6 +106,7 @@ class MarketChatListViewController: UIViewController {
 
 }
 
+@available(iOS 16.0, *)
 extension MarketChatListViewController: UITableViewDataSource, UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -139,7 +141,9 @@ extension MarketChatListViewController: UITableViewDataSource, UITableViewDelega
       //  vc.userImage = DirectMessageData?.nbdata[indexPath.row].userpic
 
         vc.userName = (self.MarketChatListData?.chats?[indexPath.row].senderName)!
-      //  vc.Productid = (self.MarketChatListData?.chats?[indexPath.row].productID)
+        vc.Sid = String(self.MarketChatListData?.chats?[indexPath.row].senderID ?? 0)
+        UserDefaults.standard.set(vc.Sid, forKey: "SenderidN")
+
         vc.Productid = String(self.MarketChatListData?.chats?[indexPath.row].productID ?? 0)
 
       //  vc.Productid = (self.MarketChatListData?.chats?[indexPath.row].productID)!

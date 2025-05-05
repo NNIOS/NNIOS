@@ -265,7 +265,12 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
         } else {
             cell.updateFavouriteButton(isFavourite: false) // Default to non-favorite
         }
-
+        
+        if traitCollection.userInterfaceStyle == .dark {
+               cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background
+           } else {
+               cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+           }
 
         //   cell.reactionButton.addTarget(self, action: #selector(emojiTapped), for: .touchUpInside)
         // let v = "".decodeEmoji

@@ -12,6 +12,9 @@ import Alamofire
 
 @available(iOS 16.0, *)
 class BaseViewController: UIViewController, BottomPanelDelegate {
+    
+    let mainViewS = UIView()
+    
     func updateTabAppearance(selectedIndex: Int) {
         
     }
@@ -26,6 +29,19 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
         self.hideKeyboardWhenTappedAround()
         statusBarColorChange()
       //  setBackgroundImage()
+        
+        
+//        let safeArea = view.safeAreaLayoutGuide
+//        view.addSubview(mainViewS)
+//        mainViewS.translatesAutoresizingMaskIntoConstraints = false
+//       
+//         NSLayoutConstraint.activate([
+//            mainViewS.topAnchor.constraint(equalTo: safeArea.topAnchor),
+//            mainViewS.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor),
+//            mainViewS.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor),
+//            mainViewS.heightAnchor.constraint(equalToConstant: 50)
+//        ])
+
         
     }
     
@@ -529,70 +545,52 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
         return result
     }
     
+  
     
-//    func showMaintenance(){
-//
-//        let alert = UIAlertController.init(title: BaseUrl.shared.projectName, message: "App is under maintenance", preferredStyle: .alert)
-//
-//        let yes = UIAlertAction(title: "Close", style: .default) { (alert) in
-//            exit(0);
-//        }
-//        alert.addAction(yes)
-//
-//        self.present(alert, animated: true)
-//    }
-//
-//    func showUpdate(type: Int){
-//
-//        let alert = UIAlertController.init(title: BaseUrl.shared.projectName, message: "A new version is available. Kindly update", preferredStyle: .alert)
-//
-//        let yes = UIAlertAction(title: "Update", style: .default) { (alert) in
-//
-//            guard let url = URL(string: "https://apps.apple.com/in/app/") else {
-//                return
-//            }
-//            if #available(iOS 10.0, *) {
-//                UIApplication.shared.open(url, options: [:], completionHandler: nil)
-//            } else {
-//                UIApplication.shared.openURL(url)
-//            }
-//
-//            let seconds = 1.0
-//
-//            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
-//                exit(-1)
-//            }
-//        }
-//        alert.addAction(yes)
-//
-//        let no = UIAlertAction(title: "Not Now", style: .cancel) { (alert) in
-//
-//            if type == 0
-//            {
-//                if (NetworkManeger.getUserDefault(key: "userId").isEmpty)
-//                {
-//                    let seconds = 1.0
-//
-//                    DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
-////                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginWithEmailViewController") as! LoginWithEmailViewController
-////                        self.navigationController?.pushViewController(vc, animated: true)
-//                    }
-//                }
-//            }
-//            else
-//            {
-//                exit(-1)
-//            }
-//
-//            NetworkManeger.setUserDefault(value: "1", key: "notNow")
-//        }
-//        alert.addAction(no)
-//
-//        if NetworkManeger.getUserDefault(key: "notNow") == "0"
-//        {
-//            self.present(alert, animated: true)
-//        }
-//    }
+    //MARK: - -------------------------    get Device info Irshad malik --------------------/
+    
+    func getDeviceInfo() -> (deviceModel: String, deviceIMEI: String, devicePlatform: String, deviceID: String) {
+        let device = UIDevice.current
+        
+        // Operating system name (e.g., "iOS")
+        let systemName = device.systemName
+        
+        // Unique device identifier (UUID)
+        let uuid = device.identifierForVendor?.uuidString ?? "N/A"
+        
+        // Get specific model name
+        let modelName = getDeviceModelName()
+        
+        return (deviceModel: modelName, deviceIMEI: uuid, devicePlatform: systemName, deviceID: uuid)
+    }
+    
+    // Helper function to get the specific model name using hardware identifier
+    func getDeviceModelName() -> String {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        let modelCode = withUnsafePointer(to: &systemInfo.machine) {
+            $0.withMemoryRebound(to: CChar.self, capacity: 1) {
+                String(validatingUTF8: $0)
+            }
+        }
+        
+        // Mapping of model codes to specific iPhone models (only some examples shown here)
+        let modelMap: [String: String] = [
+            "iPhone14,2": "iPhone 13 Pro",
+            "iPhone14,3": "iPhone 13 Pro Max",
+            "iPhone13,4": "iPhone 12 Pro Max",
+            "iPhone13,3": "iPhone 12 Pro",
+            // Add more models here as needed
+        ]
+        
+        if let modelName = modelMap[modelCode ?? ""] {
+            return modelName
+        } else {
+            return modelCode ?? "Unknown iPhone"
+        }
+    }
+    
+    
 }
 
 extension UIViewController {
@@ -839,3 +837,5 @@ struct Platform {
 //    if let vc = storyboard.instantiateViewController(withIdentifier: "MenuBottomViewController") as? MenuBottomViewController {
 //        vc.selectedTabIndex = index
 //        viewController = vc
+
+

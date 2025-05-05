@@ -69,7 +69,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     @IBOutlet weak var btnDec: UIButton!
     @IBOutlet weak var btnEdit: UIButton!
     @IBOutlet weak var btnDelete: UIButton!
-  
+    @IBOutlet weak var btnPreview: UIButton!
 
     @IBOutlet weak var btnAccptIcon: UIButton!
     @IBOutlet weak var btnDeclineIcon: UIButton!
@@ -126,6 +126,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         SVProgressHUD.show()
         collectionViewEvent.delegate = self
         collectionViewEvent.dataSource = self
@@ -946,17 +947,34 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             present(imagePickerController, animated: true, completion: nil)
         }
     }
+//
+//    func openGallery() {
+//         from = 1
+//             var config = PHPickerConfiguration()
+//             config.selectionLimit = 0 // 0 means no limit
+//             config.filter = .images
+//
+//             let picker = PHPickerViewController(configuration: config)
+//             picker.delegate = self
+//             present(picker, animated: true, completion: nil)
+//         }
  
- func openGallery() {
-     from = 1
-         var config = PHPickerConfiguration()
-         config.selectionLimit = 0 // 0 means no limit
-         config.filter = .images
-         
-         let picker = PHPickerViewController(configuration: config)
-         picker.delegate = self
-         present(picker, animated: true, completion: nil)
-     }
+    func openGallery() {
+        from = 1
+        
+        // Get the remaining limit from the label text
+        let limitText = self.lblImgLimit.text?.replacingOccurrences(of: "Max Images: ", with: "") ?? "0"
+        let selectionLimit = Int(limitText) ?? 0
+        
+        var config = PHPickerConfiguration()
+        config.selectionLimit = selectionLimit  // set limit from lblImgLimit
+        config.filter = .images
+        
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = self
+        present(picker, animated: true, completion: nil)
+    }
+
     
     func presentCropViewController(image: UIImage) {
         let cropViewController = TOCropViewController(image: image)

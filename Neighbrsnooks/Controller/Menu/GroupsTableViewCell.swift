@@ -26,6 +26,7 @@ class GroupsTableViewCell: UITableViewCell {
     @IBOutlet weak var btnJoin: UIButton!
     @IBOutlet weak var btnReqPending: UIButton!
     @IBOutlet weak var btnDetails: UIButton!
+    @IBOutlet weak var DotPollBtn: UIButton!
     
     var ExitCallback : ((UIButton) -> Void)?
     var JoinCallback : ((UIButton) -> Void)?
@@ -51,10 +52,11 @@ class GroupsTableViewCell: UITableViewCell {
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-            lblName.textColor = .white
-            lblGroupName.textColor = .white
-            lblPrivate.textColor = .white
-            lblSec.textColor = .white
+            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblGroupName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblPrivate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            DotPollBtn.tintColor = .white
            // lblMember.textColor = .white
           //  lblMemberText.textColor = .white
             
@@ -65,6 +67,7 @@ class GroupsTableViewCell: UITableViewCell {
             lblGroupName.textColor = defaultTextColor
             lblPrivate.textColor = UIColor.secondaryLabel
             lblSec.textColor = UIColor.secondaryLabel
+            DotPollBtn.tintColor = .black
 //            lblMember.textColor = .white
 //            lblMemberText.textColor = UIColor.secondaryLabel
             

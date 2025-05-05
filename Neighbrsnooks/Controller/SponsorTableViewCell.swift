@@ -22,7 +22,7 @@ class SponsorTableViewCell: UITableViewCell {
         super.awakeFromNib()
         viewAction.layer.cornerRadius = 10
         viewAction.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        viewAction.clipsToBounds = true  
+        viewAction.clipsToBounds = true
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSponsLabel))
         lblAction.isUserInteractionEnabled = true

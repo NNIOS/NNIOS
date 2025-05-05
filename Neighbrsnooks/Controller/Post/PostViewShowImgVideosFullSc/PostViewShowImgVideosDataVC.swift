@@ -9,6 +9,7 @@ import UIKit
 
 import AVKit
 
+@available(iOS 16.0, *)
 class PostViewShowImgVideosDataVC: UIViewController {
     
     @IBOutlet weak var colleviewShowImgVideos: UICollectionView!
@@ -82,8 +83,7 @@ class PostViewShowImgVideosDataVC: UIViewController {
         
         
         
-        
-        // CollectionView ke visible cells le lo
+         // CollectionView ke visible cells le lo
         for cell in colleviewShowImgVideos.visibleCells {
             if let videoCell = cell as? PostViewShowImgVideosColleViewCell {
                 videoCell.stopVideo() // 🎯 Stop Video Function Call Karein
@@ -93,8 +93,15 @@ class PostViewShowImgVideosDataVC: UIViewController {
         
     }
     
+   
+    
+    
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        self.tabBarController?.tabBar.isHidden = false
+        
+      
         
         // CollectionView ke visible cells le lo
         for cell in colleviewShowImgVideos.visibleCells {
@@ -103,6 +110,7 @@ class PostViewShowImgVideosDataVC: UIViewController {
             }
         }
     }
+    
     
     
     
@@ -111,6 +119,7 @@ class PostViewShowImgVideosDataVC: UIViewController {
     }
 }
 
+@available(iOS 16.0, *)
 extension PostViewShowImgVideosDataVC: UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

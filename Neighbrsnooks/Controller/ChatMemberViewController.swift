@@ -9,7 +9,7 @@ import UIKit
 import SVProgressHUD
 
 @available(iOS 16.0, *)
-class ChatMemberViewController: BaseViewC {
+class ChatMemberViewController: BaseViewController {
     
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var MembersLbl: UILabel!

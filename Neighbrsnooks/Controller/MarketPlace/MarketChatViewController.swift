@@ -1,6 +1,7 @@
 import UIKit
 
-class MarketChatViewController: BaseViewC, UITextViewDelegate {
+@available(iOS 16.0, *)
+class MarketChatViewController: BaseViewController, UITextViewDelegate {
     
     @IBOutlet weak var lblHeading: UILabel!
     
@@ -21,7 +22,9 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
     var senderUserpic: String?
     var timer: Timer?
     var counter = 0
-    
+    var Sid = ""
+    var isFromChatList: Bool = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
         placeholderLabel.text = "Type a message..."
@@ -32,9 +35,9 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
         self.tvmessage.font = UIFont(name: "Montserrat-Regular", size: 15)
         if let imageUrlString = senderUserpic, let url = URL(string: imageUrlString) {
             profileImgView.kf.indicatorType = .activity
-            profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "letter-b"))
+            profileImgView.kf.setImage(with: url, placeholder: UIImage(named: ""))
         } else {
-            profileImgView.image = UIImage(named: "letter-b") // Fallback image
+            profileImgView.image = UIImage(named: "") // Fallback image
         }
         
         self.viewItems.layer.shadowColor = UIColor.gray.cgColor
@@ -179,67 +182,120 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
     
     //  "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?"
     
-    
     func callMarketChatWebService(completion: @escaping () -> Void) {
-        
         let baseURL = "https://dev.neighbrsnook.com/admin/api/messages/"
         let id = UserDefaults.standard.string(forKey: "userid")
-        let Sid = UserDefaults.standard.string(forKey: "SenderidN")
-        // let dictParams: Dictionary<String, Any> = ["":""]
-        
-        let url = "\(baseURL)\(id ?? "")/\(Sid ?? "")"
-        
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        let dictParams: Dictionary<String, Any> = [
-            // "":id ?? "",
-            "product_id":  Productid ?? "",
-            
-            
+        let Sid: String
+
+        if isFromChatList {
+            Sid = self.Sid ?? UserDefaults.standard.string(forKey: "SenderidN") ?? ""
+        } else {
+            Sid = UserDefaults.standard.string(forKey: "SenderidN") ?? ""
+        }
+
+        let url = "\(baseURL)\(id ?? "")/\(Sid)"
+
+        let dictParams: [String: Any] = [
+            "product_id": Productid ?? ""
         ]
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+
+        RSNetworkManager.shared.newRequestApi(withServiceName: url, requestMethod: .GET, requestParameters: dictParams, withProgressHUD: true) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
             switch statusCode {
-            case .SUCCESS ,.CREATED:
-                
+            case .SUCCESS, .CREATED:
                 do {
                     let data = try JSONDecoder().decode(MarketChatModel.self, from: result!)
                     self.MarketChatData = data
-                    //                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
                     UserDefaults.standard.set(self.MarketChatData?.messages?.first?.senderID, forKey: "Senderid")
                     self.tableviewMembers.reloadData()
-                    
-                    
+
                     DispatchQueue.global().async {
-                        // Simulate network delay
                         sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.MarketChatData = data // Your actual data fetching logic
-                        
+                        self.MarketChatData = data
                         DispatchQueue.main.async {
-                            completion() // Call completion handler
+                            completion()
                         }
                     }
                 } catch {
                     print(error.localizedDescription)
                 }
+
             case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
                 do {
                     let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
                 } catch {
                     print(error.localizedDescription)
                 }
+
             case .UNAUTHORIZED:
                 print(error?.localizedDescription)
-                //   self.showLogoutAlert()
+
             default:
                 break
             }
         }
     }
+
+   // nichee
+    
+    
+//    func callMarketChatWebService(completion: @escaping () -> Void) {
+//
+//        let baseURL = "https://dev.neighbrsnook.com/admin/api/messages/"
+//           let id = UserDefaults.standard.string(forKey: "userid") ?? ""
+//
+//           // ✅ Condition: If Sid is passed from MarketChatListViewController, use it, otherwise fallback to UserDefaults
+//           let senderId = self.Sid ?? UserDefaults.standard.string(forKey: "SenderidN") ?? ""
+//
+//           let url = "\(baseURL)\(id)/\(senderId)"
+//           print("Final URL: \(url)")
+//
+//           let dictParams: [String: Any] = [
+//               "product_id": Productid ?? ""
+//           ]
+//
+//        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
+//        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS ,.CREATED:
+//
+//                do {
+//                    let data = try JSONDecoder().decode(MarketChatModel.self, from: result!)
+//                    self.MarketChatData = data
+//                    //                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+//                    UserDefaults.standard.set(self.MarketChatData?.messages?.first?.senderID, forKey: "Senderid")
+//                    self.tableviewMembers.reloadData()
+//
+//
+//                    DispatchQueue.global().async {
+//                        // Simulate network delay
+//                        sleep(2)
+//
+//                        // Update MarketWDetailData with fetched data
+//                        // Example data assignment
+//                        self.MarketChatData = data // Your actual data fetching logic
+//
+//                        DispatchQueue.main.async {
+//                            completion() // Call completion handler
+//                        }
+//                    }
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                do {
+//                    let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
+//                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .UNAUTHORIZED:
+//                print(error?.localizedDescription)
+//                //   self.showLogoutAlert()
+//            default:
+//                break
+//            }
+//        }
+//    }
     
     
     //  "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?"
@@ -284,6 +340,7 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
 }
 
 
+@available(iOS 16.0, *)
 extension MarketChatViewController: UITableViewDataSource, UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

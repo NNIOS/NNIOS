@@ -9,7 +9,7 @@ import UIKit
 import SVProgressHUD
 import Kingfisher
 @available(iOS 16.0, *)
-class MessageViewController: BaseViewC, UITextViewDelegate {
+class MessageViewController: BaseViewController, UITextViewDelegate {
     
     
     @IBOutlet weak var NameLbl: UILabel!

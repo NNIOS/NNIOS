@@ -66,6 +66,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         btnPlusImg.layer.cornerRadius = btnPlusImg.frame.height/2
         btnPlusImg.clipsToBounds = true
         btnPlusImg.contentEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
@@ -141,7 +142,6 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
             
             selectPostVC.labelTag = 1
             selectPostVC.postData = CategoryPostData?.nbdata.map { $0.postTitle ?? "" } ?? []
-            // Transparent Background Ke Liye
             selectPostVC.delegate = self
             selectPostVC.modalPresentationStyle = .overCurrentContext
             selectPostVC.modalTransitionStyle = .crossDissolve
@@ -311,7 +311,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
 //        serviceDropdownData.cellHeight = 35
 //        serviceDropdownData.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
 //    }
-//    
+//
 //    private func showDropdownData(showOn textField: UITextField, DropdownName dropdown : DropDown) {
 //        dropdown.show()
 //        dropdown.anchorView = textField
@@ -336,7 +336,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
 //            dropdown.width = 200
 //        }
 //    }
-//    
+//
     func dismissAndNavigateToMenuGroupViewController() {
         // Dismiss the current view controller
         self.dismiss(animated: true) { [weak self] in
@@ -387,7 +387,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
         }
         
         // Image Count Validation
-        if imageArray.count > 2 {
+        if imageArray.count > 3 {
             showAlert(with: "You can upload a maximum of 2 images", sender: sender)
             stopLoader(sender)
             return
@@ -441,7 +441,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
     
     @IBAction func selectPhotos(_ sender: UIButton) {
         // Agar user ne max 2 images aur 1 video upload kar liya hai to alert show karna hai
-        if imageArray.count >= 2 && videoArray.count >= 1 {
+        if imageArray.count >= 3 && videoArray.count >= 1 {
             showAlert(message: "You can only add up to 3 media items (1 video and 2 images).")
             return
         }
@@ -539,147 +539,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
             }
         }
         
-//        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-//            picker.dismiss(animated: true, completion: nil)
-//            
-//            if let image = info[.originalImage] as? UIImage {
-//                if imageArray.count >= 2 {
-//                    showAlert(message: "You can only upload a maximum of 2 images.")
-//                    return
-//                }
-//                if !imageArray.contains(where: { $0 == image }) {
-//                    imageArray.append(image)
-//                    DispatchQueue.main.async {
-//                        self.updateMediaCount()
-//                    }
-//                    
-//                }
-//            } else if let videoURL = info[.mediaURL] as? URL {
-//                if videoArray.count >= 1 {
-//                    showAlert(message: "You can only upload a maximum of 1 video.")
-//                    return
-//                }
-//                if !videoArray.contains(where: { $0 == videoURL }) {
-//                    videoArray.append(videoURL)
-//                    DispatchQueue.main.async {
-//                        self.updateMediaCount()
-//                    }
-//                }
-//            }
-//        }
-//
-//        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-//            picker.dismiss(animated: true, completion: nil)
-//            
-//            // Selected media ka count check karo
-//            let selectedImages = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) }
-//            let selectedVideos = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) }
-//            
-//            // Agar images aur videos ka total count exceed kar raha hai toh return karo
-//            if imageArray.count + selectedImages.count > 2 {
-//                showAlert(message: "You can only upload a maximum of 2 images.")
-//                return
-//            }
-//            
-//            if videoArray.count + selectedVideos.count > 1 {
-//                showAlert(message: "You can only upload a maximum of 1 video.")
-//                return
-//            }
-//
-//            for result in results {
-//                if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
-//                    result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
-//                        if let imageNew = object as? UIImage {
-//                            DispatchQueue.main.async {
-//                                if self.imageArray.count < 2 {
-//                                    self.imageArray.append(imageNew)
-//                                    self.updateMediaCount()
-//                                    
-//                                }
-//                            }
-//                        }
-//                    }
-//                } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
-//                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
-//                        if let videoURL = url {
-//                            DispatchQueue.main.async {
-//                                if self.videoArray.count < 1 {
-//                                    self.videoArray.append(videoURL)
-//                                    self.updateMediaCount()
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-    
-    
-//    
-//    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-//        picker.dismiss(animated: true, completion: nil)
-//        
-//        if let image = info[.originalImage] as? UIImage {
-//            if imageArray.count >= 2 {
-//                showAlert(message: "You can only upload a maximum of 2 images.")
-//                return
-//            }
-//            showCrop(image: image) // Cropping Function Call
-//        } else if let videoURL = info[.mediaURL] as? URL {
-//            if videoArray.count >= 1 {
-//                showAlert(message: "You can only upload a maximum of 1 video.")
-//                return
-//            }
-//            if !videoArray.contains(where: { $0 == videoURL }) {
-//                videoArray.append(videoURL)
-//                DispatchQueue.main.async {
-//                    self.updateMediaCount()
-//                }
-//            }
-//        }
-//    }
-//
-//    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-//        picker.dismiss(animated: true, completion: nil)
-//        
-//        let selectedImages = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) }
-//        let selectedVideos = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) }
-//        
-//        if imageArray.count + selectedImages.count > 2 {
-//            showAlert(message: "You can only upload a maximum of 2 images.")
-//            return
-//        }
-//        
-//        if videoArray.count + selectedVideos.count > 1 {
-//            showAlert(message: "You can only upload a maximum of 1 video.")
-//            return
-//        }
-//
-//        for result in results {
-//            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
-//                result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
-//                    if let imageNew = object as? UIImage {
-//                        DispatchQueue.main.async {
-//                            self.showCrop(image: imageNew) // Cropping Function Call
-//                        }
-//                    }
-//                }
-//            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
-//                result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
-//                    if let videoURL = url {
-//                        DispatchQueue.main.async {
-//                            if self.videoArray.count < 1 {
-//                                self.videoArray.append(videoURL)
-//                                self.updateMediaCount()
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
+ 
 
     
     // MARK: - Image Picker Delegates (Keep your original code exactly as is)
@@ -687,7 +547,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
         picker.dismiss(animated: true, completion: nil)
         
         if let image = info[.originalImage] as? UIImage {
-            if imageArray.count >= 2 {
+            if imageArray.count >= 3 {
                 showAlert(message: "You can only upload a maximum of 2 images.")
                 return
             }

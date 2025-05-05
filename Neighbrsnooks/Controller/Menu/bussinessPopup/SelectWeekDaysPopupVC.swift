@@ -34,10 +34,15 @@ class SelectWeekDaysPopupVC: UIViewController, UITableViewDelegate, UITableViewD
         self.view.backgroundColor = UIColor.black.withAlphaComponent(0.5) // Semi-transparent black
         self.view.isOpaque = false
         tblSelectWeekDay.showsVerticalScrollIndicator = false  // ✅ Scroll indicator hide karein
-      
         
+        closeButton.layer.cornerRadius = closeButton.frame.height / 2
+
         
     }
+    
+    
+    
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return weekDays.count
     }
@@ -89,6 +94,7 @@ class SelectWeekDaysPopupVC: UIViewController, UITableViewDelegate, UITableViewD
         
     }
     
+
     
     
 }

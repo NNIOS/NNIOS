@@ -12,7 +12,8 @@ import GooglePlaces
 import SVProgressHUD
 import AVKit
 import SystemConfiguration
-
+import Vision
+import Alamofire
 
 
 protocol ProfileneigSelectionDelegate: AnyObject {
@@ -97,6 +98,8 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     
     @IBOutlet weak var lblBack: UILabel!
     @IBOutlet weak var lblFront: UILabel!
+    @IBOutlet weak var lblForNeighourhood_ID: UILabel!
+    @IBOutlet weak var lblForNeighourhood_Address: UILabel!
     
     // Enum to manage selected state of documents
     enum SelectedDocument {
@@ -161,11 +164,11 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     var countryData : CountryModel?
     var stateData : StateModel?
     var cityData : cityModel?
-//    var countryDropdownData = DropDown()
+    //    var countryDropdownData = DropDown()
     var countryName = [String]()
-//    var stateDropdownData = DropDown()
+    //    var stateDropdownData = DropDown()
     var stateName = [String]()
-//    var cityDropdownData = DropDown()
+    //    var cityDropdownData = DropDown()
     var cityName = [String]()
     var nbdName = [String]()
     var shortAddress : String?
@@ -193,7 +196,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     override func viewDidLoad() {
         super.viewDidLoad()
         setUp()
-
+        
         callUploaddocumentWebService { [weak self] in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -217,7 +220,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             }
         }
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -229,12 +232,16 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             let components = newLocation.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             if components.count > 1 {
                 lblArea.text = components[1] // Sub locality ya street ko set karo
+                lblForNeighourhood_ID.text = components[1]
+                lblForNeighourhood_Address.text = components[1]
             } else {
                 lblArea.text = "Sub Locality not found"
             }
         } else {
             if let profileData = profileData {
                 lblArea.text = profileData.neighborhood
+                lblForNeighourhood_ID.text = profileData.neighborhood
+                lblForNeighourhood_Address.text = profileData.neighborhood
                 lblSector.text = "\(profileData.addlineone ?? ""), \(profileData.addlinetwo ?? "")"
                 tfFlat.text = profileData.addlineone
                 tfStreet.text = profileData.addlinetwo
@@ -247,13 +254,13 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
                 print("⚠️ profileData is nil")
             }
         }
-
+        
         // ✅ Ensure updated `lblArea.text` is being used
         print("🔹 lblArea.text before API call:", lblArea.text ?? "No Value")
         callCurrentSearchNeighbrWebService()  // API call viewWillAppear ke andar ho
     }
-
-  
+    
+    
     
     func setUp(){
         frontImageView.isHidden = true
@@ -263,6 +270,16 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         tfCity.text = city ?? ""
         tfState.text = state ?? ""
         tfPincode.text = zipcode
+        
+        tfFlat.text = profileData?.addlineone
+        let addressline = (profileData?.addlineone ?? "") + " " + (profileData?.addlinetwo ?? "")
+        tfStreet.text = addressline
+        genderTextField.text = profileData?.gender
+        dobTextField.text = profileData?.dob
+        
+        
+        
+        
         // Debug prints to check the values
         print("City in RegisterSecondVC: \(city ?? "No City")")
         print("State in RegisterSecondVC: \(state ?? "No State")")
@@ -422,92 +439,92 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     
     
     // 🔹 Function to find the first available document type
-       func getAvailableDocumentType() -> String? {
-           guard let docs = uploadDoc?.docsdata else { return nil }
-           
-           let documentMapping: [(String, String)] = [
-               ("passport", docs.passportFront),
-               ("aadhar", docs.aadharFront),
-               ("voterid", docs.voteridFront),
-               ("drivingLicense", docs.drivingLicenseFront),
-               ("rentDocs", docs.rentDocs)
-           ]
-           
-           for (docType, docURL) in documentMapping {
-               if !docURL.isEmpty { return docType }
-           }
-           
-           return nil // No available document found
-       }
-
-       // 🔹 Function to display uploaded images dynamically
-       func displayUploadedImages(for documentType: String) {
-           guard let docs = uploadDoc?.docsdata else {
-               print("❌ docsdata is nil")
-               return
-           }
-
-           let frontImageUrl: String?
-           let backImageUrl: String?
-
-           switch documentType {
-           case "passport":
-               frontImageUrl = docs.passportFront
-               backImageUrl = docs.passportBack
-           case "aadhar":
-               frontImageUrl = docs.aadharFront
-               backImageUrl = docs.aadharBack
-           case "voterid":
-               frontImageUrl = docs.voteridFront
-               backImageUrl = docs.voteridBack
-           case "drivingLicense":
-               frontImageUrl = docs.drivingLicenseFront
-               backImageUrl = docs.drivingLicenseBack
-           case "rentDocs":
-               frontImageUrl = docs.rentDocs
-               backImageUrl = nil
-           default:
-               return
-           }
-
-           print("🔍 Front Image URL: \(frontImageUrl ?? "No URL")")
-           print("🔍 Back Image URL: \(backImageUrl ?? "No URL")")
-
-           // Load Front Image
-           if let frontUrl = frontImageUrl, !frontUrl.isEmpty {
-               loadImage(from: frontUrl, into: frontImageView, isFront: true)
-           } else {
-               print("⚠️ Front Image URL is empty, showing placeholder")
-               frontImageView.image = UIImage(named: "placeholder")
-           }
-
-           // Load Back Image
-           if let backUrl = backImageUrl, !backUrl.isEmpty {
-               loadImage(from: backUrl, into: backImageView, isFront: false)
-           } else {
-               print("⚠️ Back Image URL is empty, showing placeholder")
-               backImageView.image = UIImage(named: "placeholder")
-           }
-       }
-
-       // ✅ Function to Load Image with Error Handling
-       func loadImage(from urlString: String, into imageView: UIImageView, isFront: Bool) {
-           let formattedUrl = urlString.hasPrefix("http") ? urlString : "https://" + urlString
-
-           guard let url = URL(string: formattedUrl) else {
-               print("❌ Invalid URL: \(urlString)")
-               return
-           }
-
-           imageView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder")) { result in
-               switch result {
-               case .success(let value):
-                   print("✅ \(isFront ? "Front" : "Back") Image Loaded: \(value.source.url?.absoluteString ?? "")")
-               case .failure(let error):
-                   print("❌ \(isFront ? "Front" : "Back") Image Error: \(error.localizedDescription)")
-               }
-           }
-       }
+    func getAvailableDocumentType() -> String? {
+        guard let docs = uploadDoc?.docsdata else { return nil }
+        
+        let documentMapping: [(String, String)] = [
+            ("passport", docs.passportFront),
+            ("aadhar", docs.aadharFront),
+            ("voterid", docs.voteridFront),
+            ("drivingLicense", docs.drivingLicenseFront),
+            ("rentDocs", docs.rentDocs)
+        ]
+        
+        for (docType, docURL) in documentMapping {
+            if !docURL.isEmpty { return docType }
+        }
+        
+        return nil // No available document found
+    }
+    
+    // 🔹 Function to display uploaded images dynamically
+    func displayUploadedImages(for documentType: String) {
+        guard let docs = uploadDoc?.docsdata else {
+            print("❌ docsdata is nil")
+            return
+        }
+        
+        let frontImageUrl: String?
+        let backImageUrl: String?
+        
+        switch documentType {
+        case "passport":
+            frontImageUrl = docs.passportFront
+            backImageUrl = docs.passportBack
+        case "aadhar":
+            frontImageUrl = docs.aadharFront
+            backImageUrl = docs.aadharBack
+        case "voterid":
+            frontImageUrl = docs.voteridFront
+            backImageUrl = docs.voteridBack
+        case "drivingLicense":
+            frontImageUrl = docs.drivingLicenseFront
+            backImageUrl = docs.drivingLicenseBack
+        case "rentDocs":
+            frontImageUrl = docs.rentDocs
+            backImageUrl = nil
+        default:
+            return
+        }
+        
+        print("🔍 Front Image URL: \(frontImageUrl ?? "No URL")")
+        print("🔍 Back Image URL: \(backImageUrl ?? "No URL")")
+        
+        // Load Front Image
+        if let frontUrl = frontImageUrl, !frontUrl.isEmpty {
+            loadImage(from: frontUrl, into: frontImageView, isFront: true)
+        } else {
+            print("⚠️ Front Image URL is empty, showing placeholder")
+            frontImageView.image = UIImage(named: "placeholder")
+        }
+        
+        // Load Back Image
+        if let backUrl = backImageUrl, !backUrl.isEmpty {
+            loadImage(from: backUrl, into: backImageView, isFront: false)
+        } else {
+            print("⚠️ Back Image URL is empty, showing placeholder")
+            backImageView.image = UIImage(named: "placeholder")
+        }
+    }
+    
+    // ✅ Function to Load Image with Error Handling
+    func loadImage(from urlString: String, into imageView: UIImageView, isFront: Bool) {
+        let formattedUrl = urlString.hasPrefix("http") ? urlString : "https://" + urlString
+        
+        guard let url = URL(string: formattedUrl) else {
+            print("❌ Invalid URL: \(urlString)")
+            return
+        }
+        
+        imageView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder")) { result in
+            switch result {
+            case .success(let value):
+                print("✅ \(isFront ? "Front" : "Back") Image Loaded: \(value.source.url?.absoluteString ?? "")")
+            case .failure(let error):
+                print("❌ \(isFront ? "Front" : "Back") Image Error: \(error.localizedDescription)")
+            }
+        }
+    }
     
     
     //    fetchDataFromAPI
@@ -523,9 +540,16 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         self.dobTextField.font = UIFont(name: "Montserrat-Regular", size: 14)
         self.backLabel.font = UIFont(name: "Montserrat-SemiBold", size: 14)
         self.frontLabel.font = UIFont(name: "Montserrat-SemiBold", size: 14)
+        
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.lblresi.font = UIFont(name: "Montserrat-Regular", size: 16)
+        //        self.lblYourneighbhood.font = UIFont(name: "Montserrat-Regular", size: 16)
+        //        self.lblAddress.font = UIFont(name: "Montserrat-SemiBold", size: 16)
+        
+        
+        
         let font = UIFont(name: "Montserrat-Regular", size: 12) // Apna font aur size specify karein
+        
         // Aadhaar Button
         let aadhaarTitle = "Aadhar"
         let aadhaarAttributes: [NSAttributedString.Key: Any] = [
@@ -551,7 +575,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         voterIDButton.setAttributedTitle(voterIDAttributedTitle, for: .normal)
         
         // Driving License Button
-        let drivingLicenseTitle = "Driving Licence "
+        let drivingLicenseTitle = "DL"
         let drivingLicenseAttributes: [NSAttributedString.Key: Any] = [
             .font: font as Any
         ]
@@ -559,12 +583,21 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         drivingLicenseButton.setAttributedTitle(drivingLicenseAttributedTitle, for: .normal)
         
         //
-        let rentdocTitle = "Rent Agreement"
+        let rentdocTitle = "Rent Lease\nElectricity Bill"
         let rentdocAttributes: [NSAttributedString.Key: Any] = [
-            .font: font as Any
+            .font: font as Any,
+            .foregroundColor: UIColor.black // optional
         ]
+        
         let rentdocAttributedTitle = NSAttributedString(string: rentdocTitle, attributes: rentdocAttributes)
         rentdocsButton.setAttributedTitle(rentdocAttributedTitle, for: .normal)
+        
+        // MULTILINE SUPPORT
+        rentdocsButton.titleLabel?.lineBreakMode = .byWordWrapping
+        rentdocsButton.titleLabel?.textAlignment = .center
+        rentdocsButton.titleLabel?.numberOfLines = 2
+        
+        
         
     }
     
@@ -596,8 +629,8 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             return
         }
     }
-
- 
+    
+    
     @IBAction func documentButtonClicked(_ sender: UIButton) {
         switch sender.tag {
         case 1:
@@ -635,7 +668,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         // Aadhaar, passport, voter ID, ya driving license ke liye dono images enable honi chahiye
         frontImageView.isUserInteractionEnabled = true
         lblFront.isUserInteractionEnabled = true
-
+        
         if document == .RentDoc {
             backImageView.isHidden = true
             lblBack.isHidden = true
@@ -648,7 +681,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             lblBack.isUserInteractionEnabled = true
         }
     }
-
+    
     
     
     @IBAction func aadhaarButtonTapped(_ sender: UIButton) {
@@ -675,7 +708,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     func showImageViews() {
         frontImageView.isHidden = false
         lblFront.isHidden = false
-
+        
         // Agar selectedDocumentType RentDoc hai toh back wale elements hide karo
         if selectedDocumentType == .RentDoc {
             backImageView.isHidden = true
@@ -685,7 +718,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             lblBack.isHidden = false
         }
     }
-
+    
     
     
     // Update buttons and image views states
@@ -1022,19 +1055,52 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     }
     
     @IBAction func backAction(_ sender: Any) {
-        if let navigationController = self.navigationController {
-               for controller in navigationController.viewControllers {
-                   if controller is MyProfileViewController {
-                       navigationController.popToViewController(controller, animated: true)
-                       return
-                   }
-               }
-           }
-           // Agar `MyProfileViewController` stack me nahi hai, toh manually push karein
-           let storyboard = UIStoryboard(name: "Main", bundle: nil)
-           if let profileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
-               navigationController?.pushViewController(profileVC, animated: true)
-           }
+        let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+        
+        // Title and message customization
+        let titleText = "Confirmation"
+        let messageText = "Are you sure you want to go back? Unsaved chnages might be lost."
+        
+        let titleColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .label
+        let messageColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .secondaryLabel
+        
+        let attributedTitle = NSAttributedString(string: titleText, attributes: [
+            .foregroundColor: titleColor,
+            .font: UIFont.boldSystemFont(ofSize: 17)
+        ])
+        
+        let attributedMessage = NSAttributedString(string: messageText, attributes: [
+            .foregroundColor: messageColor,
+            .font: UIFont.systemFont(ofSize: 15)
+        ])
+        
+        alertController.setValue(attributedTitle, forKey: "attributedTitle")
+        alertController.setValue(attributedMessage, forKey: "attributedMessage")
+        
+        // Confirm Back Action
+        let confirmAction = UIAlertAction(title: "Yes", style: .destructive) { _ in
+            if let navigationController = self.navigationController {
+                for controller in navigationController.viewControllers {
+                    if controller is MyProfileViewController {
+                        navigationController.popToViewController(controller, animated: true)
+                        return
+                    }
+                }
+            }
+            // Agar `MyProfileViewController` stack me nahi hai, toh manually push karein
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let profileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
+                self.navigationController?.pushViewController(profileVC, animated: true)
+            }
+        }
+        
+        // Cancel Action
+        let cancelAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
+        
+        alertController.addAction(confirmAction)
+        alertController.addAction(cancelAction)
+        
+        self.present(alertController, animated: true, completion: nil)
     }
     
     @IBAction func actionReachout(_ sender: Any) {
@@ -1108,29 +1174,96 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             showAlert(message: "Please upload Front image")
         }
         // Back image check
-        else if backImageView.image == nil {
+        else if selectedDocumentType != .RentDoc && backImageView.image == nil {
             showAlert(message: "Please upload Back image")
         } else {
+            showConfirmationAlert()
             
             
-            callRegSecWebService {
-                print("Call API")
-                
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as! NeigbrnookViewController
-                vc.name = self.name ?? ""
-                vc.secname = self.secname ?? ""
-                if let selectedIndexPath = self.selectedIndexPath {
-                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
-                } else {
-                    vc.Neighbourname = "" // Default value
-                }
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
+//            callRegSecWebService {
+//                print("Call API")
+//                
+//                let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as! NeigbrnookViewController
+//                vc.name = self.name ?? ""
+//                vc.secname = self.secname ?? ""
+//                if let selectedIndexPath = self.selectedIndexPath {
+//                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+//                } else {
+//                    vc.Neighbourname = "" // Default value
+//                }
+//                self.navigationController?.pushViewController(vc, animated: true)
+//            }
             
             
             
         }
     }
+    
+    
+    
+    // Function to show the confirmation alert
+    func showConfirmationAlert() {
+        let addressDetails = lblArea.text ?? "Address not available"
+        let messageText = "Please confirm that the address proof is for your address in\n\(addressDetails)"
+        
+        let alert = UIAlertController(title: nil, message: messageText, preferredStyle: .alert)
+        
+        // Customize message font and color
+        let messageFont = [NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 13)!,
+                           NSAttributedString.Key.foregroundColor: UIColor.darkGray]
+        let messageAttrString = NSAttributedString(string: messageText, attributes: messageFont)
+        alert.setValue(messageAttrString, forKey: "attributedMessage")
+        
+        // Confirm button (green)
+        let confirmAction = UIAlertAction(title: "Confirm", style: .default, handler: { _ in
+            self.callRegSecWebService {
+                print("API call successful")
+                self.showThankYouAlert()
+            }
+        })
+        confirmAction.setValue(UIColor(hex: "#008000"), forKey: "titleTextColor")
+        
+        // Cancel button (red)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        cancelAction.setValue(UIColor.red, forKey: "titleTextColor")
+        
+        // Add actions
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+
+    // Function to show the "Thank You" alert
+    func showThankYouAlert() {
+        let alert = UIAlertController(title: "Thank You", message: "Thank you for choosing Neighbournook. Your account will be active after a quick verification.", preferredStyle: .alert)
+        
+        // OK button to dismiss the alert and move to the next screen
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+            // Push to the next view controller after the user clicks "OK"
+            self.pushToNeighbournookViewController()
+        }))
+        
+        // Present the alert
+        self.present(alert, animated: true, completion: nil)
+    }
+
+    // Function to push to NeighbournookViewController
+    func pushToNeighbournookViewController() {
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as! NeigbrnookViewController
+        vc.name = self.name ?? ""
+        vc.secname = self.secname ?? ""
+        
+        if let selectedIndexPath = self.selectedIndexPath {
+            vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+        } else {
+            vc.Neighbourname = "" // Default value
+        }
+        
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+
+    
     
     
     //       call apni with irshad malik
@@ -1352,7 +1485,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             for value in self.countryData?.nbdata ?? [] {
                 self.countryName.append(value.countryname ?? "")
             }
-//            self.countryDropdownData.dataSource = self.countryName
+            //            self.countryDropdownData.dataSource = self.countryName
             //    self.ServiceDescriptionLabel.text = self.ServiceTypeData?.data.servicede
             
             
@@ -1388,7 +1521,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
                 print("State Name: \(value.stateName), State ID: \(value.id)") // Debugging print
                 self.stateName.append(value.stateName)
             }
-//            self.stateDropdownData.dataSource = self.stateName
+            //            self.stateDropdownData.dataSource = self.stateName
         }
     }
     
@@ -1416,7 +1549,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
                 print("City Name: \(value.cityName), City ID: \(value.id)") // Debugging print
                 self.cityName.append(value.cityName)
             }
-//            self.cityDropdownData.dataSource = self.cityName
+            //            self.cityDropdownData.dataSource = self.cityName
         }
     }
     
@@ -1612,80 +1745,80 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     }
     
     
-//    
-//    func callAddressWebService() {
-//        let id = UserDefaults.standard.string(forKey: "userid")
-//        if self.from == 1
-//        {
-//            let dictParams: Dictionary<String, Any> = [
-//                "lati":  latitudeCurrentLocation,
-//                "longi":longitudeCurrentLocation,
-//                "areas": self.NeighbrhdData?.data.first?.nbdID ?? 0,
-//                "addlineone":self.tfFlat.text ?? "",
-//                "addlinetwo":self.tfStreet.text ?? "",
-//                "countryid": countryId ?? "",
-//                "stateid": stateId ?? "",
-//                "cityid":cityId ?? "",
-//                "pincode":self.tfPincode.text ?? "",
-//                "userid": id ?? ""
-//            ]
-//            
-//            WebService.sharedInstance.callAddressWebService(withParams: dictParams) { data in
-//                self.AddressData = data
-//                
-//                let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
-//                vc.name = self.name ?? ""
-//                vc.secname = self.secname ?? ""
-//                //                vc.Neighbourname = self.lblNeighbr.text ?? ""
-//                if let selectedIndexPath = self.selectedIndexPath {
-//                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
-//                } else {
-//                    vc.Neighbourname = "" // Default value
-//                }
-//                self.navigationController?.pushViewController(vc, animated: false)
-//                //
-//            }
-//        }
-//        
-//        else if self.from == 2
-//        {
-//            let dictParams: Dictionary<String, Any> = [
-//                "lati":  lat,
-//                "longi":long,
-//                "areas": self.NeighbrhdData?.data.first?.nbdID ?? 0,
-//                "addlineone":self.tfFlat.text ?? "",
-//                "addlinetwo":self.tfStreet.text ?? "",
-//                "countryid": countryId ?? "",
-//                "stateid": stateId ?? "",
-//                "cityid":cityId ?? "",
-//                "pincode":self.tfPincode.text ?? "",
-//                "userid": id ?? ""
-//                
-//            ]
-//            
-//            
-//            WebService.sharedInstance.callAddressWebService(withParams: dictParams) { data in
-//                self.AddressData = data
-//                
-//                let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
-//                
-//                vc.name = self.name ?? ""
-//                vc.secname = self.secname ?? ""
-//                //                vc.Neighbourname = self.lblNeighbr.text ?? ""
-//                if let selectedIndexPath = self.selectedIndexPath {
-//                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
-//                } else {
-//                    vc.Neighbourname = "" // Default value
-//                }
-//                
-//                
-//                self.navigationController?.pushViewController(vc, animated: false)
-//                //
-//            }
-//            
-//        }
-//    }
-//    
+    //
+    //    func callAddressWebService() {
+    //        let id = UserDefaults.standard.string(forKey: "userid")
+    //        if self.from == 1
+    //        {
+    //            let dictParams: Dictionary<String, Any> = [
+    //                "lati":  latitudeCurrentLocation,
+    //                "longi":longitudeCurrentLocation,
+    //                "areas": self.NeighbrhdData?.data.first?.nbdID ?? 0,
+    //                "addlineone":self.tfFlat.text ?? "",
+    //                "addlinetwo":self.tfStreet.text ?? "",
+    //                "countryid": countryId ?? "",
+    //                "stateid": stateId ?? "",
+    //                "cityid":cityId ?? "",
+    //                "pincode":self.tfPincode.text ?? "",
+    //                "userid": id ?? ""
+    //            ]
+    //
+    //            WebService.sharedInstance.callAddressWebService(withParams: dictParams) { data in
+    //                self.AddressData = data
+    //
+    //                let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
+    //                vc.name = self.name ?? ""
+    //                vc.secname = self.secname ?? ""
+    //                //                vc.Neighbourname = self.lblNeighbr.text ?? ""
+    //                if let selectedIndexPath = self.selectedIndexPath {
+    //                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+    //                } else {
+    //                    vc.Neighbourname = "" // Default value
+    //                }
+    //                self.navigationController?.pushViewController(vc, animated: false)
+    //                //
+    //            }
+    //        }
+    //
+    //        else if self.from == 2
+    //        {
+    //            let dictParams: Dictionary<String, Any> = [
+    //                "lati":  lat,
+    //                "longi":long,
+    //                "areas": self.NeighbrhdData?.data.first?.nbdID ?? 0,
+    //                "addlineone":self.tfFlat.text ?? "",
+    //                "addlinetwo":self.tfStreet.text ?? "",
+    //                "countryid": countryId ?? "",
+    //                "stateid": stateId ?? "",
+    //                "cityid":cityId ?? "",
+    //                "pincode":self.tfPincode.text ?? "",
+    //                "userid": id ?? ""
+    //
+    //            ]
+    //
+    //
+    //            WebService.sharedInstance.callAddressWebService(withParams: dictParams) { data in
+    //                self.AddressData = data
+    //
+    //                let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
+    //
+    //                vc.name = self.name ?? ""
+    //                vc.secname = self.secname ?? ""
+    //                //                vc.Neighbourname = self.lblNeighbr.text ?? ""
+    //                if let selectedIndexPath = self.selectedIndexPath {
+    //                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+    //                } else {
+    //                    vc.Neighbourname = "" // Default value
+    //                }
+    //
+    //
+    //                self.navigationController?.pushViewController(vc, animated: false)
+    //                //
+    //            }
+    //
+    //        }
+    //    }
+    //
     
     
     

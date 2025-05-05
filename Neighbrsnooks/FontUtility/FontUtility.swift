@@ -28,7 +28,7 @@ class FontUtility {
 
 @IBDesignable
 class CustomTextView: UITextView {
-    @IBInspectable var customFontSize: CGFloat = 15 {
+    @IBInspectable var customFontSize: CGFloat = 14 {
         didSet {
             self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         }
@@ -40,14 +40,51 @@ class CustomTextView: UITextView {
 }
 
 
+//
+//class CustomLabelFirstName: UITextField {
+//    
+//    @IBInspectable var customFontSize: CGFloat = 16 {
+//        didSet {
+//            updateAppearance()
+//        }
+//    }
+//    
+//    override func awakeFromNib() {
+//        super.awakeFromNib()
+//        updateAppearance()
+//    }
+//
+//    private func updateAppearance() {
+//        self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+//        self.textColor = UIColor(red: 92/255.0, green: 92/255.0, blue: 92/255.0, alpha: 1.0)
+//    }
+//}
 
 
+
+@IBDesignable
+class CustomLabelFirstName: UITextField {
+     @IBInspectable var customFontSize: CGFloat = 16 {
+        didSet {
+            self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+            self.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
+
+        }
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+        self.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
+
+    }
+}
 
 
 @IBDesignable
 class CustomTextField: UITextField {
     
-    @IBInspectable var customFontSize: CGFloat = 15 {
+    @IBInspectable var customFontSize: CGFloat = 14 {
         didSet {
             self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         }
@@ -92,6 +129,7 @@ class CustomLabelSelectPost: UILabel {
 
 
  
+ 
 
 @IBDesignable
 class CustomLabel: UILabel {
@@ -110,15 +148,42 @@ class CustomLabel: UILabel {
 @IBDesignable
 class CustomLabelComment: UILabel {
     
-    @IBInspectable var customFontSize: CGFloat = 13 {
+    @IBInspectable var customFontSize: CGFloat = 14 {
         didSet {
-            self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+            updateAppearance()
         }
     }
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        updateAppearance()
+    }
+
+    private func updateAppearance() {
         self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+        self.textColor = UIColor(red: 92/255.0, green: 92/255.0, blue: 92/255.0, alpha: 1.0)
+    }
+}
+
+
+
+@IBDesignable
+class CustomLabelHedingComment: UILabel {
+    
+    @IBInspectable var customFontSize: CGFloat = 20 {
+        didSet {
+            updateAppearance()
+        }
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        updateAppearance()
+    }
+
+    private func updateAppearance() {
+        self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+        self.textColor = UIColor(red: 92/255.0, green: 92/255.0, blue: 92/255.0, alpha: 1.0)
     }
 }
 
@@ -163,7 +228,20 @@ class CustomButton: UIButton {
 
 
 
+@IBDesignable
+class CustomButtonMenu: UIButton {
 
+    @IBInspectable var customFontSize: CGFloat = 14 {
+        didSet {
+            self.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+        }
+    }
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+    }
+}
 
 
  

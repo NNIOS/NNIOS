@@ -8,7 +8,7 @@
 import UIKit
 import SVProgressHUD
 @available(iOS 16.0, *)
-class ContactUsViewController: BaseViewC, UITextViewDelegate {
+class ContactUsViewController: BaseViewController, UITextViewDelegate {
     
     @IBOutlet weak var NameLbl: UILabel!
     @IBOutlet weak var SecLbl: UILabel!
