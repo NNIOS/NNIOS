@@ -122,6 +122,8 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
         //  cell.lblGeneral.text = PostListData?.listdata[indexPath.row].postType
         cell.lblGeneral.text = PostListData?.listdata?[indexPath.row].postType
         cell.lblDescription.text = PostListData?.listdata?[indexPath.row].postMessage
+        cell.configureDescription(with: PostListData?.listdata?[indexPath.row].postMessage ?? "N/A")
+        cell.addTapGestureToLabel()
         //  cell.lblSec.text = PostListData?.listdata[indexPath.row].neighborhood
         cell.lblSec.text = PostListData?.listdata?[indexPath.row].neighborhood
         cell.lblMonth.text = PostListData?.listdata?[indexPath.row].createdOn
@@ -528,7 +530,7 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
         }
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        if let postDetailsVC = storyboard.instantiateViewController(withIdentifier: "PostDetailsViewController") as? PostDetailsViewController {
+        if let postDetailsVC = storyboard.instantiateViewController(withIdentifier: "PostDetailsNewViewController") as? PostDetailsNewViewController {
             // Data pass karo
             postDetailsVC.UserName = PostListData?.listdata?[indexPath.row].username ?? ""
             postDetailsVC.sectorName = PostListData?.listdata?[indexPath.row].neighborhood ?? ""
@@ -540,7 +542,7 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
             postDetailsVC.imgData = PostListData?.listdata?[indexPath.row].postImages ?? []
             postDetailsVC.videoData = PostListData?.listdata?[indexPath.row].postImages?.filter { ($0.video ?? "").isEmpty == false } ?? []
             postDetailsVC.postid = PostListData?.listdata?[indexPath.row].postid ?? ""
-            // Navigate to PostDetailsViewController
+            // Navigate to PostDetailsNewViewController
             self.navigationController?.pushViewController(postDetailsVC, animated: true)
         }
         

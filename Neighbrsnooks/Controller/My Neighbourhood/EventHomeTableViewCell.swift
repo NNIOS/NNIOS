@@ -39,8 +39,8 @@ class EventHomeTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateColors()
-        defaultTextColor = lblName.textColor
+//        updateColors()
+        
         ProfileImgView.layer.cornerRadius = ProfileImgView.frame.height/2
         addTapGestureToProfile()
          

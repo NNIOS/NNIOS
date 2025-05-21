@@ -46,7 +46,7 @@ class GroupsTableViewCell: UITableViewCell {
             addTapGestureToProfile()
         }
         defaultTextColor = lblGroupName.textColor
-        updateColors()
+//        updateColors()
     }
     
     private func updateColors() {
@@ -54,20 +54,20 @@ class GroupsTableViewCell: UITableViewCell {
             // Dark mode colors
             lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
             lblGroupName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblPrivate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            DotPollBtn.tintColor = .white
+//            lblPrivate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            DotPollBtn.tintColor = .white
            // lblMember.textColor = .white
           //  lblMemberText.textColor = .white
             
         } else {
             // Light mode mein storyboard ke original colors preserve karna
-            lblName.textColor = UIColor.secondaryLabel
+//            lblName.textColor = UIColor.secondaryLabel
            // lblGroupName.textColor = defaultTextColor
             lblGroupName.textColor = defaultTextColor
-            lblPrivate.textColor = UIColor.secondaryLabel
-            lblSec.textColor = UIColor.secondaryLabel
-            DotPollBtn.tintColor = .black
+//            lblPrivate.textColor = UIColor.secondaryLabel
+//            lblSec.textColor = UIColor.secondaryLabel
+//            DotPollBtn.tintColor = .black
 //            lblMember.textColor = .white
 //            lblMemberText.textColor = UIColor.secondaryLabel
             

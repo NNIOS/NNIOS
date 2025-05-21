@@ -11,10 +11,8 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     @IBOutlet weak var btnAnyone: UIButton!
     @IBOutlet weak var btnApprove: UIButton!
     @IBOutlet weak var lblHeading: UILabel!
-    
     @IBOutlet weak var btnHide: UIButton!
     @IBOutlet weak var btnShow: UIButton!
-    
     @IBOutlet weak var profilePic: UIImageView!
     @IBOutlet weak var placeholderLabel: UILabel!
     @IBOutlet weak var profilePicHeight: NSLayoutConstraint!
@@ -22,21 +20,17 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     @IBOutlet weak var lblWho: UILabel!
     @IBOutlet weak var lblAnyone: UILabel!
     @IBOutlet weak var lblApproved: UILabel!
-    
     @IBOutlet weak var GroupView: UIView!
     @IBOutlet weak var GroupNameView: UIView!
     @IBOutlet weak var AboutGroupView: UIView!
     @IBOutlet weak var JoinView: UIView!
     @IBOutlet weak var UploadImgView: UIView!
-    
-    
-   
-    
+
     var Anyone = ""
     var ApprovedMember = ""
     var account = ""
     var CreateGroupData : CreateGroupModel?
-    
+    var isCreatingGroup = false
     var imagePicker:UIImagePickerController?
     private weak var delegate: UIImagePickerControllerDelegate?
     var selectedImge: UIImage? = nil
@@ -47,18 +41,15 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
         NetworkMonitor.shared.startMonitoring()
         tfGroupName.delegate = self
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
-        
         self.tfGroupName.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.tvaboutGroup.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.lblUploadImg.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.lblWho.font = UIFont(name: "Montserrat-Regular", size: 15)
         self.lblAnyone.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.lblApproved.font = UIFont(name: "Montserrat-Regular", size: 17)
-        
         placeholderLabel.text = "About Group..."
-               placeholderLabel.textColor = UIColor.lightGray
-               placeholderLabel.isHidden = !tvaboutGroup.text.isEmpty
-
+        placeholderLabel.textColor = UIColor.lightGray
+        placeholderLabel.isHidden = !tvaboutGroup.text.isEmpty
         tvaboutGroup.delegate = self
         updateProfileImageView()
         self.imagePicker = UIImagePickerController()
@@ -67,15 +58,15 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
         profilePic.isUserInteractionEnabled = true
         profilePic.addGestureRecognizer(tapGestureRecognizer)
         profilePic.layer.masksToBounds = true
-      //  profilePic.layer.cornerRadius = profilePic.frame.height / 2
+        //  profilePic.layer.cornerRadius = profilePic.frame.height / 2
         
-     //   updateCollectionView()
+        //   updateCollectionView()
         
-        tfGroupName.autocapitalizationType = .sentences
-        tvaboutGroup.autocapitalizationType = .sentences
-       
-//        btnApprove.isSelected = true
-//        account = "2"
+        tfGroupName.autocapitalizationType = .words
+        tvaboutGroup.autocapitalizationType = .words
+        
+        //        btnApprove.isSelected = true
+        //        account = "2"
         // Do any additional setup after loading the view.
     }
     
@@ -85,9 +76,9 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     }
     
     @IBAction func BackButtionAction(_ : UIButton){
-
+        
         _ = navigationController?.popViewController(animated: true)
-
+        
     }
     
     private func updateColors() {
@@ -99,36 +90,29 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
             JoinView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             btnAnyone.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             btnApprove.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            
             GroupNameView.layer.borderWidth = 1.0 // Enable border in dark mode
             UploadImgView.layer.borderWidth = 1.0
             AboutGroupView.layer.borderWidth = 1.0
             JoinView.layer.borderWidth = 1.0 // Enable border in dark mode
-            
             GroupView.backgroundColor = .black
             GroupNameView.backgroundColor = .black
             UploadImgView.backgroundColor = .black
-            
             btnAnyone.backgroundColor = .white
             btnApprove.backgroundColor = .white
             btnAnyone.setTitleColor(.black, for: .normal) // Adjust text color for contrast
             btnApprove.setTitleColor(.black, for: .normal)
-            
         } else {
             GroupNameView.isUserInteractionEnabled = true
             UploadImgView.isUserInteractionEnabled = true
             AboutGroupView.isUserInteractionEnabled = true
             JoinView.isUserInteractionEnabled = true
-            
             GroupNameView.layer.borderWidth = 0 // Remove border in light mode
             AboutGroupView.layer.borderWidth = 0
             UploadImgView.layer.borderWidth = 0
             JoinView.layer.borderWidth = 0 // Remove border in light mode
-            
             GroupNameView.backgroundColor = .white
             UploadImgView.backgroundColor = .white
             GroupView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-            
             btnAnyone.layer.borderColor = UIColor.white.cgColor
             btnApprove.layer.borderColor = UIColor.white.cgColor
             btnAnyone.backgroundColor = .white
@@ -137,7 +121,7 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
             btnApprove.setTitleColor(.black, for: .normal)
         }
     }
-
+    
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
@@ -149,26 +133,26 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     
     
     func textViewDidChange(_ textView: UITextView) {
-            // Show or hide placeholder label based on text view content
-            placeholderLabel.isHidden = !textView.text.isEmpty
-        }
+        // Show or hide placeholder label based on text view content
+        placeholderLabel.isHidden = !textView.text.isEmpty
+    }
     
-     @IBAction func AnyOneBtnAction(_ sender: UIButton) {
+    @IBAction func AnyOneBtnAction(_ sender: UIButton) {
         btnAnyone.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
         btnApprove.setImage(UIImage(named: "radio-blank"), for: .normal)
-         account = "1"
-
+        account = "1"
+        
     }
     
     @IBAction func ApprovedBtnAction(_ sender: UIButton) {
         btnApprove.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
         btnAnyone.setImage(UIImage(named: "radio-blank"), for: .normal)
         account = "0"
-       
+        
     }
     
     @objc func imageViewTapped(_ sender:AnyObject){
-     //   selectPictureThroughPhotoGallery()
+        //   selectPictureThroughPhotoGallery()
         openCameraGallery()
         
     }
@@ -178,21 +162,23 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
         openCameraGallery()
     }
     
-   
+    
     @IBAction func CreateBtn(_ sender: UIButton){
         
         if tfGroupName.text == "" {
-                showAlert(message: "Please enter group name")
-            } else if tvaboutGroup.text == "" {
-                showAlert(message: "Please enter group description")
-            } else if account == "" { // Check if no option is selected
-                showAlert(message: "Please select who can join")
-            } else {
-                callCreateGroupWebService {
-                    self.navigationController?.popViewController(animated: true)
-                }
+            showAlert(message: "Please enter group name")
+        } else if tvaboutGroup.text == "" {
+            showAlert(message: "Please enter group description")
+        } else if account == "" {
+            showAlert(message: "Please select who can join")
+        } else {
+            sender.isEnabled = false // disable button
+            callCreateGroupWebService {
+                sender.isEnabled = true // re-enable after completion
+                self.navigationController?.popViewController(animated: true)
             }
-      
+        }
+        
     }
     
     func showAlert(message: String) {
@@ -224,7 +210,7 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
             let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
             
             // If the character count exceeds 22, prevent further changes
-            if updatedText.count > 22 {
+            if updatedText.count > 30 {
                 return false
             }
             
@@ -233,13 +219,16 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
         
         return true
     }
-
-
-
-
-
+    
+    
+    
+    
+    
     
     func callCreateGroupWebService(_ completionClosure: @escaping () -> ()) {
+        guard !isCreatingGroup else { return }
+        isCreatingGroup = true
+        
         let id = UserDefaults.standard.string(forKey: "userid")
         let dictParams: [String: Any] = [
             "createdby": id ?? "",
@@ -251,21 +240,21 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
         let headers: HTTPHeaders = ["Content-type": "multipart/form-data"]
         
         AF.upload(multipartFormData: { multipartFormData in
-            // Append parameters
             for (key, value) in dictParams {
                 if let valueStr = value as? String, let valueData = valueStr.data(using: .utf8) {
                     multipartFormData.append(valueData, withName: key)
                 }
             }
             
-            // Append image (profilePic)
             if let profilePicData = self.profilePic.image?.jpegData(compressionQuality: 1.0) {
                 multipartFormData.append(profilePicData, withName: "groupimage", fileName: "\(NSDate().timeIntervalSince1970.rounded()).jpeg", mimeType: "image/jpeg")
             }
         },
-        to: kBASEURL + WebServiceName.kCreateGroup,
-        method: .post,
-        headers: headers).response { response in
+                  to: kBASEURL + WebServiceName.kCreateGroup,
+                  method: .post,
+                  headers: headers).response { response in
+            self.isCreatingGroup = false  // Reset the flag
+            
             if response.error == nil {
                 do {
                     if let jsonData = response.data {
@@ -287,8 +276,8 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
             }
         }
     }
-
-
+    
+    
 }
 
 
@@ -303,11 +292,11 @@ extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigati
         
         self.profilePic.image = image
         self.selectedImge = image
-
+        
         updateProfileImageView() // ✅ Yeh line add karein
     }
-
-
+    
+    
     func showCrop(image: UIImage) {
         let vc = CropViewController(croppingStyle: .default, image: image)
         vc.aspectRatioPreset = .presetSquare
@@ -318,11 +307,11 @@ extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigati
         vc.delegate = self
         present(vc, animated: true)
     }
-
+    
     func cropViewController(_ cropViewController: CropViewController, didFinishCancelled cancelled: Bool) {
         cropViewController.dismiss(animated: true)
     }
-
+    
     func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
         cropViewController.dismiss(animated: true)
         print("Did crop")
@@ -333,16 +322,16 @@ extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigati
         
         updateProfileImageView() // ✅ Yeh line zaroori hai
     }
-
-
-
-
+    
+    
+    
+    
     func openCameraGallery() {
         let alert = UIAlertController()
-
+        
         alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
             print("User clicked Camera button")
-
+            
             if UIImagePickerController.isSourceTypeAvailable(.camera) {
                 self.imagePicker = UIImagePickerController()
                 self.imagePicker?.sourceType = .camera
@@ -353,10 +342,10 @@ extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigati
                 print("Camera not available")
             }
         }))
-
+        
         alert.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
             print("User clicked Gallery button")
-
+            
             if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
                 self.imagePicker = UIImagePickerController()
                 self.imagePicker?.sourceType = .photoLibrary
@@ -367,17 +356,17 @@ extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigati
                 print("Photo library not available")
             }
         }))
-
+        
         alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { _ in
             print("User clicked Dismiss button")
         }))
-
+        
         self.present(alert, animated: true, completion: {
             print("completion block")
         })
     }
-
-
+    
+    
     
     
     func updateProfileImageView() {
@@ -394,14 +383,14 @@ extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigati
             self.view.layoutIfNeeded()
         }
     }
-
-
+    
+    
     func resetProfileImage() {
         self.profilePic.image = nil
         self.selectedImge = nil
         
         updateProfileImageView() // ✅ Height 0 hone ke liye
     }
-
-
+    
+    
 }

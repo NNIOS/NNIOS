@@ -161,7 +161,7 @@ struct WebServiceName {
     static let kEventLikeList = "event?flag=eventlikeslist"
     static let kUpdateToken = "update-token"
     static let kEmailVerify = "verify-email"
-     
+    static let kDeactivate = "mobilesettings?flag=deactiveaccount"
     
     
     

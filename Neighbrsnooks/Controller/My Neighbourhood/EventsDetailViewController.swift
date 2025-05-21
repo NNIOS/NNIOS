@@ -18,14 +18,10 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     func didTapDeleteButton(at index: Int) {
         
     }
-    
-    
-    
     func didDeleteImage(at index: Int) {
         images.remove(at: index)
     }
-    
-       
+    @IBOutlet weak var collectionViewEventHeightConst: NSLayoutConstraint!
     @IBOutlet weak var collectionViewEvent: UICollectionView!
     @IBOutlet weak var UserNameLbl: UILabel!
     @IBOutlet weak var DateLbl: UILabel!
@@ -59,9 +55,8 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     @IBOutlet weak var collectionViewNewEvent: UICollectionView!
     @IBOutlet weak var WicketRangeCollectionView: UICollectionView!
     @IBOutlet weak var AttendesCollectionView: UICollectionView!
-   
+    @IBOutlet weak var AttendesCollectionViewHeightConst: NSLayoutConstraint!
     
-   
     
     @IBOutlet weak var btnyes: UIButton!
     @IBOutlet weak var btnNo: UIButton!
@@ -82,6 +77,9 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     @IBOutlet weak var LblOwnerPhotoTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var imgCountlLbl: UILabel!
     @IBOutlet weak var EventsBgView: UIView!
+    @IBOutlet weak var btnSeelectPhotos: UIButton!
+    
+    
     
     var eventid = ""
     var notiid = ""
@@ -90,7 +88,8 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     var EventUploadPicData : UploadEventDetailModel?
     var DelImgData : DeleteImgEventModel?
     var EventYesData : EventYesJointModel?
-    var selection = 1
+//    var selection = 1
+    var selection: Int? = 1
   //  var EventDetauilData : EventDetailModel?
     var thisWidth:CGFloat = 0
     var from = 1
@@ -104,10 +103,15 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     var MarketWDeleteData : DelMarketProductModel?
     var id = UserDefaults.standard.string(forKey: "userid")
     var idCr = UserDefaults.standard.string(forKey: "usercr")
-    
-    func tapConfirm() {
+    var userImages: [ImageEvent] = []
+     func tapConfirm() {
         
     }
+    
+    var allImages: [UIImage] {
+        return selectedImages + images
+    }
+
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -128,6 +132,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
         super.viewDidLoad()
         updateColors()
         SVProgressHUD.show()
+        DateLbl.textColor = UIColor.secondaryLabel
         collectionViewEvent.delegate = self
         collectionViewEvent.dataSource = self
         AttendesCollectionView.delegate = self
@@ -159,73 +164,97 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
         btnUplImg.isHidden = true
         
         DispatchQueue.main.async {
-               self.updateNewViewConstraints()
+            
+            self.updateNewViewConstraints()
             self.updateLblOwnerConstraints()
            }
+
+        self.btnPreview.isUserInteractionEnabled = false
         
         super.viewDidLayoutSubviews()
-           
-
         
         if let userAttends = self.EventDetauilData?.userattends {
-                switch userAttends {
-                case .intValue(let intValue):
-                    if intValue == 1 {
-                        btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-                        if selection != 1 {  // Ensure it doesn't override btnYes action
-                            UploadImgView.isHidden = false
-                            collectionViewEvent.isHidden = false
-                            AttendesCollectionView.isHidden = false
-                        }
-                    } else if intValue == 0 {
-                        btnNo.backgroundColor = #colorLiteral(red: 0.7490196078, green: 0.2117647059, blue: 0.04705882353, alpha: 1)
-                        if selection != 1 {
-                            UploadImgView.isHidden = true
-                            collectionViewEvent.isHidden = true
-                            AttendesCollectionView.isHidden = true
-                        }
-                    }
-                case .stringValue(let stringValue):
-                    if stringValue == "1" {
-                        btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-                        if selection != 1 {
-                            UploadImgView.isHidden = false
-                            collectionViewEvent.isHidden = false
-                            AttendesCollectionView.isHidden = false
-                        }
-                    } else if stringValue == "0" {
-                        btnNo.backgroundColor = #colorLiteral(red: 0.7490196078, green: 0.2117647059, blue: 0.04705882353, alpha: 1)
-                        if selection != 1 {
-                            UploadImgView.isHidden = true
-                            collectionViewEvent.isHidden = true
-                            AttendesCollectionView.isHidden = true
-                        }
-                    }
-                    
-                case .intValue(let intValue):
-                    print("userAttends intValue:", intValue)  // Debugging
-                    if intValue == 2 {
-                        DispatchQueue.main.async {
-                            self.UploadImgView.isHidden = true
-                            self.collectionViewEvent.isHidden = true
-                            self.AttendesCollectionView.isHidden = true
-                        }
-                    }
+                        switch userAttends {
+                        case .intValue(let intValue):
+                            switch intValue {
+                            case 1:
+                                btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                              if selection != 1 {
+                                    UploadImgView.isHidden = false
+                                    collectionViewEvent.isHidden = false
+                                    AttendesCollectionView.isHidden = false
+                                    lblImgLimit.isHidden = false
+                               }
+                            case 0:
+                                btnNo.backgroundColor =  #colorLiteral(red: 0.5807225108, green: 0.066734083, blue: 0, alpha: 1)
+                                if selection != 1 {
+                                    UploadImgView.isHidden = true
+                                    collectionViewEvent.isHidden = true
+                                    AttendesCollectionView.isHidden = true
+                                }
+                            case 2:
+                                DispatchQueue.main.async {
+                                    self.UploadImgView.isHidden = true
+                                    self.collectionViewEvent.isHidden = true
+                                    self.AttendesCollectionView.isHidden = true
+                                    self.lblImgLimit.isHidden = true
+                                }
+                            default:
+                                break
+                            }
 
-                case .stringValue(let stringValue):
-                    print("userAttends stringValue:", stringValue)  // Debugging
-                    if stringValue == "2" {
-                        DispatchQueue.main.async {
-                            self.UploadImgView.isHidden = true
-                            self.collectionViewEvent.isHidden = true
-                            self.AttendesCollectionView.isHidden = true
+                        case .stringValue(let stringValue):
+                            switch stringValue {
+                            case "1":
+                                btnyes.backgroundColor =   #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                                if selection != 1 {
+                                    UploadImgView.isHidden = false
+                                    collectionViewEvent.isHidden = false
+                                    AttendesCollectionView.isHidden = false
+                                    lblImgLimit.isHidden = false
+                                }
+                            case "0":
+                                btnNo.backgroundColor =  #colorLiteral(red: 0.5807225108, green: 0.066734083, blue: 0, alpha: 1)
+                                if selection != 1 {
+                                    UploadImgView.isHidden = true
+                                    collectionViewEvent.isHidden = true
+                                    AttendesCollectionView.isHidden = true
+                                    self.lblImgLimit.isHidden = true
+                                }
+                            case "2":
+                                DispatchQueue.main.async {
+                                    self.UploadImgView.isHidden = true
+                                    self.collectionViewEvent.isHidden = true
+                                    self.AttendesCollectionView.isHidden = true
+                                    self.lblImgLimit.isHidden = true
+                                }
+                            default:
+                                break
+                            }
                         }
                     }
+        
+        if let selectedBtnValue = self.EventDetauilData?.userjoinmemberlist?
+            .compactMap({ Int($0.status ?? "") }).first {
 
-                    
-                }
-            
+            switch selectedBtnValue {
+            case 1:
+                self.UploadImgView.isHidden = false
+                self.collectionViewEvent.isHidden = false
+                self.AttendesCollectionView.isHidden = false
+                self.lblImgLimit.isHidden = false
+            case 0:
+                if selection != 1 {
+                    UploadImgView.isHidden = true
+                    collectionViewEvent.isHidden = true
+                    AttendesCollectionView.isHidden = true
+                    self.lblImgLimit.isHidden = true
+}
+                
+            default:
+                break
             }
+        }
 
 
         
@@ -247,6 +276,13 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
                 btnDelete.isHidden = false
                 btnEdit.isHidden = false
             } else {
+                if EventDetauilData?.userjoinmemberlist?.compactMap({ $0.status }).contains("1") == true {
+                    UploadImgView.isHidden = false
+                    lblImgLimit.isHidden = false
+                } else {
+                    UploadImgView.isHidden = true
+                    lblImgLimit.isHidden = true
+                }
                 yesNewView.isHidden = false
               //  btnEdit.isHidden = true
                 appLbl.isHidden = true
@@ -255,8 +291,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
                 btnAccptIcon.isHidden = true
                 btnDeclineIcon.isHidden = true
                 btnDec.isHidden = true
-                UploadImgView.isHidden = true
-                lblImgLimit.isHidden = true
+//                lblImgLimit.isHidden = true
                 btnDelete.isHidden = true
                 btnEdit.isHidden = true
                 
@@ -273,58 +308,44 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-      //  self.MembersLbl.font = UIFont(name: "Montserrat-SemiBold", size: 18)
-       
-        
         SVProgressHUD.show()
-        
-        
-        callEventDetailWebService{ [self] in
-            
+        callEventDetailWebService { [self] in
             SVProgressHUD.dismiss()
-            self.collectionViewEvent.reloadData()
-            self.AttendesCollectionView.reloadData()
-            
-            updateNewViewConstraints()
-            updateLblOwnerConstraints()
-            
+          
+           
             if let futureEventStatusString = EventDetauilData?.futureeventstatus,
                let futureEventStatus = Int(futureEventStatusString),
-               let eventId = UserDefaults.standard.string(forKey: "userid"),  // Ensure id exists
-             //  let id = UserDefaults.standard.string(forKey: "userid")
-               let idCr = UserDefaults.standard.string(forKey: "usercr") {  // Get idCr from UserDefaults
+               let eventId = UserDefaults.standard.string(forKey: "userid"),
+               let idCr = UserDefaults.standard.string(forKey: "usercr") {
 
                 print("Future Event Status:", futureEventStatus)
                 print("Event ID:", eventId)
                 print("User ID (idCr):", idCr)
 
-                DispatchQueue.main.async {  // Ensure UI updates on main thread
+                DispatchQueue.main.async {
                     if futureEventStatus == 0 || (futureEventStatus == 1 && eventId == idCr) {
-                        self.UploadImgView.isHidden = false
-                        self.lblImgLimit.isHidden = false
+//                    if futureEventStatus == 0 || futureEventStatus == 1 {
+//                    if eventId == idCr   || futureEventStatus == 1{
+                        if self.selection != 1 {
+                            self.UploadImgView.isHidden = false
+                            self.lblImgLimit.isHidden = false
+                            self.btnDelete.isHidden = false
+                            self.btnEdit.isHidden = false
+                        }
                     } else {
                         self.UploadImgView.isHidden = true
                         self.lblImgLimit.isHidden = true
+                        self.btnDelete.isHidden = false
+                        self.btnEdit.isHidden = false
                     }
                 }
             } else {
                 print("⚠️ futureeventstatus is nil, not a valid number, or id is missing")
             }
-
-
-
-
-
-
-
-
             if let imageDataArray = UserDefaults.standard.array(forKey: "savedImages") as? [Data] {
                    selectedImages = imageDataArray.compactMap { UIImage(data: $0) }
                }
 
-            
-           
             self.UserNameLbl.text = self.EventDetauilData?.createby
             self.DateLbl.text = self.EventDetauilData?.datetimeandneighbrhood
             self.TitleLbl.text = self.EventDetauilData?.title
@@ -347,48 +368,79 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             self.LikeLbl.text = self.EventDetauilData?.totalLike
             
             if let userAttends = self.EventDetauilData?.userattends {
-                    switch userAttends {
-                    case .intValue(let intValue):
-                        if intValue == 1 {
-                            btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-                            if selection != 1 {  // Ensure it doesn't override btnYes action
-                                UploadImgView.isHidden = false
-                                collectionViewEvent.isHidden = false
-                                AttendesCollectionView.isHidden = false
-                            }
-                        } else if intValue == 0 {
-                            btnNo.backgroundColor = #colorLiteral(red: 0.7490196078, green: 0.2117647059, blue: 0.04705882353, alpha: 1)
-                            if selection != 1 {
-                                UploadImgView.isHidden = true
-                                collectionViewEvent.isHidden = true
-                                AttendesCollectionView.isHidden = true
+                            switch userAttends {
+                            case .intValue(let intValue):
+                                switch intValue {
+                                case 1:
+                                    btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                                    if selection != 1 {
+                                        UploadImgView.isHidden = false
+                                        collectionViewEvent.isHidden = false
+                                        AttendesCollectionView.isHidden = false
+                                    }
+                                case 0:
+                                    btnNo.backgroundColor =  #colorLiteral(red: 0.5807225108, green: 0.066734083, blue: 0, alpha: 1)
+//                                    if selection != 1 {
+                                        UploadImgView.isHidden = true
+                                        collectionViewEvent.isHidden = true
+                                        AttendesCollectionView.isHidden = true
+                                        self.lblImgLimit.isHidden = true
+//                                    }
+                                case 2:
+                                    DispatchQueue.main.async {
+                                        if self.id == self.idCr {
+                                            self.UploadImgView.isHidden = false
+                                            self.collectionViewEvent.isHidden = false
+                                        } else {
+                                            self.UploadImgView.isHidden = true
+                                            self.collectionViewEvent.isHidden = true
+                                        }
+//                                        self.collectionViewEvent.isHidden = true
+//                                        self.AttendesCollectionView.isHidden = true
+//                                        self.lblImgLimit.isHidden = true
+                                    }
+                                default:
+                                    break
+                                }
+
+                            case .stringValue(let stringValue):
+                                switch stringValue {
+                                case "1":
+                                    btnyes.backgroundColor =   #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                                    if selection != 1 {
+                                        UploadImgView.isHidden = false
+                                        collectionViewEvent.isHidden = false
+                                        AttendesCollectionView.isHidden = false
+                                    }
+                                case "0":
+                                    btnNo.backgroundColor =  #colorLiteral(red: 0.5807225108, green: 0.066734083, blue: 0, alpha: 1)
+                                    if selection != 1 {
+                                        UploadImgView.isHidden = true
+                                        collectionViewEvent.isHidden = true
+                                        AttendesCollectionView.isHidden = true
+                                        self.lblImgLimit.isHidden = true
+                                    }
+                                case "2":
+                                    DispatchQueue.main.async {
+                                        if self.id == self.idCr {
+                                            self.UploadImgView.isHidden = false
+                                        } else {
+                                            self.UploadImgView.isHidden = true
+                                        }
+                                        self.collectionViewEvent.isHidden = true
+                                        self.AttendesCollectionView.isHidden = true
+                                        self.lblImgLimit.isHidden = true
+                                    }
+                                default:
+                                    break
+                                }
                             }
                         }
-                    case .stringValue(let stringValue):
-                        if stringValue == "1" {
-                            btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-                            if selection != 1 {
-                                UploadImgView.isHidden = false
-                                collectionViewEvent.isHidden = false
-                                AttendesCollectionView.isHidden = false
-                            }
-                        } else if stringValue == "0" {
-                            btnNo.backgroundColor = #colorLiteral(red: 0.7490196078, green: 0.2117647059, blue: 0.04705882353, alpha: 1)
-                            if selection != 1 {
-                                UploadImgView.isHidden = true
-                                collectionViewEvent.isHidden = true
-                                AttendesCollectionView.isHidden = true
-                            }
-                        }
-                    }
-                }
-            
             profileImgView.isUserInteractionEnabled = true
-               let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped(_:)))
-               profileImgView.addGestureRecognizer(tapGesture)
-            
-            self.lblImgLimit.text = "Max Images: " + (self.EventDetauilData?.eventImgRemainLimit ?? "")
-            var idCr = UserDefaults.standard.string(forKey: "usercr")
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped(_:)))
+            profileImgView.addGestureRecognizer(tapGesture)
+            self.lblImgLimit.text = "Max Images: " + (self.EventDetauilData?.eventImgLimit ?? "")
+ 
             
             if id == idCr {
                 yesNewView.isHidden = true
@@ -411,16 +463,26 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
                 btnAccptIcon.isHidden = true
                 btnDeclineIcon.isHidden = true
                 btnDec.isHidden = true
-               UploadImgView.isHidden = true
-                lblImgLimit.isHidden = true
+                if EventDetauilData?.userjoinmemberlist?.compactMap({ $0.status }).contains("1") == true{
+                    UploadImgView.isHidden = false
+                    lblImgLimit.isHidden = false
+                   
+                } else {
+                    UploadImgView.isHidden = true
+                    lblImgLimit.isHidden = true
+                   
+                    
+                  
+                }
+//                lblImgLimit.isHidden = true
                
             }
             
-            DispatchQueue.main.async {
-                if let isEventRunning = EventDetauilData?.iseventrunning, Int(isEventRunning) == 0 {
-                    yesNewView.isHidden = true
-                    UploadImgView.isHidden = true
-                    lblImgLimit.isHidden = true
+            DispatchQueue.main.async {  // past
+                if let isEventRunning = self.EventDetauilData?.iseventrunning, Int(isEventRunning) == 0 {
+                    self.yesNewView.isHidden = true
+                    self.UploadImgView.isHidden = true
+                    self.lblImgLimit.isHidden = true
                 } else {
 //                    yesNewView.isHidden = false
 //                    UploadImgView.isHidden = false
@@ -428,6 +490,32 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
                 }
 
             }
+            
+            if let images = EventDetauilData?.images {
+                let ownerImageCount = images.filter { $0.type == "owner" }.count
+                if ownerImageCount > 0 {
+    
+                    collectionViewEvent.isHidden = false
+                    collectionViewEventHeightConst.constant = 128
+                } else {
+                    
+                    collectionViewEvent.isHidden = true
+                    collectionViewEventHeightConst.constant = 0
+                }
+            }
+
+            
+            if let images = EventDetauilData?.images {
+                let ownerImageCount = images.filter { $0.type == "user" }.count
+                if ownerImageCount > 0 {
+                    AttendesCollectionView.isHidden = false
+                    AttendesCollectionViewHeightConst.constant = 128
+                } else {
+                    AttendesCollectionView.isHidden = true
+                    AttendesCollectionViewHeightConst.constant = 0
+                }
+            }
+
 
 
             
@@ -448,6 +536,10 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             let urlU = URL(string: (self.EventDetauilData?.userpic ?? ""))
             self.UserImgView.kf.indicatorType = .activity
            self.UserImgView.kf.setImage(with:urlU ,placeholder: UIImage(named: "EventImage"))
+            updateNewViewConstraints()
+            updateLblOwnerConstraints()
+            self.collectionViewEvent.reloadData()
+            self.AttendesCollectionView.reloadData()
         }
       //  callEventUploadImgWebService {}
     }
@@ -466,7 +558,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-            UserNameLbl.textColor = .white
+             UserNameLbl.textColor = .white
             DateLbl.textColor = .white
             TitleLbl.textColor = .white
             VenueLbl.textColor = .white
@@ -500,7 +592,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             UploadImgView.layer.borderWidth = 1.0
         } else {
             // Light mode mein storyboard ke original colors preserve karna
-            UserNameLbl.textColor = UIColor.secondaryLabel
+//            UserNameLbl.textColor = UIColor.secondaryLabel
             DateLbl.textColor = UIColor.secondaryLabel
             TitleLbl.textColor = UIColor.secondaryLabel
             VenueLbl.textColor = UIColor.secondaryLabel
@@ -578,8 +670,13 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     
     @IBAction func PostimgAction(_ : UIButton){
 
-        callEventUploadImgWebService {}
-
+        let limit = Int(EventDetauilData?.eventImgLimit ?? "") ?? 0
+            if imageArray.count > limit {
+                showAlert(message:"You have already reached maximum \(limit) media limit.")
+                return
+            } else {
+                callEventUploadImgWebService {}
+            }
     }
   //  self.EventDetauilData?.title
     @IBAction func btnProfile(_ : UIButton){
@@ -622,6 +719,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             UploadImgView.isHidden = false
             collectionViewEvent.isHidden = false
             AttendesCollectionView.isHidden = false
+            lblImgLimit.isHidden = false
 
         DispatchQueue.main.async { [self] in
                 self.collectionViewEvent.reloadData()
@@ -673,6 +771,29 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
 //                    UploadImgView.isHidden = true
 //                    lblImgLimit.isHidden = true
 //                }
+                
+                if let selectedBtnValue = self.EventDetauilData?.userjoinmemberlist?
+                    .compactMap({ Int($0.status ?? "") }).first {
+
+                    switch selectedBtnValue {
+                    case 1:
+                        
+                            self.UploadImgView.isHidden = false
+                            self.collectionViewEvent.isHidden = false
+                            self.AttendesCollectionView.isHidden = false
+                            self.lblImgLimit.isHidden = false
+                    
+                    case 0:
+                        if selection != 1  {
+                            UploadImgView.isHidden = true
+                            collectionViewEvent.isHidden = true
+                            AttendesCollectionView.isHidden = true
+                            self.lblImgLimit.isHidden = true
+                        }
+                    default:
+                        break
+                    }
+                }
 
                 DispatchQueue.main.async {
                     self.collectionViewEvent.reloadData()
@@ -693,7 +814,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     
     @IBAction func btnNo(_ sender: UIButton) {
         selection = 2
-
+        let idCr = UserDefaults.standard.string(forKey: "usercr")
             // तुरंत Labels को हाइड करें
             self.LblOwnerPhoto.isHidden = true
             self.LblAttendesPhoto.isHidden = true
@@ -703,6 +824,11 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
 
             btnyes.setTitleColor(.white, for: .normal)
             btnNo.setTitleColor(.white, for: .normal)
+        
+        UploadImgView.isHidden = true
+        collectionViewEvent.isHidden = true
+        AttendesCollectionView.isHidden = true
+        self.lblImgLimit.isHidden = true
 
             callEventDetailWebService { [self] in
                 print("Web service completed")  // Debugging line
@@ -750,6 +876,26 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
                         self.UserImgView.kf.indicatorType = .activity
                         self.UserImgView.kf.setImage(with: urlU, placeholder: UIImage(named: "EventImage"))
                     }
+                    
+
+                    if let selectedBtnValue = self.EventDetauilData?.userjoinmemberlist?
+                        .compactMap({ Int($0.status ?? "") }).first {
+                        switch selectedBtnValue {
+                        case 1:
+                            self.UploadImgView.isHidden = false
+                            self.collectionViewEvent.isHidden = false
+                            self.AttendesCollectionView.isHidden = false
+                            self.lblImgLimit.isHidden = false
+                        case 0:
+                                self.UploadImgView.isHidden = true
+                                self.collectionViewEvent.isHidden = true
+                                self.AttendesCollectionView.isHidden = true
+                                self.lblImgLimit.isHidden = true
+                        default:
+                            break
+                        }
+                    }
+
 
                     print("UI Updated Successfully")  // Debugging line
                 }
@@ -763,53 +909,51 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     }
     
     @IBAction func JoinPopUpBtnAction(_ sender: UIButton) {
-      
-        let vc = storyboard?.instantiateViewController(withIdentifier:"EventJoinListViewController")as! EventJoinListViewController
-        vc.modalPresentationStyle = .overFullScreen
-        vc.modalTransitionStyle = .crossDissolve
-        vc.delegate = self
-        vc.eventid = (EventDetauilData?.id)!
-    
-        self.present(vc , animated: true)
+        if EventDetauilData?.totalJoin != "0" {
+            let vc = storyboard?.instantiateViewController(withIdentifier:"EventJoinListViewController")as! EventJoinListViewController
+            vc.modalPresentationStyle = .overFullScreen
+            vc.modalTransitionStyle = .crossDissolve
+            vc.delegate = self
+            vc.eventid = (EventDetauilData?.id)!
+            self.present(vc , animated: true)
+        }
 
    }
     
     @IBAction func EventJoinLikeListBtnAction(_ sender: UIButton) {
-      
-        let vc = storyboard?.instantiateViewController(withIdentifier:"EventLikeListViewController")as! EventLikeListViewController
-        vc.modalPresentationStyle = .overFullScreen
-        vc.modalTransitionStyle = .crossDissolve
-        vc.delegate = self
-        vc.eventid = (EventDetauilData?.id)!
+        if self.EventDetauilData?.totalLike != "0" {
+            let vc = storyboard?.instantiateViewController(withIdentifier:"EventLikeListViewController")as! EventLikeListViewController
+            vc.modalPresentationStyle = .overFullScreen
+            vc.modalTransitionStyle = .crossDissolve
+            vc.delegate = self
+            vc.eventid = (EventDetauilData?.id)!
+            self.present(vc , animated: true)
+        } else {
+            print("No Likes .")
+        }
+    }
     
-        self.present(vc , animated: true)
-
-   }
     
-    
-    @IBAction func btnEdit(_ : UIButton){
-
+    @IBAction func btnEdit(_ : UIButton) {
         let vc = self.storyboard?.instantiateViewController(withIdentifier: "UpdateEventViewController")as! UpdateEventViewController
-        
         vc.eventid = (EventDetauilData?.id)!
+        vc.titleLabel = self.EventDetauilData?.title ?? ""
         self.navigationController?.pushViewController(vc, animated: true)
-       }
+    }
     
     @IBAction func NoJoinPopUpBtnAction(_ sender: UIButton) {
-      
-        let vc = storyboard?.instantiateViewController(withIdentifier:"EventNoJoinViewController")as! EventNoJoinViewController
-        vc.modalPresentationStyle = .overFullScreen
-        vc.modalTransitionStyle = .crossDissolve
-        vc.delegate = self
-        vc.eventid = (EventDetauilData?.id)!
-    //    vc.businessid = BusinessDeleteData?.id
-       // vc.userid = GroupListData?.listdata![indexPath.row].userid ?? ""
-        self.present(vc , animated: true)
-
-   }
+        if ((self.EventDetauilData?.userunjoinmemberlist) != nil) != true {
+            let vc = storyboard?.instantiateViewController(withIdentifier:"EventNoJoinViewController")as! EventNoJoinViewController
+            vc.modalPresentationStyle = .overFullScreen
+            vc.modalTransitionStyle = .crossDissolve
+            vc.delegate = self
+            vc.eventid = (EventDetauilData?.id)!
+            self.present(vc , animated: true)
+        } else {
+            print("No user has not joined yet.")
+        }
+    }
     
-
-//
     @IBAction func DeletePopUpNewBtnAction(_ sender: UIButton) {
       
         let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
@@ -849,20 +993,18 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     
     
     @IBAction func selectPhotos(_ sender: UIButton) {
-       
-     //   self.lblImgLimit.text = "Images remaining: " + (self.EventDetauilData?.eventImgRemainLimit ?? "")
-        if EventDetauilData?.eventImgRemainLimit == "0" {
-            
-               // Show a popup alert
-               let alert = UIAlertController(title: "Limit Exceeded", message: "You have reached the image limit.", preferredStyle: .alert)
-               alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-               self.present(alert, animated: true, completion: nil)
-           } else {
-               selectImages()
-               btnUplImg.isHidden = false
-           }
-    
-       
+    let limit = Int(EventDetauilData?.eventImgLimit ?? "") ?? 0
+        if imageArray.count >= limit {
+            showAlert(message: "You can only add up to \(limit) media items (\(limit) images).")
+            return
+        }
+        if let ownerImages = EventDetauilData?.images?.filter({ $0.type == "user" }),
+           ownerImages.count >= limit {
+            showAlert(message: "You have already reached maximum \(limit) media limit.")
+            return
+        }
+        selectImages()
+        btnUplImg.isHidden = false
        }
     
     
@@ -878,14 +1020,14 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
        }
     
     @IBAction func like(_ sender: UIButton) {
-    
+        
         callEventLikeWebService{ [self] in
             callEventDetailWebService{ [self] in
                 
                 SVProgressHUD.dismiss()
                 self.collectionViewEvent.reloadData()
                 self.AttendesCollectionView.reloadData()
-               
+                
                 self.LikeLbl.text = self.EventDetauilData?.totalLike
                 
                 if self.EventDetauilData?.totalLike == "0" {
@@ -893,32 +1035,50 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
                 } else {
                     self.ThumbsImgView.image = UIImage(systemName: "hand.thumbsup.fill")
                 }
-
-              
-            }
+              }
         }
-       }
-   
+    }
+    
     func updateImageCountLabel() {
         DispatchQueue.main.async {
-            self.imgCountlLbl.text = "Images: \(self.selectedImages.count + self.images.count)"
+            print("DEBUG: selectedImages = \(self.selectedImages.count), images = \(self.images.count), allImages = \((self.selectedImages + self.images).count)")
+            self.imgCountlLbl.text = "Images: \((self.selectedImages + self.images).count)"
+            self.btnPreview.isUserInteractionEnabled = !(self.selectedImages + self.images).isEmpty
         }
     }
 
 
+     
+
 
     @IBAction func previewButtonTapped(_ sender: UIButton) {
-           let storyboard = UIStoryboard(name: "Main", bundle: nil)
-           if let previewVC = storyboard.instantiateViewController(withIdentifier: "PreviewEventDetailViewController") as? PreviewEventDetailViewController {
-               previewVC.selectedImages = self.selectedImages // Pass the selected images
-               previewVC.images = self.images
-               
-               self.navigationController?.pushViewController(previewVC, animated: true)
-           }
-       }
+//        print("selectedImages.count: \(selectedImages.count)")
+//        print("images.count: \(images.count)")
+//        print("allImages.count: \(allImages.count)") // will now reflect correct value
+//        
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        if let previewVC = storyboard.instantiateViewController(withIdentifier: "PreviewEventDetailViewController") as? PreviewEventDetailViewController {
+//            previewVC.allImages = self.allImages
+//            self.navigationController?.pushViewController(previewVC, animated: true)
+//        }
+    }
+
     
-    
-    @objc func selectImages() {
+    func showAlert(title: String = "", message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        
+        // ✅ OK button add karein, jo alert ko turant dismiss karega
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+            alert.dismiss(animated: true, completion: nil)
+        }))
+        present(alert, animated: true) {
+            // ✅ 2 second ke baad alert automatically dismiss hoga
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+//                alert.dismiss(animated: true, completion: nil)
+//            }
+        }
+    }
+     @objc func selectImages() {
         let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         
         actionSheet.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
@@ -935,9 +1095,7 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
         
         present(actionSheet, animated: true, completion: nil)
     }
-
-
-    
+ 
     func openCamera() {
         from = 2
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
@@ -947,27 +1105,14 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             present(imagePickerController, animated: true, completion: nil)
         }
     }
-//
-//    func openGallery() {
-//         from = 1
-//             var config = PHPickerConfiguration()
-//             config.selectionLimit = 0 // 0 means no limit
-//             config.filter = .images
-//
-//             let picker = PHPickerViewController(configuration: config)
-//             picker.delegate = self
-//             present(picker, animated: true, completion: nil)
-//         }
  
     func openGallery() {
         from = 1
-        
-        // Get the remaining limit from the label text
         let limitText = self.lblImgLimit.text?.replacingOccurrences(of: "Max Images: ", with: "") ?? "0"
         let selectionLimit = Int(limitText) ?? 0
         
         var config = PHPickerConfiguration()
-        config.selectionLimit = selectionLimit  // set limit from lblImgLimit
+        config.selectionLimit = selectionLimit
         config.filter = .images
         
         let picker = PHPickerViewController(configuration: config)
@@ -983,52 +1128,44 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                DispatchQueue.main.async {
-                    self.presentCropViewController(image: image)
-                    self.images.append(image)
-                    self.updateImageCountLabel() // Update count label
-                    //  self.presentCropViewController(image: image)
-                    self.WicketRangeCollectionView.reloadData()
-                    self.collectionViewNewEvent.reloadData()
-                    self.updateImageCountLabel()
-                }
-            }
-            picker.dismiss(animated: true, completion: nil)
-        }
-    
-   
-
-    
-
-    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true, completion: nil)
-
-        let group = DispatchGroup()
-
-        for result in results {
-            group.enter()
-            result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
-                if let imageNew = object as? UIImage {
-                   // self.showCrop(image: imageNew)
-                    self.selectedImages.append(imageNew) // Add image to the array
-                    self.imageArray.append(imageNew)
-                    
-                    self.selectedImge = imageNew
+                if let image = info[.originalImage] as? UIImage {
                     DispatchQueue.main.async {
-                        self.presentCropViewController(image: imageNew)
-                        self.collectionViewEvent.reloadData()
-                        self.AttendesCollectionView.reloadData()
+                        self.presentCropViewController(image: image)
+                        self.images.append(image)
+                        self.updateImageCountLabel()
+                        self.WicketRangeCollectionView.reloadData()
+                        self.collectionViewNewEvent.reloadData()
+                        self.updateImageCountLabel()
                     }
                 }
-                group.leave()
+                picker.dismiss(animated: true, completion: nil)
+            }
+    
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            picker.dismiss(animated: true, completion: nil)
+
+            let group = DispatchGroup()
+
+            for result in results {
+                group.enter()
+                result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
+                    if let imageNew = object as? UIImage {
+                        self.selectedImages.append(imageNew)
+                        self.imageArray.append(imageNew)
+                        self.selectedImge = imageNew
+                        DispatchQueue.main.async {
+                            self.presentCropViewController(image: imageNew)
+                            self.collectionViewEvent.reloadData()
+                            self.AttendesCollectionView.reloadData()
+                        }
+                    }
+                    group.leave()
+                }
+            }
+            group.notify(queue: .main) {
+                self.updateImageCountLabel()
             }
         }
-
-        group.notify(queue: .main) {
-            self.updateImageCountLabel() // Update count label after all images are loaded
-        }
-    }
 
 
     func callEventDetailWebService(_ completionClosure: @escaping () -> ()) {
@@ -1238,7 +1375,6 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
                                                                         ]
           WebService.sharedInstance.callEventNojointWebService(withParams: dictParams) { data in
             self.EventYesData = data
-           //   UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
            
 
             completionClosure()
@@ -1247,36 +1383,27 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     
     
     func callEventUploadImgWebService(_ completionClosure: @escaping () -> ()) {
-       // let id = UserDefaults.standard.string(forKey: "userid")
+        // let id = UserDefaults.standard.string(forKey: "userid")
         let id = UserDefaults.standard.string(forKey: "userid")
         let idName = UserDefaults.standard.string(forKey: "name")
         let idEvent = UserDefaults.standard.string(forKey: "eventid")
-          let dictParams: Dictionary<String, Any> = [
-                                                     
-                                                    "event_id": idEvent ?? "",
-                                                    "userid":id ?? "",
-                                                                        ]
-        if self.from == 1
-        {
+        let dictParams: Dictionary<String, Any> = [
+            
+            "event_id": idEvent ?? "",
+            "userid":id ?? "",
+        ]
+        if self.from == 1 {
             
             callsendImageAPI(param: dictParams, arrImage: imageArray, imageKey: "image[]", URlName: kBASEURL + WebServiceName.kUploadImageEventt, withblock: {
-                
                 self.navigationController?.popViewController(animated: true)
             })
-//            callsendImageAPI(param: dictParams, arrImage: imageArray, imageKey: "document[]", URlName: kBASEURL + WebServiceName.kCreateBussines, withblock: {
-//
-//                self.navigationController?.popViewController(animated: true)
-//            })
         }
-        else if self.from == 2
-        {
+        else if self.from == 2 {
             callsendImageAPI(param: dictParams, arrImage: images, imageKey: "image[]", URlName: kBASEURL + WebServiceName.kUploadImageEventt, withblock: {
-                
                 self.navigationController?.popViewController(animated: true)
             })
-            
         }
-        }
+    }
     
     func callsendImageAPI(param:[String: Any],arrImage:[UIImage],imageKey:String,URlName:String, withblock:@escaping ()->Void){
 
@@ -1576,32 +1703,37 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-    let width = collectionViewEvent.frame.width / 3 - 15
-       let height = width + 40
-        return CGSize(width: width , height: height)
-        
-    
+        return CGSize(width: 128 , height: 128)
     }
     
 }
 
 @available(iOS 16.0, *)
 extension EventsDetailViewController: TOCropViewControllerDelegate {
-    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, withRect cropRect: CGRect, angle: Int)
-    
-    {
-        self.imageArray.append(image)
-        self.collectionViewNewEvent.reloadData()
-        self.images.append(image)
-        self.WicketRangeCollectionView.reloadData()
+    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, withRect cropRect: CGRect, angle: Int) {
+        
+        // Agar aap 'from' variable use kar rahe hain camera/gallery differentiate karne ke liye:
+        if from == 1 {
+            self.selectedImages.append(image)
+        } else if from == 2 {
+            self.images.append(image)
+        } else {
+            // Default agar koi condition nahi mile
+            self.images.append(image)
+        }
+        
+        self.imageArray.append(image) // Agar ye zaroori hai
+        
+        DispatchQueue.main.async {
+            self.collectionViewNewEvent.reloadData()
+            self.WicketRangeCollectionView.reloadData()
+            self.updateImageCountLabel()  // ✅ Label update karna na bhoolein
+        }
+        
         cropViewController.dismiss(animated: true, completion: nil)
     }
-    
-    
     
     @nonobjc func cropViewController(_ cropViewController: TOCropViewController, didFinishCancelled cancelled: Bool) {
         cropViewController.dismiss(animated: true, completion: nil)
     }
 }
-
-

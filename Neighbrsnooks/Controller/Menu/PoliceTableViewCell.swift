@@ -21,6 +21,7 @@ class PoliceTableViewCell: UITableViewCell {
     
     @IBOutlet weak var Number2View: UIView!
     @IBOutlet weak var arrowImageView : UIImageView!
+    var ShareCallback : ((UIButton) -> Void)?
     
     @IBOutlet weak var viewLine: UIView!
     override func awakeFromNib() {
@@ -33,6 +34,10 @@ class PoliceTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
         
         // Configure the view for the selected state
+    }
+    
+    @IBAction func btnShare(_ sender: UIButton) {
+        ShareCallback?(sender)
     }
     
     private func updateColors() {
@@ -52,6 +57,7 @@ class PoliceTableViewCell: UITableViewCell {
             Number2Lbl.textColor = UIColor.secondaryLabel
             WebLbl.textColor = UIColor.secondaryLabel
             arrowImageView.tintColor = .black // Arrow tint for light mode
+            WebLbl.textColor = UIColor.blue
         }
     }
     

@@ -48,46 +48,34 @@ class MyProfileViewController: BaseViewController {
     @IBOutlet weak var EventBusinessPrncntgLbl: UILabel!
     @IBOutlet weak var EventGropsPrcntgLbl: UILabel!
     @IBOutlet weak var EventPostPrcntgLbl: UILabel!
-    
     @IBOutlet weak var viewintrest: UIView!
     @IBOutlet weak var viewNS: NSLayoutConstraint!
-    
     @IBOutlet weak var lblHeading: UILabel!
-   
     @IBOutlet weak var Eventprcntg: UILabel!
     @IBOutlet weak var EventPollsPrcntg: UILabel!
     @IBOutlet weak var EventBusinessPrncntg: UILabel!
     @IBOutlet weak var EventGropsPrcntg: UILabel!
     @IBOutlet weak var EventPostPrcntg: UILabel!
-    
     @IBOutlet weak var MarketPrcntg: UILabel!
     @IBOutlet weak var TotMarket: UILabel!
-    
     @IBOutlet weak var vieweevent: UIView!
     @IBOutlet weak var viewpost: UIView!
-    
     @IBOutlet weak var viewePolls: UIView!
     @IBOutlet weak var viewBussines: UIView!
-    
     @IBOutlet weak var vieweGroup: UIView!
     @IBOutlet weak var viewMarket: UIView!
-    
     @IBOutlet weak var viewefillEvent: UIView!
     @IBOutlet weak var viewefillPolls: UIView!
     @IBOutlet weak var viewefillBusiness: UIView!
-    
     @IBOutlet weak var viewefillGroup: UIView!
     @IBOutlet weak var viewefillPost: UIView!
     @IBOutlet weak var viewefillMarket: UIView!
-    
     @IBOutlet weak var vieweMainProfile: UIView!
-    
     @IBOutlet weak var MyprofileView: UIView!
     @IBOutlet weak var PersonalView: UIView!
     @IBOutlet weak var AddressView: UIView!
     @IBOutlet weak var OtherView: UIView!
     @IBOutlet weak var LoveView: UIView!
-    
     @IBOutlet weak var LblPersonal: UILabel!
     @IBOutlet weak var LblAddrss: UILabel!
     @IBOutlet weak var LblOther: UILabel!
@@ -103,6 +91,9 @@ class MyProfileViewController: BaseViewController {
     @IBOutlet weak var LblIntrsrtText: UILabel!
     @IBOutlet weak var LblLoveText: UILabel!
     @IBOutlet weak var pollslbl: UILabel!
+    @IBOutlet weak var FirstNameLbl: UILabel!
+    @IBOutlet weak var MyNameLbl: UILabel!
+    @IBOutlet weak var personalViewHeightConstraint: NSLayoutConstraint!
    
     
     var profileData : ProfileModel?
@@ -117,7 +108,7 @@ class MyProfileViewController: BaseViewController {
     var Newid: String? // Set this when navigating from MessageViewController
     var Oid: String?
     var headingTitle: String = ""
-  
+    var isFromMessage: Bool = false
     
     var picker = UIImagePickerController()
   //  private weak var delegate: UIImagePickerControllerDelegate?
@@ -230,6 +221,10 @@ class MyProfileViewController: BaseViewController {
         ])
 
     }
+    
+    
+    
+    
     
    // self.EmergencyLbl.text = self.profileData?.emer_phone
 

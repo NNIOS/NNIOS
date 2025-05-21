@@ -83,31 +83,31 @@ class MennuPostViewController: BaseViewController, MemberCellDelegate,UITextFiel
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-           
+            
             postView.backgroundColor = .black
             tableviewPost.backgroundColor = .black
         } else {
             // Light mode mein storyboard ke original colors preserve karna
-           
-
+            
+            
             // Light mode mein PollsView ka background red karna
             postView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
             tableviewPost.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-           
+            
         }
     }
     
     @objc func refreshData() {
         fetchPostListData()
     }
-
+    
     
     @IBAction func btnSearch(_ : UIButton){
-
+        
         self.searchView.isHidden = false
         self.lblHeading.isHidden = true
-
-       }
+        
+    }
     
     func fetchPostListData() {
         callPostListWebService(searchQuery: "") {
@@ -117,36 +117,36 @@ class MennuPostViewController: BaseViewController, MemberCellDelegate,UITextFiel
     }
     
     @IBAction func btncancelSearch(_ : UIButton){
-
+        
         self.searchView.isHidden = true
         self.lblHeading.isHidden = false
-               self.tfSearch.text = ""
+        self.tfSearch.text = ""
         callPostListWebService(searchQuery: "") {
-                   self.tableviewPost.reloadData()
-               }
-
-       }
+            self.tableviewPost.reloadData()
+        }
+        
+    }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-           let currentText = textField.text ?? ""
-           let updatedText = (currentText as NSString).replacingCharacters(in: range, with: string)
-
-           // Cancel the previous work item to avoid multiple API calls
-           searchWorkItem?.cancel()
-
-           // Create a new work item for the search
-           searchWorkItem = DispatchWorkItem {
-               // Call the API with the updated search text
-               self.callPostListWebService(searchQuery: updatedText) {
-                   self.tableviewPost.reloadData()
-               }
-           }
-
-           // Execute the work item after a delay of 0.5 seconds
-           DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: searchWorkItem!)
-
-           return true
-       }
+        let currentText = textField.text ?? ""
+        let updatedText = (currentText as NSString).replacingCharacters(in: range, with: string)
+        
+        // Cancel the previous work item to avoid multiple API calls
+        searchWorkItem?.cancel()
+        
+        // Create a new work item for the search
+        searchWorkItem = DispatchWorkItem {
+            // Call the API with the updated search text
+            self.callPostListWebService(searchQuery: updatedText) {
+                self.tableviewPost.reloadData()
+            }
+        }
+        
+        // Execute the work item after a delay of 0.5 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: searchWorkItem!)
+        
+        return true
+    }
     
     @IBAction func btnCreatePost(_ : UIButton){
         
@@ -193,24 +193,19 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         let cell = tableView.dequeueReusableCell(withIdentifier: "MennuPostTableViewCell", for: indexPath) as! MennuPostTableViewCell
         cell.delegate = self
         cell.delegateCell = self
-        
-        
         cell.delegateM = self
         let userId = filteredPostData?.listdata?[indexPath.row].createdby
         cell.userId = userId
         
-        
         cell.lblName.text = filteredPostData?.listdata?[indexPath.row].username
         //  cell.lblGeneral.text = PostListData?.listdata[indexPath.row].postType
         cell.lblGeneral.text = filteredPostData?.listdata?[indexPath.row].postType
-//        cell.lblDescription.text = filteredPostData?.listdata?[indexPath.row].postMessage
+        //        cell.lblDescription.text = filteredPostData?.listdata?[indexPath.row].postMessage
         cell.configureDescription(with: filteredPostData?.listdata?[indexPath.row].postMessage ?? "N/A")
-         cell.addTapGestureToLabel()
-
+        cell.addTapGestureToLabel()
         //  cell.lblSec.text = PostListData?.listdata[indexPath.row].neighborhood
         cell.lblSec.text = filteredPostData?.listdata?[indexPath.row].neighborhood
         cell.lblMonth.text = filteredPostData?.listdata?[indexPath.row].createdOn
@@ -232,12 +227,12 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
         } else {
             cell.updateFavouriteButton(isFavourite: false) // Default to non-favorite
         }
-
+        
         if traitCollection.userInterfaceStyle == .dark {
-               cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background
-           } else {
-               cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
-           }
+            cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background
+        } else {
+            cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
+        }
         
         
         cell.favouriteButtonCallback = { [weak self] in
@@ -361,7 +356,7 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
                         reportVC.DescriptionlName = selectedPost.postMessage ?? ""
                         reportVC.CommentName = selectedPost.totcomment ?? ""
                         reportVC.likeName = selectedPost.totallike ?? ""
-
+                        
                         // ✅ Extract images and videos properly
                         let imgDataAll = selectedPost.postImages?.compactMap { $0.img }.filter { !$0.isEmpty } ?? []
                         let videoDataAll = selectedPost.postImages?.compactMap { $0.video }.filter { !$0.isEmpty } ?? []
@@ -382,7 +377,7 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
                     }
                 }
             }
-
+            
             self.present(vc, animated: true, completion: nil)
         }
         
@@ -454,19 +449,11 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
             self.present(vc, animated: true, completion: nil)
             
         }
-        
-        
-        
-        
-        
-        
+       
         let url = URL(string: (PostListData?.listdata?[indexPath.row].userpic ?? ""))
         cell.profileImgView.kf.indicatorType = .activity
         cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "NewBusiness"))
-        
-        
-        
-        return cell
+          return cell
     }
     
     func didTapProfile(for userId: String) {
@@ -485,7 +472,7 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
         }
         
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        if let postDetailsVC = storyboard.instantiateViewController(withIdentifier: "PostDetailsViewController") as? PostDetailsViewController {
+        if let postDetailsVC = storyboard.instantiateViewController(withIdentifier: "PostDetailsNewViewController") as? PostDetailsNewViewController {
             // Data pass karo
             postDetailsVC.UserName = PostListData?.listdata?[indexPath.row].username ?? ""
             postDetailsVC.sectorName = PostListData?.listdata?[indexPath.row].neighborhood ?? ""
@@ -497,10 +484,9 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
             postDetailsVC.imgData = PostListData?.listdata?[indexPath.row].postImages ?? []
             postDetailsVC.videoData = PostListData?.listdata?[indexPath.row].postImages?.filter { ($0.video ?? "").isEmpty == false } ?? []
             postDetailsVC.postid = PostListData?.listdata?[indexPath.row].postid ?? ""
-            // Navigate to PostDetailsViewController
+            // Navigate to PostDetailsNewViewController
             self.navigationController?.pushViewController(postDetailsVC, animated: true)
         }
-        
         
     }
     
@@ -533,7 +519,7 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
     
     
     
-     
+    
     
     func callPostListWebService(searchQuery: String, _ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -564,8 +550,8 @@ extension MennuPostViewController: UITableViewDataSource, UITableViewDelegate, P
             self.tableviewPost.reloadData()
         }
     }
-        
-        
+    
+    
     @objc private func emojiTapped(sender: UIButton) {
         callPostUnLikeWebService{
             self.tableviewPost.reloadData()

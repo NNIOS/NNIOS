@@ -6,12 +6,14 @@
 //
 
 import UIKit
+protocol HomeBusinessCellDelegate: AnyObject {
+    func didTapBusinessItem(_ businessID: String)
+}
+
 
 class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource {
-    
     @IBOutlet weak var lblUserName: UILabel!
     @IBOutlet weak var lblSector: UILabel!
-    
     @IBOutlet weak var lblProduct: UILabel!
     @IBOutlet weak var lblHealth: UILabel!
     @IBOutlet weak var profileImgView : UIImageView!
@@ -20,12 +22,10 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
     @IBOutlet weak var lblRating: UILabel!
     @IBOutlet weak var BussinessStatusView: UIView!
     @IBOutlet weak var lblApproval: UILabel!
-    
     @IBOutlet weak var collectionViewEvent: UICollectionView!
-    
     var userId: String?
     weak var delegate: ProfileTapDelegate?
-    
+    weak var delegateH: BussinessTableViewCellDelegate?
     var thisWidth:CGFloat = 0
     //   var BusimgData = [image]()
     // var BusimgData = [image].self
@@ -35,14 +35,31 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
     var DotCallback : ((UIButton) -> Void)?
     // var BusimgData = [image]
     
-    
+    weak var businessDelegate: HomeBusinessCellDelegate?
+    var businessID: String? // Pass this from controller while setting up cell
+
     
     override func awakeFromNib() {
         super.awakeFromNib()
         collectionViewEvent.delegate = self
         collectionViewEvent.dataSource = self
         addTapGestureToProfile()
+        profileImgView.layer.cornerRadius = profileImgView.frame.height/2
+        
+        collectionViewEvent.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap)))
+
     }
+    
+    @objc private func handleCollectionViewTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: collectionViewEvent)
+        if let indexPath = collectionViewEvent.indexPathForItem(at: location) {
+            let selectedData = BusimgData[indexPath.row]
+            print("Selected data: \(selectedData)")
+///businessDelegate?.didSelectItem(with: selectedData, username: UserName,)
+        }
+    }
+
+
     
     private func addTapGestureToProfile() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(profileTapped))
@@ -90,9 +107,6 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeBusinessCollectionViewCell", for: indexPath) as! HomeBusinessCollectionViewCell
-        //
-        
-        
         // Check if the index is valid
         guard indexPath.row < BusimgData.count else {
             print("Index out of bounds for BusimgData at row: \(indexPath.row)")
@@ -100,7 +114,6 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
         }
         
         let item = BusimgData[indexPath.row]
-        
         // If it's an image
         if let imageUrl = item.img, !imageUrl.isEmpty {
             let url = URL(string: imageUrl)
@@ -123,18 +136,7 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
         }
         
         
-        
-        //            // Check if the index is valid
-        //            guard indexPath.row < BusimgData.count else {
-        //                print("Index out of bounds for BusimgData at row: \(indexPath.row)")
-        //                return cell // Return an empty cell if the index is invalid
-        //            }
-        //
-        //            let url = URL(string: BusimgData[indexPath.row].img ?? "")
-        //            cell.profileImgView.kf.indicatorType = .activity
-        //            cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "NewEvents"))
-        //
-        cell.numberLabel.text = "\(indexPath.item + 1)"
+         cell.numberLabel.text = "\(indexPath.item + 1)"
         cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
         cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
         let totalNumberOfImages = BusimgData.count
@@ -143,12 +145,18 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
         return cell
     }
     
-    
+        func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+            print("TabDidSelect")
+            if let businessID = businessID {
+                    businessDelegate?.didTapBusinessItem(businessID)
+                }
+                
+        }
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         thisWidth = CGFloat(self.collectionViewEvent.width) / 1
-        return CGSize(width: thisWidth, height: 396)
+        return CGSize(width: thisWidth, height: 500)
     }
     
 }

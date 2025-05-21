@@ -23,7 +23,7 @@ class AmbulanceTableViewCell: UITableViewCell {
 
     @IBOutlet weak var ExpandedView: UIView!
     @IBOutlet weak var viewLine: UIView!
-    
+    var ShareCallback : ((UIButton) -> Void)?
     @IBOutlet weak var arrowImageView : UIImageView!
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -36,6 +36,11 @@ class AmbulanceTableViewCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
+    
+    @IBAction func btnShare(_ sender: UIButton) {
+        ShareCallback?(sender)
+    }
+    
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
@@ -53,6 +58,7 @@ class AmbulanceTableViewCell: UITableViewCell {
             Number2Lbl.textColor = UIColor.secondaryLabel
             WebLbl.textColor = UIColor.secondaryLabel
             arrowImageView.tintColor = .black // Arrow tint for light mode
+            WebLbl.textColor = UIColor.blue
         }
     }
 

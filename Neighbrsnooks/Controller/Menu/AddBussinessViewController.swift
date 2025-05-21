@@ -129,12 +129,15 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         btnRate.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle
         btnTerrif.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle
         btnOthers.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle
+        
         lblSelectWeeklyOfDay.sizeToFit() // Text ke according label ka size adjust karein
         tfCategory.inputView = pickerView
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
-//        self.tvDescribe.font = UIFont(name: "Montserrat-Regular", size: 14)
+        self.tvDescribe.font = UIFont(name: "Montserrat-Regular", size: 15)
+        self.lblNeighborhood.font = UIFont(name: "Montserrat-Regular", size: 15)
+        self.lblCity.font = UIFont(name: "Montserrat-Regular", size: 15)
+        self.lblPinCode.font = UIFont(name: "Montserrat-Regular", size: 15)
         self.serviceName.append("Bussiness Categories")
-        tfBussinessName.autocapitalizationType = .words
         tfTag.autocapitalizationType = .words
 //        tvDescribe.autocapitalizationType = .words
         tfAdd1.autocapitalizationType = .words
@@ -262,24 +265,20 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
             BusinesNameView.isUserInteractionEnabled = true
             TagLineView.isUserInteractionEnabled = true
             CategoryView.isUserInteractionEnabled = true
-                   
             UploadImgView.isUserInteractionEnabled = true
             BussinessHoursView.isUserInteractionEnabled = true
             DocTypeView.isUserInteractionEnabled = true
             BussinessAddView.isUserInteractionEnabled = true
             tvDescribe.isUserInteractionEnabled = true
-            
             BusinesNameView.layer.borderWidth = 0 // Remove border in light mode
             TagLineView.layer.borderWidth = 0
             CategoryView.layer.borderWidth = 0
-            
             UploadImgView.layer.borderWidth = 0 // Remove border in light mode
             BussinessHoursView.layer.borderWidth = 0
             DocTypeView.layer.borderWidth = 0
             BussinessAddView.layer.borderWidth = 0
             viewWeekly.layer.borderWidth = 0
             tvDescribe.layer.borderWidth = 0
-            
             BusinesNameView.backgroundColor = .white
             TagLineView.backgroundColor = .white
             CategoryView.backgroundColor = .white
@@ -375,11 +374,6 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         lblMediaCount.text = "\(totalMedia) preview"
         lblMediaCount.isHidden = totalMedia == 0
     }
-
-    
-
-    
-    
     @objc func previewLabelTapped() {
         if imageArray.isEmpty && videoArray.isEmpty {
             print("No media to preview")
@@ -398,19 +392,17 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
-    
-    
-    func textViewDidBeginEditing(_ textView: UITextView) {
+     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.text == placeholderText {
             textView.text = ""
-            textView.textColor = UIColor.black
+//            textView.textColor = UIColor.darkGray
         }
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             textView.text = placeholderText
-            textView.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1) // Placeholder color #5C5C5C
+//            textView.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1) // Placeholder color #5C5C5C
             
         }
     }
@@ -418,8 +410,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     func setupTextView() {
         tvDescribe.delegate = self
         tvDescribe.text = placeholderText
-        tvDescribe.font = UIFont.systemFont(ofSize: 14)
-        tvDescribe.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1) // Placeholder color #5C5C5C
+//        tvDescribe.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1) // Placeholder color #5C5C5C
         
     }
     
@@ -449,8 +440,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         
     }
     
-    
-    
+ 
     @IBAction func selectDocPhotos(_ sender: UIButton) {
         if imageArray.count >= 2 && videoArray.count >= 1 {
             showAlert(message: "You can only add up to 3 media items (1 video and 2 images).")
@@ -555,9 +545,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         present(videoPickerController, animated: true, completion: nil)
     }
     
-     
-    
-    func resetMediaArrays() {
+     func resetMediaArrays() {
         imageArray.removeAll()  // Clear all images
         videoArray.removeAll()  // Clear all videos
         DispatchQueue.main.async {
@@ -565,9 +553,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         }
     }
     
-
-
-
+ 
 // MARK: - Image Picker Delegates (Keep your original code exactly as is)
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true, completion: nil)
@@ -719,12 +705,13 @@ func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPicke
                 button.tintColor = UIColor(red: 0, green: 100/255.0, blue: 0, alpha: 1) // Dark green for selected
             } else {
                 button.setImage(unselectedImage, for: .normal)
-                button.tintColor = .black // Black for unselected
+                button.tintColor = .darkGray // Black for unselected
             }
         }
     }
     
-    
+   
+
     
     
     // Change Code Irshad Malik
@@ -803,11 +790,7 @@ func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPicke
     
     
     
-//    func textViewDidChange(_ textView: UITextView) {
-//        let text = textView.text.lowercased() // Pehle sab lowercase me convert kar lo
-//        textView.text = text.capitalizingFirstLetterOfSentence()
-//    }
-    
+ 
     
     func selectPDF() {
         let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf])
@@ -1162,20 +1145,4 @@ extension AddBussinessViewController: TOCropViewControllerDelegate {
  
 
  
-
-extension String {
-    func capitalizingFirstLetterOfSentence() -> String {
-        var result = ""
-        let sentences = self.split(separator: ".", omittingEmptySubsequences: false)
-        
-        for sentence in sentences {
-            let trimmed = sentence.trimmingCharacters(in: .whitespaces)
-            if let first = trimmed.first {
-                result += first.uppercased() + trimmed.dropFirst()
-            }
-            result += ". " // Har sentence ke baad space rakho
-        }
-        
-        return result.trimmingCharacters(in: .whitespaces)
-    }
-}
+ 

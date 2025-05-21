@@ -72,13 +72,13 @@ class PollDotViewController: BottomPopupViewController {
             
             if self.PollDetailData?.favouritstatus == 0 {
                 self.btnUnFavourite.isHidden = true
-                self.FvrtLbl.text = "Favourite Poll"  // Set label title for "0"
+                self.FvrtLbl.text = "Favourite"  // Set label title for "0"
                
                
             } else if self.PollDetailData?.favouritstatus == 1 {
                
                 self.btnFavourite.isHidden = true
-                self.FvrtLbl.text = "Unfavourite Poll"  // Set label title for "1"
+                self.FvrtLbl.text = "Unfavourite"  // Set label title for "1"
              
             }
            

@@ -31,14 +31,14 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
     @IBOutlet weak var stackView: UIStackView!
     @IBOutlet weak var tableViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var stackViewHeightConstraint: NSLayoutConstraint!
-    
-    @IBOutlet weak var groupsView: UIView!
+     @IBOutlet weak var groupsView: UIView!
     
     var GroupListData : GropsListModel?
     var JoinListData : JoinGroupModel?
     var filteredGroupData: GropsListModel?
     var searchWorkItem: DispatchWorkItem?
     var groupid : String?
+    var Newid : String?
     var groupName : String?
     var userName : String?
     var refreshTimer: Timer?
@@ -416,10 +416,17 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
                
             ]
         }
-        else  if sourceViewController == "MyProfile" {
+        else  if sourceViewController == "OtherProfile" {
             dictParams = [
                 "userid": id ?? "",
                 "groupuserlist": id ?? ""
+               
+            ]
+        }
+        else  if sourceViewController == "OtherProfile" {
+            dictParams = [
+                "userid":  Newid ?? "",
+                "groupuserlist":  Newid ?? ""
                
             ]
         }
@@ -501,13 +508,13 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
 
         cell.lblOwner.text = filteredGroupData?.listdata?[indexPath.row].getjoin
         
-        cell.lblName.font  = UIFont(name: "Montserrat-Regular", size: 13)
+        cell.lblName.font  = UIFont(name: "Montserrat-SemiBold", size: 13)
         cell.lblGroupName.font  = UIFont(name: "Montserrat-Regular", size: 14)
         cell.lblPrivate.font  = UIFont(name: "Montserrat-Regular", size: 13)
         cell.lblSec.font  = UIFont(name: "Montserrat-Regular", size: 13)
         cell.lblMemberText.font = UIFont(name: "Montserrat-Regular", size: 10)
         cell.lblOwner.font = UIFont(name: "Montserrat-Regular", size: 14)
-       
+        cell.lblPendingCount.font = UIFont(name: "Montserrat-Regular", size: 12)
         
         if filteredGroupData?.listdata![indexPath.row].getjoin == "owner" {
             cell.viewOwner.isHidden = false  // Ensure viewOwner is visible

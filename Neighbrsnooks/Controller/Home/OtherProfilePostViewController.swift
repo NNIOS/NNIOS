@@ -289,7 +289,7 @@ extension OtherProfilePostViewController: UITableViewDataSource, UITableViewDele
         
         cell.CommentCallback = { [self] value in
             
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailsViewController")as! PostDetailsViewController
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailsNewViewController")as! PostDetailsNewViewController
             vc.UserName = PostListData?.listdata?[indexPath.row].username ?? ""
           //  vc.sectorName =  PostListData?.listdata![indexPath.row].neighborhood ?? ""
             vc.sectorName = PostListData?.listdata?[indexPath.row].neighborhood ?? ""

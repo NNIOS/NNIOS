@@ -1,17 +1,15 @@
 {
   "images" : [
     {
-      "filename" : "icons8-favorites-50.png",
+      "filename" : "svg_bookmark_fill.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "icons8-favorites-100.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "icons8-favorites-150.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

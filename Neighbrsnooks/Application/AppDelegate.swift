@@ -53,13 +53,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
         
-         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-               if granted {
-                   print("✅ Notification permission granted")
-               } else {
-                   print("❌ Notification permission denied")
-               }
-           }
+//         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+//               if granted {
+//                   print("✅ Notification permission granted")
+//               } else {
+//                   print("❌ Notification permission denied")
+//               }
+//           }
         
         
         application.registerForRemoteNotifications()
@@ -123,21 +123,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         // Request Notification Permission
         UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            print("Notification permission granted: \(granted)")
-        }
+//        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+//            print("Notification permission granted: \(granted)")
+//        }
         application.registerForRemoteNotifications()
         return true
-        
-        
-        
     }
     deinit {
         // Stop monitoring when the view controller is deallocated
         NetworkMonitor.shared.stopMonitoring()
     }
-    
-    
+ 
     // MARK: - Custom Verification Popup
        @objc func showVerificationPopup() {
            DispatchQueue.main.async {
@@ -146,16 +142,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                      let rootVC = window.rootViewController else {
                    return
                }
-
                let topVC = self.getTopViewController(rootVC)
-               
                let alert = UIAlertController(title: "Welcome!",
                                              message: "You are now a verified member.\nHappy Neighbrsnooking!!!",
                                              preferredStyle: .alert)
                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
                    // Optional: Call your verification API here
                }))
-               
                topVC?.present(alert, animated: true, completion: nil)
            }
        }
@@ -183,13 +176,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         UIButton.appearance().titleLabel?.font = customFont
         // Customize other UI elements if needed
     }
-    
-    
-    
-    
-    // MARK: UISceneSession Lifecycle
-    
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+ 
+    // MARK: - UISceneSession Lifecycle
+     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         // Called when a new scene session is being created.
         // Use this method to select a configuration to create the new scene with.
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
@@ -240,19 +229,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
 @available(iOS 16.0, *)
 extension AppDelegate: UNUserNotificationCenterDelegate {
-
     // App foreground me ho toh ye chalega
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-
         let title = notification.request.content.title
         let body = notification.request.content.body
         print("🔔 Notification received: Title: \(title), Body: \(body)")
-
         // Send signal to refresh Home page
         NotificationCenter.default.post(name: NSNotification.Name("RefreshHomePageNotification"), object: nil)
-
         completionHandler([.alert, .sound])
     }
 
@@ -262,10 +247,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
         print("📩 Notification tapped: \(userInfo)")
-
         // Send signal to refresh Home page
         NotificationCenter.default.post(name: NSNotification.Name("RefreshHomePageNotification"), object: nil)
-
         completionHandler()
     }
 }
@@ -275,9 +258,6 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 
 @available(iOS 16.0, *)
 extension AppDelegate: MessagingDelegate {
-    
-    
-    
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         print("🌐 Firebase registration token: \(fcmToken ?? "")")
         if let token = fcmToken {

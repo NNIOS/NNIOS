@@ -1,12 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "like.png",
+      "filename" : "icons8-good-quality-50.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "icons8-facebook-like-100.png",
+      "filename" : "icons8-good-quality-100.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

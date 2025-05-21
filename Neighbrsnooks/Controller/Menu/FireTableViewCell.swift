@@ -21,7 +21,7 @@ class FireTableViewCell: UITableViewCell {
     @IBOutlet weak var Number2View: UIView!
     @IBOutlet weak var viewLine: UIView!
     @IBOutlet weak var arrowImageView : UIImageView!
-
+    var ShareCallback : ((UIButton) -> Void)?
     override func awakeFromNib() {
         super.awakeFromNib()
         updateColors()
@@ -32,6 +32,10 @@ class FireTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
+    }
+    
+    @IBAction func btnShare(_ sender: UIButton) {
+        ShareCallback?(sender)
     }
     
     private func updateColors() {
@@ -51,6 +55,7 @@ class FireTableViewCell: UITableViewCell {
             Number2Lbl.textColor = UIColor.secondaryLabel
             WebLbl.textColor = UIColor.secondaryLabel
             arrowImageView.tintColor = .black // Arrow tint for light mode
+            WebLbl.textColor = UIColor.blue
         }
     }
 

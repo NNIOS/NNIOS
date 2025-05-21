@@ -56,24 +56,15 @@ class GroupDetailsViewController: BaseViewController, UITableViewDataSource, UIT
             self.GroupNameLbl.text = self.GrouDetailsData?.groupname
             self.DescriptionLbl.text = self.GrouDetailsData?.description
             
-//            if let joinStatus = GrouDetailsData?.membJoinStatus {
-//                print("membJoinStatus:", joinStatus)
-//                btnJoin.isHidden = (joinStatus == 1) // 1 => hide, 0 => show
-//            } else {
-//                print("membJoinStatus is nil or not an Int")
-//                btnJoin.isHidden = false // default: show button
-//            }
 
-            print("Current status: \(GrouDetailsData?.membJoinStatus ?? -1)")
-            print("Button hidden state before: \(btnJoin.isHidden)")
-
-            if GrouDetailsData?.membJoinStatus == 1 {
-                btnJoin.isHidden = true
-            } else if GrouDetailsData?.membJoinStatus == 0 {
+            if GrouDetailsData?.membJoinStatus == 0 {
                 btnJoin.isHidden = false
+            } else {
+                btnJoin.isHidden = true
             }
 
-            print("Button hidden state after: \(btnJoin.isHidden)")
+
+           // print("Button hidden state after: \(btnJoin.isHidden)")
 
 
             
@@ -148,21 +139,15 @@ class GroupDetailsViewController: BaseViewController, UITableViewDataSource, UIT
                 self.MembersLbl.text = "N/A" // Or some default value
             }
             
-            print("Current status: \(GrouDetailsData?.membJoinStatus ?? -1)")
-            print("Button hidden state before: \(btnJoin.isHidden)")
 
-            if GrouDetailsData?.membJoinStatus == 1 {
-                btnJoin.isHidden = true
-            } else if GrouDetailsData?.membJoinStatus == 0 {
+
+            if GrouDetailsData?.membJoinStatus == 0 {
                 btnJoin.isHidden = false
+            } else {
+                btnJoin.isHidden = true
             }
 
-            print("Button hidden state after: \(btnJoin.isHidden)")
 
-
-
-
-            
             if let groupType = self.GrouDetailsData?.groupType {
                 self.GroupTypeLbl.text = "\(groupType) Group"
             } else {
@@ -638,7 +623,7 @@ class GroupDetailsViewController: BaseViewController, UITableViewDataSource, UIT
         let idCr = UserDefaults.standard.string(forKey: "usercr")
         let grName = UserDefaults.standard.string(forKey: "groupName")
           let dictParams: Dictionary<String, Any> = [
-                                                    "userid":userid ?? "",
+                                                    "userid":id ?? "",
                                                     "groupid": groupid ?? "",
                                                    
                                                                         ]

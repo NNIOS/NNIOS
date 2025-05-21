@@ -35,12 +35,9 @@ class LoginViewController: BaseViewController {
         super.viewDidLoad()
         self.navigationItem.hidesBackButton = true
         updateColors()
-        
-         EventPostPrcntgLbl.font = UIFont(name: "Montserrat-Medium", size: 18)
-        
-        self.additionalSafeAreaInsets.top = -50
-        
-        // Do any additional setup after loading the view.
+          EventPostPrcntgLbl.font = UIFont(name: "Montserrat-Medium", size: 18)
+         self.additionalSafeAreaInsets.top = -50
+         // Do any additional setup after loading the view.
     }
     
     
@@ -57,41 +54,27 @@ class LoginViewController: BaseViewController {
 //            tfPassword.backgroundColor = .black
             emailView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             passwordView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            
-            emailView.backgroundColor = .black
+             emailView.backgroundColor = .black
             passwordView.backgroundColor = .black
-            
-            emailView.layer.borderWidth = 1.0 // Enable border in dark mode
+             emailView.layer.borderWidth = 1.0 // Enable border in dark mode
             passwordView.layer.borderWidth = 1.0
             EventPostPrcntgLbl.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
             btnPassword.setTitleColor(#colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1), for: .normal)
             btnRegister.setTitleColor(#colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1), for: .normal)
-            
-           
-            
-        } else {
+         } else {
             // Light mode mein storyboard ke original colors preserve karna
           //  questionView.textColor = UIColor.secondaryLabel
             emailView.isUserInteractionEnabled = true
             passwordView.isUserInteractionEnabled = true
             tfMobile.backgroundColor = .white
             tfPassword.backgroundColor = .white
-            
-            emailView.layer.borderWidth = 0 // Remove border in light mode
+             emailView.layer.borderWidth = 0 // Remove border in light mode
             passwordView.layer.borderWidth = 0
-                   
-            
-            
-            loginView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+             loginView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
             
         }
       //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
-    
-    
-   
-    
-    
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         

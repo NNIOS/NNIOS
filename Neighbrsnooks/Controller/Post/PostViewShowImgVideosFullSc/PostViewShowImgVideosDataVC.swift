@@ -53,18 +53,15 @@ class PostViewShowImgVideosDataVC: UIViewController {
         btnCross.layer.cornerRadius = btnCross.frame.height/2
         btnCross.clipsToBounds = true
         
-        //           MARK: -
+        //           MARK: - Image show
         // ✅ imgData ko imgDataAll me convert karke add karo
         imgDataAll.append(contentsOf: imgData.map { postImagesN(img: $0.img, video: $0.video) })
-        
         // ✅ imgDataF ko imgDataAll me convert karke add karo
         imgDataAll.append(contentsOf: imgDataF.map { postImagesN(img: $0.img, video: $0.video) })
-        
         // ✅ bussdata ko imgDataAll me convert karke add karo
         imgDataAll.append(contentsOf: bussdata.map { postImagesN(img: $0.img, video: $0.video) })
         imgDataAll.append(contentsOf: imageUrls.map { postImagesN(img: $0.img, video: $0.video) })
         imgDataAll.append(contentsOf: allMediaData.map { postImagesN(img: $0.img, video: $0.video) })
-
         imgDataAll.append(contentsOf: mediaArrayMarketDetails.map { urlString in
             if urlString.lowercased().hasSuffix(".mp4") || urlString.lowercased().hasSuffix(".mov") {
                 return postImagesN(img: nil, video: urlString) // Video mila

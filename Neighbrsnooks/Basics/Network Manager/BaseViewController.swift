@@ -45,6 +45,7 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
         
     }
     
+    
     private func setupBottomPanel() {
             bottomPanel.delegate = self
             view.addSubview(bottomPanel)
@@ -151,38 +152,7 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
         view.layer.shadowOpacity = 0.45
     }
     
-//    func showAlertOk(Message:String,type: Int){
-//
-//        let alert = UIAlertController.init(title: BaseUrl.shared.projectName, message: Message, preferredStyle: .alert)
-//
-//        let yes = UIAlertAction(title: "Ok", style: .default) { (aelrt) in
-//
-//            if type == 1
-//            {
-//                let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") as! LoginViewController
-//                self.navigationController?.pushViewController(vc, animated: true)
-//            }
-//            else if type == 2
-//            {
-//                let vc = self.storyboard?.instantiateViewController(withIdentifier: "CreateWithdrawalPinViewController") as! CreateWithdrawalPinViewController
-//                self.navigationController?.pushViewController(vc, animated: true)
-//            }
-//            else if type == 3
-//            {
-//                appDelegate.pushToHomeViewContoller()
-//            }
-//            else
-//            {
-//                self.navigationController?.popViewController(animated: true)
-//            }
-//
-//        }
-//        alert.addAction(yes)
-//
-//        self.present(alert, animated: true)
-//
-//        SVProgressHUD.dismiss()
-//    }
+
     
     func popThisView() {
         self.dismiss(animated: false, completion: nil)
@@ -837,5 +807,40 @@ struct Platform {
 //    if let vc = storyboard.instantiateViewController(withIdentifier: "MenuBottomViewController") as? MenuBottomViewController {
 //        vc.selectedTabIndex = index
 //        viewController = vc
+
+
+extension UIColor {
+    static func fromHex(_ hex: String) -> UIColor {
+        var hexFormatted = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+
+        if hexFormatted.hasPrefix("#") {
+            hexFormatted.removeFirst()
+        }
+
+        var rgbValue: UInt64 = 0
+        Scanner(string: hexFormatted).scanHexInt64(&rgbValue)
+
+        let red = CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0
+        let green = CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0
+        let blue = CGFloat(rgbValue & 0x0000FF) / 255.0
+
+        return UIColor(red: red, green: green, blue: blue, alpha: 1.0)
+    }
+}
+
+
+
+extension UIViewController {
+    func showAutoDismissAlert(message: String, duration: Double = 2.0) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        self.present(alert, animated: true)
+
+        // Dismiss alert after 2 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            alert.dismiss(animated: true)
+        }
+    }
+}
+
 
 

@@ -103,6 +103,7 @@ class PostDotViewController: BottomPopupViewController {
         super.viewDidLoad()
         postUserID = createdBy
         checkUserID()
+        
         self.FvrtLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         self.lblDM.font = UIFont(name: "Montserrat-Regular", size: 16)
         self.lblSharePost.font = UIFont(name: "Montserrat-Regular", size: 16)
@@ -124,10 +125,10 @@ class PostDotViewController: BottomPopupViewController {
         callPostCommenteWebService {
             if self.poststs == 0 {
                 self.btnUnFavourite.isHidden = true
-                self.FvrtLbl.text = "Favourite Post"
+                self.FvrtLbl.text = "Favourite"
             } else if self.poststs == 1 {
                 self.btnFavourite.isHidden = true
-                self.FvrtLbl.text = "Unfavourite Post"
+                self.FvrtLbl.text = "Unfavourite"
             }
 
             // ✅ Recalculate height after UI updates

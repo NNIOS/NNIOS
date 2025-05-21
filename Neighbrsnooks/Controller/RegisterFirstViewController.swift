@@ -6,12 +6,10 @@
 //
 
 import UIKit
-
 import SVProgressHUD
 import TOCropViewController
 import Alamofire
 import SwiftUI
-
 
 
 @available(iOS 16.0, *)
@@ -44,33 +42,33 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
     var selectedInterestItems: [String] = []
     var selectedNeighbourItems: [String] = []
     var staticLabel: UILabel!
-     let pickerView = UIPickerView()
+    let pickerView = UIPickerView()
     let doPickerView = UIPickerView()
-     var name = ""
+    var name = ""
     var secname = ""
     var Neighbourname : String! = nil
-     var AddProjectData : ProffessionModel?
+    var AddProjectData : ProffessionModel?
     var IntrsetData : IntrestModel?
     var NeighbourData : NeighbourModel?
-     var serviceName = [String]()
-     var attributedItems: [NSAttributedString] = []
+    var serviceName = [String]()
+    var attributedItems: [NSAttributedString] = []
     var intrsetName = [String]()
-     var NeighbourName = [String]()
+    var NeighbourName = [String]()
     var genderList = ["Select Gender"," Male"," Female"," Other"]
     let boldText = "This is bold text."
     var serviceId : String?
     var selectedImge: UIImage? = nil
     var userid : String?
-     var MoreDataF : Welcome?
+    var MoreDataF : Welcome?
     var isCircularWithStroke: Bool = false
-     var ProfileUpload = ""
+    var ProfileUpload = ""
     var overlayView: UIView!
     let items = ["Option 1", "Option 2", "Option 3", "Option 4"]
     let timePicker = UIDatePicker()
     let datePicker = UIDatePicker()
     var timePickerContainer = UIView()
     var imageArray = [UIImage]()
-     var userId: String?
+    var userId: String?
     var imagePicker:UIImagePickerController?
     private weak var delegate: UIImagePickerControllerDelegate?
     let color = UIColor(red: 0.25, green: 0.5, blue: 0.75, alpha: 1.0)
@@ -79,7 +77,7 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.hidesBackButton = true
-         viewCornerRed.layer.cornerRadius = 10
+        viewCornerRed.layer.cornerRadius = 10
         viewCornerRed.clipsToBounds = false // Important: shadow ke liye false karein
         viewCornerRed.layer.shadowColor = UIColor.gray.cgColor
         viewCornerRed.layer.shadowOpacity = 0.3 // Shadow visibility (0 to 1)
@@ -87,17 +85,16 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
         viewCornerRed.layer.shadowRadius = 4 // Blur effect
         viewCornerRed.layer.borderWidth = 0.5
         viewCornerRed.layer.borderColor = UIColor.lightGray.cgColor
-        
         let firstName = UserDefaults.standard.string(forKey: "userFirstName") ?? ""
         let lastName = UserDefaults.standard.string(forKey: "userLastName") ?? ""
-        lblName.text = "\(firstName)\(lastName)"
-         
+        lblName.text = "\(firstName) \(lastName)"
         print("👉 First Name: \(firstName)")
         print("👉 Last Name: \(lastName)")
-
-        
+        tfIntrest.textColor = .darkGray
+        tfNeighbour.textColor = .darkGray
+        lblDo.textColor = .darkGray
         NetworkMonitor.shared.startMonitoring()
-          viewCornerRed.layer.cornerRadius = 10
+        viewCornerRed.layer.cornerRadius = 10
         viewCornerRed.clipsToBounds = true
         lblProfession.font = UIFont(name: "Montserrat-Regular", size: 16)
         lblProfession.tintColor = .darkGray
@@ -117,7 +114,7 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
         lblDo.text = "What do you do?"
         tfIntrest.text = "Chooes interest "
         tfNeighbour.text = "I love my neighbourhood because"
-         let professionLabelTap = UITapGestureRecognizer(target: self, action: #selector(professionLabelTapped))
+        let professionLabelTap = UITapGestureRecognizer(target: self, action: #selector(professionLabelTapped))
         lblDo.isUserInteractionEnabled = true
         lblDo.addGestureRecognizer(professionLabelTap)
         
@@ -142,7 +139,7 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
         let neighbourImageTap = UITapGestureRecognizer(target: self, action: #selector(neighbourLabelTapped))
         neigDropDown.isUserInteractionEnabled = true
         neigDropDown.addGestureRecognizer(neighbourImageTap)
- 
+        
         self.intrsetName.append("Select Intrest")
         self.serviceName.append("Select Profession")
         //   self.genderList.append("Select Gender")
@@ -153,8 +150,8 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
         viewThankYou.layer.shadowOffset = CGSize(width: 0, height: 0)
         viewThankYou.layer.shadowRadius = 5
         viewThankYou.layer.masksToBounds = false
-         self.lblName.font = UIFont(name: "Montserrat-Medium", size: 20)
-          self.lblProfession.font = UIFont(name: "Montserrat-Medium", size: 16)
+        self.lblName.font = UIFont(name: "Montserrat-Medium", size: 20)
+        self.lblProfession.font = UIFont(name: "Montserrat-Medium", size: 16)
         lblProfession.textColor = .darkGray
         self.lblInterest.font = UIFont(name: "Montserrat-Medium", size: 16)
         lblInterest.textColor = .darkGray
@@ -173,28 +170,23 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
         datePicker.minimumDate = dateFormatter.date(from: "1980-04-01T00:00:00Z")
         datePicker.maximumDate = dateFormatter.date(from: "2011-04-01T00:00:00Z")
         datePicker.preferredDatePickerStyle = .inline
- 
-        showStartDatePicker()
+         showStartDatePicker()
         CallProffesoinWebService()
         CallIntrestWebService()
         CallNeighbourWebService()
-        
-        self.imagePicker = UIImagePickerController()
+         self.imagePicker = UIImagePickerController()
         self.imagePicker?.delegate = self
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped(_:)))
         profilePic.isUserInteractionEnabled = true
         profilePic.addGestureRecognizer(tapGestureRecognizer)
         profilePic.layer.masksToBounds = true
         profilePic.layer.cornerRadius = profilePic.frame.height / 2
-         tfIntrest.numberOfLines = 0 // Allow label to have multiple lines
+        tfIntrest.numberOfLines = 0 // Allow label to have multiple lines
         tfIntrest.lineBreakMode = .byWordWrapping
         //        adjustLabelHeight()
         
     }
-    
- 
-    
-    deinit {
+     deinit {
         // Stop monitoring when the view controller is deallocated
         NetworkMonitor.shared.stopMonitoring()
     }
@@ -255,32 +247,25 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
             tfNeighbour.text = selectedItemsString
         }
     }
-    
- 
-    
-    
-    @IBOutlet weak var containerHeightConstraint: NSLayoutConstraint!
- 
-    func getCustomImage(imageDisplayName: String?, imageView: UIImageView!) {
+     func getCustomImage(imageDisplayName: String?, imageView: UIImageView!) {
         if let name = imageDisplayName?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
-            // ✅ First letter only
             let firstLetter = String(name.prefix(1)).uppercased()
-            
-            if let initialsImage = generateInitialsImage(initials: firstLetter) {
+            let bgColor = UIColor.colorForAlphabet(firstLetter)
+
+            if let initialsImage = generateInitialsImage(initials: firstLetter, backgroundColor: bgColor) {
                 imageView.image = initialsImage
                 
-                // Upload logic
-                if let jpegData = initialsImage.jpegData(compressionQuality: 0.5) {
-                    if let jpegImage = UIImage(data: jpegData) {
-                        imageArray = [jpegImage]
-                        callProfileUploadWebService {
-                            print("Profile initials image uploaded successfully.")
-                        }
+                // Optional upload
+                if let jpegData = initialsImage.jpegData(compressionQuality: 0.5),
+                   let jpegImage = UIImage(data: jpegData) {
+                    imageArray = [jpegImage]
+                    callProfileUploadWebService {
+                        print("Profile initials image uploaded successfully.")
                     }
                 }
             }
         } else {
-            // ❌ No name available, show default image
+            // No name – use fallback
             imageView.setImage(
                 string: "Display Picture",
                 color: UIColor.colorHash(name: "Display Picture"),
@@ -291,34 +276,43 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
     }
 
     
-    
-    
-    
-    
-
-    
-    
-    
+    func generateInitialsImage(initials: String, backgroundColor: UIColor, size: CGSize = CGSize(width: 100, height: 100)) -> UIImage? {
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let image = renderer.image { context in
+            // Set background color
+            backgroundColor.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            
+            // Draw initials in the center
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: size.width / 2, weight: .bold),
+                .foregroundColor: UIColor.white
+            ]
+            let textSize = initials.size(withAttributes: attributes)
+            let textRect = CGRect(
+                x: (size.width - textSize.width) / 2,
+                y: (size.height - textSize.height) / 2,
+                width: textSize.width,
+                height: textSize.height
+            )
+            initials.draw(in: textRect, withAttributes: attributes)
+        }
+        return image
+    }
  
     @IBAction func BackButtionAction(_ : UIButton){
         
         _ = navigationController?.popViewController(animated: true)
         
     }
- 
-     
-    
-    
-    @objc func imageViewTapped(_ sender:AnyObject){
+     @objc func imageViewTapped(_ sender:AnyObject){
         //   selectPictureThroughPhotoGallery()
         openCameraGallery()
         
     }
-    
-    
+ 
     func showStartDatePicker(){
-        
-        //Formate Date
+         //Formate Date
         datePicker.datePickerMode = .date
         datePicker.locale = .current
         if #available(iOS 14, *) {
@@ -381,8 +375,8 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
     
     @IBAction func nextBtn(_ sender: UIButton){
         //        adjustLabelHeight()
- 
-         callMoreYouWebService{ [self] in
+        
+        callMoreYouWebService{ [self] in
             //            let vc  = self.storyboard?.instantiateViewController(withIdentifier: "HomeViewController") as! HomeViewController
             
             viewThankYou.isHidden = false
@@ -391,7 +385,7 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
             
         }
         
- 
+        
         
     }
     
@@ -407,7 +401,7 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
         
     }
     
- 
+    
     
     func CallProffesoinWebService() {
         
@@ -488,7 +482,7 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
             "userpic": ""
         ]
         
- 
+        
         WebService.sharedInstance.callMoreYouWebService(withParams: dictParams) { data in
             self.MoreDataF = data
             completionClosure()
@@ -499,7 +493,7 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
     
 }
 
- 
+
 
 @available(iOS 16.0, *)
 extension RegisterFirstViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate, CropViewControllerDelegate {
@@ -587,14 +581,11 @@ extension RegisterFirstViewController: UIImagePickerControllerDelegate, UINaviga
             print("Failed to compress image")
             return
         }
-        
-        // Set the profile image view
+         // Set the profile image view
         profilePic.image = compressedImage
-        
-        // Prepare image for API upload
+         // Prepare image for API upload
         imageArray = [compressedImage]
-        
-        // Call API to upload the image
+         // Call API to upload the image
         callProfileUploadWebService {
             print("Profile photo updated successfully.")
             
@@ -604,29 +595,7 @@ extension RegisterFirstViewController: UIImagePickerControllerDelegate, UINaviga
         
     }
     
-    func generateInitialsImage(initials: String, size: CGSize = CGSize(width: 100, height: 100)) -> UIImage? {
-        let renderer = UIGraphicsImageRenderer(size: size)
-        let image = renderer.image { context in
-            // Set background color
-            UIColor.lightGray.setFill()
-            context.fill(CGRect(origin: .zero, size: size))
-            
-            // Draw initials in the center
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: size.width / 2, weight: .bold),
-                .foregroundColor: UIColor.white
-            ]
-            let textSize = initials.size(withAttributes: attributes)
-            let textRect = CGRect(
-                x: (size.width - textSize.width) / 2,
-                y: (size.height - textSize.height) / 2,
-                width: textSize.width,
-                height: textSize.height
-            )
-            initials.draw(in: textRect, withAttributes: attributes)
-        }
-        return image
-    }
+    
     
     
     func callProfileUploadWebService(_ completionClosure: @escaping () -> ()) {
@@ -738,18 +707,66 @@ enum DateFormat {
 }
 
 
+ 
+import UIKit
+
 extension UIColor {
-    func toHexString() -> String? {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        
-        if self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
-            let rgb: Int = (Int)(red * 255)<<16 | (Int)(green * 255)<<8 | (Int)(blue * 255)<<0
-            return String(format: "#%06x", rgb)
+    static func colorForAlphabet(_ letter: String) -> UIColor {
+        let hexColors: [String] = [
+            "#EF8DA1", // A
+            "#F08A56", // B
+            "#7AE48A", // C
+            "#8F8DF3", // D
+            "#F5889D", // E
+            "#88CDEC", // F
+            "#88EC9E", // G
+            "#88DEEC", // H
+            "#EC8894", // I
+            "#BFEC88", // J
+            "#EF8DA1", // K
+            "#F08A56", // L
+            "#7AE48A", // M
+            "#8F8DF3", // N
+            "#F5889D", // O
+            "#88CDEC", // P
+            "#88EC9E", // Q
+            "#88DEEC", // R
+            "#EC8894", // S
+            "#BFEC88", // T
+            "#EF8DA1", // U
+            "#F08A56", // V
+            "#7AE48A", // W
+            "#8F8DF3", // X
+            "#F5889D", // Y
+            "#88CDEC"  // Z
+        ]
+
+        guard let first = letter.uppercased().unicodeScalars.first else {
+            return .lightGray
         }
-        
-        return nil
+
+        let index = Int(first.value) - 65 // A-Z maps to 0–25
+        if index >= 0 && index < hexColors.count {
+            return UIColor(hexColor: hexColors[index])
+        } else {
+            return .lightGray
+        }
+    }
+
+    // 🔄 Renamed to avoid conflict
+    convenience init(hexColor: String) {
+        var hexSanitized = hexColor.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if hexSanitized.hasPrefix("#") {
+            hexSanitized.remove(at: hexSanitized.startIndex)
+        }
+
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+
+        let r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+        let g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+        let b = CGFloat(rgb & 0x0000FF) / 255.0
+
+        self.init(red: r, green: g, blue: b, alpha: 1.0)
     }
 }

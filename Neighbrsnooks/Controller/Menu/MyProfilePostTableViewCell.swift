@@ -40,7 +40,8 @@ class MyProfilePostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLa
     var isFavourite = false
     var isLikedByUser = false // Track if user has already liked
     var emojiSelectionHandler: ((String) -> Void)?
-    
+    var isExpanded = false
+    var fullDescriptionText: String = ""
     
     @IBOutlet weak var likebtn: UIButton!
     @IBOutlet weak var lblLikeCount: UILabel!
@@ -155,6 +156,137 @@ class MyProfilePostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLa
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupView()
     }
+    
+    
+    
+    
+    // MARK: - cell more less
+    
+    func addTapGestureToLabel() {
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
+            lblDescription.isUserInteractionEnabled = true
+            lblDescription.addGestureRecognizer(tapGesture)
+        }
+        
+        // Action when label is tapped (toggle between expanded/collapsed state)
+        @objc func labelTapped() {
+            isExpanded.toggle()
+          //  updateDescriptionText() // Update the description based on new state
+            DispatchQueue.main.async {
+                self.updateDescriptionText()
+            }
+        }
+        
+        // Function to configure description text
+        func configureDescription(with text: String) {
+            fullDescriptionText = text
+    //          updateDescriptionText()
+            DispatchQueue.main.async {
+                self.updateDescriptionText()
+            }
+        }
+        
+        private func updateDescriptionText() {
+            guard let font = lblDescription.font else { return }
+
+            let maxLines = 2
+            let maxWidth = lblDescription.frame.width > 0 ? lblDescription.frame.width : UIScreen.main.bounds.width - 40
+            let lineHeight = "A".size(withAttributes: [.font: font]).height
+            let maxHeight = lineHeight * CGFloat(maxLines)
+
+            let fullTextAttr = NSAttributedString(string: fullDescriptionText, attributes: [
+                .font: font
+            ])
+
+            let fullBoundingRect = fullTextAttr.boundingRect(
+                with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                context: nil
+            )
+
+            let lineCount = Int(ceil(fullBoundingRect.height / lineHeight))
+
+            if isExpanded {
+                // Show full description with "Less"
+                let fullText = NSMutableAttributedString(string: "\(fullDescriptionText) ", attributes: [
+                    .font: font,
+                    .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
+                ])
+                let lessText = NSAttributedString(string: "Less", attributes: [
+                    .font: font,
+                    .foregroundColor: #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                ])
+                fullText.append(lessText)
+
+                lblDescription.numberOfLines = 0
+                lblDescription.attributedText = fullText
+            } else {
+                if lineCount > maxLines {
+                    // Show trimmed text + "... More"
+                    let trailingText = "... More"
+                    let trailingAttr = NSAttributedString(string: trailingText, attributes: [
+                        .font: font,
+                        .foregroundColor: #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                    ])
+
+                    var fittingText = fullDescriptionText
+                    var finalText = NSMutableAttributedString()
+
+                    for i in stride(from: fittingText.count, through: 0, by: -1) {
+                        let sub = String(fittingText.prefix(i)).trimmingCharacters(in: .whitespacesAndNewlines)
+                        let testAttr = NSMutableAttributedString(string: sub, attributes: [
+                            .font: font,
+                            .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
+                        ])
+                        testAttr.append(trailingAttr)
+
+                        let boundingRect = testAttr.boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+                                                                 options: [.usesLineFragmentOrigin, .usesFontLeading],
+                                                                 context: nil)
+
+                        if boundingRect.height <= maxHeight {
+                            finalText = testAttr
+                            break
+                        }
+                    }
+
+                    lblDescription.numberOfLines = maxLines
+                    lblDescription.attributedText = finalText
+                } else {
+                    // Show plain full text, no "More"
+                    lblDescription.numberOfLines = 0
+                    lblDescription.text = fullDescriptionText
+                }
+            }
+
+            // Disable tap if only 1 line
+            if lineCount <= 1 {
+                lblDescription.gestureRecognizers?.forEach { recognizer in
+                    lblDescription.removeGestureRecognizer(recognizer)
+                }
+                lblDescription.isUserInteractionEnabled = false
+            } else {
+                // Re-add tap gesture if missing
+                if lblDescription.gestureRecognizers?.isEmpty ?? true {
+                    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
+                    lblDescription.addGestureRecognizer(tapGesture)
+                    lblDescription.isUserInteractionEnabled = true
+                }
+            }
+
+            lblDescription.setNeedsLayout()
+            lblDescription.layoutIfNeeded()
+
+            if let tableView = self.superview as? UITableView {
+                tableView.beginUpdates()
+                tableView.endUpdates()
+            }
+        }
+
+    // end more less
+    
+    
+    
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -332,26 +464,7 @@ class MyProfilePostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLa
             let imageName = isFavourite ? "favorites" : "Un favorites" // Set your image names
         btnFavourite.setImage(UIImage(named: imageName), for: .normal)
         }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+     
     
     private func setupView() {
         contentView.addSubview(reactionButton)

@@ -81,13 +81,13 @@ class BusinessDotViewController: BottomPopupViewController {
             
             if self.BussinessDetailData?.fastatus == "0" {
                 self.btnUnFavourite.isHidden = true
-                self.FvrtLbl.text = "Favourite Post"  // Set label title for "0"
+                self.FvrtLbl.text = "Favourite"  // Set label title for "0"
                
                
             } else if self.BussinessDetailData?.fastatus == "1" {
                
                 self.btnFavourite.isHidden = true
-                self.FvrtLbl.text = "Unfavourite Post"  // Set label title for "1"
+                self.FvrtLbl.text = "Unfavourite"  // Set label title for "1"
              
             }
            

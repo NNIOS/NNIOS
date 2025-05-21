@@ -96,9 +96,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
             print("📵 Camera not available, using photo library instead")
             NewmagePicker.sourceType = .photoLibrary
         }
-
-        
-        self.tpyePostLbl.font  = UIFont(name: "Montserrat-Regular", size: 16)
+ 
         self.tpyePostLbl.tintColor = .darkGray
         self.lblMaxImgVid.font  = UIFont(name: "Montserrat-Regular", size: 12)
         self.lblUploadImgVideo.font  = UIFont(name: "Montserrat-Regular", size: 16)

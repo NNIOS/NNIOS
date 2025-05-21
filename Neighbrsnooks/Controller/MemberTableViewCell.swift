@@ -32,7 +32,6 @@ protocol ThreeDotMemberTableViewCellDelegate: AnyObject {
 @available(iOS 16.0, *)
 class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource {
     
-    
     @IBOutlet weak var collectionViewBannerHeight: NSLayoutConstraint!
     @IBOutlet weak var collectionViewBanner: UICollectionView!
     @IBOutlet weak var lblName: UILabel!
@@ -40,8 +39,6 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     @IBOutlet weak var lblDescription: UILabel!
     @IBOutlet weak var lblSec: UILabel!
     @IBOutlet weak var lblMonth: UILabel!
-    var isExpanded = false
-    
     @IBOutlet weak var profileImgView : UIImageView!
     weak var delegateM: MemberCellDelegate?
     var userId: String?
@@ -52,6 +49,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     @IBOutlet weak var viewToHide: UIView!
     @IBOutlet weak var btnDotsImg : UIButton!
     
+   
     var business_id : String?
     var BussinessFavouriteData : FavouriteBussinessModel?
     var BussinessRemoveFavouriteData : RemoveFavouriteBussiness?
@@ -59,7 +57,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     //    new outlet
     weak var delegateCell: MemberTableViewCellDelegate?
     weak var delegateThreDot: ThreeDotMemberTableViewCellDelegate?
-    
+    var isExpanded = false
     var profileData : ProfileModel?
     var isLiked = false
     var likeCount = 0
@@ -98,7 +96,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         collectionViewBanner.delegate = self
         collectionViewBanner.dataSource = self
         lblMonth.font = UIFont(name: "Montserrat-Regular", size: 12)
-        lblSec.font = UIFont(name: "Montserrat-Regular", size: 14)
+        lblSec.font = UIFont(name: "Montserrat-Regular", size: 12)
         lblGeneral.font = UIFont(name: "Montserrat-SemiBold", size: 14)
         lblDescription.font = UIFont(name: "Montserrat-Regular", size: 14)
         profileImgView.layer.cornerRadius = profileImgView.frame.height/2
@@ -342,9 +340,11 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCollectionViewCell", for: indexPath) as! HomeCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCollectionViewCell", for: indexPath) as! HomeCollectionViewCell
         let postImage = imgDataAll[indexPath.row]  // Current item
-        cell.configure(with: postImage)
+        
+        let totalCount = imgDataAll.count
+        cell.configure(with: postImage, totalCount: totalCount)
         cell.numberLabel.text = "\(indexPath.item + 1)"
         cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
         cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -460,6 +460,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     //    new code emoji code
     
     @IBAction func likeButtonTapped(_ sender: UIButton) {
+        
         if profileData?.verfiedMsg == "User Verification is completed!" {
                     likeUnLikeTab?()
                     
@@ -614,11 +615,12 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         favouriteButtonCallback?()
     }
     
-    func updateFavouriteButton(isFavourite: Bool) {
-        let imageName = isFavourite ? "favorites" : "Un favorites" // Set your image names
-        btnFavourite.setImage(UIImage(named: imageName), for: .normal)
-    }
-    
+    // Update UI based on fav/unfav status
+       func updateFavouriteButton(isFavourite: Bool) {
+           let imageName = isFavourite ? "favorites" : "Un favorites" // ✅ Image names from Assets
+           let image = UIImage(named: imageName)
+           btnFavourite.setImage(image, for: .normal)
+       }
    
     
 }

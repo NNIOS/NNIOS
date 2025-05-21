@@ -23,7 +23,7 @@ class WelcomeTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateColors()
+//        updateColors()
         defaultTextColor = lblName.textColor
         defaultTextColor = lblWelcmMsg.textColor
         // Initialization code
@@ -52,7 +52,7 @@ class WelcomeTableViewCell: UITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
     

@@ -1,11 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "WhatsApp_Image_2024-02-15_at_11.32.49_AM_copy-removebg-preview.png",
+      "filename" : "icons8-iphone-16-pro-50.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "icons8-iphone-16-pro-100.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

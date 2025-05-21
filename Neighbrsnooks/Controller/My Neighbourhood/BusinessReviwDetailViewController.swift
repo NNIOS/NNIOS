@@ -161,14 +161,14 @@ extension BusinessReviwDetailViewController: UITableViewDataSource, UITableViewD
             if response.status.lowercased() == "failed" {
                 print("🚨 Error: \(response.message)")
                 DispatchQueue.main.async {
-                    self.showAlert(message: "Error: \(response.message)")
+                    self.showAutoDismissAlert(message: "Error: \(response.message)")
                     completionClosure(response.message)
                 }
                 return
             }
             self.BusinesReviewDelete = response
             DispatchQueue.main.async {
-                self.showAlert(message: response.message)
+                self.showAutoDismissAlert(message: response.message)
                 completionClosure(response.message)
             }
             self.callBussinesReviewDetailPostWebService {

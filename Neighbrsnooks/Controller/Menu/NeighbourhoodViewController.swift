@@ -10,6 +10,9 @@ import SVProgressHUD
 
 @available(iOS 16.0, *)
 class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, UICollectionViewDataSource, ConfirmfollowDelegate, UICollectionViewDelegateFlowLayout {
+   
+    
+   
     
     
     @IBOutlet weak var collectionViewDirectory: UICollectionView!
@@ -313,6 +316,7 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
             
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsViewController")as! EventsViewController
             vc.selectedNeighborhoodId = self.selectedNeighborhoodId
+            vc.selectedNeighborhoodName = self.NeighrhoodLbl.text
             vc.sourceViewController = "Neighbourhood"
             self.navigationController?.pushViewController(vc, animated: true)
         }
@@ -441,42 +445,38 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
 
         
         if neighbrhoodData?.verfiedMsg == "User Verification is completed!" {
-            
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostViewController")as! PostViewController
-            vc.selectedNeighborhoodId = self.selectedNeighborhoodId
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
-        else {
-            // Create the alert controller
-            let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-            
-            // Define font and color attributes
-            let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-            let messageAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-            ]
-            
-            // Create attributed strings
-            let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-            let attributedMessage = NSAttributedString(
-                string: "You have limited access till verification is complete. We thank you for your patience.",
-                attributes: messageAttributes
-            )
-            
-            // Set the title and message of the alert
-            alert.setValue(attributedTitle, forKey: "attributedTitle")
-            alert.setValue(attributedMessage, forKey: "attributedMessage")
-            
-            // Add an action to the alert
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-                alert.dismiss(animated: true, completion: nil)
-            }))
-            
-            // Present the alert
-            self.present(alert, animated: true, completion: nil)
-        }
+               
+               // Save selectedNeighborhoodId to UserDefaults
+               UserDefaults.standard.set(selectedNeighborhoodId, forKey: "neighbrshood")
+               
+               let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostViewController") as! PostViewController
+               vc.selectedNeighborhoodId = self.selectedNeighborhoodId
+               self.navigationController?.pushViewController(vc, animated: true)
+               
+           } else {
+               let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
 
+               let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+               let messageAttributes: [NSAttributedString.Key: Any] = [
+                   .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                   .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+               ]
+
+               let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+               let attributedMessage = NSAttributedString(
+                   string: "You have limited access till verification is complete. We thank you for your patience.",
+                   attributes: messageAttributes
+               )
+
+               alert.setValue(attributedTitle, forKey: "attributedTitle")
+               alert.setValue(attributedMessage, forKey: "attributedMessage")
+
+               alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                   alert.dismiss(animated: true, completion: nil)
+               }))
+
+               self.present(alert, animated: true, completion: nil)
+           }
        }
     
     @IBAction func moreButton(_ sender: Any)

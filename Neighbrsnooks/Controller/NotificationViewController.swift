@@ -454,293 +454,291 @@ extension NotificationViewController: UITableViewDataSource, UITableViewDelegate
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell = tableView.dequeueReusableCell(withIdentifier: "NotificationTableViewCell", for: indexPath) as! NotificationTableViewCell
-        
-        cell.lblName.text = NotificationData?.nbdata[indexPath.row].title
-        cell.lblSec.text = NotificationData?.nbdata[indexPath.row].message
-        cell.lblDate.text = NotificationData?.nbdata[indexPath.row].createon
-        
-        if NotificationData?.nbdata[indexPath.row].notificationType == "Event" {
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.6156862745, green: 0.6745098039, blue: 0.4862745098, alpha: 1)
-            cell.lblName.textColor = #colorLiteral(red: 0.6156862745, green: 0.6745098039, blue: 0.4862745098, alpha: 1)
             
-
+            let cell = tableView.dequeueReusableCell(withIdentifier: "NotificationTableViewCell", for: indexPath) as! NotificationTableViewCell
             
-            cell.DetailsCallback = { [self] value in
-                // Fetch the clicked notification ID
-                guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
-                    print("Notification ID not found")
-                    return
-                }
-
-                // Call API first to hide the notification
-                callHideNotificationWebService(notificationID: notificationID) {
-                    // After API call, navigate to PollsDetailViewController
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController") as! EventsDetailViewController
-
-                    vc.eventid = NotificationData?.nbdata[indexPath.row].id ?? ""
-                    vc.id = notificationID
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-            }
-
-           
-        } else if NotificationData?.nbdata[indexPath.row].notificationType == "Group" {
+            cell.lblName.text = NotificationData?.nbdata[indexPath.row].title
+            cell.lblSec.text = NotificationData?.nbdata[indexPath.row].message
+            cell.lblDate.text = NotificationData?.nbdata[indexPath.row].createon
             
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
-            cell.lblName.textColor = #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
-            
-            cell.DetailsCallback = { [self] value in
+            if NotificationData?.nbdata[indexPath.row].notificationType == "Event" {
+                cell.viewNotification.backgroundColor = #colorLiteral(red: 0.6156862745, green: 0.6745098039, blue: 0.4862745098, alpha: 1)
+                cell.lblName.textColor = #colorLiteral(red: 0.6156862745, green: 0.6745098039, blue: 0.4862745098, alpha: 1)
                 
-                guard let groupType = NotificationData?.nbdata[indexPath.row].groupType else { return }
+
                 
-                if groupType == "Public" {
-                    // Open GroupsViewController for Public groups
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as! GroupDetailsViewController
+                cell.DetailsCallback = { [self] value in
+                    // Fetch the clicked notification ID
                     guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
                         print("Notification ID not found")
                         return
                     }
+
+                    // Call API first to hide the notification
                     callHideNotificationWebService(notificationID: notificationID) {
+                        // After API call, navigate to PollsDetailViewController
+                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController") as! EventsDetailViewController
+
+                        vc.eventid = NotificationData?.nbdata[indexPath.row].id ?? ""
+                        vc.id = notificationID
+                        
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+
+               
+            } else if NotificationData?.nbdata[indexPath.row].notificationType == "Group" {
+                
+                cell.viewNotification.backgroundColor = #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
+                cell.lblName.textColor = #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
+                
+                cell.DetailsCallback = { [self] value in
+                    
+                    guard let groupType = NotificationData?.nbdata[indexPath.row].groupType else { return }
+                    
+                    if groupType == "Public" {
+                        // Open GroupsViewController for Public groups
+                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as! GroupDetailsViewController
+                        guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
+                            print("Notification ID not found")
+                            return
+                        }
+                        callHideNotificationWebService(notificationID: notificationID) {
+                            vc.groupid = NotificationData?.nbdata[indexPath.row].id ?? ""
+                            vc.userid = NotificationData?.nbdata[indexPath.row].notificationID ?? ""
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        }
+                        
+                    } else if groupType == "Private" {
+                        // Open GroupDetailsViewController for Private groups
+                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupsViewController") as! GroupsViewController
+                        guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
+                            print("Notification ID not found")
+                            return
+                        }
+                        callHideNotificationWebService(notificationID: notificationID) {
+                            vc.groupid = NotificationData?.nbdata[indexPath.row].id ?? ""
+                            vc.userid = NotificationData?.nbdata[indexPath.row].notificationID ?? ""
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        }
+                    }
+                }
+            }
+
+            
+            else if NotificationData?.nbdata[indexPath.row].notificationType == "Post" {
+
+                cell.viewNotification.backgroundColor = #colorLiteral(red: 0.5960784314, green: 0.337254902, blue: 0.2745098039, alpha: 1)
+                cell.lblName.textColor = #colorLiteral(red: 0.5960784314, green: 0.337254902, blue: 0.2745098039, alpha: 1)
+                
+                cell.DetailsCallback = { [self] value in
+                    // Check if the title is "Direct Message"
+                    if NotificationData?.nbdata[indexPath.row].title == "Comment on Post" {
+                        guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
+                            print("Notification ID not found")
+                            return
+                        }
+                        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailsNewViewController") as? PostDetailsNewViewController else { return }
+                        
+                        callHideNotificationWebService(notificationID: notificationID) {
+                            vc.postid =  NotificationData?.nbdata[indexPath.row].id ?? ""
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        }
+                        
+                    } else {
+                        guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
+                            print("Notification ID not found")
+                            return
+                        }
+                        
+                        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else { return }
+                        
+                        callHideNotificationWebService(notificationID: notificationID) {
+                          //  vc.id = notificationID
+                            self.navigationController?.pushViewController(vc, animated: true)
+                        }
+                    }
+                }
+            }
+
+            
+            else if NotificationData?.nbdata[indexPath.row].notificationType == "Poll" {
+                cell.viewNotification.backgroundColor = #colorLiteral(red: 0.6862745098, green: 0.6156862745, blue: 0.4, alpha: 1)
+                cell.lblName.textColor = #colorLiteral(red: 0.6862745098, green: 0.6156862745, blue: 0.4, alpha: 1)
+
+                cell.DetailsCallback = { [self] value in
+                    // Fetch the clicked notification ID
+                    guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
+                        print("Notification ID not found")
+                        return
+                    }
+
+                    // Call API first to hide the notification
+                    callHideNotificationWebService(notificationID: notificationID) {
+                        // After API call, navigate to PollsDetailViewController
+                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "PollsDetailViewController") as! PollsDetailViewController
+
+                        vc.pollid = NotificationData?.nbdata[indexPath.row].id ?? ""
+                        vc.id = notificationID // Sending the clicked notification ID
+                        
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+            }
+
+
+            
+            else if NotificationData?.nbdata[indexPath.row].notificationType == "Business" {
+               
+                cell.viewNotification.backgroundColor = #colorLiteral(red: 0.5098039216, green: 0.5843137255, blue: 0.568627451, alpha: 1)
+                cell.lblName.textColor = #colorLiteral(red: 0.5098039216, green: 0.5843137255, blue: 0.568627451, alpha: 1)
+                
+
+                
+                cell.DetailsCallback = { [self] value in
+                    // Fetch the clicked notification ID
+                    guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
+                        print("Notification ID not found")
+                        return
+                    }
+
+                    // Call API first to hide the notification
+                    callHideNotificationWebService(notificationID: notificationID) {
+                        // After API call, navigate to PollsDetailViewController
+                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "BusinessDetailsViewController") as! BusinessDetailsViewController
+
+                        vc.business_id = NotificationData?.nbdata[indexPath.row].id ?? ""
+                        vc.id = notificationID // Sending the clicked notification ID
+                        
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+             
+            }
+            
+            else if NotificationData?.nbdata[indexPath.row].notificationType == "Marketplacechat" {
+               
+                cell.viewNotification.backgroundColor = #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
+                cell.lblName.textColor = #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
+                
+                
+
+                
+                cell.DetailsCallback = { [self] value in
+                    // Fetch the clicked notification ID
+                    guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
+                        print("Notification ID not found")
+                        return
+                    }
+
+                    // Call API first to hide the notification
+                    callHideNotificationWebService(notificationID: notificationID) {
+                        // After API call, navigate to PollsDetailViewController
+                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController") as! MarketDetailViewController
+
+                        vc.idD = NotificationData?.nbdata[indexPath.row].id ?? ""
+                        vc.id = notificationID // Sending the clicked notification ID
+                        
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+             
+            }
+            
+            else if NotificationData?.nbdata[indexPath.row].notificationType == "Directmessage" {
+               
+                cell.viewNotification.backgroundColor = #colorLiteral(red: 0.9568627477, green: 0.6588235497, blue: 0.5450980663, alpha: 1)
+                cell.lblName.textColor = #colorLiteral(red: 0.9568627477, green: 0.6588235497, blue: 0.5450980663, alpha: 1)
+                
+                
+
+                
+                cell.DetailsCallback = { [self] value in
+                    // Fetch the clicked notification ID
+                    guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
+                        print("Notification ID not found")
+                        return
+                    }
+
+                    // Call API first to hide the notification
+                    callHideNotificationWebService(notificationID: notificationID) {
+                        // After API call, navigate to PollsDetailViewController
+                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "MessageViewController") as! MessageViewController
+
+                        vc.otherid = NotificationData?.nbdata[indexPath.row].createdOwner ?? ""
+                        vc.userName = NotificationData?.nbdata[indexPath.row].ownername ?? ""
+                        vc.id = notificationID // Sending the clicked notification ID
+                        
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+             
+            }
+            
+            else if NotificationData?.nbdata[indexPath.row].notificationType == "Groupchat" {
+               
+                cell.viewNotification.backgroundColor =  #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
+                cell.lblName.textColor =  #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
+                
+                
+    //            cell.DetailsCallback = { [self] value in
+    //
+    //                let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupMessageViewController")as! GroupMessageViewController
+    //
+    //                vc.groupid = NotificationData?.nbdata[indexPath.row].id ?? ""
+    //                vc.GroupName = NotificationData?.nbdata[indexPath.row].groupchatName ?? ""
+    //                vc.userImage = NotificationData?.nbdata[indexPath.row].groupchatImage ?? ""
+    //                self.navigationController?.pushViewController(vc, animated: true)
+    //
+    //            }
+                
+                cell.DetailsCallback = { [self] value in
+                    // Fetch the clicked notification ID
+                    guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
+                        print("Notification ID not found")
+                        return
+                    }
+
+                    // Call API first to hide the notification
+                    callHideNotificationWebService(notificationID: notificationID) {
+                        // After API call, navigate to PollsDetailViewController
+                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupMessageViewController") as! GroupMessageViewController
+
                         vc.groupid = NotificationData?.nbdata[indexPath.row].id ?? ""
-                        vc.userid = NotificationData?.nbdata[indexPath.row].notificationID ?? ""
-                        self.navigationController?.pushViewController(vc, animated: true)
-                    }
-                    
-                } else if groupType == "Private" {
-                    // Open GroupDetailsViewController for Private groups
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupsViewController") as! GroupsViewController
-                    guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
-                        print("Notification ID not found")
-                        return
-                    }
-                    callHideNotificationWebService(notificationID: notificationID) {
-                        vc.groupid = NotificationData?.nbdata[indexPath.row].id ?? ""
-                        vc.userid = NotificationData?.nbdata[indexPath.row].notificationID ?? ""
+                        vc.GroupName = NotificationData?.nbdata[indexPath.row].groupchatName ?? ""
+                        vc.userImage = NotificationData?.nbdata[indexPath.row].groupchatImage ?? ""
+                        vc.id = notificationID // Sending the clicked notification ID
+                        
                         self.navigationController?.pushViewController(vc, animated: true)
                     }
                 }
+             
             }
-        }
-
-        
-        else if NotificationData?.nbdata[indexPath.row].notificationType == "Post" {
-
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.5960784314, green: 0.337254902, blue: 0.2745098039, alpha: 1)
-            cell.lblName.textColor = #colorLiteral(red: 0.5960784314, green: 0.337254902, blue: 0.2745098039, alpha: 1)
             
-            cell.DetailsCallback = { [self] value in
-                // Check if the title is "Direct Message"
-                if NotificationData?.nbdata[indexPath.row].title == "Comment on Post" {
-                    guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
-                        print("Notification ID not found")
-                        return
-                    }
-                    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailsViewController") as? PostDetailsViewController else { return }
-                    
-                    callHideNotificationWebService(notificationID: notificationID) {
-                        vc.postid =  NotificationData?.nbdata[indexPath.row].id ?? ""
-                        self.navigationController?.pushViewController(vc, animated: true)
-                    }
-                    
-                } else {
-                    guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
-                        print("Notification ID not found")
-                        return
-                    }
-                    
-                    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else { return }
-                    
-                    callHideNotificationWebService(notificationID: notificationID) {
-                      //  vc.id = notificationID
-                        self.navigationController?.pushViewController(vc, animated: true)
-                    }
-                }
+            else if NotificationData?.nbdata[indexPath.row].notificationType == "Member" {
+               
+                cell.viewNotification.backgroundColor = #colorLiteral(red: 0.6862745098, green: 0.4196078431, blue: 0.462745098, alpha: 1)
+                cell.lblName.textColor = #colorLiteral(red: 0.6862745098, green: 0.4196078431, blue: 0.462745098, alpha: 1)
+             
             }
-        }
-
-        
-        else if NotificationData?.nbdata[indexPath.row].notificationType == "Poll" {
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.6862745098, green: 0.6156862745, blue: 0.4, alpha: 1)
-            cell.lblName.textColor = #colorLiteral(red: 0.6862745098, green: 0.6156862745, blue: 0.4, alpha: 1)
-
-            cell.DetailsCallback = { [self] value in
-                // Fetch the clicked notification ID
-                guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
-                    print("Notification ID not found")
-                    return
-                }
-
-                // Call API first to hide the notification
-                callHideNotificationWebService(notificationID: notificationID) {
-                    // After API call, navigate to PollsDetailViewController
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "PollsDetailViewController") as! PollsDetailViewController
-
-                    vc.pollid = NotificationData?.nbdata[indexPath.row].id ?? ""
-                    vc.id = notificationID // Sending the clicked notification ID
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-            }
-        }
-
-
-        
-        else if NotificationData?.nbdata[indexPath.row].notificationType == "Business" {
+            
+            
            
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.5098039216, green: 0.5843137255, blue: 0.568627451, alpha: 1)
-            cell.lblName.textColor = #colorLiteral(red: 0.5098039216, green: 0.5843137255, blue: 0.568627451, alpha: 1)
             
-
+            cell.lblName.font = UIFont(name: "Montserrat-SemiBold", size: 15)
+            cell.lblSec.font = UIFont(name: "Montserrat-Regular", size: 14)
+            cell.lblDate.font = UIFont(name: "Montserrat-Regular", size: 10)
             
-            cell.DetailsCallback = { [self] value in
-                // Fetch the clicked notification ID
-                guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
-                    print("Notification ID not found")
-                    return
-                }
-
-                // Call API first to hide the notification
-                callHideNotificationWebService(notificationID: notificationID) {
-                    // After API call, navigate to PollsDetailViewController
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "BusinessDetailsViewController") as! BusinessDetailsViewController
-
-                    vc.business_id = NotificationData?.nbdata[indexPath.row].id ?? ""
-                    vc.id = notificationID // Sending the clicked notification ID
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-            }
-         
-        }
-        
-        else if NotificationData?.nbdata[indexPath.row].notificationType == "Marketplacechat" {
+            cell.viewNotification.roundCorners([.topLeft, .bottomLeft], radius: 25)
            
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
-            cell.lblName.textColor = #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
-            
-            
-
-            
-            cell.DetailsCallback = { [self] value in
-                // Fetch the clicked notification ID
-                guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
-                    print("Notification ID not found")
-                    return
-                }
-
-                // Call API first to hide the notification
-                callHideNotificationWebService(notificationID: notificationID) {
-                    // After API call, navigate to PollsDetailViewController
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController") as! MarketDetailViewController
-
-                    vc.idD = NotificationData?.nbdata[indexPath.row].id ?? ""
-                    vc.id = notificationID // Sending the clicked notification ID
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-            }
-         
+            return cell
         }
-        
-        else if NotificationData?.nbdata[indexPath.row].notificationType == "Directmessage" {
-           
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.9568627477, green: 0.6588235497, blue: 0.5450980663, alpha: 1)
-            cell.lblName.textColor = #colorLiteral(red: 0.9568627477, green: 0.6588235497, blue: 0.5450980663, alpha: 1)
-            
-            
-
-            
-            cell.DetailsCallback = { [self] value in
-                // Fetch the clicked notification ID
-                guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
-                    print("Notification ID not found")
-                    return
-                }
-
-                // Call API first to hide the notification
-                callHideNotificationWebService(notificationID: notificationID) {
-                    // After API call, navigate to PollsDetailViewController
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "MessageViewController") as! MessageViewController
-
-                    vc.otherid = NotificationData?.nbdata[indexPath.row].createdOwner ?? ""
-                    vc.userName = NotificationData?.nbdata[indexPath.row].ownername ?? ""
-                    vc.id = notificationID // Sending the clicked notification ID
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-            }
-         
-        }
-        
-        else if NotificationData?.nbdata[indexPath.row].notificationType == "Groupchat" {
-           
-            cell.viewNotification.backgroundColor =  #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
-            cell.lblName.textColor =  #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
-            
-            
-//            cell.DetailsCallback = { [self] value in
-//
-//                let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupMessageViewController")as! GroupMessageViewController
-//
-//                vc.groupid = NotificationData?.nbdata[indexPath.row].id ?? ""
-//                vc.GroupName = NotificationData?.nbdata[indexPath.row].groupchatName ?? ""
-//                vc.userImage = NotificationData?.nbdata[indexPath.row].groupchatImage ?? ""
-//                self.navigationController?.pushViewController(vc, animated: true)
-//
-//            }
-            
-            cell.DetailsCallback = { [self] value in
-                // Fetch the clicked notification ID
-                guard let notificationID = NotificationData?.nbdata[indexPath.row].notificationID else {
-                    print("Notification ID not found")
-                    return
-                }
-
-                // Call API first to hide the notification
-                callHideNotificationWebService(notificationID: notificationID) {
-                    // After API call, navigate to PollsDetailViewController
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupMessageViewController") as! GroupMessageViewController
-
-                    vc.groupid = NotificationData?.nbdata[indexPath.row].id ?? ""
-                    vc.GroupName = NotificationData?.nbdata[indexPath.row].groupchatName ?? ""
-                    vc.userImage = NotificationData?.nbdata[indexPath.row].groupchatImage ?? ""
-                    vc.id = notificationID // Sending the clicked notification ID
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-            }
-         
-        }
-        
-        else if NotificationData?.nbdata[indexPath.row].notificationType == "Member" {
-           
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.6862745098, green: 0.4196078431, blue: 0.462745098, alpha: 1)
-            cell.lblName.textColor = #colorLiteral(red: 0.6862745098, green: 0.4196078431, blue: 0.462745098, alpha: 1)
-         
-        }
-        
-        
-       
-        
-        cell.lblName.font = UIFont(name: "Montserrat-SemiBold", size: 15)
-        cell.lblSec.font = UIFont(name: "Montserrat-Regular", size: 14)
-        cell.lblDate.font = UIFont(name: "Montserrat-Regular", size: 10)
-        
-        cell.viewNotification.roundCorners([.topLeft, .bottomLeft], radius: 25)
-       
-        return cell
-    }
-    
-    
 
 
     
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 76
+        return 90
     }
     
     

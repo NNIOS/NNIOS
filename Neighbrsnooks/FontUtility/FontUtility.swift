@@ -13,22 +13,18 @@ class FontUtility {
     static func applyFont(to label: UILabel, size: CGFloat = 15) {
         label.font = UIFont(name: "Montserrat-Regular", size: size)
     }
-    
     // You can also add more functions for UITextField, UITextView, etc.
     static func applyFont(to textField: UITextField, size: CGFloat = 15) {
         textField.font = UIFont(name: "Montserrat-Regular", size: size)
     }
-    
     static func applyFont(to textView: UITextView, size: CGFloat = 15) {
         textView.font = UIFont(name: "Montserrat-Regular", size: size)
     }
 }
 
-
-
 @IBDesignable
 class CustomTextView: UITextView {
-    @IBInspectable var customFontSize: CGFloat = 14 {
+    @IBInspectable var customFontSize: CGFloat = 15 {
         didSet {
             self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         }
@@ -39,16 +35,15 @@ class CustomTextView: UITextView {
     }
 }
 
-
 //
 //class CustomLabelFirstName: UITextField {
-//    
+//
 //    @IBInspectable var customFontSize: CGFloat = 16 {
 //        didSet {
 //            updateAppearance()
 //        }
 //    }
-//    
+//
 //    override func awakeFromNib() {
 //        super.awakeFromNib()
 //        updateAppearance()
@@ -61,14 +56,13 @@ class CustomTextView: UITextView {
 //}
 
 
-
 @IBDesignable
 class CustomLabelFirstName: UITextField {
-     @IBInspectable var customFontSize: CGFloat = 16 {
+    @IBInspectable var customFontSize: CGFloat = 16 {
         didSet {
             self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
             self.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
-
+            
         }
     }
     
@@ -76,7 +70,7 @@ class CustomLabelFirstName: UITextField {
         super.awakeFromNib()
         self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         self.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
-
+        
     }
 }
 
@@ -84,7 +78,7 @@ class CustomLabelFirstName: UITextField {
 @IBDesignable
 class CustomTextField: UITextField {
     
-    @IBInspectable var customFontSize: CGFloat = 14 {
+    @IBInspectable var customFontSize: CGFloat = 15 {
         didSet {
             self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         }
@@ -93,6 +87,20 @@ class CustomTextField: UITextField {
     override func awakeFromNib() {
         super.awakeFromNib()
         self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+    }
+}
+
+
+@IBDesignable
+class CustomLabelHeadingUseranme: UILabel {
+    @IBInspectable var customFontSize: CGFloat = 15 {
+        didSet {
+            self.font = UIFont(name: "Montserrat-SemiBold", size: customFontSize)
+        }
+    }
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.font = UIFont(name: "Montserrat-SemiBold", size: customFontSize)
     }
 }
 
@@ -112,8 +120,6 @@ class CustomLabelHeadingname: UILabel {
     }
 }
 
-
-
 @IBDesignable
 class CustomLabelSelectPost: UILabel {
     @IBInspectable var customFontSize: CGFloat = 18 {
@@ -127,13 +133,9 @@ class CustomLabelSelectPost: UILabel {
     }
 }
 
-
- 
- 
-
 @IBDesignable
-class CustomLabel: UILabel {
-    @IBInspectable var customFontSize: CGFloat = 15 {
+class CustomLabelBus: UILabel {
+    @IBInspectable var customFontSize: CGFloat = 16 {
         didSet {
             self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         }
@@ -144,7 +146,34 @@ class CustomLabel: UILabel {
     }
 }
 
- 
+@IBDesignable
+class CustomLabel: UILabel {
+    @IBInspectable var customFontSize: CGFloat = 16 {
+        didSet {
+            self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+        }
+    }
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+    }
+}
+
+@IBDesignable
+class CustomLabelNormal: UILabel {
+    @IBInspectable var customFontSize: CGFloat = 14 {
+        didSet {
+            self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+        }
+    }
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+    }
+}
+
+
+
 @IBDesignable
 class CustomLabelComment: UILabel {
     
@@ -158,13 +187,12 @@ class CustomLabelComment: UILabel {
         super.awakeFromNib()
         updateAppearance()
     }
-
+    
     private func updateAppearance() {
         self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         self.textColor = UIColor(red: 92/255.0, green: 92/255.0, blue: 92/255.0, alpha: 1.0)
     }
 }
-
 
 
 @IBDesignable
@@ -180,18 +208,12 @@ class CustomLabelHedingComment: UILabel {
         super.awakeFromNib()
         updateAppearance()
     }
-
+    
     private func updateAppearance() {
         self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         self.textColor = UIColor(red: 92/255.0, green: 92/255.0, blue: 92/255.0, alpha: 1.0)
     }
 }
-
-
-
-
-
-
 
 // font size user name profile and side menu
 @IBDesignable
@@ -209,45 +231,51 @@ class ProfileSideMenuLabel: UILabel {
     }
 }
 
-
-
 @IBDesignable
-class CustomButton: UIButton {
-
-    @IBInspectable var customFontSize: CGFloat = 14 {
+class CustomButtonClick: UIButton {
+    
+    @IBInspectable var customFontSize: CGFloat = 20 {
         didSet {
             self.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         }
     }
-
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         self.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
     }
 }
 
+@IBDesignable
+class CustomButton: UIButton {
+    
+    @IBInspectable var customFontSize: CGFloat = 14 {
+        didSet {
+            self.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+        }
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+    }
+}
 
 
 @IBDesignable
 class CustomButtonMenu: UIButton {
-
     @IBInspectable var customFontSize: CGFloat = 14 {
         didSet {
             self.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
         }
     }
-
     override func awakeFromNib() {
         super.awakeFromNib()
         self.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
     }
 }
-
-
- 
-
-class UIHelper {
-    static func showLoader(on button: UIButton, show: Bool, title: String = "Button") {
+ class UIHelper {
+    static func showLoader(on button: UIButton, show: Bool, title: String = "Next") {
         let tag = 9999 // Unique tag to identify loader
         if show {
             // Check if loader already exists
@@ -257,13 +285,13 @@ class UIHelper {
                 activityIndicator.translatesAutoresizingMaskIntoConstraints = false
                 activityIndicator.tag = tag
                 button.addSubview(activityIndicator)
-
+                
                 // Center the loader in button
                 NSLayoutConstraint.activate([
                     activityIndicator.centerXAnchor.constraint(equalTo: button.centerXAnchor),
                     activityIndicator.centerYAnchor.constraint(equalTo: button.centerYAnchor)
                 ])
-
+                
                 activityIndicator.startAnimating()
                 button.isUserInteractionEnabled = false // Disable button while loading
                 button.setTitle("", for: .normal) // Hide button title
@@ -276,5 +304,20 @@ class UIHelper {
                 button.setTitle(title, for: .normal) // Restore button title
             }
         }
+    }
+}
+
+
+
+class SideMenuPresentationController: UIPresentationController {
+    override var frameOfPresentedViewInContainerView: CGRect {
+        guard let containerView = containerView else { return .zero }
+        let width: CGFloat = 280
+        return CGRect(x: 0, y: 0, width: width, height: containerView.bounds.height)
+    }
+    
+    override func presentationTransitionWillBegin() {
+        guard let containerView = containerView else { return }
+        containerView.addSubview(presentedView!)
     }
 }

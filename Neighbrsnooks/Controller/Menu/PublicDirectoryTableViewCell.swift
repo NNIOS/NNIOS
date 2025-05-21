@@ -22,6 +22,8 @@ class PublicDirectoryTableViewCell: UITableViewCell {
     
     @IBOutlet weak var viewLine: UIView!
     @IBOutlet weak var arrowImageView : UIImageView!
+    
+    var ShareCallback : ((UIButton) -> Void)?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -35,6 +37,9 @@ class PublicDirectoryTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    @IBAction func btnShare(_ sender: UIButton) {
+        ShareCallback?(sender)
+    }
    
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
@@ -45,6 +50,7 @@ class PublicDirectoryTableViewCell: UITableViewCell {
             Number2Lbl.textColor = .white
             WebLbl.textColor = .white
             arrowImageView.tintColor = .white // Arrow tint for dark mode
+            
         } else {
             // Light mode
             EventLbl.textColor = UIColor.secondaryLabel
@@ -53,6 +59,7 @@ class PublicDirectoryTableViewCell: UITableViewCell {
             Number2Lbl.textColor = UIColor.secondaryLabel
             WebLbl.textColor = UIColor.secondaryLabel
             arrowImageView.tintColor = .black // Arrow tint for light mode
+            WebLbl.textColor = UIColor.blue
         }
     }
 
@@ -66,4 +73,3 @@ class PublicDirectoryTableViewCell: UITableViewCell {
     }
 
 }
-

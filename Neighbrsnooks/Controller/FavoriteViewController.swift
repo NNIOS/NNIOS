@@ -773,9 +773,9 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 return
             }
             
-            // Push PostDetailsViewController
+            // Push PostDetailsNewViewController
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            if let postDetailsVC = storyboard.instantiateViewController(withIdentifier: "PostDetailsViewController") as? PostDetailsViewController {
+            if let postDetailsVC = storyboard.instantiateViewController(withIdentifier: "PostDetailsNewViewController") as? PostDetailsNewViewController {
                 // Data pass karo
                 postDetailsVC.postid = selectedPost.postid ?? ""
                 print("Passing Post ID: \(postDetailsVC.postid)")

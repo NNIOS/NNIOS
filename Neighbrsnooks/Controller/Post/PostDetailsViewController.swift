@@ -38,7 +38,6 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
    @IBOutlet weak var  imgcmndLike : UIImageView!
     @IBOutlet weak var  imgcmndReply : UIImageView!
     @IBOutlet weak var  imgcmndDelete : UIImageView!
-    @IBOutlet weak var btnShareImg : UIButton!
     var createdBy: String?
     var selectedCommentIndexPath: IndexPath?
     var fullText: String = "" // Full text from backend
@@ -84,7 +83,6 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
     var selectedPostID: String?
     var selectedUserID: String?
     var selectRreateOn : String?
-    private var defaultTextColor: UIColor?
     @IBOutlet weak var containerView: UIView! // Bottom popup view
     @IBOutlet weak var btnLike: UIButton!
     @IBOutlet weak var btnFav: UIButton!
@@ -97,8 +95,6 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        defaultTextColor = lblName.textColor
-        updateColors()
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
            view.addGestureRecognizer(tapGesture)
@@ -111,7 +107,6 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
         let longPressGestureV = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
         longPressGestureV.minimumPressDuration = 1.0  // 1 second ka long press
         tableviewPost.addGestureRecognizer(longPressGestureV)
-        
         
         let tapGestureV = UITapGestureRecognizer(target: self, action: #selector(hideBottomSheet))
         self.view.addGestureRecognizer(tapGestureV)
@@ -165,8 +160,6 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
             self.tableviewHeightMess.constant = self.collectionViewBanner.contentSize.height
             
         }
-         
-
         
         btnComment.isHidden = false
         btnCommentReply.isHidden = true
@@ -193,43 +186,6 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
             }
         }
         
-    }
-    
-    private func updateColors() {
-        if traitCollection.userInterfaceStyle == .dark {
-            // Dark mode colors
-            lblName.textColor = .white
-            lblSector.textColor = .white
-            lblmonth.textColor = .white
-            lblGeneral.textColor = .white
-            lblDescription.textColor = .white
-            
-            btnLike.tintColor = .white // Arrow tint for dark mode
-            btnClickComment.tintColor = .white
-            btnShareImg.tintColor = .white
-            
-            
-        } else {
-            // Light mode
-            lblName.textColor = defaultTextColor
-            lblSector.textColor = UIColor.secondaryLabel
-            lblmonth.textColor = UIColor.secondaryLabel
-            lblGeneral.textColor = UIColor.secondaryLabel
-            lblDescription.textColor = UIColor.secondaryLabel
-            btnLike.tintColor = .black // Arrow tint for dark mode
-            btnClickComment.tintColor = .black
-            btnShareImg.tintColor = .black
-           
-        }
-    }
-
-    
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
-        }
     }
     
     
@@ -1060,19 +1016,25 @@ extension PostDetailsViewController: UITableViewDataSource, UITableViewDelegate{
         }
     }
     
- 
-     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+    
+    
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         let spacerView = UIView()
         spacerView.backgroundColor = .clear // Ya phir light gray for visible spacing
         return spacerView
     }
- 
-     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    
+    
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
         
     }
     
-     func heightForText(_ text: String, maxWidth: CGFloat) -> CGFloat {
+    
+    
+    func heightForText(_ text: String, maxWidth: CGFloat) -> CGFloat {
         let font = UIFont(name: "Montserrat-Regular", size: 14) ?? UIFont.systemFont(ofSize: 14)
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = .byWordWrapping

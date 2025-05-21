@@ -61,7 +61,7 @@ class PollsDetailViewController: UIViewController, ConfirmPollDelDelegate, Delet
             self.DateLbl.text = self.PollDetailData?.createdDate
             self.StateLbl.text = self.PollDetailData?.pollQues
             self.EnddateLbl.text =  "End date  : " + (self.PollDetailData?.endDate ?? "")
-            self.VoteLbl.text = self.PollDetailData?.isvoted
+            self.VoteLbl.text = self.PollDetailData?.total
             
            // "Rs." + (self.MarketWDetailData?.productdetail?.first?.salePrice ?? "")
             let url = URL(string: (self.PollDetailData?.userpic ?? ""))
@@ -90,7 +90,7 @@ class PollsDetailViewController: UIViewController, ConfirmPollDelDelegate, Delet
             self.DateLbl.text = self.PollDetailData?.createdDate
             self.StateLbl.text = self.PollDetailData?.pollQues
             self.EnddateLbl.text =  "End date  : " + (self.PollDetailData?.endDate ?? "")
-            self.VoteLbl.text = self.PollDetailData?.isvoted
+            self.VoteLbl.text = self.PollDetailData?.total
             
             if let id = UserDefaults.standard.string(forKey: "userid"),
                let idCr = UserDefaults.standard.string(forKey: "usercr") {
@@ -198,7 +198,7 @@ class PollsDetailViewController: UIViewController, ConfirmPollDelDelegate, Delet
                    self?.DateLbl.text = self?.PollDetailData?.createdDate
                    self?.StateLbl.text = self?.PollDetailData?.pollQues
                    self?.EnddateLbl.text =  "End date  : " + (self?.PollDetailData?.endDate ?? "")
-                   self?.VoteLbl.text = self?.PollDetailData?.isvoted
+                   self?.VoteLbl.text = self?.PollDetailData?.total
                    
                   // "Rs." + (self.MarketWDetailData?.productdetail?.first?.salePrice ?? "")
                    let url = URL(string: (self?.PollDetailData?.userpic ?? ""))
@@ -437,7 +437,11 @@ extension PollsDetailViewController: UITableViewDataSource, UITableViewDelegate 
 
         cell.lblTitle.text = PollDetailData?.options?[indexPath.row].option
         cell.lblPrcntg.text = ((PollDetailData?.options?[indexPath.row].percentage)!) + "%"
-
+        cell.selectionStyle = .none
+        
+        // Set corner radius and clipping for customBackgroundView
+        cell.customBackgroundView.layer.cornerRadius = 20
+        cell.customBackgroundView.clipsToBounds = true
 
         if let isVoted = PollDetailData?.isvoted, isVoted == "0" {
             // Set default background color and enable selection
@@ -453,27 +457,45 @@ extension PollsDetailViewController: UITableViewDataSource, UITableViewDelegate 
         } else {
             cell.isUserInteractionEnabled = true
             cell.lblPrcntg.isHidden = false
-
-            if let userCount = PollDetailData?.options?[indexPath.row].userCount {
-                if userCount == 0 {
-                    cell.customBackgroundView.backgroundColor = (selectedIndex == indexPath) ?
-                        #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1) :
-                        #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
-                } else if userCount == 1 {
-                    cell.customBackgroundView.backgroundColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
-                }
-            } else {
-                cell.customBackgroundView.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
+            
+            let percentage = Int(PollDetailData?.options?[indexPath.row].percentage ?? "0") ?? 0
+            
+            // Create a gradient layer for the background view
+            let gradientLayer = CAGradientLayer()
+            gradientLayer.frame = cell.customBackgroundView.bounds
+            gradientLayer.colors = [
+                #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1).cgColor, // F3AF22 color
+                #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1).cgColor  // Gray color
+            ]
+            
+            // Calculate the percentage point (0.0 to 1.0)
+            let percentagePoint = CGFloat(percentage) / 100.0
+            
+            // Set gradient locations
+            gradientLayer.locations = [NSNumber(value: Float(percentagePoint)), NSNumber(value: Float(percentagePoint))]
+            
+            // Make the gradient horizontal
+            gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
+            gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
+            
+            // Remove any existing gradient layer
+            cell.customBackgroundView.layer.sublayers?.forEach { if $0 is CAGradientLayer { $0.removeFromSuperlayer() } }
+            
+            // Add the gradient layer
+            cell.customBackgroundView.layer.insertSublayer(gradientLayer, at: 0)
+            cell.customBackgroundView.backgroundColor = .clear
+            
+            // If this is the selected cell, show full color
+            if selectedIndex == indexPath {
+                cell.customBackgroundView.backgroundColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
+                cell.customBackgroundView.layer.sublayers?.forEach { if $0 is CAGradientLayer { $0.removeFromSuperlayer() } }
             }
         }
-
-
 
         cell.lblTitle.font = UIFont(name: "Montserrat-SemiBold", size: 15)
         cell.lblPrcntg.font = UIFont(name: "Montserrat-Regular", size: 13)
         return cell
     }
-
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // Only allow selection if voting is allowed (isvoted == "0")
         if PollDetailData?.isvoted == "0",

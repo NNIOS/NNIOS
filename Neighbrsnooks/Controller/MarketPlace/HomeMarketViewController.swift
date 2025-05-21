@@ -61,23 +61,9 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
         LatestCollectionViewWishList.tag = 5
         callMarketwalltWebService()
         NetworkMonitor.shared.startMonitoring()
-      //  collectionViewMyEvent.isHidden = true // CollectionView ko hide karein
-      //  collectionViewMyEvent.da
-      //  updateUI()
-      //  self.setupBottomPanel()
+     
     }
-    
-//    func updateUI() {
-//        if collectionViewMyEvent.isHidden {
-//            topConstraintLblLatest.constant = 10 // Adjust this value as per your UI
-//        } else {
-//            topConstraintLblLatest.constant = 150 // Original value when collectionView is visible
-//        }
-//
-//        UIView.animate(withDuration: 0.3) {
-//            self.view.layoutIfNeeded()
-//        }
-//    }
+ 
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -85,9 +71,7 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
         collectionViewMyEvent.dataSource = self
         collectionViewMyEvent.reloadData()
         callMarketwalltWebService()
-//        if let selectedIndex = selectedTabIndex {
-//               bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
-//           }
+ 
 
         timer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(callMarketwalltWebService), userInfo: nil, repeats: true)
            

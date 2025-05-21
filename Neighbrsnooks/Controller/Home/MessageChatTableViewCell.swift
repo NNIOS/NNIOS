@@ -26,6 +26,10 @@ class MessageChatTableViewCell: UITableViewCell {
         
         lblMessage.numberOfLines = 0  // Allow multiple lines
             lblMessage.lineBreakMode = .byWordWrapping
+        
+       
+            lblMessage.setContentHuggingPriority(.required, for: .vertical)
+            lblMessage.setContentCompressionResistancePriority(.required, for: .vertical)
         // Initialization code
     }
 
@@ -58,39 +62,33 @@ class MessageChatTableViewCell: UITableViewCell {
         let path = UIBezierPath()
         let width = viewNotification.bounds.width
         let height = viewNotification.bounds.height
-        let arrowSize: CGFloat = 10 // Size of the arrow
-        let arrowOffset: CGFloat = 10 // How far the arrow bulges out
-        
-        
+        let arrowWidth: CGFloat = 10
+        let arrowHeight: CGFloat = 10
 
         if isSender {
-            // Sender chat bubble with arrow on the upper-right
+            // Sender bubble with a sharper arrow on the upper-right
             path.move(to: CGPoint(x: 0, y: 0)) // Top-left
-            path.addLine(to: CGPoint(x: width - arrowSize, y: 0)) // Top-right (before arrow)
-            path.addLine(to: CGPoint(x: width + arrowOffset, y: arrowSize / 2)) // Arrow outward
-            path.addLine(to: CGPoint(x: width - arrowSize, y: arrowSize)) // Arrow back
-            path.addLine(to: CGPoint(x: width - arrowSize, y: height)) // Bottom-right
+            path.addLine(to: CGPoint(x: width - arrowWidth, y: 0)) // Before arrow
+            path.addLine(to: CGPoint(x: width, y: arrowHeight / 2)) // Arrow tip (sharper)
+            path.addLine(to: CGPoint(x: width - arrowWidth, y: arrowHeight)) // After arrow
+            path.addLine(to: CGPoint(x: width - arrowWidth, y: height)) // Down right edge
             path.addLine(to: CGPoint(x: 0, y: height)) // Bottom-left
             path.close()
         } else {
-            // Receiver chat bubble with arrow on the upper-left
-            path.move(to: CGPoint(x: 0, y: 0)) // Top-left start
-            path.addLine(to: CGPoint(x: -arrowOffset, y: arrowSize / 2)) // Arrow outward
-            path.addLine(to: CGPoint(x: arrowSize, y: arrowSize)) // Arrow back
-            path.addLine(to: CGPoint(x: arrowSize, y: height)) // Bottom-left
+            // Receiver bubble with arrow on the upper-left
+            path.move(to: CGPoint(x: arrowWidth, y: 0)) // Top-left before arrow
+            path.addLine(to: CGPoint(x: 0, y: arrowHeight / 2)) // Arrow tip (sharper)
+            path.addLine(to: CGPoint(x: arrowWidth, y: arrowHeight)) // After arrow
+            path.addLine(to: CGPoint(x: arrowWidth, y: height)) // Down left edge
             path.addLine(to: CGPoint(x: width, y: height)) // Bottom-right
             path.addLine(to: CGPoint(x: width, y: 0)) // Top-right
             path.close()
         }
 
-
-        // Apply the custom path as a mask
         let shapeLayer = CAShapeLayer()
         shapeLayer.path = path.cgPath
         viewNotification.layer.mask = shapeLayer
     }
 
+
 }
-
-
-

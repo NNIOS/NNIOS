@@ -25,7 +25,7 @@ class PollHomeTableViewCell: UITableViewCell {
     @IBOutlet weak var btnDotsImg : UIButton!
     @IBOutlet weak var lblStartPoll: UILabel!
     @IBOutlet weak var lblEndPoll: UILabel!
-    
+
     var userId: String?
     weak var delegate: ProfileTapDelegate?
     
@@ -34,47 +34,42 @@ class PollHomeTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateColors()
+//        updateColors()
         addTapGestureToProfile()
+        ProfileImgView.layer.cornerRadius = ProfileImgView.frame.height/2
     }
     
-    private func updateColors() {
-        if traitCollection.userInterfaceStyle == .dark {
-            // Dark mode colors
-            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblSector.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblTime.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblAddress.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblstartdate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblEnddate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblVote.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblStartPoll.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblEndPoll.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            btnDotsImg.tintColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            
-        } else {
-            // Light mode
-            lblName.textColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-            lblSector.textColor = UIColor.secondaryLabel
-            lblTime.textColor = UIColor.secondaryLabel
-            lblAddress.textColor = UIColor.secondaryLabel
-            lblstartdate.textColor = UIColor.secondaryLabel
-            lblEnddate.textColor = UIColor.secondaryLabel
-            lblVote.textColor = UIColor.secondaryLabel
-            lblStartPoll.textColor = UIColor.secondaryLabel
-            lblEndPoll.textColor = UIColor.secondaryLabel
-            btnDotsImg.tintColor = .black
-            
-        }
-    }
+//    private func updateColors() {
+//        if traitCollection.userInterfaceStyle == .dark {
+//            // Dark mode colors
+//            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            lblSector.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            lblTime.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            lblAddress.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            lblstartdate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            lblEnddate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            lblVote.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            lblStartPoll.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            lblEndPoll.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            btnDotsImg.tintColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+//            
+//        } else {
+//            // Light mode
+//            lblName.textColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+//            lblSector.textColor = UIColor.secondaryLabel
+//            lblTime.textColor = UIColor.secondaryLabel
+//            lblAddress.textColor = UIColor.secondaryLabel
+//            lblstartdate.textColor = UIColor.secondaryLabel
+//            lblEnddate.textColor = UIColor.secondaryLabel
+//            lblVote.textColor = UIColor.secondaryLabel
+//            lblStartPoll.textColor = UIColor.secondaryLabel
+//            lblEndPoll.textColor = UIColor.secondaryLabel
+//            btnDotsImg.tintColor = .black
+//            
+//        }
+//    }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
-        }
-    }
+   
     
     private func addTapGestureToProfile() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(profileTapped))

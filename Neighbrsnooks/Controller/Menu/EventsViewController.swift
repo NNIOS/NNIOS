@@ -44,8 +44,10 @@ class EventsViewController: BaseViewController , UICollectionViewDelegateFlowLay
     var searchWorkItem: DispatchWorkItem?
     var sourceViewController: String?
     var Newid: String? // Set this when navigating from MessageViewController
+    var Oid: String?
     var profileData : ProfileModel?
     var savedProfileData: ProfileModel?
+    var selectedNeighborhoodName: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,21 +55,21 @@ class EventsViewController: BaseViewController , UICollectionViewDelegateFlowLay
         self.searchView.isHidden = true
         tfSearch.delegate = self
         NetworkMonitor.shared.startMonitoring()
-        callUserProfileWebService{ [self] in
-            
+
+        callUserProfileWebService { [self] in
             SVProgressHUD.dismiss()
-            
-            
-            
-            
-            self.SectorLbl.text = self.profileData?.neighborhood
+
+            // Only update if selectedNeighborhoodName is nil or empty
+            if let selectedName = selectedNeighborhoodName, !selectedName.isEmpty {
+                self.SectorLbl.text = selectedName
+            } else {
+                self.SectorLbl.text = self.profileData?.neighborhood
+            }
+
             // self.MobileLbl.text = self.profileData?.phoneno
-            
-            
         }
-        // Do any additional setup after loading the view.
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
@@ -76,17 +78,17 @@ class EventsViewController: BaseViewController , UICollectionViewDelegateFlowLay
         self.CurrentLbl.font = UIFont(name: "Montserrat-Regular", size: 22)
         self.UpcomingLbl.font = UIFont(name: "Montserrat-Regular", size: 22)
         
-        callUserProfileWebService{ [self] in
-            
+        callUserProfileWebService { [self] in
             SVProgressHUD.dismiss()
-            
-            
-            
-            
-            self.SectorLbl.text = self.profileData?.neighborhood
+
+            // Only update if selectedNeighborhoodName is nil or empty
+            if let selectedName = selectedNeighborhoodName, !selectedName.isEmpty {
+                self.SectorLbl.text = selectedName
+            } else {
+                self.SectorLbl.text = self.profileData?.neighborhood
+            }
+
             // self.MobileLbl.text = self.profileData?.phoneno
-            
-            
         }
        
       //  collectionViewEvent.contentInset = UIEdgeInsets(top: -25, left: 0, bottom: 0, right: 0)
@@ -392,7 +394,7 @@ class EventsViewController: BaseViewController , UICollectionViewDelegateFlowLay
         
         var dictParams: [String: Any] = [:]
         
-        if sourceViewController == "MyProfile" {
+        if sourceViewController == "OtherProfile" {
             dictParams = [
                 "userid": id ?? "",
                 "eventuserlist": id ?? "", // Use the
@@ -407,6 +409,13 @@ class EventsViewController: BaseViewController , UICollectionViewDelegateFlowLay
             dictParams = [
                 "userid": id ?? "",
                 "searchQuery": searchQuery
+            ]
+        }
+        else  if sourceViewController == "OtherProfile" {
+            dictParams = [
+                "userid":  Newid ?? "",
+                "eventuserlist":  Newid ?? ""
+               
             ]
         }
         else  {

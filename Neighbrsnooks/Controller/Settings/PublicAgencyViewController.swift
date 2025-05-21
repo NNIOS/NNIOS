@@ -42,6 +42,7 @@ class PublicAgencyViewController: BaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.lblHospital.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.lblAmbu.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -399,7 +400,21 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
                 print("Invalid latitude or longitude for data: \(data)")
             }
             
-           
+            cell.ShareCallback = { [self] value in
+                
+                let appName = "NeighboursNook"
+                let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
+                let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                
+                let shareText = "\(appDescription) \nDownload now: \(appLink)"
+                
+                // Step 2: Show share popup
+                let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                
+                // Step 3: Present the share popup
+                present(activityViewController, animated: true, completion: nil)
+                
+            }
             
             // Add tap gesture to WebLbl to open the website
 //                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
@@ -459,6 +474,22 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
                 configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
             } else {
                 print("Invalid latitude or longitude for data: \(data)")
+            }
+            
+            cell.ShareCallback = { [self] value in
+                
+                let appName = "NeighboursNook"
+                let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
+                let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                
+                let shareText = "\(appDescription) \nDownload now: \(appLink)"
+                
+                // Step 2: Show share popup
+                let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                
+                // Step 3: Present the share popup
+                present(activityViewController, animated: true, completion: nil)
+                
             }
             
 //            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
@@ -527,6 +558,22 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
 
             // Store the website URL in gesture recognizer's `accessibilityLabel`
             cell.WebLbl.accessibilityLabel = data.website
+            
+            cell.ShareCallback = { [self] value in
+                
+                let appName = "NeighboursNook"
+                let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
+                let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                
+                let shareText = "\(appDescription) \nDownload now: \(appLink)"
+                
+                // Step 2: Show share popup
+                let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                
+                // Step 3: Present the share popup
+                present(activityViewController, animated: true, completion: nil)
+                
+            }
 
             
             let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
@@ -567,6 +614,18 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
                 configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
             } else {
                 print("Invalid latitude or longitude for data: \(data)")
+            }
+            
+            cell.ShareCallback = { [self] value in
+                let appName = "NeighboursNook"
+                let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
+                let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                let shareText = "\(appDescription) \nDownload now: \(appLink)"
+                // Step 2: Show share popup
+                let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                // Step 3: Present the share popup
+                present(activityViewController, animated: true, completion: nil)
+                
             }
             
 //            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
@@ -653,4 +712,3 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
    
 
 }
-

@@ -6,7 +6,7 @@
 //
 
 import UIKit
- 
+
 import Alamofire
 import Photos
 import PhotosUI
@@ -27,39 +27,27 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     @IBOutlet weak var btnRate: UIButton!
     @IBOutlet weak var btnTerrif: UIButton!
     @IBOutlet weak var btnOthers: UIButton!
-    
-    @IBOutlet weak var tfState: UITextField!
-    @IBOutlet weak var tfCity: UITextField!
-    @IBOutlet weak var btnStartNewTime: UIButton!
-    @IBOutlet weak var btnOffTNewime: UIButton!
     @IBOutlet weak var tfBussinessName: UITextField!
     @IBOutlet weak var tfTag: UITextField!
     @IBOutlet weak var tvDescribe: UITextView!
-    @IBOutlet weak var tfOpenTime: UITextField!
-    @IBOutlet weak var tfCloseTime: UITextField!
     @IBOutlet weak var tfAdd1: UITextField!
     @IBOutlet weak var tfAdd2: UITextField!
-    @IBOutlet weak var tfPin: UITextField!
     @IBOutlet weak var tfWeb: UITextField!
     @IBOutlet weak var tfEmail: UITextField!
     @IBOutlet weak var tfMob: UITextField!
     @IBOutlet weak var tfTel: UITextField!
-    // @IBOutlet weak var tfSunday: UITextField!
     @IBOutlet weak var WeekLbl: UILabel!
     @IBOutlet weak var lblSelectWeeklyOfDay: UILabel!
     @IBOutlet weak var lblMediaCount: UILabel!
     @IBOutlet weak var lblStartTime: UILabel!
     @IBOutlet weak var lblEndTime: UILabel!
-    
     @IBOutlet weak var btnSelectWeekyOf: UIButton!
     @IBOutlet weak var btnOpenOnAllDay: UIButton!
-    @IBOutlet weak var lblAddressLineTwo: UILabel!
     @IBOutlet weak var lblCity: UILabel!
     @IBOutlet weak var lblState: UILabel!
     @IBOutlet weak var lblPinCode: UILabel!
     @IBOutlet weak var lblNeighborhood: UILabel!
     
-    //    let doPickerView = UIPickerView()
     
     
     var UpdateBusinessData : UpdateBusinessModel?
@@ -70,20 +58,20 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     var selectedPDFURL: URL?
     var account = ""
     var docType = ""
-//    var serviceDropdownData = DropDown()
+    //    var serviceDropdownData = DropDown()
     var serviceName = [String]()
     var AddPCategoryData : CategoryBussinessModel?
     var stateData : StateModel?
     var cityData : cityModel?
     var createBusinessData : CreateBussinessModel?
     var selectedCategoryID: String? // ✅ ID Store Karne Ke Liye
-//    var stateDropdownData = DropDown()
-//    var cityDropdownData = DropDown()
+    //    var stateDropdownData = DropDown()
+    //    var cityDropdownData = DropDown()
     var cityName = [String]()
     var stateName = [String]()
     var stateId : String?
     var cityId : String?
-//    var GenderDropdownData = DropDown()
+    //    var GenderDropdownData = DropDown()
     var thisWidth:CGFloat = 0
     var imageArray = [UIImage]()
     var videoArray: [URL] = []
@@ -102,11 +90,12 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     let startTimePicker = UIDatePicker()
     let endTimePicker = UIDatePicker()
     let hiddenTextField = UITextField()
+    var loaderView: UIActivityIndicatorView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTextView()
-        
+        setupLoader()
         btnOpenOnAllDay.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle
         btnSelectWeekyOf.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle
         btnMenu.setImage(UIImage(systemName: "circle"), for: .normal) // ⭕️ Empty circle
@@ -176,19 +165,20 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         viewWeeklyOfHeight.constant = 0 // Reset height to 0
         
         // show tha data home to AddbussinessVC
-//        lblNeighborhood.text = UserDefaults.standard.string(forKey: "myNeighbhrhhod") ?? "N/A"
-//        lblCity.text = UserDefaults.standard.string(forKey: "city") ?? "N/A"
-//        lblState.text = UserDefaults.standard.string(forKey: "state") ?? "N/A"
-//        lblPinCode.text = UserDefaults.standard.string(forKey: "pincode") ?? "N/A"
-//        tfAdd1.text = UserDefaults.standard.string(forKey: "addressLineOne") ?? ""
-//        tfAdd2.text = UserDefaults.standard.string(forKey: "addressLineTwo") ?? ""
+        //        lblNeighborhood.text = UserDefaults.standard.string(forKey: "myNeighbhrhhod") ?? "N/A"
+        //        lblCity.text = UserDefaults.standard.string(forKey: "city") ?? "N/A"
+        //        lblState.text = UserDefaults.standard.string(forKey: "state") ?? "N/A"
+        //        lblPinCode.text = UserDefaults.standard.string(forKey: "pincode") ?? "N/A"
+        //        tfAdd1.text = UserDefaults.standard.string(forKey: "addressLineOne") ?? ""
+        //        tfAdd2.text = UserDefaults.standard.string(forKey: "addressLineTwo") ?? ""
         
-     }
+    }
     
     
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        showLoader()
         callBussinesDetailPostWebService { [self] in
             
             self.tfBussinessName.text = self.BussinessDetailData?.businessName
@@ -237,15 +227,39 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
                     }
                 }
             }
-
-            
-
-
             self.updateMediaCount() // Media count update karna
+            hideLoader()
         }
     }
-
     
+    func setupLoader() {
+        loaderView = UIActivityIndicatorView(style: .large)
+        loaderView.center = view.center
+        loaderView.hidesWhenStopped = true
+        loaderView.color = .gray
+        loaderView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(loaderView)
+        
+        // Centering loader in the view
+        NSLayoutConstraint.activate([
+            loaderView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loaderView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+    
+    func showLoader() {
+        DispatchQueue.main.async {
+            self.loaderView.startAnimating()
+            self.view.isUserInteractionEnabled = false
+        }
+    }
+    
+    func hideLoader() {
+        DispatchQueue.main.async {
+            self.loaderView.stopAnimating()
+            self.view.isUserInteractionEnabled = true
+        }
+    }
     
     func selectButtonBasedOnDocType() {
         guard let docType = BussinessDetailData?.doctype else { return }
@@ -265,7 +279,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     }
     func selectWeeklyOffButton() {
         guard let weeklyOff = BussinessDetailData?.weeklyOff?.lowercased() else { return }
-
+        
         if weeklyOff == "weekly_off" {
             actionopenOnAllDay(btnOpenOnAllDay) // Automatically call the button function
         } else {
@@ -273,42 +287,42 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
             lblSelectWeeklyOfDay.text = weeklyOff // Show weekly off days
         }
     }
-
+    
     
     // Start Time label click event
-       @objc func startTimeTapped() {
-           showPickerAlert(title: "Select Start Time", picker: startTimePicker, label: lblStartTime)
-       }
-
-       // End Time label click event
-       @objc func endTimeTapped() {
-           showPickerAlert(title: "Select End Time", picker: endTimePicker, label: lblEndTime)
-       }
-
-       // Function to show time picker in an alert
-       func showPickerAlert(title: String, picker: UIDatePicker, label: UILabel) {
-           let alert = UIAlertController(title: title, message: "\n\n\n\n\n\n\n\n", preferredStyle: .actionSheet)
-
-           picker.frame = CGRect(x: 10, y: 10, width: alert.view.frame.width - 20, height: 200)
-           alert.view.addSubview(picker)
-
-           let selectAction = UIAlertAction(title: "Select", style: .default) { _ in
-               self.updateLabel(picker, label: label)
-           }
-           let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-
-           alert.addAction(selectAction)
-           alert.addAction(cancelAction)
-
-           present(alert, animated: true)
-       }
-
-       // Update the UILabel with selected time
-       func updateLabel(_ sender: UIDatePicker, label: UILabel) {
-           let formatter = DateFormatter()
-           formatter.dateFormat = "hh:mm a"  // AM/PM format
-           label.text = formatter.string(from: sender.date)
-       }
+    @objc func startTimeTapped() {
+        showPickerAlert(title: "Select Start Time", picker: startTimePicker, label: lblStartTime)
+    }
+    
+    // End Time label click event
+    @objc func endTimeTapped() {
+        showPickerAlert(title: "Select End Time", picker: endTimePicker, label: lblEndTime)
+    }
+    
+    // Function to show time picker in an alert
+    func showPickerAlert(title: String, picker: UIDatePicker, label: UILabel) {
+        let alert = UIAlertController(title: title, message: "\n\n\n\n\n\n\n\n", preferredStyle: .actionSheet)
+        
+        picker.frame = CGRect(x: 10, y: 10, width: alert.view.frame.width - 20, height: 200)
+        alert.view.addSubview(picker)
+        
+        let selectAction = UIAlertAction(title: "Select", style: .default) { _ in
+            self.updateLabel(picker, label: label)
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        alert.addAction(selectAction)
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true)
+    }
+    
+    // Update the UILabel with selected time
+    func updateLabel(_ sender: UIDatePicker, label: UILabel) {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "hh:mm a"  // AM/PM format
+        label.text = formatter.string(from: sender.date)
+    }
     
     @objc func openWeekDaysPopup() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -326,7 +340,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         lblSelectWeeklyOfDay.text = selectedDays.joined(separator: ", ")
         lblSelectWeeklyOfDay.text = selectedDays.isEmpty ? "Select day" : selectedDays.joined(separator: ", ")
         updateViewHeight() // ✅ Dynamically UIView ki height adjust karein
-
+        
     }
     
     // MARK: - deleteMedia Protocol Method
@@ -377,7 +391,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             textView.text = placeholderText
             textView.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1) // Placeholder color #5C5C5C
-
+            
         }
     }
     
@@ -386,7 +400,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         tvDescribe.text = placeholderText
         tvDescribe.font = UIFont.systemFont(ofSize: 14)
         tvDescribe.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1) // Placeholder color #5C5C5C
-
+        
     }
     
     private func setupBottomPanel() {
@@ -424,12 +438,12 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     @IBAction func selectDocPhotos(_ sender: UIButton) {
         checkCameraPermission { [weak self] granted in
-               guard let self = self else { return }
-               
-               if granted {
-                   self.selectImages()
-               }
-           }
+            guard let self = self else { return }
+            
+            if granted {
+                self.selectImages()
+            }
+        }
         
     }
     
@@ -606,14 +620,14 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         }
         return thumbnail
     }
-        // code irshad malik
+    // code irshad malik
     // ✅ Button Actions - Call the common function
     @IBAction func actionopenOnAllDay(_ sender: UIButton) {
         viewWeekly.isHidden = true
         viewWeeklyOfHeight.constant = 0 // Reset height to 0
         updateSelection(selectedButton: btnOpenOnAllDay, allButtons: [btnOpenOnAllDay, btnSelectWeekyOf])
     }
-
+    
     @IBAction func actionSelectWeekyOf(_ sender: UIButton) {
         viewWeekly.isHidden = false
         updateSelection(selectedButton: btnSelectWeekyOf, allButtons: [btnOpenOnAllDay, btnSelectWeekyOf])
@@ -622,16 +636,16 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         }
         updateViewHeight() // Call function to update height dynamically
     }
-
-
+    
+    
     func updateViewHeight() {
         let maxWidth = lblSelectWeeklyOfDay.frame.width  // Label ke width ko lein
         let newSize = lblSelectWeeklyOfDay.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude)) // Required height calculate karein
         
         let newHeight = newSize.height + 20 // Extra padding ke liye 20 add karein
-
+        
         viewWeeklyOfHeight.constant = newHeight // UIView ki height update karein
-
+        
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded() // Smooth animation effect ke liye
         }
@@ -640,38 +654,38 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular) // Set the same size for all buttons
         let selectedImage = UIImage(systemName: "largecircle.fill.circle", withConfiguration: config)?.withRenderingMode(.alwaysTemplate)
         let unselectedImage = UIImage(systemName: "circle", withConfiguration: config)?.withRenderingMode(.alwaysTemplate)
-
+        
         for button in allButtons {
             if button == selectedButton {
                 button.setImage(selectedImage, for: .normal)
                 button.tintColor = UIColor(red: 0, green: 100/255.0, blue: 0, alpha: 1) // Dark green for selected
             } else {
                 button.setImage(unselectedImage, for: .normal)
-                button.tintColor = .black // Black for unselected
+                button.tintColor = .darkGray // Black for unselected
             }
         }
     }
-
-
     
     
-     // Change Code Irshad Malik
+    
+    
+    // Change Code Irshad Malik
     
     @IBAction func acctionMenu(_ sender: UIButton) {
         docType = "Menu"
         updateSelection(selectedButton: btnMenu, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
     }
-
+    
     @IBAction func actionRate(_ sender: UIButton) {
         docType = "Rate"
         updateSelection(selectedButton: btnRate, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
     }
-
+    
     @IBAction func actionTarrif(_ sender: UIButton) {
         docType = "Tarrif"
         updateSelection(selectedButton: btnTerrif, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
     }
-
+    
     @IBAction func actionOthers(_ sender: UIButton) {
         docType = "Others"
         updateSelection(selectedButton: btnOthers, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
@@ -708,7 +722,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         UserDefaults.standard.set(id, forKey: "idCategory") // ✅ ID Store Karna
     }
     
- 
+    
     
     func callCatBussinessWebService() {
         
@@ -721,14 +735,14 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
             for value in self.AddPCategoryData?.nbdata ?? [] {
                 self.serviceName.append(value.businessTitle ?? "")
             }
-//            self.serviceDropdownData.dataSource = self.serviceName
+            //            self.serviceDropdownData.dataSource = self.serviceName
             
             
         }
     }
     
     
- 
+    
     
     func selectPDF() {
         let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf])
@@ -784,48 +798,32 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     @IBAction func PublishBtn(_ sender: UIButton){
         
-        sender.isEnabled = false
-        
-        // Add loader
-        let loader = UIActivityIndicatorView(style: .medium)
-        loader.translatesAutoresizingMaskIntoConstraints = false
-        loader.color = .white
-        loader.startAnimating()
-        sender.addSubview(loader)
-        
-        // Center the loader in the button
-        NSLayoutConstraint.activate([
-            loader.centerXAnchor.constraint(equalTo: sender.centerXAnchor),
-            loader.centerYAnchor.constraint(equalTo: sender.centerYAnchor)
-        ])
-        
-        // Form Validation
+           // Form Validation
         if tfBussinessName.text == "" {
-            loader.stopAnimating()
-            loader.removeFromSuperview() // Remove loader
+   
             sender.isEnabled = true // Enable the button
             let alert = UIAlertController(title: "", message: "Please Enter Business Name", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
         } else if tfTag.text == "" {
-            loader.stopAnimating()
-            loader.removeFromSuperview() // Remove loader
-            sender.isEnabled = true // Enable the button
+ 
             let alert = UIAlertController(title: "", message: "Please Enter Category", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
         } else {
             // Simulate API call delay for testing loader
+            // API Call Simulation
             callCreateBussinessWebService {
                 DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
                     DispatchQueue.main.async {
-                        loader.stopAnimating()
-                        loader.removeFromSuperview() // Remove loader
-                        sender.isEnabled = true // Enable the button
-                        
-                        // Navigate to next screen
-                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as! NeigbrnookViewController
-                        self.navigationController?.pushViewController(vc, animated: false)
+ 
+                         
+                        // Safe storyboard VC instantiation
+                        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController {
+                            self.navigationController?.pushViewController(vc, animated: false)
+                        } else {
+                            print("❌ Could not find 'NeigbrnookViewController'. Check Storyboard ID.")
+                        }
                     }
                 }
             }
@@ -844,8 +842,8 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
             "cat": idcategory ?? "", // ✅ **Pass Selected Category ID**
             "description": self.tvDescribe.text ?? "",
             "image[]": "",
-            "opentime": self.tfOpenTime.text ?? "", // change irshad malik
-            "closetime": self.tfCloseTime.text ?? "", // change irshad malik
+            "opentime": self.lblStartTime.text ?? "", // change irshad malik
+            "closetime": self.lblEndTime.text ?? "", // change irshad malik
             "weekoff": self.lblSelectWeeklyOfDay.text ?? "",
             "doctype": docType,
             "address1": self.tfAdd1.text ?? "",
@@ -861,10 +859,11 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         if !imageArray.isEmpty || !videoArray.isEmpty || selectedPDFURL != nil {
             callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: selectedPDFURL, mediaKey: "image[]", URlName: kBASEURL + WebServiceName.kCreateBussines) {
                 print("Upload successful")
-                self.navigationController?.popViewController(animated: true)
+                completionClosure()
             }
         } else {
             print("No media available for upload.")
+            completionClosure()
         }
     }
     
@@ -872,30 +871,30 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     
     func callBussinesDetailPostWebService(_ completionClosure: @escaping () -> ()) {
-            let id = UserDefaults.standard.string(forKey: "userid")
-            let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-            let idPost = UserDefaults.standard.string(forKey: "postid")
-            let Newid = UserDefaults.standard.string(forKey: "useidProfile")
-            let Busid = UserDefaults.standard.string(forKey: "Businessid")
-            let Busimg = UserDefaults.standard.string(forKey: "Businessfirstimg")
-            let dictParams: Dictionary<String, Any> = [
-                                                      "userid":id ?? "" ,
-                                                      "business_id":Busid ?? "",]
-              WebService.sharedInstance.callBussinesDetailPostWebService(withParams: dictParams) { data in
-                self.BussinessDetailData = data
-                //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-                  
-                //  let url = URL(string: (imgData[indexPath.row].img ?? ""))
-               //   UserDefaults.standard.set(self.imgData[IndexPath.row].postid, forKey: "postid")
-                  UserDefaults.standard.set(self.BussinessDetailData?.userid, forKey: "useidProfile")
-                  UserDefaults.standard.set(self.BussinessDetailData?.id, forKey: "Businessid")
-                  UserDefaults.standard.set(self.BussinessDetailData?.image?.first?.img, forKey: "Businessfirstimg")
-                 // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
-                 // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-                completionClosure()
-              }
-            }
+        let id = UserDefaults.standard.string(forKey: "userid")
+        let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
+        let idPost = UserDefaults.standard.string(forKey: "postid")
+        let Newid = UserDefaults.standard.string(forKey: "useidProfile")
+        let Busid = UserDefaults.standard.string(forKey: "Businessid")
+        let Busimg = UserDefaults.standard.string(forKey: "Businessfirstimg")
+        let dictParams: Dictionary<String, Any> = [
+            "userid":id ?? "" ,
+            "business_id":Busid ?? "",]
+        WebService.sharedInstance.callBussinesDetailPostWebService(withParams: dictParams) { data in
+            self.BussinessDetailData = data
+            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+            
+            //  let url = URL(string: (imgData[indexPath.row].img ?? ""))
+            //   UserDefaults.standard.set(self.imgData[IndexPath.row].postid, forKey: "postid")
+            UserDefaults.standard.set(self.BussinessDetailData?.userid, forKey: "useidProfile")
+            UserDefaults.standard.set(self.BussinessDetailData?.id, forKey: "Businessid")
+            UserDefaults.standard.set(self.BussinessDetailData?.image?.first?.img, forKey: "Businessfirstimg")
+            // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
+            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+            
+            completionClosure()
+        }
+    }
     
     
     func callsendMediaAPI(param: [String: Any], images: [UIImage], videos: [URL], pdfURL: URL?, mediaKey: String, URlName: String, withblock: @escaping () -> Void) {
@@ -951,7 +950,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     
     
-     
+    
     // Retry Function
     func retryUpload(param: [String: Any], images: [UIImage], videos: [URL], pdfURL: URL?, mediaKey: String, URlName: String, withblock: @escaping () -> Void) {
         // Implement a delay before retrying

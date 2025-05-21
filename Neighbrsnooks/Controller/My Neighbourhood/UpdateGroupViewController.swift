@@ -158,7 +158,7 @@ class UpdateGroupViewController: BaseViewController,CropViewControllerDelegate {
                             self.navigationController?.popToRootViewController(animated: true)
                         }
                     } else {
-                        self.showAlert(message: "Failed to update event. Please try again.")
+                        self.showAutoDismissAlert(message: "Failed to update event. Please try again.")
                     }
                 }
             }

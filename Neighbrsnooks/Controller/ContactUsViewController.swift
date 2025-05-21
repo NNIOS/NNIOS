@@ -12,12 +12,12 @@ class ContactUsViewController: BaseViewController, UITextViewDelegate {
     
     @IBOutlet weak var NameLbl: UILabel!
     @IBOutlet weak var SecLbl: UILabel!
-    @IBOutlet weak var EmailLbl: UILabel!
+  //  @IBOutlet weak var EmailLbl: UILabel!
     @IBOutlet weak var MobileLbl: UILabel!
     @IBOutlet weak var lblHeading: UILabel!
     @IBOutlet weak var tvmessage: UITextView!
     @IBOutlet weak var placeholderLabel: UILabel!
-    
+    @IBOutlet weak var tfMail: UITextField!
     var profileData : ProfileModel?
     var ContactUsData : ContactUsModel?
     
@@ -29,7 +29,7 @@ class ContactUsViewController: BaseViewController, UITextViewDelegate {
                placeholderLabel.isHidden = !tvmessage.text.isEmpty
 
         tvmessage.delegate = self
-        
+      //  MobileLbl.text = UserDefaults.standard.object(forKey: "emer_phone") as? String
         
         // Do any additional setup after loading the view.
     }
@@ -50,7 +50,7 @@ class ContactUsViewController: BaseViewController, UITextViewDelegate {
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.NameLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
         self.SecLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-      
+        self.tfMail.font = UIFont(name: "Montserrat-Regular", size: 15)
         
         SVProgressHUD.show()
         callUserProfileWebService{ [self] in
@@ -63,7 +63,7 @@ class ContactUsViewController: BaseViewController, UITextViewDelegate {
             self.SecLbl.text = self.profileData?.lastname
            
             
-            self.EmailLbl.text = self.profileData?.emailid
+            self.tfMail.text = self.profileData?.emailid
             self.MobileLbl.text = self.profileData?.phoneno
             
            
@@ -95,6 +95,7 @@ class ContactUsViewController: BaseViewController, UITextViewDelegate {
           let dictParams: Dictionary<String, Any> = [
                                                     
                                                     "userid":id ?? "",
+                                                    "loggeduser": id ?? ""
                                                    
                                                    
                                                                         ]
@@ -112,9 +113,12 @@ class ContactUsViewController: BaseViewController, UITextViewDelegate {
        // let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
           let dictParams: Dictionary<String, Any> = [
                                                     "userid":id ?? "",
-                                                    "textmessage":self.tvmessage.text ?? ""
+                                                    "textmessage":self.tvmessage.text ?? "",
+                                                    "emailid":self.tfMail.text ?? "",
+                                                    "phoneno":self.MobileLbl.text ?? ""
                                                    
                                                                         ]
+        
           WebService.sharedInstance.callContactUsWebService(withParams: dictParams) { data in
             self.ContactUsData = data
 

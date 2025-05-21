@@ -83,10 +83,7 @@ class RegisterFirstPopupVC: UIViewController, UITableViewDelegate, UITableViewDa
     
     
     //MARK: - tab bar hide
-   
-    
-    
-    
+ 
     deinit {
            // Stop monitoring when the view controller is deallocated
            NetworkMonitor.shared.stopMonitoring()

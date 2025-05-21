@@ -22,7 +22,9 @@ class MessageViewController: BaseViewController, UITextViewDelegate {
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var MessageFullView: UIView!
     @IBOutlet weak var viewMessage: UIView!
+    @IBOutlet weak var tvmessageHeightConstraint: NSLayoutConstraint!
     
+
     var userName : String?
     var userImage :  String?
     var otherid : String?
@@ -32,11 +34,17 @@ class MessageViewController: BaseViewController, UITextViewDelegate {
     var id = ""
     var timer: Timer?
         var counter = 0
-    
+    var chatRefreshTimer: Timer?
     var ChatMessageData : MessageModel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateColors()
+        if let imageUrl = userImage, let url = URL(string: imageUrl) {
+            profileImgView.kf.setImage(with: url) // Use Kingfisher for async loading
+        } else {
+            profileImgView.image = UIImage(named: "placeholder") // Fallback image
+        }
         placeholderLabel.text = "Type a message..."
         placeholderLabel.textColor = UIColor.lightGray
         placeholderLabel.isHidden = !tvmessage.text.isEmpty
@@ -44,14 +52,41 @@ class MessageViewController: BaseViewController, UITextViewDelegate {
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshTableView), userInfo: nil, repeats: true)
         tableviewMembers.transform = CGAffineTransform(scaleX: 1, y: -1) // Flip the table view
         tableviewMembers.reloadData()
-        addShadowToView(view: viewMessage)
-        tableviewMembers.rowHeight = UITableView.automaticDimension
-        tableviewMembers.estimatedRowHeight = 50  // Provide a reasonable estimate
+       // addShadowToView(view: viewMessage)
+//        tableviewMembers.rowHeight = UITableView.automaticDimension
+//        tableviewMembers.estimatedRowHeight = 350  // Provide a reasonable estimate
         
-        
+       
         
         
         // Do any additional setup after loading the view.
+    }
+    
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//        startChatRefreshTimer()
+//    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        stopChatRefreshTimer()
+    }
+    
+    // Timer start karne ka function
+    func startChatRefreshTimer() {
+        chatRefreshTimer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(refreshChat), userInfo: nil, repeats: true)
+    }
+    
+    func stopChatRefreshTimer() {
+        chatRefreshTimer?.invalidate()
+        chatRefreshTimer = nil
+    }
+    
+    // API call karne ka function jo timer se chalega
+    @objc func refreshChat() {
+        callChatMessageListWebService {
+            print("Chat refreshed")
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -84,10 +119,10 @@ class MessageViewController: BaseViewController, UITextViewDelegate {
         
         callChatMessageListWebService{
            // SVProgressHUD.dismiss()
-            let url = URL(string: (self.ChatMessageData?.nbdata.first?.userpic ?? ""))
-            self.profileImgView.kf.indicatorType = .activity
-           self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "letter-b"))
-            
+//            let url = URL(string: (self.ChatMessageData?.nbdata.first?.userpic ?? ""))
+//            self.profileImgView.kf.indicatorType = .activity
+//           self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "letter-b"))
+//
             self.tableviewMembers.reloadData()
             
            
@@ -109,10 +144,49 @@ class MessageViewController: BaseViewController, UITextViewDelegate {
         view.layer.masksToBounds = false
     }
     
+//    func textViewDidChange(_ textView: UITextView) {
+//        let fixedWidth = textView.frame.size.width
+//        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
+//
+//        let maxHeight: CGFloat = 120
+//        tvmessage.isScrollEnabled = newSize.height > maxHeight
+//        tvmessageHeightConstraint.constant = min(newSize.height, maxHeight)
+//
+//        UIView.animate(withDuration: 0.2) {
+//            self.view.layoutIfNeeded()
+//        }
+//    }
+
+    
     func textViewDidChange(_ textView: UITextView) {
-            // Show or hide placeholder label based on text view content
-            placeholderLabel.isHidden = !textView.text.isEmpty
+        // Show or hide placeholder
+        placeholderLabel.isHidden = !textView.text.isEmpty
+
+        let fixedWidth = textView.frame.size.width
+        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
+
+        let minHeight: CGFloat = 50   // 📏 default height
+        let maxHeight: CGFloat = 120  // 📏 max expandable height
+
+        // Calculate final height between 60 and 120
+        var finalHeight = newSize.height
+        if finalHeight < minHeight {
+            finalHeight = minHeight
+        } else if finalHeight > maxHeight {
+            finalHeight = maxHeight
         }
+
+        // Set scroll only if exceeding max height
+        tvmessage.isScrollEnabled = newSize.height > maxHeight
+
+        // Update height constraint
+        tvmessageHeightConstraint.constant = finalHeight
+
+        UIView.animate(withDuration: 0.2) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
     
     @objc func refreshTableView() {
             // Call reloadData to refresh the table view
@@ -139,6 +213,7 @@ class MessageViewController: BaseViewController, UITextViewDelegate {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         updateColors()
+        startChatRefreshTimer()
     }
     
     private func updateColors() {
@@ -178,7 +253,7 @@ class MessageViewController: BaseViewController, UITextViewDelegate {
         vc.sourceViewController = "MessageViewController"
         vc.Newid = otherid // Pass the other user ID
         vc.headingTitle = "Profile" // Always set "Profile"
-       
+        vc.isFromMessage = true // 👈 Add this line
 
     self.navigationController?.pushViewController(vc, animated: true)
 
@@ -264,11 +339,10 @@ extension MessageViewController: UITableViewDataSource, UITableViewDelegate{
         cell.lblTime.font = UIFont(name: "Montserrat-SemiBold", size: 7)
         cell.lblMessage.font = UIFont(name: "Montserrat-Regular", size: 13)
 
-
-        
         cell.lblMessage.numberOfLines = 0  // Allows multi-line messages
         
        
+
 
         // Set preferred max width (adjusted for padding)
         cell.lblMessage.preferredMaxLayoutWidth = tableView.frame.width * 0.9
@@ -276,9 +350,8 @@ extension MessageViewController: UITableViewDataSource, UITableViewDelegate{
         cell.viewNotification.setNeedsLayout()
         cell.viewNotification.layoutIfNeeded()
         
-        
-        
-
+        let messageText = ChatMessageData?.nbdata[reversedIndex].message ?? ""
+        let wordCount = messageText.split(separator: " ").count
 
         // Calculate message width
         let maxWidth = tableView.frame.width * 0.7
@@ -314,6 +387,17 @@ extension MessageViewController: UITableViewDataSource, UITableViewDelegate{
         return cell
     }
 
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        let reversedIndex = (ChatMessageData?.nbdata.count ?? 0) - 1 - indexPath.row
+        let messageText = ChatMessageData?.nbdata[reversedIndex].message ?? ""
+        let wordCount = messageText.split(separator: " ").count
+
+        if wordCount > 20 {
+            return 150
+        } else {
+            return UITableView.automaticDimension
+        }
+    }
 
 
     

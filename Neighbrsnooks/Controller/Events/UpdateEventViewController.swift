@@ -55,7 +55,7 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
     var fromDate = 1
     var timePickerContainer = UIView()
     var thisWidth:CGFloat = 0
-    
+    var titleLabel: String?
     let timePicker = UIDatePicker()
     let datePicker = UIDatePicker()
     var imagePicker:UIImagePickerController?
@@ -67,7 +67,7 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        lblHeading.text = titleLabel
         // Do any additional setup after loading the view.
     }
     
@@ -88,11 +88,7 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
         self.lblUploadEvent.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.tfAdd1.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.tfAdd2.font = UIFont(name: "Montserrat-Regular", size: 17)
-        
-        
         SVProgressHUD.show()
-       
-       
         callEventDetailWebService{ [self] in
             SVProgressHUD.dismiss()
             self.tfTitle.text = self.EventDetauilData?.title
@@ -246,41 +242,45 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
     }
     
     @IBAction func PublishBtn(_ sender: UIButton){
-        
-        if tfTitle.text?.isEmpty == true {
-                showAlert(message: "Please Enter title")
-            } else if tfSrartDate.text?.isEmpty == true {
-                showAlert(message: "Please select start date")
-            } else if tfEndDate.text?.isEmpty == true {
-                showAlert(message: "Please select end date")
-            } else if tfStartTime.text?.isEmpty == true {
-                showAlert(message: "Please select start time")
-            } else if tfEndTime.text?.isEmpty == true {
-                showAlert(message: "Please select end time")
-            } else if tvDesc.text?.isEmpty == true {
-                showAlert(message: "Please enter description")
-            } else if tfAdd1.text?.isEmpty == true {
-                showAlert(message: "Please enter address line 1")
-            } else if tfAdd2.text?.isEmpty == true {
-                showAlert(message: "Please enter address line 2")
-            } else {
-                callUpdateEventWebService { success in
-                    DispatchQueue.main.async {
-                        if success {
-                            if let eventsVC = self.navigationController?.viewControllers.first(where: { $0 is EventsViewController }) {
-                                self.navigationController?.popToViewController(eventsVC, animated: true)
+            
+            if tfTitle.text?.isEmpty == true {
+                    showAlert(message: "Please Enter title")
+                } else if tfSrartDate.text?.isEmpty == true {
+                    showAlert(message: "Please select start date")
+                } else if tfEndDate.text?.isEmpty == true {
+                    showAlert(message: "Please select end date")
+                } else if tfStartTime.text?.isEmpty == true {
+                    showAlert(message: "Please select start time")
+                } else if tfEndTime.text?.isEmpty == true {
+                    showAlert(message: "Please select end time")
+                } else if tvDesc.text?.isEmpty == true {
+                    showAlert(message: "Please enter description")
+                } else if tfAdd1.text?.isEmpty == true {
+                    showAlert(message: "Please enter address line 1")
+                } else if tfAdd2.text?.isEmpty == true {
+                    showAlert(message: "Please enter address line 2")
+                } else {
+                    callUpdateEventWebService { success in
+                        DispatchQueue.main.async {
+                            if success {
+                                //                            if let eventsVC = self.navigationController?.viewControllers.first(where: { $0 is EventsViewController }) {
+                                //                                self.navigationController?.popToViewController(eventsVC, animated: true)
+                                //                            } else {
+                                //                                self.navigationController?.popToRootViewController(animated: true)
+                                //                            }
+                                
+                                if let viewControllers = self.navigationController?.viewControllers {
+                                    let targetViewController = viewControllers[viewControllers.count - 3]
+                                    self.navigationController?.popToViewController(targetViewController, animated: true)
+                                }
                             } else {
-                                self.navigationController?.popToRootViewController(animated: true)
+                                self.showAlert(message: "Failed to update event. Please try again.")
                             }
-                        } else {
-                            self.showAlert(message: "Failed to update event. Please try again.")
                         }
                     }
                 }
-            }
-      
-    }
-    
+          
+        }
     func showAlert(message: String) {
         let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
         

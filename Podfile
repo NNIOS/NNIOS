@@ -9,7 +9,6 @@ target 'Neighbrsnooks' do
   pod 'SVProgressHUD'
   pod 'IQKeyboardManager'
   pod 'Kingfisher'
-  
   pod 'iOSDropDown'
   pod 'GoogleMaps'
   pod 'GooglePlaces'

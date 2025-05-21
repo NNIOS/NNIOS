@@ -199,31 +199,23 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
         
         self.present(activityViewController, animated: true, completion: nil)
     }
-    
-    
-    
     @objc private func emojiTapped(sender: UIButton) {
         sender.setImage(UIImage(systemName: "heart.fill"), for: .normal)
         callPostUnLikeWebService{
-            
             self.callPostListWebService(searchQuery: "") {
-                
                 self.tableviewPost.reloadData()
                 
             }
             
         }
     }
-    
-    
 }
+
 @available(iOS 16.0, *)
 // MARK: - ********************  Tableview under collectonview ************************************************************
 extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTableViewCellDelegate, PostvTableViewCellDelegate{
-    
-    
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+ 
+     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         return filteredPostData?.listdata!.count ?? 0
         
@@ -243,6 +235,9 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
         //  cell.lblGeneral.text = PostListData?.listdata[indexPath.row].postType
         cell.lblGeneral.text = filteredPostData?.listdata?[indexPath.row].postType
         cell.lblDescription.text = filteredPostData?.listdata?[indexPath.row].postMessage
+        
+        cell.configureDescription(with: filteredPostData?.listdata?[indexPath.row].postMessage ?? "N/A")
+        cell.addTapGestureToLabel()
         //  cell.lblSec.text = PostListData?.listdata[indexPath.row].neighborhood
         cell.lblSec.text = filteredPostData?.listdata?[indexPath.row].neighborhood
         cell.lblMonth.text = filteredPostData?.listdata?[indexPath.row].createdOn
@@ -758,7 +753,7 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
         }
         
         
-        let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailsViewController") as! PostDetailsViewController
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailsNewViewController") as! PostDetailsNewViewController
         vc.UserName = PostListData?.listdata?[indexPath.row].username ?? ""
         vc.sectorName = PostListData?.listdata?[indexPath.row].neighborhood ?? ""
         vc.MonthName = PostListData?.listdata?[indexPath.row].createdOn ?? ""

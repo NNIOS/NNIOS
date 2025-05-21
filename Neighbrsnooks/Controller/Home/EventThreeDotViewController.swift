@@ -13,7 +13,8 @@ class EventThreeDotViewController: BottomPopupViewController {
     @IBOutlet weak var btnUnFavourite : UIButton!
     @IBOutlet weak var ShareLbl: UILabel!
     @IBOutlet weak var FvrtLbl: UILabel!
-    
+     @IBOutlet weak var lblAddThisFavouritPost: UILabel!
+     @IBOutlet weak var lblShareThisPost: UILabel!
     var DotCallback : ((UIButton) -> Void)?
     var BussinessFavouriteData : FavouriteBussinessModel?
     var BussinessRemoveFavouriteData : RemoveFavouriteBussiness?
@@ -74,6 +75,10 @@ class EventThreeDotViewController: BottomPopupViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("Received eventID: \(business_id ?? "Nil")")
+         self.ShareLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+        self.FvrtLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+         self.lblAddThisFavouritPost.font = UIFont(name: "Montserrat-Regular", size: 13)
+        self.lblShareThisPost.font = UIFont(name: "Montserrat-Regular", size: 13)
 
 
        
@@ -88,13 +93,13 @@ class EventThreeDotViewController: BottomPopupViewController {
             
             if self.poststs == 0 {
                 self.btnUnFavourite.isHidden = true
-                self.FvrtLbl.text = "Favourite Post"  // Set label title for "0"
+                self.FvrtLbl.text = "Favourite"  // Set label title for "0"
                
                
             } else if self.poststs == 1 {
                
                 self.btnFavourite.isHidden = true
-                self.FvrtLbl.text = "Unfavourite Post"  // Set label title for "1"
+                self.FvrtLbl.text = "Unfavourite"  // Set label title for "1"
              
             }
            

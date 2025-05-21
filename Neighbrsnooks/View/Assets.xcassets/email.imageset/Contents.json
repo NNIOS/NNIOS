@@ -1,11 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "WhatsApp_Image_2024-02-15_at_4.55.52_PM_copy-removebg-preview copy.png",
+      "filename" : "icons8-mail-50.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "icons8-mail-100.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

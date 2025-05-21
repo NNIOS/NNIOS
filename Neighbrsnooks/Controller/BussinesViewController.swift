@@ -298,14 +298,13 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
         WebService.sharedInstance.callBussinesTypePostWebService(withParams: dictParams) { data in
             self.BussinessCategoryData = data
             
-            // Sirf "Select category" set karna hai, aur koi data label pe show nahi karna
             DispatchQueue.main.async {
                 self.tpyeCategoryLbl.text = "Select category"
+                self.tpyeCategoryLbl.font = UIFont(name: "Montserrat-Regular", size: 16) // aap size adjust kar sakte ho
+                self.tpyeCategoryLbl.textColor = .darkGray
             }
-            
-            // Agar dropdown ya kisi aur data source ko populate karna ho toh
-//            self.serviceDropdownData.dataSource = self.serviceName
-        }
+
+         }
     }
     
     

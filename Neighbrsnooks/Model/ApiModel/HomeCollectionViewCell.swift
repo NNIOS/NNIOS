@@ -20,6 +20,7 @@ class HomeCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var totalImagesLabel: UILabel!
     @IBOutlet weak var pauseButton: UIButton!
     @IBOutlet weak var muteButton: UIButton!
+    @IBOutlet weak var viewShowImgCount: UIView!
     weak var delegate: HomeCollectionViewCellDelegate?
     var player: AVPlayer?
     var playerLayer: AVPlayerLayer?
@@ -45,30 +46,31 @@ class HomeCollectionViewCell: UICollectionViewCell {
         muteButton.isHidden = true
     }
     
-    func configure(with postImage: postImagesN) {
+    func configure(with postImage: postImagesN, totalCount: Int) {
+        // Show or hide the image count view
+        viewShowImgCount.isHidden = (totalCount <= 1)
+        
         if let videoUrl = postImage.video, !videoUrl.isEmpty {
-            // ✅ Video available, load video
             print("✅ Loading Video: \(videoUrl)")
             profileImgView.isHidden = false
             setupVideo(from: videoUrl)
             pauseButton.isHidden = false
             muteButton.isHidden = false
-            muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal) // Default mute
+            muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
         } else if let imageUrl = postImage.img, !imageUrl.isEmpty {
-            // ✅ Image available, load image
             print("✅ Loading Image: \(imageUrl)")
             profileImgView.isHidden = false
             loadImage(from: imageUrl)
             pauseButton.isHidden = true
             muteButton.isHidden = true
         } else {
-            // ❌ No video or image, hide everything
             print("⚠️ No Image or Video available")
             profileImgView.isHidden = true
             pauseButton.isHidden = true
             muteButton.isHidden = true
         }
     }
+
     
     private func loadImage(from urlString: String) {
         if let url = URL(string: urlString) {

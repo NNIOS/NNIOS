@@ -37,6 +37,7 @@ class RegisterViewController: BaseViewController {
     @IBOutlet weak var lblHeading: UILabel!
     @IBOutlet var checkOTP: UIImageView!
     @IBOutlet weak var lblStrongPass: UILabel!
+    @IBOutlet weak var btnNext: UIButton!
     @IBOutlet weak var stackView: UIStackView!
     
     
@@ -54,11 +55,15 @@ class RegisterViewController: BaseViewController {
     var timer = Timer()
     var otpFromAPI: String = ""
     var isOTPVerified: Bool = false
+    var isFirstTimeOtp = true
+
     
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        btnNext.setTitle("Next", for: .normal)
+        btnNext.layer.cornerRadius = 10
         self.navigationItem.hidesBackButton = true
         NetworkMonitor.shared.startMonitoring()
         tfFirstName.autocapitalizationType = .words
@@ -84,6 +89,8 @@ class RegisterViewController: BaseViewController {
         stackView.insertArrangedSubview(createInfoLabel(), at: 3) // adjust index if needed
         stackView.setCustomSpacing(0, after: stackView.arrangedSubviews[2])
         tfPassword.addTarget(self, action: #selector(passwordDidChange), for: .editingChanged)
+        requestNotificationPermissionIfNeeded()
+
         
         
     }
@@ -212,13 +219,16 @@ class RegisterViewController: BaseViewController {
     @objc func timerAction() {
         counter -= 1
         lblTimer.text = "00:\(String(format: "%02d", counter))"
+
         if counter == 0 {
-            btnResend.isHidden = false
-            lblTimer.isHidden = true
-            timer.invalidate() // Timer stopped
+            timer.invalidate()
+            DispatchQueue.main.async {
+                self.btnResend.isHidden = false
+                self.lblTimer.isHidden = true
+            }
         }
     }
-    
+
     func otpCounterAndResendButton() {
         btnResend.isHidden = true
         lblTimer.isHidden = false
@@ -228,7 +238,28 @@ class RegisterViewController: BaseViewController {
     }
     
     
+//    ---------- MARK: - Notification Permission
     
+    func requestNotificationPermissionIfNeeded() {
+           let center = UNUserNotificationCenter.current()
+           center.getNotificationSettings { settings in
+               if settings.authorizationStatus == .notDetermined {
+                   // Request permission on first time
+                   center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                       DispatchQueue.main.async {
+                           if granted {
+                               print("✅ User granted notifications")
+                               UIApplication.shared.registerForRemoteNotifications()
+                           } else {
+                               print("❌ User denied notifications")
+                           }
+                       }
+                   }
+               } else {
+                   print("🔄 Notification permission already handled: \(settings.authorizationStatus.rawValue)")
+               }
+           }
+       }
     
     
     
@@ -318,31 +349,31 @@ class RegisterViewController: BaseViewController {
     @IBAction func SendOTPBtn(_ sender: UIButton){
         
         if tfMobile.text == "" {
-            let alert = UIAlertController(title: "", message: "Please enter your number", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            
-        }
-        else{
-            callOTPWebService{
-                
-                // ✅ Show alert
-                let successAlert = UIAlertController(title: "", message: "OTP has been sent", preferredStyle: .alert)
-                self.present(successAlert, animated: true)
-                
-                // ✅ Dismiss after 3 seconds
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                    successAlert.dismiss(animated: true, completion: {
-                        // ✅ Focus on OTP field after alert dismisses
-                        self.tfOtp1.becomeFirstResponder()
-                    })
-                }
-                
-                // ✅ Start counter/resend setup
-                self.otpCounterAndResendButton()
-            }
-        }
-    }
+               let alert = UIAlertController(title: "", message: "Please enter your number", preferredStyle: .alert)
+               alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
+               self.present(alert, animated: true, completion: nil)
+           } else {
+               callOTPWebService {
+                   let successAlert = UIAlertController(title: "", message: "OTP has been sent", preferredStyle: .alert)
+                   self.present(successAlert, animated: true)
+
+                   DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                       successAlert.dismiss(animated: true, completion: {
+                           self.tfOtp1.becomeFirstResponder()
+                       })
+                   }
+
+                   // ✅ Start timer
+                   self.otpCounterAndResendButton()
+
+                   // ✅ Change button title to "Resend OTP" after first time
+                   if self.isFirstTimeOtp {
+                       self.btnResend.setTitle("Resend OTP", for: .normal)
+                       self.isFirstTimeOtp = false
+                   }
+               }
+           }
+       }
     
     
     
@@ -358,52 +389,46 @@ class RegisterViewController: BaseViewController {
     
     
     
-    @IBAction func createBtn(_ sender: UIButton){
+    @IBAction func createBtn(_ sender: UIButton) {
         // Validate First Name
-        if tfFirstName.text?.isEmpty == true {
+        guard let firstName = tfFirstName.text, !firstName.isEmpty else {
             showAlert(title: "", message: "Please enter first name")
             return
         }
-        
+
         // Validate Last Name
-        if tfLastName.text?.isEmpty == true {
+        guard let lastName = tfLastName.text, !lastName.isEmpty else {
             showAlert(title: "", message: "Please enter last name")
             return
         }
-        
-        // Validate Email
-        //        if tfEmail.text?.isEmpty == true {
-        //            showAlert(title: "", message: "Please enter email")
-        //            return
-        //        } else if !tfEmail.text!.isValidEmail() {
-        //            showAlert(title: "", message: "Please enter valid email")
-        //            return
-        //        }
-        
-        // Validate Email
+
+        // Validate Email format first
         guard let email = tfEmail.text, !email.isEmpty else {
-            showAlert(message: "Please enter email")
+            showAlert(title: "", message: "Please enter email")
             return
         }
-        
+
         guard email.isValidEmail() else {
-            showAlert(message: "Please enter a valid email address")
+            showAlert(title: "", message: "Please enter a valid email address")
             return
         }
-        
-        // ✅ Call email verification API
+
+        // ✅ Show loader while verifying email
+        UIHelper.showLoader(on: sender, show: true)
+
+        // ✅ Call verify email API
         callVerifyEmailAPI { [weak self] isEmailValid in
             guard let self = self else { return }
-            
-            if isEmailValid {
-                DispatchQueue.main.async {
-                    // ✅ Email is valid, now continue validation
-                    
-                    // Validate Mobile Number
-                    if self.tfMobile.text?.isEmpty == true {
+            DispatchQueue.main.async {
+                // Hide loader after API call completes
+                UIHelper.showLoader(on: sender, show: false)
+                if isEmailValid {
+                    // ✅ Proceed to remaining validation
+                    guard let mobile = self.tfMobile.text, !mobile.isEmpty else {
                         self.showAlert(title: "", message: "Please enter mobile number")
                         return
-                    } else if self.tfMobile.text!.count < 10 {
+                    }
+                    if mobile.count < 10 {
                         self.showAlert(title: "", message: "Please enter valid mobile number")
                         return
                     }
@@ -416,69 +441,62 @@ class RegisterViewController: BaseViewController {
                         return
                     }
                     let passwordRegex = "^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$"
-                    if let password = self.tfPassword.text, let confirmPassword = self.tfConfirmPassword.text {
-                        let passwordTest = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
-                        
-                        if password.isEmpty {
-                            self.showAlert(title: "", message: "Please enter password")
-                            return
-                        }
-                        
-                        if confirmPassword.isEmpty {
-                            self.showAlert(title: "", message: "Please confirm your password")
-                            return
-                        }
-                        
-                        if !passwordTest.evaluate(with: password) {
-                            self.showAlert(title: "Weak password", message: "Your password must be at least 8 characters long and include a number, an uppercase letter and a lowercase letter.")
-                            return
-                        }
-                        
-                        if password != confirmPassword {
-                            self.showAlert(title: "Password mismatch", message: "Passwords you entered didn't match.")
-                            return
-                        }
-                    }
-                    
-                    if self.checkBox.image == UIImage(systemName: "square") {
-                        self.showAlert(title: "", message: "Please read and accept terms & conditions")
+                    let passwordTest = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+                    guard let password = self.tfPassword.text, !password.isEmpty else {
+                        self.showAlert(title: "", message: "Please enter password")
                         return
                     }
-                    
-                    // ✅ All validations pass
-                    //    UIHelper.showLoader(on: sender, show: true)
-                    
+
+                    guard let confirmPassword = self.tfConfirmPassword.text, !confirmPassword.isEmpty else {
+                        self.showAlert(title: "", message: "Please confirm your password")
+                        return
+                    }
+
+//                    if !passwordTest.evaluate(with: password) {
+//                        self.showAlert(title: "Weak password", message: "Your password must be at least 8 characters long and include a number, an uppercase letter and a lowercase letter.")
+//                        return
+//                    }
+//
+//                    if password != confirmPassword {
+//                        self.showAlert(title: "Password mismatch", message: "Passwords you entered didn't match.")
+//                        return
+//                    }
+
+                    if self.checkBox.image == UIImage(systemName: "square") {
+                        self.showAlert(title: "", message: "Please read and accept Terms & Conditions and Privacy Policy.")
+                        return
+                    }
+
+                    // ✅ All validations passed — Get FCM Token
+                    UIHelper.showLoader(on: sender, show: true)
+
                     Messaging.messaging().token { token, error in
+                        UIHelper.showLoader(on: sender, show: false)
+
                         if let error = error {
                             print("❌ Error fetching FCM token: \(error)")
-                            UIHelper.showLoader(on: sender, show: false)
                         } else if let token = token {
                             print("📱 FCM Token fetched: \(token)")
-                            
+
                             self.callRegisterWebService(firebaseToken: token) {
-                                DispatchQueue.main.async { [self] in
-                                    UIHelper.showLoader(on: sender, show: false)
+                                DispatchQueue.main.async {
                                     SVProgressHUD.show()
                                     let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterSecondViewController") as! RegisterSecondViewController
-                                    let firstName = self.tfFirstName.text ?? ""
-                                    let lastName = self.tfLastName.text ?? ""
                                     UserDefaults.standard.set(firstName, forKey: "userFirstName")
                                     UserDefaults.standard.set(lastName, forKey: "userLastName")
-                                    print(firstName)
-                                    print(lastName)
-                                    print("Name saved: \(self.tfFirstName.text ?? "") \(self.tfLastName.text ?? "")")
                                     self.navigationController?.pushViewController(vc, animated: false)
                                 }
                             }
                         }
                     }
+                } else {
+                    // ❌ Email was not valid, alert is already shown inside API
+                    print("❌ Invalid email")
                 }
-            } else {
-                print("❌ Email not valid, not proceeding")
-                // Alert already shown inside the API
             }
         }
     }
+
     
     func callRegisterWebService(firebaseToken: String, completionClosure: @escaping () -> ()) {
         let dictParams: [String: Any] = [
@@ -707,8 +725,7 @@ extension RegisterViewController: UITextFieldDelegate {
             let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
             return newText.count <= 10
         }
-        
-        // OTP fields me sirf ek character allow karna
+         // OTP fields me sirf ek character allow karna
         if [tfOtp1, tfOtp2, tfOtp3, tfOtp4, tfOtp5, tfOtp6].contains(textField) {
             if string.count > 0 { // ✅ Naya character enter ho raha hai
                 textField.text = string // ✅ Entered digit set karo
@@ -741,10 +758,7 @@ extension RegisterViewController: UITextFieldDelegate {
                             }
                         }
                     }
-
-
-                    
-                }
+                 }
                 return false // ✅ Default behavior disable
             } else if string.isEmpty { // ✅ Agar user backspace dabaye
                 textField.text = "" // ✅ Current field clear kare
@@ -761,11 +775,7 @@ extension RegisterViewController: UITextFieldDelegate {
         }
         return true
     }
-    
-    
-    
-    
-    func showToast(message: String) {
+     func showToast(message: String) {
         let toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2 - 150, y: self.view.frame.size.height-100, width: 300, height: 40))
         toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
         toastLabel.textColor = UIColor.white

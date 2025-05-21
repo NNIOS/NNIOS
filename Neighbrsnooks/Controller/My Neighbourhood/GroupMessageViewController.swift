@@ -35,7 +35,7 @@ class GroupMessageViewController: BaseViewController, UITextViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        updateColors()
         addShadowToMainView()
 
         placeholderLabel.text = "Type a message..."
@@ -221,8 +221,8 @@ extension GroupMessageViewController: UITableViewDataSource, UITableViewDelegate
         cell.lblMessage.text = GroupChatData?.data[reversedIndex].message
         cell.lblTime.text = GroupChatData?.data[reversedIndex].date
 
-        cell.lblTime.font = UIFont(name: "Montserrat-SemiBold", size: 7)
-        cell.lblMessage.font = UIFont(name: "Montserrat-SemiBold", size: 13)
+        cell.lblTime.font = UIFont(name: "Montserrat-Regular", size: 7)
+        cell.lblMessage.font = UIFont(name: "Montserrat-Regular", size: 13)
 
         cell.lblMessage.numberOfLines = 0  // Allows multi-line messages
 

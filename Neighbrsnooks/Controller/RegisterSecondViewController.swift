@@ -15,6 +15,8 @@ import AVKit
 import SystemConfiguration
 import Alamofire
 import Vision
+import TOCropViewController
+
 
 protocol neigSelectionDelegate: AnyObject {
     func didSelectItems(selectedItems: [String], forLabel tag: Int)
@@ -27,7 +29,7 @@ protocol LocationDelegate: AnyObject {
 
 
 @available(iOS 16.0, *)
-class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
+class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, TOCropViewControllerDelegate  {
     
     @IBOutlet weak var tabNeighourhoodView: UIView!
     @IBOutlet weak var lblSector: UILabel!
@@ -51,8 +53,6 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     @IBOutlet weak var drivingLicenseButton: UIButton!
     @IBOutlet weak var rentdocsButton: UIButton!
     // Outlets for image views to display front and back images
-    @IBOutlet weak var frontImageView: UIImageView!
-    @IBOutlet weak var backImageView: UIImageView!
     @IBOutlet weak var lblCityH: UILabel!
     @IBOutlet weak var lblStateH: UILabel!
     @IBOutlet weak var lblpinCodeH: UILabel!
@@ -63,8 +63,6 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     @IBOutlet weak var lblSubHeadingSelectLocation: UILabel!
     @IBOutlet weak var genderView: UIView!
     @IBOutlet weak var cityView: UIView!
-    
-    
     @IBOutlet weak var lblForNeighourhood_ID: UILabel!
     @IBOutlet weak var lblForNeighourhood_Address: UILabel!
     @IBOutlet weak var tfCountry: UITextField!
@@ -74,23 +72,20 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     @IBOutlet weak var lblNeighbr: UILabel!
     @IBOutlet weak var lblStreet: UILabel!
     @IBOutlet weak var tfPincode: UITextField!
-    
     @IBOutlet weak var tfFlat: UITextField!
     @IBOutlet weak var tfStreet: UITextField!
     @IBOutlet weak var ivLocation: UIImageView!
     @IBOutlet weak var lblHeading: UILabel!
-    
     @IBOutlet weak var lblresi: UILabel!
     @IBOutlet weak var lblYourneighbhood: UILabel!
     @IBOutlet weak var lblAddress: UILabel!
-    
     @IBOutlet weak var lblAdharDetails: UILabel!
     @IBOutlet weak var saveButton: UIButton!
-    
     @IBOutlet weak var viewYourAddress: UIView!
-    
     @IBOutlet weak var lblBack: UILabel!
     @IBOutlet weak var lblFront: UILabel!
+    @IBOutlet weak var frontImageView: UIImageView!
+    @IBOutlet weak var backImageView: UIImageView!
     
     // Enum to manage selected state of documents
     enum SelectedDocument {
@@ -179,13 +174,15 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     var state: String?
     var zipcode: String = ""
     var userId: String?
+    var originalHeight: CGFloat = 0
+    var isDocumentSelected: Bool = false
+    
+    
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setUp()
-        
-        
         self.navigationItem.hidesBackButton = true
         callDeviceInfoWebService() // Save device Info
         if !isComingFromSearchVC {
@@ -202,6 +199,9 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         requestLocationAuthorization()
         startLocationUpdates()
         
+        originalHeight = addressProofViewheight.constant
+        setInitialCollapsedView()
+        
         // Location manager setup
         //           locationManager.delegate = self
         //           locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -209,7 +209,15 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         //           locationManager.startUpdatingLocation()
     }
     
-    
+    func setInitialCollapsedView() {
+        frontImageView.isHidden = true
+        backImageView.isHidden = true
+        lblFront.isHidden = true
+        lblBack.isHidden = true
+        // Reduce height by 100
+        addressProofViewheight.constant = originalHeight - 50
+        self.view.layoutIfNeeded()
+    }
     
     
     func setUp(){
@@ -231,22 +239,19 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         if let location = selectedLocation {
             // Directly set the full address to lblSector
             lblSector.text = location
-            
             let components = location.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             print("Components: \(components)") // Debugging
-            
             // Sub Locality ko lblArea par set karo
-            if components.count > 1 {
+            if components.count > 0 {
                 // Assuming sub locality is in the second index (components[1])
-                lblArea.text = components[1]
-                lblForNeighourhood_ID.text = ("(For \(components[1]))")
-                lblForNeighourhood_Address.text = ("(For \(components[1]))")
+                lblArea.text = components[0]
+                lblForNeighourhood_ID.text = ("(For \(components[0]))")
+                lblForNeighourhood_Address.text = ("(For \(components[0]))")
                 self.callRegSecWebService{}
                 callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: latitudeS ?? 0.0, longitude: longitudeS ?? 0.0))
             } else {
                 lblArea.text = "Sub Locality not found"
             }
-            
             
         }
         
@@ -312,17 +317,13 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         voterIDButton.clipsToBounds = true
         drivingLicenseButton.layer.cornerRadius = 10
         drivingLicenseButton.clipsToBounds = true
-        
         // Add tap gesture recognizers to image views
         let frontTapGesture = UITapGestureRecognizer(target: self, action: #selector(frontImageTapped))
         frontImageView.isUserInteractionEnabled = true
         frontImageView.addGestureRecognizer(frontTapGesture)
-        
         let backTapGesture = UITapGestureRecognizer(target: self, action: #selector(backImageTapped))
         backImageView.isUserInteractionEnabled = true
         backImageView.addGestureRecognizer(backTapGesture)
-        
-        
         setupGenderPicker()
         setupDatePicker()
         updateButtonStates()
@@ -336,7 +337,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             }
         }
         
-         // self.lblresi.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+        // self.lblresi.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
         //        callCountryWebService()
         tfFlat.autocapitalizationType = .words
         tfStreet.autocapitalizationType = .words
@@ -348,7 +349,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         SVProgressHUD.dismiss()
         //     callRegSecWebService()
         //         getCurrentLocation()
-       
+        
         let areaTapGesture = UITapGestureRecognizer(target: self, action: #selector(areaLabelTapped))
         tabNeighourhoodView.isUserInteractionEnabled = true
         tabNeighourhoodView.addGestureRecognizer(areaTapGesture)
@@ -557,21 +558,72 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     private func handleDocumentSelection(_ document: SelectedDocument) {
         selectedDocument = document
         updateButtonStates()
-        
+        isDocumentSelected = true
         frontImageView.isUserInteractionEnabled = selectedDocument != .none
         backImageView.isUserInteractionEnabled = selectedDocument != .none
         lblFront.isUserInteractionEnabled = selectedDocument != .none
         lblBack.isUserInteractionEnabled = selectedDocument != .none
-        
-        // Image views ko update karein document ke hisaab se
         showImageViews()
+        // Document name
+        var documentName = ""
+        switch document {
+        case .aadhaar:
+            documentName = "Aadhaar card"
+        case .passport:
+            documentName = "Passport"
+        case .voterID:
+            documentName = "Voter ID"
+        case .drivingLicense:
+            documentName = "Driving License"
+        case .RentDoc:
+            documentName = "Rent Lease / Electricity Bill"
+        case .none:
+            return
+        }
+        // Neighbourhood/area
+        let sector = lblArea.text ?? "your neighbourhood"
+        // Build attributed message
+        let fullMessage = NSMutableAttributedString()
+
+        // Common message for all
+        let messagePart = NSAttributedString(
+            string: "Please upload your \(documentName)—must show address in ",
+            attributes: [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                .foregroundColor: UIColor.darkGray
+            ]
+        )
+        fullMessage.append(messagePart)
+        // Area/sector name
+        let areaPart = NSAttributedString(
+            string: "\(sector).", // ya sirf "." agar space bilkul nahi chahiye
+            attributes: [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                .foregroundColor: UIColor.fromHex("#008000")
+            ]
+        )
+
+
+        fullMessage.append(areaPart)
+        // Aadhaar-specific safety note
+        if document == .aadhaar {
+            let safetyNote = NSAttributedString(
+                string: "\nFor your safety, it will be automatically masked.",
+                attributes: [
+                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                    .foregroundColor: UIColor.gray
+                ]
+            )
+            fullMessage.append(safetyNote)
+        }
+        // Show the alert
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+        alert.setValue(fullMessage, forKey: "attributedMessage")
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true)
     }
     
-    
-    
-    
-    
-    
+ 
     @IBAction func aadhaarButtonTapped(_ sender: UIButton) {
         showImageViews()
     }
@@ -605,10 +657,17 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             lblFront.isHidden = false
             lblBack.isHidden = false
         }
+        
+        // Set full height only when document is selected
+        if isDocumentSelected {
+            addressProofViewheight.constant = originalHeight
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+        }
     }
     
-    
-    
+ 
     // Update buttons and image views states
     func updateButtonStates() {
         let buttons: [(UIButton?, SelectedDocument)] = [
@@ -633,7 +692,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
                 button.setTitleColor(.black, for: .normal)
             } else {
                 button.setImage(unselectedImage, for: .normal)
-                button.tintColor = .black
+                button.tintColor = .darkGray
             }
             
             // Add spacing between circle and button title
@@ -653,7 +712,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         }
     }
     
- 
+    
     
     // Front image view tap gesture
     @objc private func frontImageTapped() {
@@ -751,21 +810,14 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             present(popupVC, animated: true, completion: nil)
         }
     }
-    
-    
-    
-    
-    
+ 
     // Default image ke liye tap gestures setup karna
     private func setupImageViews() {
         frontImageView.isUserInteractionEnabled = true
         backImageView.isUserInteractionEnabled = true
-        
-        
-        let frontTapGesture = UITapGestureRecognizer(target: self, action: #selector(frontImageTapped))
+         let frontTapGesture = UITapGestureRecognizer(target: self, action: #selector(frontImageTapped))
         let backTapGesture = UITapGestureRecognizer(target: self, action: #selector(backImageTapped))
-        
-        frontImageView.addGestureRecognizer(frontTapGesture)
+         frontImageView.addGestureRecognizer(frontTapGesture)
         backImageView.addGestureRecognizer(backTapGesture)
     }
     
@@ -796,36 +848,36 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     private func openImagePicker(sourceType: UIImagePickerController.SourceType) {
         let imagePicker = UIImagePickerController()
         imagePicker.sourceType = sourceType
-        imagePicker.allowsEditing = true
         imagePicker.delegate = self
         present(imagePicker, animated: true, completion: nil)
     }
-    
-    
-    
+
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        picker.dismiss(animated: true, completion: nil)
-        
-        // Prefer edited image, fallback to original
-        let selectedImage = (info[.editedImage] as? UIImage) ?? (info[.originalImage] as? UIImage)
-        
-        guard let image = selectedImage else {
-            print("No image found")
-            return
+        picker.dismiss(animated: true)
+
+        if let originalImage = info[.originalImage] as? UIImage {
+            let cropVC = TOCropViewController(croppingStyle: .default, image: originalImage)
+            cropVC.delegate = self
+            present(cropVC, animated: true)
         }
-        
+    }
+
+    
+    
+    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, with cropRect: CGRect, angle: Int) {
+        cropViewController.dismiss(animated: true)
+
         // Run OCR and masking
         detectText(in: image) { observations in
             let aadhaarTexts = self.findAadhaarNumbers(in: observations)
-            
+
             if let maskedImage = self.maskDigits(in: image, from: observations) {
                 DispatchQueue.main.async {
                     self.imageViewToUpdate?.image = maskedImage
                     self.imageViewToUpdate = nil
                 }
             } else {
-                // No Aadhaar number found or failed to mask — fallback to original image
                 DispatchQueue.main.async {
                     self.imageViewToUpdate?.image = image
                     self.imageViewToUpdate = nil
@@ -833,13 +885,40 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             }
         }
     }
+
     
+ 
+//    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+//        picker.dismiss(animated: true, completion: nil)
+//        
+//        // Prefer edited image, fallback to original
+//        let selectedImage = (info[.editedImage] as? UIImage) ?? (info[.originalImage] as? UIImage)
+//        
+//        guard let image = selectedImage else {
+//            print("No image found")
+//            return
+//        }
+//        
+//        // Run OCR and masking
+//        detectText(in: image) { observations in
+//            let aadhaarTexts = self.findAadhaarNumbers(in: observations)
+//            
+//            if let maskedImage = self.maskDigits(in: image, from: observations) {
+//                DispatchQueue.main.async {
+//                    self.imageViewToUpdate?.image = maskedImage
+//                    self.imageViewToUpdate = nil
+//                }
+//            } else {
+//                // No Aadhaar number found or failed to mask — fallback to original image
+//                DispatchQueue.main.async {
+//                    self.imageViewToUpdate?.image = image
+//                    self.imageViewToUpdate = nil
+//                }
+//            }
+//        }
+//    }
     
-    
-    
-    
-    
-    // Jab image picker cancel ho jaye
+     // Jab image picker cancel ho jaye
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
         imageViewToUpdate = nil
@@ -852,6 +931,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         imagePicker.sourceType = .photoLibrary // You can also use .camera if needed
         present(imagePicker, animated: true, completion: nil)
     }
+    
     
     func setupDatePicker() {
         // Set the date picker mode to date only
@@ -936,11 +1016,6 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         genderTextField.resignFirstResponder()
     }
     
-    
-    
-    
-    
-    
     func isConnectedToNetwork() -> Bool {
         var zeroAddress = sockaddr_in()
         zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
@@ -966,14 +1041,27 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
         
         let yesAction = UIAlertAction(title: "Yes", style: .destructive) { _ in
-            if let navigationController = self.navigationController {
-                navigationController.popViewController(animated: true)
-            } else {
-                self.dismiss(animated: true, completion: nil)
+            if let navController = self.navigationController {
+                for controller in navController.viewControllers {
+                    if controller is RegisterViewController {
+                        navController.popToViewController(controller, animated: true)
+                        return
+                    }
+                }
             }
+            
+            // If not found in stack, fallback: instantiate and present it
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterViewController") as! RegisterViewController
+            vc.modalPresentationStyle = .fullScreen
+            self.present(vc, animated: true, completion: nil)
         }
         
+        alert.addAction(noAction)
+        alert.addAction(yesAction)
+        
+        self.present(alert, animated: true, completion: nil)
     }
+    
     
     @IBAction func actionReachout(_ sender: Any) {
         
@@ -982,9 +1070,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         self.navigationController?.pushViewController(vc, animated: true)
         
     }
-    
-    
-    
+   
     @IBAction func btnRegister(_ : UIButton){
         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterThirdViewController") as? RegisterThirdViewController else {return}
         self.navigationController?.pushViewController(vc, animated: true)
@@ -1008,8 +1094,6 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         //   self.cityNewDropdownData(showOn: tfCity, DropdownName: cityDropdownData)
         // self.ServiceDescriptionLabel.text = self.ServiceTypeData?.data.seri
     }
-    
-    
     
     
     
@@ -1068,9 +1152,9 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         } else if tfState.text?.isEmpty ?? true {
             return "Please enter state"
         } else if tfFlat.text?.isEmpty ?? true {
-            return "Please enter flat/house /door #, tower/unit #"
-        } else if tfStreet.text?.isEmpty ?? true {
-            return "Please enter apartment name, road/street name"
+            return "Please enter flat/house/door #, tower/unit #"
+//        } else if tfStreet.text?.isEmpty ?? true {
+//            return "Please enter apartment name, road/street name"
         } else if selectedIndexPath == nil {
             return "Please select the neighbourhood"
         } else if selectedDocumentType == nil {
@@ -1102,24 +1186,14 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         return nil
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
+ 
     
     //MARK: -       call apni with irshad malik
-    
     // Function to upload selected document and call web service
-    
     func callRegSecWebService(_ completionClosure: @escaping () -> ()) {
         let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
         let latString = latitudeS != nil ? String(latitudeS!) : ""
         let longString = longitudeS != nil ? String(longitudeS!) : ""
-        
         // Gender ko numeric value mein map karein (1 for Male, 2 for Female)
         var genderValue: String = ""
         if let genderText = self.genderTextField.text {
@@ -1148,10 +1222,8 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             "term": "1"
         ]
         print(dictParams)
-        
         // Handle document type selection and image upload logic
         var images: [(key: String, image: UIImage?)] = []
-        
         switch selectedDocumentType {
         case .aadhar:
             if let frontImage = self.frontImageView.image {
@@ -1453,41 +1525,31 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     
     
     
-    
-    
-    
     //MARK: - Function to show alert
-    
     func showNeighborhoodAlert(withMessage message: String) {
-        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
         
-        // Title attributed
-        let title = "Neighborhood"
-        let titleFont = [NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 16)!,
-                         NSAttributedString.Key.foregroundColor: UIColor.darkGray]
-        let attributedTitle = NSAttributedString(string: title, attributes: titleFont)
-        alert.setValue(attributedTitle, forKey: "attributedTitle")
-
         // Message attributed
-        let messageFont = [NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 14)!,
-                           NSAttributedString.Key.foregroundColor: UIColor.darkGray]
+        let messageFont = [
+            NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 14)!,
+            NSAttributedString.Key.foregroundColor: UIColor.darkGray
+        ]
         let attributedMessage = NSAttributedString(string: message, attributes: messageFont)
         alert.setValue(attributedMessage, forKey: "attributedMessage")
-
+        
+        // Add OK button
+        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+            alert.dismiss(animated: true, completion: nil)
+        }
+        alert.addAction(okAction)
+        
+        // Present alert
         if let topController = UIApplication.shared.keyWindow?.rootViewController {
-            topController.present(alert, animated: true) {
-                // Auto-dismiss after 2 seconds
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                    alert.dismiss(animated: true, completion: nil)
-                }
-            }
+            topController.present(alert, animated: true, completion: nil)
         } else {
             print("Failed to find a view controller to present the alert.")
         }
     }
-
-
-    
     
     
     //MARK: - call Search Neighborhood api
@@ -1507,7 +1569,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             // Clear previous data
             self.NeighbrhdData?.data.removeAll()
             print("API Status:", data.status)
-
+            
             self.callNeighorhodStatusStateCity()
             DispatchQueue.main.async {
                 if data.status == "success" {
@@ -1534,14 +1596,14 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
                 // Call this in all cases
                 self.callStateWebService()
                 self.callCityWebService()
-               
+                
             }
-           
+            
         }
     }
-
     
- 
+    
+    
     // MARK: - ---------***********   Neighborhood Status By State/City/Pincode api  post ---------------**************
     
     func callNeighorhodStatusStateCity() {
@@ -1554,22 +1616,20 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             "pincode": self.tfPincode.text ?? "",
             "userid": userID
         ]
-        
         print("Calling API with parameters:", dictParams)
-        
         WebService.sharedInstance.callNeighborhoodStatusByState(withParams: dictParams) { [weak self] (responseModel: NeighborhoodStatusByStateModel) in
             guard let self = self else { return }
-
+            
             print("API Response - Status: \(responseModel.status), Message: \(responseModel.message)")
-
-            // Always show the message
-            DispatchQueue.main.async {
-                self.showNeighborhoodAlert(withMessage: responseModel.message)
+            
+            // ✅ Show alert only if message is NOT "Neighborhood found."
+            if responseModel.message != "Neighborhood found." {
+                DispatchQueue.main.async {
+                    self.showNeighborhoodAlert(withMessage: responseModel.message)
+                }
             }
         }
     }
-
-    
     
     //MARK: - CurrentSearch location
     
@@ -1580,12 +1640,12 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             "longi": long ?? 0.0
         ]
         print(dictParams)
-         // API Call
+        // API Call
         WebService.sharedInstance.callCurrentSearchNeighbrWebService(withParams: dictParams) { [weak self] data in
             guard let self = self else { return }
-             // Clear previous data and load new data
+            // Clear previous data and load new data
             self.NeighbrhdData?.data.removeAll()
-             DispatchQueue.main.async {
+            DispatchQueue.main.async {
                 // Update neighbourhood data
                 self.NeighbrhdData = data
                 
@@ -1660,8 +1720,8 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             ]
             WebService.sharedInstance.callAddressWebService(withParams: dictParams) { data in
                 self.AddressData = data
-                 let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
-                 vc.name = self.name ?? ""
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
+                vc.name = self.name ?? ""
                 vc.secname = self.secname ?? ""
                 //                vc.Neighbourname = self.lblNeighbr.text ?? ""
                 if let selectedIndexPath = self.selectedIndexPath {
@@ -1920,7 +1980,7 @@ extension RegisterSecondViewController: UITableViewDataSource, UITableViewDelega
         }
         
         // Call layoutIfNeeded to update the layout
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.0) {
             self.view.layoutIfNeeded() // Ensure layout update
         }
     }
