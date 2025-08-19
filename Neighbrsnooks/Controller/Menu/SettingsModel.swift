@@ -13,7 +13,8 @@ struct SettingsModel: Codable {
     let pollForVoteMB, notificationeventmail, directmsgmail, groupcreatemail: String?
     let ratingCommentbusinessmail, emergencyContactno, addresslinetwo, commentOnYourPostsMB: String?
     let commentLikesOnYourSuggestionMB, pollvotemail, notificationForEventMB, directMessageMB: String?
-    let newGroupMB, ratingReviewsOnYourBusinessMB, addresslineone: String?
+    let newGroupMB, ratingReviewsOnYourBusinessMB: String?
+    var address:String?
 
     enum CodingKeys: String, CodingKey {
         case status, message, commentpostmail, commentsuggestionmail
@@ -28,7 +29,6 @@ struct SettingsModel: Codable {
         case directMessageMB = "directMessageMb"
         case newGroupMB = "newGroupMb"
         case ratingReviewsOnYourBusinessMB = "rating_reviewsOnYourBusinessMb"
-        case addresslineone
+        case address
     }
 }
-

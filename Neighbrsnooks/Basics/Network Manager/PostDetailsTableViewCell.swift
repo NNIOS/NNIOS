@@ -17,7 +17,7 @@ class PostDetailsTableViewCell: UITableViewCell {
     @IBOutlet weak var replyButton: UIButton!
     @IBOutlet weak var emojiHart: UIButton!
     
-//    outlet for hide show mess
+    //    outlet for hide show mess
     
     @IBOutlet weak var lblReplyMessCount: UILabel!
     @IBOutlet weak var btnHideShow: UIButton!
@@ -25,25 +25,28 @@ class PostDetailsTableViewCell: UITableViewCell {
     var DotCallback: ((String?) -> Void)?
     var toggleReplyCellAction: (() -> Void)?
     var replyButtonTapped: (() -> Void)? // Closure to handle button tap
-    
-    var isLiked: Bool = false // Track the liked state
-//    var toggleLikeAction: (() -> Void)?
-        override func awakeFromNib() {
-            super.awakeFromNib()
-            profileImgView.layer.cornerRadius = profileImgView.frame.height/2
-            replyButton.addTarget(self, action: #selector(replyButtonTappedAction), for: .touchUpInside)
-            btnHideShow.addTarget(self, action: #selector(hideShowButtonTappedAction), for: .touchUpInside)
-            emojiHart.setImage(UIImage(named: "heartBlack"), for: .normal)
-            
-            
-        }
+     private var isLiked: Bool = false
+    var likeButtonTapped: ((_ newIsLiked: Bool) -> Void)?
 
-        @objc func replyButtonTappedAction() {
-            // Call the closure when reply button is tapped
-            
-            replyButtonTapped?()
-            
-        }
+    
+     //    var toggleLikeAction: (() -> Void)?
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        profileImgView.layer.cornerRadius = profileImgView.frame.height/2
+        replyButton.addTarget(self, action: #selector(replyButtonTappedAction), for: .touchUpInside)
+        btnHideShow.addTarget(self, action: #selector(hideShowButtonTappedAction), for: .touchUpInside)
+        emojiHart.setImage(UIImage(named: "heartBlack"), for: .normal)
+        self.lblName.font = UIFont(name: "Montserrat-Regular", size: 14)
+        
+        
+    }
+    
+    @objc func replyButtonTappedAction() {
+        // Call the closure when reply button is tapped
+        
+        replyButtonTapped?()
+        
+    }
     
     @objc func hideShowButtonTappedAction() {
         // Call the closure when reply button is tapped
@@ -51,24 +54,24 @@ class PostDetailsTableViewCell: UITableViewCell {
         toggleReplyCellAction?()
         
     }
-
-    func configure(with isLiked: Bool) {
-           self.isLiked = isLiked
-           let imageName = isLiked ? "heartRed" : "heartBlack"
-           emojiHart.setImage(UIImage(named: imageName), for: .normal)
-       }
     
+    func configure(with isLiked: Bool) {
+        self.isLiked = isLiked
+        let imageName = isLiked ? "heartRed" : "heartBlack"
+        emojiHart.setImage(UIImage(named: imageName), for: .normal)
+    }
+
     @IBAction func emojiHartTapped(_ sender: UIButton) {
         // Toggle the like state
-               isLiked.toggle() // Flip the isLiked state each time button is clicked
-               
-               // Change the icon based on the isLiked state
-               let imageName = isLiked ? "heartRed" : "heartBlack" // Toggle between heartRed and heartBlack
-               emojiHart.setImage(UIImage(named: imageName), for: .normal)
-               
-               // Debugging - Check state
-               print("Is Liked: \(isLiked ? "Liked" : "Unliked")")
-           }
-    
+        isLiked.toggle()
+
+        // Set icon instantly
+        let imageName = isLiked ? "heartRed" : "heartBlack"
+        emojiHart.setImage(UIImage(named: imageName), for: .normal)
+
+        // Tell controller
+        likeButtonTapped?(isLiked)
+    }
+
     
 }

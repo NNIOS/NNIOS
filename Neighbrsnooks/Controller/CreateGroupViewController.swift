@@ -36,44 +36,45 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     var selectedImge: UIImage? = nil
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        updateColors()
-        NetworkMonitor.shared.startMonitoring()
-        tfGroupName.delegate = self
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
-        self.tfGroupName.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.tvaboutGroup.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.lblUploadImg.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.lblWho.font = UIFont(name: "Montserrat-Regular", size: 15)
-        self.lblAnyone.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.lblApproved.font = UIFont(name: "Montserrat-Regular", size: 17)
-        placeholderLabel.text = "About Group..."
-        placeholderLabel.textColor = UIColor.lightGray
-        placeholderLabel.isHidden = !tvaboutGroup.text.isEmpty
-        tvaboutGroup.delegate = self
-        updateProfileImageView()
-        self.imagePicker = UIImagePickerController()
-        self.imagePicker?.delegate = self
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped(_:)))
-        profilePic.isUserInteractionEnabled = true
-        profilePic.addGestureRecognizer(tapGestureRecognizer)
-        profilePic.layer.masksToBounds = true
-        //  profilePic.layer.cornerRadius = profilePic.frame.height / 2
-        
-        //   updateCollectionView()
-        
-        tfGroupName.autocapitalizationType = .words
-        tvaboutGroup.autocapitalizationType = .words
-        
-        //        btnApprove.isSelected = true
-        //        account = "2"
-        // Do any additional setup after loading the view.
-    }
+            super.viewDidLoad()
+    //        updateColors()
+            NetworkMonitor.shared.startMonitoring()
+            tfGroupName.delegate = self
+            self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
+            self.tfGroupName.font = UIFont(name: "Montserrat-Regular", size: 17)
+            self.tvaboutGroup.font = UIFont(name: "Montserrat-Regular", size: 17)
+            self.lblUploadImg.font = UIFont(name: "Montserrat-Regular", size: 17)
+            self.lblWho.font = UIFont(name: "Montserrat-Regular", size: 15)
+            self.lblAnyone.font = UIFont(name: "Montserrat-Regular", size: 17)
+            self.lblApproved.font = UIFont(name: "Montserrat-Regular", size: 17)
+            placeholderLabel.text = "About Group..."
+            placeholderLabel.textColor = UIColor.lightGray
+            placeholderLabel.isHidden = !tvaboutGroup.text.isEmpty
+            tvaboutGroup.delegate = self
+            updateProfileImageView()
+            self.imagePicker = UIImagePickerController()
+            self.imagePicker?.delegate = self
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped(_:)))
+            profilePic.isUserInteractionEnabled = true
+            profilePic.addGestureRecognizer(tapGestureRecognizer)
+            profilePic.layer.masksToBounds = true
+            //  profilePic.layer.cornerRadius = profilePic.frame.height / 2
+            
+            //   updateCollectionView()
+            
+            tfGroupName.autocapitalizationType = .words
+            tvaboutGroup.autocapitalizationType = .sentences
+            
+            //        btnApprove.isSelected = true
+            //        account = "2"
+            // Do any additional setup after loading the view.
+        }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        updateColors()
-    }
+    
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//        updateColors()
+//    }
     
     @IBAction func BackButtionAction(_ : UIButton){
         
@@ -123,14 +124,14 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     }
     
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
-        }
-    }
-    
+//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+//        super.traitCollectionDidChange(previousTraitCollection)
+//        
+//        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+//            updateColors()
+//        }
+//    }
+//    
     
     func textViewDidChange(_ textView: UITextView) {
         // Show or hide placeholder label based on text view content
@@ -159,27 +160,80 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     
     @IBAction func PicUploadBtnAction(_ sender: UIButton) {
         
-        openCameraGallery()
+//        openCameraGallery()
+        //   selectPictureThroughPhotoGallery()
+        //        openCameraGallery()
+                checkCameraPermission { [weak self] granted in
+                    guard let self = self else { return }
+                    if granted {
+                        openCameraGallery()
+                    }
+                }
     }
     
     
-    @IBAction func CreateBtn(_ sender: UIButton){
-        
-        if tfGroupName.text == "" {
-            showAlert(message: "Please enter group name")
-        } else if tvaboutGroup.text == "" {
-            showAlert(message: "Please enter group description")
-        } else if account == "" {
-            showAlert(message: "Please select who can join")
-        } else {
-            sender.isEnabled = false // disable button
-            callCreateGroupWebService {
-                sender.isEnabled = true // re-enable after completion
+    @IBAction func CreateBtn(_ sender: UIButton) {
+        sender.isEnabled = false
+
+        // Save original title
+        let originalTitle = sender.title(for: .normal)
+        sender.setTitle("", for: .normal)
+
+        // Add activity indicator in center of button
+        let loader = UIActivityIndicatorView(style: .medium)
+        loader.translatesAutoresizingMaskIntoConstraints = false
+        loader.color = .white
+        sender.addSubview(loader)
+
+        NSLayoutConstraint.activate([
+            loader.centerXAnchor.constraint(equalTo: sender.centerXAnchor),
+            loader.centerYAnchor.constraint(equalTo: sender.centerYAnchor)
+        ])
+        loader.startAnimating()
+
+        // 📋 Text values
+        let groupName = tfGroupName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let groupDescription = tvaboutGroup.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        // 🔍 Validation Checks
+        if groupName.isEmpty {
+            showAlert(with: "Please enter group name", sender: sender, loader: loader, originalTitle: originalTitle)
+            return
+        }
+
+        if containsBadWords(groupName) {
+            showAlert(with: "Group name contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
+            return
+        }
+
+        if groupDescription.isEmpty {
+            showAlert(with: "Please enter group description", sender: sender, loader: loader, originalTitle: originalTitle)
+            return
+        }
+
+        if containsBadWords(groupDescription) {
+            showAlert(with: "Group description contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
+            return
+        }
+
+        if account == "" {
+            showAlert(with: "Please select who can join", sender: sender, loader: loader, originalTitle: originalTitle)
+            return
+        }
+
+        // ✅ All validations passed — Call API
+        callCreateGroupWebService {
+            DispatchQueue.main.async {
+                loader.stopAnimating()
+                loader.removeFromSuperview()
+                sender.setTitle(originalTitle, for: .normal)
+                sender.isEnabled = true
                 self.navigationController?.popViewController(animated: true)
             }
         }
-        
     }
+
+
     
     func showAlert(message: String) {
         let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
@@ -299,7 +353,7 @@ extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigati
     
     func showCrop(image: UIImage) {
         let vc = CropViewController(croppingStyle: .default, image: image)
-        vc.aspectRatioPreset = .presetSquare
+//        vc.aspectRatioPreset = .presetSquare
         vc.aspectRatioLockEnabled = false
         vc.toolbarPosition = .bottom
         vc.doneButtonTitle = "continue"
@@ -379,7 +433,7 @@ extension CreateGroupViewController: UIImagePickerControllerDelegate, UINavigati
         }
         
         // Animate layout changes for smooth effect
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.0) {
             self.view.layoutIfNeeded()
         }
     }

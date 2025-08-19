@@ -32,7 +32,7 @@ class PollsTableViewCell: UITableViewCell {
         // Save the default colors from storyboard
         defaultTextColor = lblCreaterName.textColor
         
-        updateColors()
+//        updateColors()
         addTapGestureToProfile()
     }
     
@@ -84,7 +84,7 @@ class PollsTableViewCell: UITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
 
@@ -119,4 +119,9 @@ class PollsTableViewCell: UITableViewCell {
     @IBAction func btnDotPoll(_ sender: UIButton) {
         DotCallback?(sender)
     }
+    
+    
+    @IBAction func actionDot(_ sender: UIButton) {
+            DotCallback?(sender)
+        }
 }

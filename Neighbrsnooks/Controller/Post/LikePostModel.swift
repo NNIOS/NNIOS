@@ -12,7 +12,7 @@ import Foundation
 
 // MARK: - Welcome
 struct LikePostModel: Codable {
-    let status, message: String?
+    var status, message: String?
     let totalLike: Int?
 
     enum CodingKeys: String, CodingKey {

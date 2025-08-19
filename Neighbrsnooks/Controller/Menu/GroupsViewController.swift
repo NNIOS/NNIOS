@@ -11,15 +11,15 @@ import SVProgressHUD
 @available(iOS 16.0, *)
 class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDelegate  {
     func tapConfirm() {
-     //   callGroupListWebService{}
+        //   callGroupListWebService{}
     }
     
-
+    
     
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var GroupLbl: UILabel!
     @IBOutlet weak var lblHeading: UILabel!
-   
+    
     @IBOutlet weak var tfSearch: UITextField!
     @IBOutlet weak var searchView: UIView!
     
@@ -31,40 +31,40 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
     @IBOutlet weak var stackView: UIStackView!
     @IBOutlet weak var tableViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var stackViewHeightConstraint: NSLayoutConstraint!
-     @IBOutlet weak var groupsView: UIView!
+    
+    @IBOutlet weak var groupsView: UIView!
     
     var GroupListData : GropsListModel?
     var JoinListData : JoinGroupModel?
     var filteredGroupData: GropsListModel?
     var searchWorkItem: DispatchWorkItem?
     var groupid : String?
-    var Newid : String?
     var groupName : String?
     var userName : String?
     var refreshTimer: Timer?
-  //  var groupid : String?
+    //  var groupid : String?
     var userid : String?
-   // var refreshTimer: Timer?
+    // var refreshTimer: Timer?
     var isTimerStopped = false  // Default false, mtlb API har 5 sec me hit hogi
     var selectedFilter: String?
-
-   
-
+    
+    
+    
     var selectedNeighborhoodId: String? // Property to receive the selected ID
-  //  var imgData = self().GroupListData
-   // let blurEffectTransitioningDelegate = BlurEffectTransitioningDelegate()
+    //  var imgData = self().GroupListData
+    // let blurEffectTransitioningDelegate = BlurEffectTransitioningDelegate()
     var sourceViewController: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateColors()
         self.searchView.isHidden = true
         tfSearch.delegate = self
-        
+        self.tableviewMembers.showsVerticalScrollIndicator = false
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         fetchGroupListData()
-       // updateColorsForTheme()
+        // updateColorsForTheme()
         NetworkMonitor.shared.startMonitoring()
-
+        
         if sourceViewController == "MyProfile" {
             stackView.isHidden = true
             stackViewHeightConstraint.constant = 0  // Completely collapse stackView
@@ -74,31 +74,26 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
             stackViewHeightConstraint.constant = 35  // Set stackView's original height (adjust as needed)
             tableViewTopConstraint.constant = 10     // Keep tableView in its normal position
         }
-
-        // Animate the layout update
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
-
         
-            // Start timer to call API every 5 seconds
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
-            if !self.isTimerStopped {  // Jab tak timer band nahi hai tabhi API call hogi
-              //  self.callGroupListWebService(searchQuery: "")
-                self.callGroupListWebService(searchQuery: "") {
-                    
-                    self.tableviewMembers.reloadData()
-                }
-            }
-        }
-
+        // Animate the layout update
+        // Start timer to call API every 5 seconds
+//        refreshTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
+//            if !self.isTimerStopped {  // Jab tak timer band nahi hai tabhi API call hogi
+//                //  self.callGroupListWebService(searchQuery: "")
+//                self.callGroupListWebService(searchQuery: "") {
+//                    
+//                    self.tableviewMembers.reloadData()
+//                }
+//            }
+//        }
+        
         
         // Do any additional setup after loading the view.
     }
-  //  5C5C5C, D9D9D9
+    //  5C5C5C, D9D9D9
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         SVProgressHUD.show()
         
         if sourceViewController == "MyProfile" {
@@ -110,33 +105,30 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
             stackViewHeightConstraint.constant = 35  // Set stackView's original height (adjust as needed)
             tableViewTopConstraint.constant = 10     // Keep tableView in its normal position
         }
-
-        // Animate the layout update
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
-
+        
+        
+        
         // Reset all buttons to default color & title
-           let allButtons = [btnAll, btnOwner, btnPrivate, btnPublic, btnJoined]
-           for button in allButtons {
-               button?.backgroundColor =  #colorLiteral(red: 0.8509803922, green: 0.8509803922, blue: 0.8509803922, alpha: 1) // Default  // Default color
-             
-               button?.setTitleColor(#colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1), for: .normal) // Default text color (Black)
-               btnAll.setTitleColor(.white, for: .normal) // Change text color
-               btnAll.backgroundColor =  #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1) // Default color   //008000  // Highlighted color
-           }
-        fetchGroupListData()
-
-            // Start timer to call API every 5 seconds
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
-            if !self.isTimerStopped {  // Jab tak timer band nahi hai tabhi API call hogi
-                self.callGroupListWebService(searchQuery: "") {
-                    
-                    self.tableviewMembers.reloadData()
-                }
-            }
+        let allButtons = [btnAll, btnOwner, btnPrivate, btnPublic, btnJoined]
+        for button in allButtons {
+            button?.backgroundColor =  #colorLiteral(red: 0.8509803922, green: 0.8509803922, blue: 0.8509803922, alpha: 1) // Default  // Default color
+            
+            button?.setTitleColor(#colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1), for: .normal) // Default text color (Black)
+            btnAll.setTitleColor(.white, for: .normal) // Change text color
+            btnAll.backgroundColor =  #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1) // Default color   //008000  // Highlighted color
         }
-
+        fetchGroupListData()
+        
+        // Start timer to call API every 5 seconds
+//        refreshTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
+//            if !self.isTimerStopped {  // Jab tak timer band nahi hai tabhi API call hogi
+//                self.callGroupListWebService(searchQuery: "") {
+//                    
+//                    self.tableviewMembers.reloadData()
+//                }
+//            }
+//        }
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -149,12 +141,12 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-           
+            
             groupsView.backgroundColor = .black
         } else {
             // Light mode mein storyboard ke original colors preserve karna
-           
-
+            
+            
             // Light mode mein PollsView ka background red karna
             groupsView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
             tableviewMembers.separatorStyle = .none
@@ -167,7 +159,7 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
         refreshTimer?.invalidate()
         refreshTimer = nil
     }
-
+    
     func filterOwnerGroups() {
         guard let allGroups = GroupListData else { return }
         
@@ -186,7 +178,7 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
     @objc func refreshData() {
         fetchGroupListData()
     }
-
+    
     
     func fetchGroupListData() {
         callGroupListWebService(searchQuery: "") {
@@ -194,252 +186,335 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
             self.tableviewMembers.reloadData()
         }
     }
-
+    
     
     @IBAction func BackButtionAction(_ : UIButton){
-
+        
         _ = navigationController?.popViewController(animated: true)
-
+        
     }
     
     @IBAction func btnSearch(_ : UIButton){
-
+        
         self.searchView.isHidden = false
         self.GroupLbl.isHidden = true
-
-       }
+        
+    }
     
     @IBAction func btncancelSearch(_ : UIButton){
-
+        
         self.searchView.isHidden = true
         self.GroupLbl.isHidden = false
-               self.tfSearch.text = ""
+        self.tfSearch.text = ""
         callGroupListWebService(searchQuery: "") {
-                   self.tableviewMembers.reloadData()
-               }
-
-       }
+            self.tableviewMembers.reloadData()
+        }
+        
+    }
     
-   
     
-//    @IBAction func filterOwnerGroups(_ sender: UIButton) {
-//        switch sender {
-//        case btnAll:
-//            filteredGroupData = GroupListData?.listdata?.filter { $0.getjoin == "owner" } ?? []
-//
-//        default:
-//            break
-//        }
-//        tableviewMembers.reloadData()
-//    }
+    
+    //    @IBAction func filterOwnerGroups(_ sender: UIButton) {
+    //        switch sender {
+    //        case btnAll:
+    //            filteredGroupData = GroupListData?.listdata?.filter { $0.getjoin == "owner" } ?? []
+    //
+    //        default:
+    //            break
+    //        }
+    //        tableviewMembers.reloadData()
+    //    }
     
     @IBAction func filterGroups(_ sender: UIButton) {
         
         // Stop the timer when any button is pressed
-            refreshTimer?.invalidate()
-            refreshTimer = nil
-            isTimerStopped = true  // Timer band kar diya
-
-            guard let allGroups = GroupListData else { return } // Ensure data is available
-
-            // Reset all buttons to default color & title
-            let allButtons = [btnAll, btnOwner, btnPrivate, btnPublic, btnJoined]
-            for button in allButtons {
-                button?.backgroundColor = #colorLiteral(red: 0.8509803922, green: 0.8509803922, blue: 0.8509803922, alpha: 1) // Default
-                button?.setTitleColor(#colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1), for: .normal) // Default text color
+        refreshTimer?.invalidate()
+        refreshTimer = nil
+        isTimerStopped = true  // Timer band kar diya
+        
+        guard let allGroups = GroupListData else { return } // Ensure data is available
+        
+        // Reset all buttons to default color & title
+        let allButtons = [btnAll, btnOwner, btnPrivate, btnPublic, btnJoined]
+        for button in allButtons {
+            button?.backgroundColor = #colorLiteral(red: 0.8509803922, green: 0.8509803922, blue: 0.8509803922, alpha: 1) // Default
+            button?.setTitleColor(#colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1), for: .normal) // Default text color
+        }
+        
+        switch sender {
+        case btnAll:
+            callGroupListWebService(searchQuery: "") {
+                self.filteredGroupData = allGroups
+                SVProgressHUD.dismiss()
+                self.tableviewMembers.reloadData()
             }
-
-            switch sender {
-            case btnAll:
-                callGroupListWebService(searchQuery: "") {
-                    self.filteredGroupData = allGroups
-                    SVProgressHUD.dismiss()
-                    self.tableviewMembers.reloadData()
-                }
-                
-            case btnOwner:
-                callGroupListWebService(searchQuery: "") {
-                    self.filteredGroupData = GropsListModel(
-                        status: allGroups.status,
-                        message: allGroups.message,
-                        verfied_msg: allGroups.verfied_msg,
-                        listdata: allGroups.listdata?.filter { $0.getjoin == "owner" }
-                    )
-                    SVProgressHUD.dismiss()
-                    self.tableviewMembers.reloadData()
-                }
-                
-            case btnPrivate:
-                callGroupListWebService(searchQuery: "") {
-                    self.filteredGroupData = GropsListModel(
-                        status: allGroups.status,
-                        message: allGroups.message,
-                        verfied_msg: allGroups.verfied_msg,
-                        listdata: allGroups.listdata?.filter { $0.group_type == "Private" }
-                    )
-                    SVProgressHUD.dismiss()
-                    self.tableviewMembers.reloadData()
-                }
-                
-            case btnPublic:
-                callGroupListWebService(searchQuery: "") {
-                    self.filteredGroupData = GropsListModel(
-                        status: allGroups.status,
-                        message: allGroups.message,
-                        verfied_msg: allGroups.verfied_msg,
-                        listdata: allGroups.listdata?.filter { $0.group_type == "Public" }
-                    )
-                    SVProgressHUD.dismiss()
-                    self.tableviewMembers.reloadData()
-                }
-                
-            case btnJoined:
-                callGroupListWebService(searchQuery: "") {
-                    self.filteredGroupData = GropsListModel(
-                        status: allGroups.status,
-                        message: allGroups.message,
-                        verfied_msg: allGroups.verfied_msg,
-                        listdata: allGroups.listdata?.filter { $0.getjoin == "joined" }
-                    )
-                    SVProgressHUD.dismiss()
-                    self.tableviewMembers.reloadData()
-                }
-                
-            default:
-                break
+            
+        case btnOwner:
+            callGroupListWebService(searchQuery: "") {
+                self.filteredGroupData = GropsListModel(
+                    status: allGroups.status,
+                    message: allGroups.message,
+                    verfied_msg: allGroups.verfied_msg,
+                    listdata: allGroups.listdata?.filter { $0.getjoin == "owner" }
+                )
+                SVProgressHUD.dismiss()
+                self.tableviewMembers.reloadData()
             }
-
-            // Change the selected button's color & title
-            sender.backgroundColor = #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1) // Highlighted color
-            sender.setTitleColor(.white, for: .normal) // Change text color
-
-            tableviewMembers.reloadData()
+            
+        case btnPrivate:
+            callGroupListWebService(searchQuery: "") {
+                self.filteredGroupData = GropsListModel(
+                    status: allGroups.status,
+                    message: allGroups.message,
+                    verfied_msg: allGroups.verfied_msg,
+                    listdata: allGroups.listdata?.filter { $0.group_type == "Private" }
+                )
+                SVProgressHUD.dismiss()
+                self.tableviewMembers.reloadData()
+            }
+            
+        case btnPublic:
+            callGroupListWebService(searchQuery: "") {
+                self.filteredGroupData = GropsListModel(
+                    status: allGroups.status,
+                    message: allGroups.message,
+                    verfied_msg: allGroups.verfied_msg,
+                    listdata: allGroups.listdata?.filter { $0.group_type == "Public" }
+                )
+                SVProgressHUD.dismiss()
+                self.tableviewMembers.reloadData()
+            }
+            
+        case btnJoined:
+            callGroupListWebService(searchQuery: "") {
+                self.filteredGroupData = GropsListModel(
+                    status: allGroups.status,
+                    message: allGroups.message,
+                    verfied_msg: allGroups.verfied_msg,
+                    listdata: allGroups.listdata?.filter { $0.getjoin == "joined" }
+                )
+                SVProgressHUD.dismiss()
+                self.tableviewMembers.reloadData()
+            }
+            
+        default:
+            break
+        }
+        
+        // Change the selected button's color & title
+        sender.backgroundColor = #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1) // Highlighted color
+        sender.setTitleColor(.white, for: .normal) // Change text color
+        
+        tableviewMembers.reloadData()
     }
-
+    
+    
+  
 
 
     
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-           let currentText = textField.text ?? ""
-           let updatedText = (currentText as NSString).replacingCharacters(in: range, with: string)
-
-           // Cancel the previous work item to avoid multiple API calls
-           searchWorkItem?.cancel()
-
-           // Create a new work item for the search
-           searchWorkItem = DispatchWorkItem {
-               // Call the API with the updated search text
-               self.callGroupListWebService(searchQuery: updatedText) {
-                   self.tableviewMembers.reloadData()
-               }
-           }
-
-           // Execute the work item after a delay of 0.5 seconds
-           DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: searchWorkItem!)
-
-           return true
-       }
+    
+//    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+//        let currentText = textField.text ?? ""
+//        let updatedText = (currentText as NSString).replacingCharacters(in: range, with: string)
+//        
+//        // Cancel the previous work item to avoid multiple API calls
+//        searchWorkItem?.cancel()
+//        
+//        // Create a new work item for the search
+//        searchWorkItem = DispatchWorkItem {
+//            // Call the API with the updated search text
+//            self.callGroupListWebService(searchQuery: updatedText) {
+//                self.tableviewMembers.reloadData()
+//            }
+//        }
+//        
+//        // Execute the work item after a delay of 0.5 seconds
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: searchWorkItem!)
+//        
+//        return true
+//    }
     
     @IBAction func btnCreateGroup(_ : UIButton){
-
-
         
-        if GroupListData?.verfied_msg == "User Verification is completed!" {
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "CreateGroupViewController") as? CreateGroupViewController else { return }
-                self.navigationController?.pushViewController(vc, animated: true)
-            } else {
-                let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-                
-                // Define font and color attributes
-                let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-                let messageAttributes: [NSAttributedString.Key: Any] = [
-                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                    .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-                ]
-                
-                // Create attributed strings
-                let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-                let attributedMessage = NSAttributedString(
-                    string: "You have limited access till verification is complete. We thank you for your patience.",
-                    attributes: messageAttributes
-                )
-                
-                // Set the title and message of the alert
-                alert.setValue(attributedTitle, forKey: "attributedTitle")
-                alert.setValue(attributedMessage, forKey: "attributedMessage")
-                
-                // Add an action to the alert
-                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-                    alert.dismiss(animated: true, completion: nil)
-                }))
-                
-                // Present the alert
-                self.present(alert, animated: true, completion: nil)
-            }
-
-       }
+        if !NetworkMonitor.shared.isConnected {
+               showAlert(message: "No internet connection. Please check your network settings.")
+               return
+           }
+        
+         if GroupListData?.verfied_msg == "User Verification is completed!" {
+            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "CreateGroupViewController") as? CreateGroupViewController else { return }
+            self.navigationController?.pushViewController(vc, animated: true)
+        } else {
+            let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+            
+            // Define font and color attributes
+            let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+            ]
+            
+            // Create attributed strings
+            let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+            let attributedMessage = NSAttributedString(
+                string: "You have limited access till verification is complete. We thank you for your patience.",
+                attributes: messageAttributes
+            )
+            
+            // Set the title and message of the alert
+            alert.setValue(attributedTitle, forKey: "attributedTitle")
+            alert.setValue(attributedMessage, forKey: "attributedMessage")
+            
+            // Add an action to the alert
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                alert.dismiss(animated: true, completion: nil)
+            }))
+            
+            // Present the alert
+            self.present(alert, animated: true, completion: nil)
+        }
+        
+    }
     
     @IBAction func JoinBtn(_ sender: UIButton){
         
-       
+        
         callJoinGroupWebService{
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupsViewController")as! GroupsViewController
-
-                 self.navigationController?.pushViewController(vc, animated: false)
-            }
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupsViewController")as! GroupsViewController
+            
+            self.navigationController?.pushViewController(vc, animated: false)
+        }
         
     }
-   
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = (textField.text ?? "") as NSString
+        let updatedText = currentText.replacingCharacters(in: range, with: string)
+
+        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(performLocalSearch), object: nil)
+        perform(#selector(performLocalSearch), with: nil, afterDelay: 0.3)
+
+        return true
+    }
+
+    // MARK: - Local Search
+    @objc func performLocalSearch() {
+        let query = tfSearch.text ?? ""
+        filterSearchResults(query)
+    }
+
+    // MARK: - Filter Logic
+    func filterSearchResults(_ query: String) {
+        guard let fullList = GroupListData?.listdata else { return }
+
+        if query.isEmpty {
+            filteredGroupData?.listdata = fullList
+        } else {
+            filteredGroupData?.listdata = fullList.filter {
+                ($0.groupname?.lowercased().contains(query.lowercased()) ?? false) ||
+                ($0.username?.lowercased().contains(query.lowercased()) ?? false) ||
+                ($0.description?.lowercased().contains(query.lowercased()) ?? false) ||
+                ($0.group_type?.lowercased().contains(query.lowercased()) ?? false)
+            }
+        }
+
+        DispatchQueue.main.async {
+            self.tableviewMembers.reloadData()
+
+            // ✅ If no data found
+            if self.filteredGroupData?.listdata?.isEmpty ?? true {
+                let noDataLabel = UILabel()
+                noDataLabel.text = "Data not found"
+                noDataLabel.textAlignment = .center
+                noDataLabel.font = UIFont.systemFont(ofSize: 16)
+                noDataLabel.textColor = .gray
+                self.tableviewMembers.backgroundView = noDataLabel
+            } else {
+                self.tableviewMembers.backgroundView = nil
+            }
+        }
+    }
+
 
     
+
+    
+    
     func callGroupListWebService(searchQuery: String, _ completionClosure: @escaping () -> ()) {
-       
         
         let id = UserDefaults.standard.string(forKey: "userid")
-        let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-        let neighborhoodId = selectedNeighborhoodId ?? idNeighbour // Use default if selectedNeighborhoodId is nil
-        
-        
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-//        let dictParams: [String: Any] = [
-//            "userid": id ?? "",
-//            "neighbrhood": neighborhoodId ?? "", // Use the resolved neighborhoodId
-//
-//        ]
-        
-        
+                let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
+                let neighborhoodId = selectedNeighborhoodId ?? idNeighbour
+//                var dictParams: [String: Any] = [:]
+//                if sourceViewController == "Menu" {
+//                    dictParams = [
+//                        "userid": id ?? "",
+//                    ]
+//                }
+//                else  if sourceViewController == "MyProfile" {
+//                    dictParams = [
+//                        "userid": id ?? "",
+//                        "groupuserlist": id ?? ""
+//                    ]
+//                }
+//                else  if sourceViewController == "Neighbourhood" {
+//                    dictParams = [
+//                        "userid": id ?? "",
+//                        "neighbrhood": idNeighbour ?? ""
+//                    ]
+//                }
+//                else  if sourceViewController == "HomeViewController"{ //HomeViewController
+//                    dictParams = [
+//                        "userid": userid ?? "",
+//                    ]
+//                } else if sourceViewController == "OtherProfile"{
+//                    dictParams = [
+//                        "userid": userid ?? "",
+//                        "groupuserlist": userid ?? ""
+//                    ]
+//                }
         var dictParams: [String: Any] = [:]
+                if sourceViewController == "Menu" {
+                    dictParams = [
+                        "userid": id ?? "",
+                    ]
+                }
+                else  if sourceViewController == "MyProfile" {
+                    dictParams = [
+                        "userid": id ?? "",
+                        "groupuserlist": id ?? ""
+                    ]
+                }
+                else  if sourceViewController == "Neighbourhood" {
+                    dictParams = [
+                        "userid": id ?? "",
+                        "neighbrhood": idNeighbour ?? ""
+                    ]
+                }
+                else  if sourceViewController == "HomeViewController"{ //HomeViewController
+                    dictParams = [
+                        "userid": userid ?? "",
+                    ]
+                } else if sourceViewController == "OtherProfile"{
+                    dictParams = [
+                        "userid": userid ?? "",
+                        "groupuserlist": userid ?? ""
+                    ]
+                }
+                else {
+                    dictParams = [
+                        "userid": id ?? ""
+                    ]
+                }
+               
         
-        if sourceViewController == "Menu" {
-            dictParams = [
-                "userid": id ?? "",
-               
-            ]
-        }
-        else  if sourceViewController == "OtherProfile" {
-            dictParams = [
-                "userid": id ?? "",
-                "groupuserlist": id ?? ""
-               
-            ]
-        }
-        else  if sourceViewController == "OtherProfile" {
-            dictParams = [
-                "userid":  Newid ?? "",
-                "groupuserlist":  Newid ?? ""
-               
-            ]
-        }
-        else  {
-            dictParams = [
-                "userid": id ?? "",
-                "neighbrhood": neighborhoodId ?? "", // Use the resolved neighborhoodId
-            ]
-        }
-
+        
+                print("Param is :\(dictParams)")
+        
         WebService.sharedInstance.callGroupListWebService(withParams: dictParams) { data in
             self.GroupListData = data
-
+            
             // Filter the GroupListData based on the search query
             if searchQuery.isEmpty {
                 self.filteredGroupData = self.GroupListData // No filtering if search is empty
@@ -453,34 +528,34 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
                     }
                 )
             }
-
+            
             // Reload the table view after filtering the data
             completionClosure()
             self.tableviewMembers.reloadData()
         }
     }
-
+    
     
     func callJoinGroupWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
         let idName = UserDefaults.standard.string(forKey: "name")
         let UserName = UserDefaults.standard.string(forKey: "UserName")
-          let dictParams: Dictionary<String, Any> = [
-                                                    "userid":id ?? "",
-                                                    "groupid": groupid ?? "",
-                                                    "groupname": groupName ?? "",
-                                                    "username": userName ?? ""
-                                                   
-                                                                        ]
-          WebService.sharedInstance.callJoinGroupWebService(withParams: dictParams) { data in
+        let dictParams: Dictionary<String, Any> = [
+            "userid":id ?? "",
+            "groupid": groupid ?? "",
+            "groupname": groupName ?? "",
+            "username": userName ?? ""
+            
+        ]
+        WebService.sharedInstance.callJoinGroupWebService(withParams: dictParams) { data in
             self.JoinListData = data
-              if self.JoinListData?.status == "success"{
-                  completionClosure()
-              }else{
-                  self.showAlert(Message: self.JoinListData?.message ?? "")
-              }
-          }
+            if self.JoinListData?.status == "success"{
+                completionClosure()
+            }else{
+                self.showAlert(Message: self.JoinListData?.message ?? "")
+            }
         }
+    }
 }
 
 @available(iOS 16.0, *)
@@ -494,7 +569,7 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "GroupsTableViewCell", for: indexPath) as! GroupsTableViewCell
-      
+        
         cell.lblName.text = filteredGroupData?.listdata?[indexPath.row].username
         cell.lblGroupName.text = filteredGroupData?.listdata?[indexPath.row].groupname
         cell.lblPrivate.text = filteredGroupData?.listdata?[indexPath.row].group_type
@@ -505,16 +580,16 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
         } else {
             cell.lblMember.text = "N/A" // Or some default value
         }
-
+        
         cell.lblOwner.text = filteredGroupData?.listdata?[indexPath.row].getjoin
         
-        cell.lblName.font  = UIFont(name: "Montserrat-SemiBold", size: 13)
+        cell.lblName.font  = UIFont(name: "Montserrat-Regular", size: 13)
         cell.lblGroupName.font  = UIFont(name: "Montserrat-Regular", size: 14)
         cell.lblPrivate.font  = UIFont(name: "Montserrat-Regular", size: 13)
         cell.lblSec.font  = UIFont(name: "Montserrat-Regular", size: 13)
         cell.lblMemberText.font = UIFont(name: "Montserrat-Regular", size: 10)
         cell.lblOwner.font = UIFont(name: "Montserrat-Regular", size: 14)
-        cell.lblPendingCount.font = UIFont(name: "Montserrat-Regular", size: 12)
+        
         
         if filteredGroupData?.listdata![indexPath.row].getjoin == "owner" {
             cell.viewOwner.isHidden = false  // Ensure viewOwner is visible
@@ -523,7 +598,7 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
             cell.btnJoin.isHidden = true
             cell.lblOwner.text = "Owner"
             cell.btnDetails.isHidden = false
-
+            
             // Check the value of pendingRequestCount
             if filteredGroupData?.listdata![indexPath.row].pendingRequestCount == "0" {
                 cell.btnReqPending.isHidden = true
@@ -533,9 +608,9 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
                 cell.viewPendingCount.isHidden = false
             }
         }
-
- else if filteredGroupData?.listdata![indexPath.row].getjoin == "joined" {
-           
+        
+        else if filteredGroupData?.listdata![indexPath.row].getjoin == "joined" {
+            
             cell.viewOwner.backgroundColor = #colorLiteral(red: 1, green: 0.8, blue: 0, alpha: 1)
             cell.viewOwner.isHidden = true
             cell.btnExit.isHidden = false
@@ -543,11 +618,11 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
             cell.btnReqPending.isHidden = true
             cell.viewPendingCount.isHidden = true
             cell.btnDetails.isHidden = false
-         
+            
         }
         
         else if filteredGroupData?.listdata![indexPath.row].getjoin == "pending" {
-           
+            
             cell.viewOwner.backgroundColor = #colorLiteral(red: 0.5019607843, green: 0, blue: 0.5019607843, alpha: 1)
             cell.btnJoin.isHidden = true
             cell.btnExit.isHidden = true
@@ -556,12 +631,12 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
             cell.btnDetails.isHidden = true
             cell.viewOwner.isHidden = false
             cell.lblOwner.text =  "Approval Pending"
-           
+            
         }
         
         else if filteredGroupData?.listdata![indexPath.row].getjoin == "join" {
-           
-           
+            
+            
             cell.btnExit.isHidden = true
             cell.btnJoin.isHidden = false
             cell.btnReqPending.isHidden = true
@@ -570,8 +645,8 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
         }
         
         else if filteredGroupData?.listdata![indexPath.row].getjoin == "Public" {
-           
-           
+            
+            
             cell.btnExit.isHidden = true
             cell.btnJoin.isHidden = false
             cell.btnReqPending.isHidden = true
@@ -580,8 +655,8 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
         }
         
         else if filteredGroupData?.listdata![indexPath.row].pendingRequestCount == "0" {
-           
-           
+            
+            
             cell.btnReqPending.isHidden = true
             cell.viewOwner.backgroundColor = #colorLiteral(red: 0.5019607843, green: 0, blue: 0.5019607843, alpha: 1)
             cell.viewOwner.isHidden = false
@@ -590,7 +665,7 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
         
         
         
-
+        
         
         let url = URL(string: (filteredGroupData?.listdata?[indexPath.row].image ?? ""))
         cell.profileImgView.kf.indicatorType = .activity
@@ -598,7 +673,7 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
         
         cell.ExitCallback = { [self] value in
             
-
+            
             
             let vc = storyboard?.instantiateViewController(withIdentifier:"ExitPopupViewController")as! ExitPopupViewController
             vc.modalPresentationStyle = .overFullScreen
@@ -607,15 +682,23 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
             vc.groupid = filteredGroupData?.listdata![indexPath.row].groupid ?? ""
             vc.userid = filteredGroupData?.listdata![indexPath.row].userid ?? ""
             
-           
+            vc.onUpdateForGroup = { [weak self] in
+                self?.fetchGroupListData()
+            }
+            
             self.present(vc , animated: true)
-           
+            
         }
         
-       
-      
+        
+        
         cell.JoinCallback = { [weak self] value in
             guard let self = self else { return }
+            if !NetworkMonitor.shared.isConnected {
+                // Show your own alert or prevent API call
+                showAlert(message: "Internet not available. Please check your connection.")
+                return
+            }
 
             // Check if verification is completed
             if GroupListData?.verfied_msg == "User Verification is completed!" {
@@ -623,17 +706,17 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
                 self.groupid = filteredGroupData?.listdata![indexPath.row].groupid ?? ""
                 self.groupName = filteredGroupData?.listdata![indexPath.row].groupname ?? ""
                 self.userName = filteredGroupData?.listdata![indexPath.row].username ?? ""
-
+                
                 // Call the API
                 
                 self.callJoinGroupWebService {
                     // Show the popup after API success
                     if self.filteredGroupData?.listdata?[indexPath.row].group_type == "Private" {
                         let message = "Group joining request sent."
-                        let messageAttributes: [NSAttributedString.Key: Any] = [
-                            .font: UIFont.systemFont(ofSize: 18),
-                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1) // Hex Color Literal
-                        ]
+                                                let messageAttributes: [NSAttributedString.Key: Any] = [
+                                                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                                                    .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                                                ]
                         let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
                         
                         // Show popup message
@@ -653,12 +736,12 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
                             self.tableviewMembers.reloadData()
                         }
                     }
-
+                    
                     else {
                         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as? GroupDetailsViewController else {return}
                         vc.groupid = self.filteredGroupData?.listdata![indexPath.row].groupid ?? ""
                         vc.userid = self.filteredGroupData?.listdata![indexPath.row].userid ?? ""
-                       
+                        
                         self.navigationController?.pushViewController(vc, animated: true)
                     }
                 }
@@ -692,12 +775,12 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
                 self.present(alert, animated: true, completion: nil)
             }
         }
-
-
-
-
-       
-      //  "It's private group please send request to join."
+        
+        
+        
+        
+        
+        //  "It's private group please send request to join."
         cell.DetailsCallback = { [self] value in
             let index = indexPath.row
             if let group = filteredGroupData?.listdata?[index] {
@@ -716,7 +799,7 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
                     // Create attributed strings
                     let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
                     let attributedMessage = NSAttributedString(
-                        string: "It's private group please send request to join.",
+                        string: "It's a private group. Please send request to join.",
                         attributes: messageAttributes
                     )
                     
@@ -732,12 +815,18 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
                     // Present the alert
                     self.present(alert, animated: true, completion: nil)
                 }
-             else {
+                else {
+                    if !NetworkMonitor.shared.isConnected {
+                        // Show your own alert or prevent API call
+                        showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+
                     if GroupListData?.verfied_msg == "User Verification is completed!" {
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as! GroupDetailsViewController
-                    vc.groupid = group.groupid ?? ""
-                    vc.userid = group.userid ?? ""
-                    self.navigationController?.pushViewController(vc, animated: true)
+                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as! GroupDetailsViewController
+                        vc.groupid = group.groupid ?? ""
+                        vc.userid = group.userid ?? ""
+                        self.navigationController?.pushViewController(vc, animated: true)
                     }
                     else {
                         // Create the alert controller
@@ -772,8 +861,8 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
                 }
             }
         }
-
-       
+        
+        
         return cell
     }
     
@@ -786,7 +875,7 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
         popupView.backgroundColor = UIColor.black.withAlphaComponent(0.8)
         popupView.layer.cornerRadius = 10
         popupView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         // Create the message label
         let messageLabel = UILabel()
         messageLabel.text = message
@@ -795,25 +884,25 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
         messageLabel.textAlignment = .center
         messageLabel.numberOfLines = 0
         messageLabel.translatesAutoresizingMaskIntoConstraints = false
-
+        
         // Add the label to the popup
         popupView.addSubview(messageLabel)
-
+        
         // Add the popup to the view
         self.view.addSubview(popupView)
-
+        
         // Set up constraints for the popup view
         NSLayoutConstraint.activate([
             popupView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 20),
             popupView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -20),
             popupView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             popupView.heightAnchor.constraint(equalToConstant: 50),
-
+            
             messageLabel.leadingAnchor.constraint(equalTo: popupView.leadingAnchor, constant: 10),
             messageLabel.trailingAnchor.constraint(equalTo: popupView.trailingAnchor, constant: -10),
             messageLabel.centerYAnchor.constraint(equalTo: popupView.centerYAnchor)
         ])
-
+        
         // Animate the popup's disappearance after 2 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             UIView.animate(withDuration: 0.5, animations: {
@@ -823,6 +912,6 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
             }
         }
     }
-
+    
     
 }

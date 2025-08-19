@@ -10,7 +10,7 @@ struct GropsListModel : Codable {
     let status : String?
     let message : String?
     let verfied_msg : String?
-    let listdata : [GroupListData]?
+    var listdata : [GroupListData]?
 
     enum CodingKeys: String, CodingKey {
 

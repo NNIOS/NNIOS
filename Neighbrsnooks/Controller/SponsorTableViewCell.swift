@@ -16,7 +16,7 @@ class SponsorTableViewCell: UITableViewCell {
     @IBOutlet weak var LogoImg : UIImageView!
     
     @IBOutlet weak var viewAction: UIView!
-    var SponsCallback : ((String) -> Void)?
+    var actionTappedCallback: (() -> Void)?
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -24,19 +24,18 @@ class SponsorTableViewCell: UITableViewCell {
         viewAction.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         viewAction.clipsToBounds = true
 
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSponsLabel))
-        lblAction.isUserInteractionEnabled = true
-        lblAction.addGestureRecognizer(tapGesture)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(actionLabelTapped))
+           lblAction.isUserInteractionEnabled = true
+           lblAction.addGestureRecognizer(tapGesture)
+        
         LogoImg.layer.cornerRadius = LogoImg.frame.height/2
         LogoImg.clipsToBounds = true
         // Initialization code
     }
     
-    @objc func didTapSponsLabel() {
-           if let linkText = lblAction.text {
-               SponsCallback?(linkText)
-           }
-       }
+    @objc func actionLabelTapped() {
+        actionTappedCallback?()
+    }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)

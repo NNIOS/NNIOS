@@ -20,7 +20,8 @@ class AllListMarketViewController: UIViewController,UICollectionViewDelegate,UIC
         collectionViewMyEvent.dataSource = self
         collectionViewMyEvent.reloadData()
         collectionViewMyEvent.tag = 1
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
+        lblHeading.text = "All Listing"
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
         // Do any additional setup after loading the view.
     }
     
@@ -90,6 +91,7 @@ class AllListMarketViewController: UIViewController,UICollectionViewDelegate,UIC
         return CGSize(width: width , height: height)
     
     }
+    //dev.
     
     func callAllMarketListWebService() {
                   let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_home?"

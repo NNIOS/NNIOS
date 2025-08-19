@@ -87,7 +87,7 @@ class ForgotViewController: UIViewController {
                         self.isOTPSent = true // Set flag after OTP is sent
                         // Display the success message from the backend
                         if let message = self.forgetOTPData?.message {
-                            self.showAutoDismissAlert(message: message)
+//                            self.showAutoDismissAlert(message: message)
                         }
                     }
                 }
@@ -107,7 +107,7 @@ class ForgotViewController: UIViewController {
                 self.tfOtp1.becomeFirstResponder()
                 // Display the success message from the backend
                 if let message = self.forgetOTPData?.message {
-                    self.showAutoDismissAlert(message: message)
+//                    self.showAutoDismissAlert(message: message)
                 }
             }
         }

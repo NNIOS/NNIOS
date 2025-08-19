@@ -18,6 +18,7 @@ class ExitPopupViewController: UIViewController {
     var userid : String?
     var ExitGrouData : ExitGroupModel?
     var delegate: ConfirmDelegate?
+    var onUpdateForGroup: (() -> Void)?
     @IBOutlet weak var lblPopup: UILabel!
 
     override func viewDidLoad() {
@@ -48,7 +49,7 @@ class ExitPopupViewController: UIViewController {
         callExitGroupWebService{
             self.delegate?.tapConfirm()
                 self.dismiss(animated: true)
-            
+            self.onUpdateForGroup
             }
         
         

@@ -128,7 +128,7 @@ class SearchAllListViewController: UIViewController,UICollectionViewDelegate,UIC
         return CGSize(width: width , height: height)
     
     }
-    
+    //dev.
     func callAllMarketListWebService() {
                   let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_home?"
 

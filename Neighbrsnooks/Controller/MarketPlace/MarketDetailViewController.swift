@@ -9,6 +9,8 @@ import UIKit
 import Kingfisher
 import AVFoundation
 import AVKit
+import SVProgressHUD
+
 
 
 @available(iOS 16.0, *)
@@ -18,6 +20,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     }
     
     
+    @IBOutlet weak var simillarCollectionViewHightConst: NSLayoutConstraint!
     @IBOutlet weak var collectionViewEvent: UICollectionView!
     @IBOutlet weak var SimilarCollectionView: UICollectionView!
     @IBOutlet weak var lblHeading: UILabel!
@@ -40,29 +43,35 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     
     @IBOutlet weak var SoldImgView : UIImageView!
     @IBOutlet weak var MarketFullView: UIView!
+    @IBOutlet weak var scrollView: UIScrollView!
+    @IBOutlet weak var countView: UIView!
     
     var MarketWDetailData : ProductResponse?
     var MarketWDeleteData : DelMarketProductModel?
     var WishlistdataData : WishListModel?
     var WishlistdeleteData : WishListRemoveModel?
-   // var imgDataM = [ProductImage]()
+    // var imgDataM = [ProductImage]()
     var ProductDataM = [ProductDetail]()
     var thisWidth:CGFloat = 0
     var idD = ""
     var id = ""
-  //  var productImages: [ProductImage] = []
-  //  var productImages: [PImage] = []
+    //  var productImages: [ProductImage] = []
+    //  var productImages: [PImage] = []
     var productImages: [ProductImage] = []
     private var defaultTextColor: UIColor?
- //   var MarketWDetailData : ProductResponse?
+    //   var MarketWDetailData : ProductResponse?
     var isFromChatList: Bool = false
-
+    var objChatRead: ChatReadModel?
+    var productUserID = ""
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        SVProgressHUD.show()
         collectionViewEvent.delegate = self
         collectionViewEvent.dataSource = self
         collectionViewEvent.reloadData()
+        self.lblHeading.text = "Item Details"
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.LblCat.font = UIFont(name: "Montserrat-Regular", size: 16)
         self.UserLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
@@ -79,186 +88,91 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 self.updateUI()
+                if self.MarketWDetailData?.similarproducts?.count == 0 {
+                    self.scrollView.isScrollEnabled = false
+                } else {
+                    self.scrollView.isScrollEnabled = true
+                }
+                SVProgressHUD.dismiss()
             }
         }
-
-        
-//        callMarketDetailWebService{ [self] in
-//            self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pTitle
-//            // cell.rsLbl.text = "Rs." + (MarketWallData?.yourItems![indexPath.row].salePrice ?? "")
-//            self.rsLbl.text = "Rs." + (self.MarketWDetailData?.productdetail?.first?.salePrice ?? "")
-//            self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
-//            self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
-//            self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
-//            self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
-//            self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.catName
-//
-//            let url = URL(string: (MarketWDetailData?.productdetail?.first?.userpic ?? ""))
-//            self.profileImgView.kf.indicatorType = .activity
-//            self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-//
-//          //  MarketWDetailData = ProductResponse // Update your data
-//            SimilarCollectionView.reloadData()
-//            updateSimilarProductsVisibility()
-//
-//
-//            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-//            var id = UserDefaults.standard.string(forKey: "userid")
-//            if id == idCr {
-//
-//                btnChat.setTitle("Chat", for: .normal)
-//                self.btnDel.isHidden = false
-//                self.btnEdit.isHidden = false
-//                self.AddWishList.isHidden = true
-//            } else {
-//                btnChat.setTitle("Chat with seller", for: .normal)
-//                self.btnDel.isHidden = true
-//                self.btnEdit.isHidden = true
-//                self.AddWishList.isHidden = false
-//            }
-//
-//            if MarketWDetailData?.productdetail?.first?.wishlistStatus == 1 {
-//                RemoveWishList.isHidden = false
-//              //  AddWishList.isHidden = true
-//
-//            } else if MarketWDetailData?.productdetail?.first?.wishlistStatus == 0 {
-//
-//                RemoveWishList.isHidden = true
-//              //  AddWishList.isHidden = false
-//
-//            }
-//
-//            if MarketWDetailData?.productdetail?.first?.pStatus == 2 {
-//                self.SoldImgView.isHidden = false
-//
-//
-//            } else {
-//
-//                SoldImgView.isHidden = true
-//
-//
-//            }
-//
-//        }
-        // Do any additional setup after loading the view.
     }
     
     func updateUI() {
-        self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pTitle
-        self.rsLbl.text = "Rs." + (self.MarketWDetailData?.productdetail?.first?.salePrice ?? "")
-        self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
+        self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
+        self.UserLbl.numberOfLines = 0
+        if let priceString = MarketWDetailData?.productdetail?.first?.salePrice,
+           let price = Double(priceString) {
+            rsLbl.text = "Rs. \(Int(price))"
+        } else {
+            rsLbl.text = "Rs. 0"
+        }
+        self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.catName
         self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
         self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
         self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
-        self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.catName
+        self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.pTitle
+        
         if let readCount = self.MarketWDetailData?.productdetail?.first?.readCount {
-            self.LblCount.text = "\(readCount)"
+            if readCount > 0 {
+                self.LblCount.text = "\(readCount)"
+                self.LblCount.isHidden = false
+                self.countView.isHidden = false
+            } else {
+                self.LblCount.isHidden = true
+                self.countView.isHidden = true
+            }
+        } else {
+            self.LblCount.isHidden = true
+            self.countView.isHidden = true
         }
-
-
-
 
         
         let url = URL(string: self.MarketWDetailData?.productdetail?.first?.userpic ?? "")
         self.profileImgView.kf.indicatorType = .activity
         self.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
-
+        
         self.SimilarCollectionView.reloadData()
         self.updateSimilarProductsVisibility()
-
+        
         let idCr = UserDefaults.standard.string(forKey: "CreatorId")
         let id = UserDefaults.standard.string(forKey: "userid")
         self.btnChat.setTitle(id == idCr ? "Chat" : "Chat with seller", for: .normal)
         self.btnDel.isHidden = id != idCr
         self.btnEdit.isHidden = id != idCr
         self.AddWishList.isHidden = id == idCr
-
+        
         self.RemoveWishList.isHidden = self.MarketWDetailData?.productdetail?.first?.wishlistStatus != 1
         self.SoldImgView.isHidden = self.MarketWDetailData?.productdetail?.first?.pStatus != 2
     }
-
+    
     
     override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        //callProductListWebService{}
-//        callMarketDetailWebService{ [self] in
-//            self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pTitle
-//            // cell.rsLbl.text = "Rs." + (MarketWallData?.yourItems![indexPath.row].salePrice ?? "")
-//            self.rsLbl.text = "Rs." + (self.MarketWDetailData?.productdetail?.first?.salePrice ?? "")
-//            self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
-//            self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
-//            self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
-//            self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
-//            self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.catName
-//
-//            let url = URL(string: (MarketWDetailData?.productdetail?.first?.userpic ?? ""))
-//            self.profileImgView.kf.indicatorType = .activity
-//            self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-//
-//          //  MarketWDetailData = ProductResponse // Update your data
-//            SimilarCollectionView.reloadData()
-//            updateSimilarProductsVisibility()
-//
-//
-//            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-//            var id = UserDefaults.standard.string(forKey: "userid")
-//            if id == idCr {
-//
-//                btnChat.setTitle("Chat", for: .normal)
-//                self.btnDel.isHidden = false
-//                self.btnEdit.isHidden = false
-//                self.AddWishList.isHidden = true
-//            } else {
-//                btnChat.setTitle("Chat with seller", for: .normal)
-//                self.btnDel.isHidden = true
-//                self.btnEdit.isHidden = true
-//                self.AddWishList.isHidden = false
-//            }
-//
-//            if MarketWDetailData?.productdetail?.first?.wishlistStatus == 1 {
-//                RemoveWishList.isHidden = false
-//              //  AddWishList.isHidden = true
-//
-//            } else if MarketWDetailData?.productdetail?.first?.wishlistStatus == 0 {
-//
-//                RemoveWishList.isHidden = true
-//              //  AddWishList.isHidden = false
-//
-//            }
-//
-//            if MarketWDetailData?.productdetail?.first?.pStatus == 2 {
-//                self.SoldImgView.isHidden = false
-//
-//
-//            } else {
-//
-//                SoldImgView.isHidden = true
-//
-//
-//            }
-//
-//        }
-       
-        
-        
-    }
+            super.viewWillAppear(animated)
+            callMarketDetailWebService { [weak self] in
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    self.updateUI()
+                    SVProgressHUD.dismiss()
+                }
+            }
+        }
     
     @IBAction func BackButtionAction(_ : UIButton){
         
-        _ = navigationController?.popViewController(animated: true)
+        self.navigationController?.popViewController(animated: true)
         
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+        //        updateColors()
     }
     
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-           
+            
             MarketFullView.backgroundColor = .black
             UserLbl.textColor = .white
             rsLbl.textColor = .white
@@ -270,7 +184,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
             
         } else {
             // Light mode mein storyboard ke original colors preserve karna
-          
+            
             MarketFullView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
             UserLbl.textColor =  UIColor.secondaryLabel
             rsLbl.textColor =  UIColor.secondaryLabel
@@ -282,25 +196,27 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
             
             
         }
-      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+        //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+            //            updateColors()
         }
     }
     
     
     func updateSimilarProductsVisibility() {
-        if let similarProducts = MarketWDetailData?.similarproducts, !similarProducts.isEmpty {
+        if let similarProducts = MarketWDetailData?.similarproducts?.count, similarProducts != 0 {
             SimilarProductLbl.isHidden = false
             SimilarCollectionView.isHidden = false
+            simillarCollectionViewHightConst.constant = 152
         } else {
             SimilarProductLbl.isHidden = true
             SimilarCollectionView.isHidden = true
+            simillarCollectionViewHightConst.constant = 0
         }
     }
     
@@ -309,155 +225,124 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         let appName = "NeighboursNook"
         let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
         let appLink = "https://testflight.apple.com/join/1G74jNEC"
-        
         let shareText = "\(appDescription) \nDownload now: \(appLink)"
-        
-        // Step 2: Show share popup
         let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-        
-        // Step 3: Present the share popup
         present(activityViewController, animated: true, completion: nil)
+    }
+    
+    
+    @IBAction func btnChat(_ : UIButton) {
+        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatListViewController") as? MarketChatListViewController else {return}
+        vc.NewidD = idD
+        self.navigationController?.pushViewController(vc, animated: true)
         
     }
-
     
-        @IBAction func btnChat(_ : UIButton){
+    @IBAction func btnProfile(_ : UIButton) {
+            //        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {return}
+            //                vc.Oid = String(self.MarketWDetailData?.productdetail?.first?.createdBy ?? 0)
+            //        self.navigationController?.pushViewController(vc, animated: true)
+            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else { return }
+            guard let currentUserId = UserDefaults.standard.string(forKey: "userid") else { return }
+            guard let createdBy = MarketWDetailData?.productdetail?.first?.createdBy else { return }
+            let createdByString = String(createdBy)
+            vc.Oid = createdByString
+            if currentUserId == createdByString {
+                vc.sourceViewController = "MyProfile"
+            } else {
+                vc.sourceViewController = "OtherProfile"
+            }
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatListViewController") as? MarketChatListViewController else {return}
     
-            vc.NewidD = idD
-    
-        self.navigationController?.pushViewController(vc, animated: true)
-    
-           }
-    
-    @IBAction func btnProfile(_ : UIButton){
-
-    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {return}
-
-        vc.Oid = String(self.MarketWDetailData?.productdetail?.first?.createdBy ?? 0)
-
-    self.navigationController?.pushViewController(vc, animated: true)
-
-       }
-    
-    @IBAction func btnEdit(_ : UIButton){
-
-    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditMarketViewController") as? EditMarketViewController else {return}
+    @IBAction func btnEdit(_ : UIButton) {
+        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditMarketViewController") as? EditMarketViewController else {return}
         vc.idD = idD
-
-    self.navigationController?.pushViewController(vc, animated: true)
-
-       }
+        vc.onUpdateForBlock = { [weak self] in
+            self?.callMarketDetailWebService { [weak self] in
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    self.updateUI()
+                }
+            }
+        }
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
     
     @IBAction func btnNewChat(_ : UIButton) {
-        
         let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-            let id = UserDefaults.standard.string(forKey: "userid")
-
-            if id == idCr {
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatListViewController") as? MarketChatListViewController else { return }
-                vc.NewidD = idD
-                vc.isFromChatList = true // ✅ Set the flag here
-                self.navigationController?.pushViewController(vc, animated: true)
-            } else {
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatViewController") as? MarketChatViewController else { return }
-                vc.Productid = String(self.MarketWDetailData?.productdetail?.first?.id ?? 0)
-                vc.userName = (self.MarketWDetailData?.productdetail?.first?.sellerName)!
-                vc.senderUserpic = (self.MarketWDetailData?.productdetail?.first?.userpic)!
-                vc.isFromChatList = false // ✅ Set the flag here
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
+        let id = UserDefaults.standard.string(forKey: "userid")
         
-           }
+        if id == idCr {
+            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatListViewController") as? MarketChatListViewController else { return }
+            vc.NewidD = idD
+            vc.isFromChatList = true
+            self.navigationController?.pushViewController(vc, animated: true)
+        } else {
+            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatViewController") as? MarketChatViewController else { return }
+            vc.Productid = String(self.MarketWDetailData?.productdetail?.first?.id ?? 0)
+            vc.userName = (self.MarketWDetailData?.productdetail?.first?.sellerName)!
+            vc.senderUserpic = (self.MarketWDetailData?.productdetail?.first?.userpic)!
+            vc.isFromChatList = false // ✅ Set the flag here
+            self.callMarketReadStatus2{}
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        
+    }
     
     @IBAction func DeletePopUpBtnAction(_ sender: UIButton) {
-      
         let vc = storyboard?.instantiateViewController(withIdentifier:"DeleteMarketViewController")as! DeleteMarketViewController
         vc.modalPresentationStyle = .overFullScreen
         vc.modalTransitionStyle = .crossDissolve
         vc.delegate = self
-        
-    
         self.present(vc , animated: true)
-
-   }
+    }
     
     @IBAction func DeletePopUpNewBtnAction(_ sender: UIButton) {
-      
+        
         let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
-
-            // Customizing the message font and size
-            let messageText = "Are you sure you want to remove this product?"
-            let attributedMessage = NSAttributedString(string: messageText, attributes: [
-                .font: UIFont(name: "Montserrat-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17),
-                .foregroundColor: #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
-            ])
-            alertController.setValue(attributedMessage, forKey: "attributedMessage")
-
-            // Define RGB Colors
-            let yesColor = UIColor(red: 0/255, green: 128/255, blue: 0/255, alpha: 1)  // Green
-            let noColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 1)   // Red
-
-            // Yes Action
-            let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
-                self.callMarketDelWebService {
-                    // Pop one screen back after the API call is successful
-                    self.navigationController?.popViewController(animated: true)
-                   
-                }
-            }
-            yesAction.setValue(yesColor, forKey: "titleTextColor") // Set Yes button color
-
-            // No Action
-            let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
-            noAction.setValue(noColor, forKey: "titleTextColor") // Set No button color
-
-            alertController.addAction(yesAction)
-            alertController.addAction(noAction)
-
-            // Present the alert
-            self.present(alertController, animated: true, completion: nil)
-   }
-    
-    @IBAction func AddWishlistBtnAction(_ sender: UIButton) {
-      
-        callWishListWebService { [weak self] in
-               
-               // After the API call is successful, navigate to HomeMarketViewController
-               DispatchQueue.main.async {
-                   // Ensure that self is not nil
-                   guard let strongSelf = self else { return }
-                   self?.navigationController?.popViewController(animated: true)
-                   // Initialize HomeMarketViewController
-//                   if let homeMarketVC = strongSelf.storyboard?.instantiateViewController(withIdentifier: "HomeMarketViewController") as? HomeMarketViewController {
-//
-//                       // Navigate to HomeMarketViewController
-//                       strongSelf.navigationController?.pushViewController(homeMarketVC, animated: true)
-//                   }
-               }
-           }
-       }
-    
-   
-    @IBAction func DelWishlistBtnAction(_ sender: UIButton) {
-      
-        callWishlistDeleteWebService{ [weak self] in
-            
-            // After the API call is successful, navigate to HomeMarketViewController
-            DispatchQueue.main.async {
-                // Ensure that self is not nil
-                guard let strongSelf = self else { return }
-                self?.navigationController?.popViewController(animated: true)
-                // Initialize HomeMarketViewController
-//                if let homeMarketVC = strongSelf.storyboard?.instantiateViewController(withIdentifier: "HomeMarketViewController") as? HomeMarketViewController {
-//
-//                    // Navigate to HomeMarketViewController
-//                    strongSelf.navigationController?.pushViewController(homeMarketVC, animated: true)
-//                }
+        let messageText = "Are you sure you want to remove this product?"
+        let attributedMessage = NSAttributedString(string: messageText, attributes: [
+            .font: UIFont(name: "Montserrat-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17),
+            .foregroundColor: #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+        ])
+        alertController.setValue(attributedMessage, forKey: "attributedMessage")
+        let yesColor = UIColor(red: 0/255, green: 128/255, blue: 0/255, alpha: 1)
+        let noColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 1)
+        let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
+            self.callMarketDelWebService {
+                self.navigationController?.popViewController(animated: true)
             }
         }
+        yesAction.setValue(yesColor, forKey: "titleTextColor")
+        let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
+        noAction.setValue(noColor, forKey: "titleTextColor")
+        
+        alertController.addAction(yesAction)
+        alertController.addAction(noAction)
+        self.present(alertController, animated: true, completion: nil)
     }
+    
+    @IBAction func AddWishlistBtnAction(_ sender: UIButton) {
+            SVProgressHUD.show()
+            callWishListWebService { [weak self] in
+                DispatchQueue.main.async {
+                    guard let strongSelf = self else { return }
+                    self?.navigationController?.popViewController(animated: true)
+                }
+            }
+        }
+        
+        @IBAction func DelWishlistBtnAction(_ sender: UIButton) {
+            SVProgressHUD.show()
+            callWishlistDeleteWebService{ [weak self] in
+                DispatchQueue.main.async {
+                    guard let strongSelf = self else { return }
+                    self?.navigationController?.popViewController(animated: true)
+                }
+            }
+        }
     
     func callMarketDelWebService(completion: @escaping () -> Void) {
         guard let idPr = UserDefaults.standard.string(forKey: "producttId"), !idPr.isEmpty else {
@@ -465,15 +350,14 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
             return
         }
         
+        // dev.
         let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add/edit/\(idPr)"
         
-        let dictParams: [String: Any] = [:] // Empty dictionary if no parameters are required
-        
-        // Run API request in background thread for faster execution
+        let dictParams: [String: Any] = [:]
         DispatchQueue.global(qos: .userInitiated).async {
             RSNetworkManager.shared.newRequestApi(withServiceName: url, requestMethod: .DELETE, requestParameters: dictParams, withProgressHUD: true) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
                 
-                DispatchQueue.main.async { // Ensure UI updates on main thread
+                DispatchQueue.main.async {
                     switch statusCode {
                     case .SUCCESS, .CREATED:
                         guard let result = result else {
@@ -484,13 +368,11 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                         do {
                             let data = try JSONDecoder().decode(DelMarketProductModel.self, from: result)
                             self.MarketWDeleteData = data
-                            
-                            // Save the deleted product ID
                             if let productID = self.MarketWDetailData?.productdetail?.first?.id {
                                 UserDefaults.standard.set(productID, forKey: "CrId")
                             }
                             
-                            completion() // Notify caller that API call is complete
+                            completion()
                         } catch {
                             print("Decoding error:", error.localizedDescription)
                         }
@@ -508,18 +390,69 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
             }
         }
     }
-
     
-//    @IBAction func btnProfile(_ : UIButton){
-//
-//    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "ChatOtherProfileViewController") as? ChatOtherProfileViewController else {return}
-//
-//        vc.Newid = idCr
-//
-//    self.navigationController?.pushViewController(vc, animated: true)
-//
-//       }
+    //dev.
     
+    func callMarketReadStatus2(completion: @escaping () -> Void) {
+            let url = "https://dev.neighbrsnook.com/admin/api/chat_read_status"
+            let id = UserDefaults.standard.string(forKey: "userid")
+        let createdBy = UserDefaults.standard.integer(forKey: "SenderidN")
+            let dictParams: Dictionary<String, Any> = [
+                "product_id": idD,
+                "sender_id": "\(createdBy)",
+                "receiver_id": id ?? ""
+            ]
+            print("Param for chat read api is :\(dictParams)")
+            RSNetworkManager.shared.newRequestApi(
+                withServiceName: url,
+                requestMethod: .PUT,
+                requestParameters: dictParams,
+                withProgressHUD: true
+            ) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                switch statusCode {
+                case .SUCCESS, .CREATED:
+                    do {
+                        let data = try JSONDecoder().decode(ChatReadModel.self, from: result!)
+                        
+                        // Update UI and UserDefaults on main thread
+                        DispatchQueue.main.async {
+                            self.objChatRead = data
+                            completion()
+                        }
+                    } catch {
+                        print("Decoding error: \(error.localizedDescription)")
+                        DispatchQueue.main.async {
+                            completion()
+                        }
+                    }
+                    
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                    do {
+                        let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
+                        print("Bad reuqest is :\(data)")
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                    DispatchQueue.main.async {
+                        completion()
+                    }
+                    
+                case .UNAUTHORIZED:
+                    print(error?.localizedDescription ?? "")
+                    DispatchQueue.main.async {
+                        completion()
+                    }
+                default:
+                    DispatchQueue.main.async {
+                        completion()
+                    }
+                }
+            }
+        }
+    
+    
+   // dev.
+     
     func callMarketDetailWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
         
@@ -590,185 +523,132 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         }
     }
     
-    func callWishListWebService(completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/wishlist"
-        
-     
-       
-        // let dictParams: Dictionary<String, Any> = ["":""]
-        
-        let idName = UserDefaults.standard.string(forKey: "name")
-        let idEvent = UserDefaults.standard.string(forKey: "eventid")
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let Sid = UserDefaults.standard.string(forKey: "Senderid")
-        let dictParams: Dictionary<String, Any> = [
-            "user_id":id ?? "",
-            "product_id":idD ?? "",
-            
-            
-        ]
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                
-                do {
-                    let data = try JSONDecoder().decode(WishListModel.self, from: result!)
-                    self.WishlistdataData = data
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "Senderid")
-                    self.collectionViewEvent.reloadData()
-                    self.SimilarCollectionView.reloadData()
-                    
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.WishlistdataData = data // Your actual data fetching logic
-                        
-                        DispatchQueue.main.async {
-                            completion() // Call completion handler
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(WishListModel.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
-            }
-        }
-    }
+    //dev.
     
-    func callWishlistDeleteWebService(completion: @escaping () -> Void) {
-        
-//        guard let id = UserDefaults.standard.string(forKey: "userid"), !id.isEmpty else {
-//                print("Product ID is not available")
-//                return
-//            }
-       // let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        let url = "https://dev.neighbrsnook.com/admin/api/wishlist/\(idD)"
-
-       // "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
-       
-        // let dictParams: Dictionary<String, Any> = ["":""]
-       
-       
-        let dictParams: Dictionary<String, Any> = ["":""]
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.DELETE,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                
-                do {
-                    let data = try JSONDecoder().decode(WishListRemoveModel.self, from: result!)
-                    self.WishlistdeleteData = data
-                 //   UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "CrId")
-                    
-                    
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.WishlistdeleteData = data // Your actual data fetching logic
-                        
-                        DispatchQueue.main.async {
-                            completion() // Call completion handler
+    func callWishListWebService(completion: @escaping () -> Void) {
+            let url = "https://dev.neighbrsnook.com/admin/api/wishlist"
+            let id = UserDefaults.standard.string(forKey: "userid")
+            let dictParams: Dictionary<String, Any> = [
+                "user_id":id ?? "",
+                "product_id":idD,
+            ]
+            
+            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true)
+            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                switch statusCode {
+                case .SUCCESS ,.CREATED:
+                    do {
+                        let data = try JSONDecoder().decode(WishListModel.self, from: result!)
+                        self.WishlistdataData = data
+                        SVProgressHUD.dismiss()
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "Senderid")
+                        self.collectionViewEvent.reloadData()
+                        self.SimilarCollectionView.reloadData()
+                        DispatchQueue.global().async {
+    //                        sleep(2)
+                            self.WishlistdataData = data
+                            DispatchQueue.main.async {
+                                SVProgressHUD.dismiss()
+                                completion()
+                            }
                         }
+                    } catch {
+                        print(error.localizedDescription)
                     }
-                } catch {
-                    print(error.localizedDescription)
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                    do {
+                        let data = try JSONDecoder().decode(WishListModel.self, from: result!)
+                        print("Bad reuqest is :\(data)")
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .UNAUTHORIZED:
+                    print(error?.localizedDescription ?? "")
+                default:
+                    break
                 }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(WishListRemoveModel.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
             }
         }
-    }
+    
+    //dev.
+    func callWishlistDeleteWebService(completion: @escaping () -> Void) {
+            let url = "https://dev.neighbrsnook.com/admin/api/wishlist/\(idD)"
+            let dictParams: Dictionary<String, Any> = ["":""]
+            
+            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.DELETE,requestParameters: dictParams, withProgressHUD: true)
+            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                switch statusCode {
+                case .SUCCESS ,.CREATED:
+                    do {
+                        SVProgressHUD.dismiss()
+                        let data = try JSONDecoder().decode(WishListRemoveModel.self, from: result!)
+                        self.WishlistdeleteData = data
+                        SVProgressHUD.dismiss()
+                        DispatchQueue.global().async {
+    //                        sleep(2)
+                            self.WishlistdeleteData = data
+                            SVProgressHUD.dismiss()
+                            DispatchQueue.main.async {
+                                completion()
+                            }
+                        }
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                    do {
+                        let data = try JSONDecoder().decode(WishListRemoveModel.self, from: result!)
+                        print("Bad reuqest is :\(data)")
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .UNAUTHORIZED:
+                    print(error?.localizedDescription ?? "")
+                default:
+                    break
+                }
+            }
+        }
+    
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // return MarketWDetailData?.productdetail.count ?? 0
-        if collectionView == collectionViewEvent
-        {
-           // return MarketWDetailData?.productdetail?.count ?? 0
+        if collectionView == collectionViewEvent {
             return MarketWDetailData?.productdetail?.first?.pImages?.count ?? 0
-            
         }
-        else{
+        else {
             return MarketWDetailData?.productdetail?.count ?? 0
         }
-        
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        if collectionView == collectionViewEvent
-        {
+        if collectionView == collectionViewEvent {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MarketDetailCollectionViewCell", for: indexPath) as! MarketDetailCollectionViewCell
- 
-            
-            
             if let postImage = MarketWDetailData?.productdetail?.first?.pImages?[indexPath.row] {
-                    cell.configure(with: postImage) // Configure the cell with the data
-               
-                }
+                cell.configure(with: postImage)
+            }
             
             cell.numberLabel.text = "\(indexPath.item + 1)"
-         //   let totalNumberOfImages =  BussinessDetailData?.image?.count ?? 0
             let totalNumberOfImages =  MarketWDetailData?.productdetail?.first?.pImages?.count ?? 0
             cell.totalImagesLabel.text =  "/ \(totalNumberOfImages)"
             cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
             cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-            
-            //
             return cell
         }
         else {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SimilarProductCollectionViewCell", for: indexPath) as! SimilarProductCollectionViewCell
-            
-
             cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
             cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
             cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
             cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
-            
             if let similarProducts = MarketWDetailData?.similarproducts, !similarProducts.isEmpty {
-                // Enable the code and configure the cell with similarproducts data
                 cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
                 cell.viewItems.layer.shadowOpacity = 0.5
                 cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
                 cell.viewItems.layer.shadowRadius = 5
                 cell.viewItems.layer.masksToBounds = false
                 cell.ViewSimilar.isHidden = false
-
                 cell.EventLbl.isEnabled = true
                 cell.rsLbl.isEnabled = true
                 cell.secttLbl.isEnabled = true
@@ -777,14 +657,14 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 
                 cell.EventLbl.text = similarProducts[indexPath.row].pTitle
                 cell.rsLbl.text = "Rs." + (similarProducts[indexPath.row].salePrice ?? "")
+
                 cell.secttLbl.text = similarProducts[indexPath.row].salePrice
                 cell.DayLbl.text = similarProducts[indexPath.row].createdTime
-
+                
                 let url = URL(string: similarProducts[indexPath.row].pImages ?? "")
                 cell.profileImgView.kf.indicatorType = .activity
                 cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
             } else {
-                // Disable the code if similarproducts is empty or nil
                 cell.EventLbl.isEnabled = false
                 cell.rsLbl.isEnabled = false
                 cell.ViewSimilar.isHidden = true
@@ -796,21 +676,11 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 cell.secttLbl.text = ""
                 cell.DayLbl.text = ""
                 cell.profileImgView.image = nil
-                
-               
-               
             }
-            
             cell.DetailCallback = { [self] value in
-                
                 let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
-                // vc.idD = (MarketWallData?.yourItems?[indexPath.row].id)!
                 vc.idD = String(MarketWDetailData?.similarproducts?[indexPath.row].id ?? 0)
-                
                 self.navigationController?.pushViewController(vc, animated: true)
-                
-                
-                
             }
             return cell
         }
@@ -833,40 +703,22 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         if collectionView == collectionViewEvent {
             
             guard let pImages = MarketWDetailData?.productdetail?.first?.pImages else { return }
-            
-            // Get the selected media item (could be image or video)
             let selectedItem = pImages[indexPath.row]
-
-            // Check if the selected item is a video
             if let videoUrl = selectedItem.video, let url = URL(string: videoUrl) {
-                // If it's a video, play it in fullscreen
                 let player = AVPlayer(url: url)
                 let playerViewController = AVPlayerViewController()
                 playerViewController.player = player
-
-                // Present video in full screen
                 present(playerViewController, animated: true) {
-                    player.play() // Automatically play the video
+                    player.play()
                 }
             } else if let imageUrlString = selectedItem.img, let imageUrl = URL(string: imageUrlString) {
-                // If it's an image, navigate to MarketEnlargmentViewController
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 if let enlargementVC = storyboard.instantiateViewController(withIdentifier: "MarketEnlargmentViewController") as? MarketEnlargmentViewController {
-                    
-                    // Pass the image array to the next view controller
                     enlargementVC.images = pImages
-                    enlargementVC.selectedIndex = indexPath.row // Pass the selected image index
-                    
-                    // Navigate to the MarketEnlargmentViewController
+                    enlargementVC.selectedIndex = indexPath.row
                     self.navigationController?.pushViewController(enlargementVC, animated: true)
                 }
             }
         }
     }
-
-   
 }
-
-//status 2 dono gone
-//0 deact gone, activate visible
-//1 deact visible, activate gone

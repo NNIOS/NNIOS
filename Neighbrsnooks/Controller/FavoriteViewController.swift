@@ -17,6 +17,7 @@ class FavoriteViewController: BaseViewController, FavoriteTableViewCellDelegate 
     var profileData : ProfileModel?
     var PostListData : PostListModel?
     var FavoriteListData : FavouriteListModel?
+    
     var imgDataF = [PostImageF]()
     var deletePost : DeletePostModel?
     var sortedSections: [(type: String, items: [Any])] = []
@@ -24,7 +25,7 @@ class FavoriteViewController: BaseViewController, FavoriteTableViewCellDelegate 
     private let bottomPanelView = BottomPanelView()
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         callFavouriteListPostWebService{
         SVProgressHUD.dismiss()
         self.tableviewMembers.reloadData()
@@ -35,7 +36,7 @@ class FavoriteViewController: BaseViewController, FavoriteTableViewCellDelegate 
         // Initialize the refresh control page
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshPageAction), for: .valueChanged)
-        
+        refreshPage()
         // Add the refresh control to your UITableView or UICollectionView
         tableviewMembers.refreshControl = refreshControl
         // Do any additional setup after loading the view.
@@ -46,16 +47,8 @@ class FavoriteViewController: BaseViewController, FavoriteTableViewCellDelegate 
         if let selectedIndex = selectedTabIndex {
                        bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
                    }
-       // SVProgressHUD.show()
-        
-        
-        callFavouriteListPostWebService{
-            SVProgressHUD.dismiss()
-            self.tableviewMembers.reloadData()
-            
-            
-            // Do any additional setup after loading the view.
-        }
+ 
+        refreshPage()
     }
     
     
@@ -129,34 +122,67 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
     
     
     
+//    func prepareSortedData(favModel: FavouriteListModel?) {
+//        guard let favModel = favModel else {
+//            print("❌ homeModel is NIL")
+//            return
+//        }
+//        
+//        let data = favModel.listdata
+//        
+//        // Check if the listdata is empty
+//        if data.isEmpty {
+//            print("❌ listdata is EMPTY")
+//            return
+//        }
+//        
+//        print("✅ listdata found, Count: \(data.count)")
+//        
+//        sortedSections.removeAll()
+//        
+//        // **Maintain Exact API Order**
+//        for item in data {
+//            let type = item.type ?? "" // ✅ Optional handling
+//            sortedSections.append((type, [item])) // ✅ Correct tuple format
+//            print("✅ Section Added: \(type) - Count: 1 (Individual Item)")
+//        }
+//        
+//        print("🔢 Total Sections: \(sortedSections.count)")
+//        print("🟡 Final Sorted Sections: \(sortedSections)")
+//    }
+    
+    
     func prepareSortedData(favModel: FavouriteListModel?) {
-        guard let favModel = favModel else {
-            print("❌ homeModel is NIL")
-            return
+            guard let favModel = favModel else {
+                print("❌ favModel is NIL")
+                return
+            }
+
+            let data = favModel.listdata
+            if data.isEmpty {
+                print("❌ listdata is EMPTY")
+                sortedSections.removeAll()
+                return
+            }
+
+            print("✅ listdata found, Count: \(data.count)")
+
+            // Group items by type
+            let groupedData = Dictionary(grouping: data) { $0.type ?? "" }
+
+            sortedSections.removeAll()
+
+            // Maintain order of types based on appearance in original list
+            let orderedTypes = Array(Set(data.map { $0.type ?? "" }))
+            for type in orderedTypes {
+                if let items = groupedData[type], !items.isEmpty {
+                    sortedSections.append((type, items))
+                    print("✅ Section Added: \(type) - Count: \(items.count)")
+                }
+            }
+
+            print("🔢 Total Sections: \(sortedSections.count)")
         }
-        
-        let data = favModel.listdata
-        
-        // Check if the listdata is empty
-        if data.isEmpty {
-            print("❌ listdata is EMPTY")
-            return
-        }
-        
-        print("✅ listdata found, Count: \(data.count)")
-        
-        sortedSections.removeAll()
-        
-        // **Maintain Exact API Order**
-        for item in data {
-            let type = item.type ?? "" // ✅ Optional handling
-            sortedSections.append((type, [item])) // ✅ Correct tuple format
-            print("✅ Section Added: \(type) - Count: 1 (Individual Item)")
-        }
-        
-        print("🔢 Total Sections: \(sortedSections.count)")
-        print("🟡 Final Sorted Sections: \(sortedSections)")
-    }
     
     
     
@@ -199,6 +225,24 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 let url = URL(string: (postData.userpic ?? ""))
                 cell.profileImgView.kf.indicatorType = .activity
                 cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "NewBusiness"))
+                if let mediaItems = postData.postImagesN, !mediaItems.isEmpty {
+                    let firstItem = mediaItems.first
+                    let imageExists = firstItem?.img != nil
+                    let videoExists = firstItem?.video != nil
+
+                    if imageExists || videoExists {
+                        cell.collectionViewBanner.isHidden = false
+                        cell.collectionViewBannerHeight.constant = 523
+                    } else {
+                        cell.collectionViewBanner.isHidden = true
+                        cell.collectionViewBannerHeight.constant = 0
+                    }
+                } else {
+                    // No media items
+                    cell.collectionViewBanner.isHidden = true
+                    cell.collectionViewBannerHeight.constant = 0
+                }
+
                 
                 cell.imgData = postData.postImagesN ?? []
                 cell.UserName = postData.username ?? ""
@@ -230,14 +274,14 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                         self.callFavouriteRemoveBussinessWebService(postId: postId) { message in
                             postData.favouritstatus = 0 // Update status
                             cell.updateFavouriteButton(isFavourite: false) // Update button icon
-                            self.showAlert(message: message) // Show alert
+//                            self.showAlert(message: message) // Show alert
                         }
                     } else {
                         // Favourite Action
                         self.callFavouriteBussinessWebService(postId: postId) { message in
                             postData.favouritstatus = 1 // Update status
                             cell.updateFavouriteButton(isFavourite: true) // Update button icon
-                            self.showAlert(message: message) // Show alert
+//                            self.showAlert(message: message) // Show alert
                         }
                     }
                 }
@@ -304,10 +348,20 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                     vc.presentDuration = 0.5
                     vc.dismissDuration = 0.5
                     vc.view.backgroundColor = .white
+                    vc.onUpdateForBlock = { [weak self] in
+                        self?.refreshPage()
+                    }
+                    vc.isComingFromMenuPostVC = false
+                    vc.onUpdateForFav = { [weak self] in
+                        self?.callFavouriteListPostWebService{
+                             self?.tableviewMembers.reloadData()
+                        }
+                    }
                     // Configure callback to handle actions in PostDotViewController
                     vc.callback = { status in
                         print("Callback received with status: \(status)")
                     }
+                    
                     
                     // Navigate to ReportPostViewController
                     vc.navigateToReportCallback = { [weak self] in
@@ -472,7 +526,12 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                     vc.dismissDuration = 0.5
                     vc.view.backgroundColor = .white
                     
-                    
+                    vc.isComingFromMenuPollVC = false
+                    vc.onUpdateForFav = { [self]  in
+                        self.callFavouriteListPostWebService{
+                            self.tableviewMembers.reloadData()
+                        }
+                    }
                     
                     vc.callback = { range in
                         
@@ -645,7 +704,7 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                     vc.poststs = postListData[indexPath.row].favouritstatus // Make sure 'favouritstatus' is an Int
                     print(eventData.eventid)
                     
-                    
+                    refreshPage()
                     // Configure PostDotViewController appearance and presentation
                     vc.height = 150
                     vc.topCornerRadius = 10.0
@@ -654,10 +713,15 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                     vc.view.backgroundColor = .white
                     
                     // Modify the callback to accept an 'Int' instead of 'Range<Int>' (if required)
-                    vc.callback = { status in
-                        // Handle the status (status should be an Int, not Range<Int>)
+                    vc.callback = { [weak self] status in
+                        guard let self = self else { return }
                         print("Callback received with status: \(status)")
+                        self.callFavouriteListPostWebService {
+                            self.tableviewMembers.reloadData()
+                        }
+                        self.dismiss(animated: true, completion: nil) // if needed
                     }
+
                     
                     
                     // Present PostDotViewController
@@ -707,8 +771,7 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 
                 cell.DotCallback = { [weak self] value in
                     guard let self = self else { return }
-                    if profileData?.verfiedMsg == "User Verification is completed!" {
-                        
+ 
                         // Ensure PostListData and listdata are non-nil and indexPath.row is valid
                         guard let postListData = self.FavoriteListData?.listdata, indexPath.row < postListData.count else { return }
                         
@@ -726,6 +789,13 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                         vc.dismissDuration = 0.2
                         vc.view.backgroundColor = .white
                         
+                        vc.isComingFromMenuBussinessVC = false
+                        vc.onUpdateForFav = { [weak self] in
+                            self?.callFavouriteListPostWebService{
+                                SVProgressHUD.dismiss()
+                                self?.tableviewMembers.reloadData()
+                            }
+                        }
                         // Modify the callback to accept an 'Int' instead of 'Range<Int>' (if required)
                         vc.callback = { status in
                             // Handle the status (status should be an Int, not Range<Int>)
@@ -735,16 +805,7 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                         
                         // Present PostDotViewController
                         self.present(vc, animated: true, completion: nil)
-                    }
-                    else{
-                        
-                        let alert = UIAlertController(title: "", message: "Your have limited access till verification is complete. We thank you for your patience.", preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-                            // Dismiss the popup
-                            alert.dismiss(animated: true, completion: nil)
-                        }))
-                        self.present(alert, animated: true, completion: nil)
-                    }
+                    
                 }
                 
             }

@@ -23,6 +23,8 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
     @IBOutlet weak var BussinessStatusView: UIView!
     @IBOutlet weak var lblApproval: UILabel!
     @IBOutlet weak var collectionViewEvent: UICollectionView!
+    @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
+
     var userId: String?
     weak var delegate: ProfileTapDelegate?
     weak var delegateH: BussinessTableViewCellDelegate?
@@ -59,6 +61,20 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
         }
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        // Check if any image or video is available
+        let hasValidItem = BusimgData.contains { item in
+            let hasImage = !(item.img?.isEmpty ?? true)
+            let hasVideo = !(item.video?.isEmpty ?? true)
+            return hasImage || hasVideo
+        }
+
+        // Set height constraint accordingly
+        collectionViewHeightConstraint.constant = hasValidItem ? 500 : -20
+        collectionViewEvent.layoutIfNeeded()
+    }
 
     
     private func addTapGestureToProfile() {
@@ -154,9 +170,26 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
         }
     
     
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        thisWidth = CGFloat(self.collectionViewEvent.width) / 1
+//        return CGSize(width: thisWidth, height: 500)
+//    }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        thisWidth = CGFloat(self.collectionViewEvent.width) / 1
-        return CGSize(width: thisWidth, height: 500)
+        guard indexPath.row < BusimgData.count else {
+            return CGSize(width: collectionView.frame.width, height: 0)
+        }
+
+        let item = BusimgData[indexPath.row]
+        let isImageEmpty = item.img?.isEmpty ?? true
+        let isVideoEmpty = item.video?.isEmpty ?? true
+
+        if isImageEmpty && isVideoEmpty {
+            return CGSize(width: collectionView.frame.width, height: 0)
+        } else {
+            return CGSize(width: collectionView.frame.width, height: 500)
+        }
     }
+
     
 }

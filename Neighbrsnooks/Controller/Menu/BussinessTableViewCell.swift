@@ -17,6 +17,7 @@ protocol BussinessTableViewCellDelegate: AnyObject {
 
 
 class BussinessTableViewCell: UITableViewCell {
+    @IBOutlet weak var ratingView: UIView!
     
     @IBOutlet weak var  collecViewBuss: UICollectionView!
     var thisWidth:CGFloat = 0
@@ -32,6 +33,9 @@ class BussinessTableViewCell: UITableViewCell {
     @IBOutlet weak var lblRating: UILabel!
     @IBOutlet weak var bussinessImg: UIImageView!
     @IBOutlet weak var btnDotsImg : UIButton!
+    @IBOutlet weak var lblBussApproval: UILabel!
+    @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
+
 
     weak var delegate: BussinessTableViewCellDelegate?
     var bussCollectionData: [String] = []
@@ -46,6 +50,7 @@ class BussinessTableViewCell: UITableViewCell {
     var bussData = [ImageBussi]()
     var FavoriteListData = [BusinessImage]()
     var BusimgData = [BusinessImageH]()
+    
     var businessData: BusinessListData?
     var DotCallback : ((UIButton) -> Void)?
     
@@ -59,7 +64,7 @@ class BussinessTableViewCell: UITableViewCell {
         super.awakeFromNib()
         
         defaultTextColor = lblUserName.textColor
-        updateColors()
+//        updateColors()
         collecViewBuss.delegate = self
         collecViewBuss.dataSource = self
         collecViewBuss.reloadData()
@@ -93,11 +98,22 @@ class BussinessTableViewCell: UITableViewCell {
         }
     }
 
-    func configureCell(with data: [ImageBussi]) {
-        self.bussData = data
+    func configureFullCell(with businessData: BusinessListData) {
+        self.businessData = businessData
+        self.bussData = businessData.image ?? []
+
+        print("📦 Business ID: \(businessData.id ?? "") | Image Count: \(bussData.count)")
+
+        let hasMedia = bussData.contains { !($0.img?.isEmpty ?? true) || !($0.video?.isEmpty ?? true) }
+        collectionViewHeightConstraint.constant = hasMedia ? 530 : 0
+
         collecViewBuss.reloadData()
-       
+        layoutIfNeeded()
     }
+
+
+
+
     
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
@@ -126,7 +142,7 @@ class BussinessTableViewCell: UITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
     
@@ -144,10 +160,11 @@ class BussinessTableViewCell: UITableViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        bussCollectionData = [] // Clear old data on reuse
-        collecViewBuss.reloadData()
-     
+        bussData = []
+        businessData = nil
+        collecViewBuss.setContentOffset(.zero, animated: false)
     }
+
     
     func pauseAllVideosInVisibleCells() {
         let visibleCells = collecViewBuss.visibleCells.compactMap { $0 as? BussinessDataCollectionViewCell }
@@ -216,12 +233,8 @@ extension BussinessTableViewCell : UICollectionViewDataSource, UICollectionViewD
             print("No business ID available")
         }
     }
-
-
-
-
-    
-    
+ 
+   
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         thisWidth = CGFloat(self.collecViewBuss.width) / 1
         return CGSize(width: thisWidth, height: 530)

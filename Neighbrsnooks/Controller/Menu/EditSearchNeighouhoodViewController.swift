@@ -64,6 +64,16 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
         callUserProfileWebService{ [self] in
             SVProgressHUD.dismiss()
         }
+        
+        LocationPermissionManager.shared.checkPermission(from: self) { granted in
+            if granted {
+                print("✅ Location access granted, start location work here.")
+                self.locationManager.startUpdatingLocation()
+            } else {
+                print("❌ Location access denied.")
+            }
+        }
+        
     }
     
     
@@ -115,41 +125,122 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
         return cell
     }
     
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        let prediction = autocompleteResults[indexPath.row]
+//        
+//        // Update the label with the selected location
+//        lblCurrentLocationDataShow.text = ": \(prediction.attributedFullText.string)"
+//        selectedLocation = prediction.attributedFullText.string // Store the selected location
+//        
+//        // Fetch full address details for the selected location
+//        fetchAddressDetails(for: selectedLocation ?? "")
+//        
+//        
+//        
+//        // Store latitude and longitude when an address is selected
+//        if let lat = self.selectedLatitude, let lon = self.selectedLongitude {
+//            print("Selected Latitude: \(lat), Longitude: \(lon)")
+//        }
+//
+//        tableView.deselectRow(at: indexPath, animated: true)
+//    }
+
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let prediction = autocompleteResults[indexPath.row]
-        
-        // Update the label with the selected location
-        lblCurrentLocationDataShow.text = ": \(prediction.attributedFullText.string)"
-        selectedLocation = prediction.attributedFullText.string // Store the selected location
-        
-        // Fetch full address details for the selected location
-        fetchAddressDetails(for: selectedLocation ?? "")
-        
-        
-        
-        // Store latitude and longitude when an address is selected
-        if let lat = self.selectedLatitude, let lon = self.selectedLongitude {
-            print("Selected Latitude: \(lat), Longitude: \(lon)")
-        }
+        let placeID = prediction.placeID
 
+        let placesClient = GMSPlacesClient.shared()
+        placesClient.fetchPlace(
+            fromPlaceID: placeID,
+            placeFields: [.name, .coordinate, .addressComponents],
+            sessionToken: nil
+        ) { [weak self] (place, error) in
+            guard let self = self else { return }
+            if let error = error {
+                print("Error fetching place details: \(error.localizedDescription)")
+                return
+            }
+            guard let place = place else {
+                print("No place details found.")
+                return
+            }
+
+            let mainText = prediction.attributedPrimaryText.string
+            self.selectedLocation = mainText
+            self.lblCurrentLocationDataShow.text = mainText
+
+            // Lat/Lng
+            let coordinate = place.coordinate
+            self.selectedLatitude = coordinate.latitude
+            self.selectedLongitude = coordinate.longitude
+
+            // Extract city, state, and pin from addressComponents
+            var foundCity: String?
+            var foundState: String?
+            var foundZip: String?
+            if let components = place.addressComponents {
+                for comp in components {
+                    if comp.types.contains("locality") { foundCity = comp.name }
+                    else if comp.types.contains("administrative_area_level_1") { foundState = comp.name }
+                    else if comp.types.contains("postal_code") { foundZip = comp.name }
+                }
+            }
+            self.city = foundCity
+            self.state = foundState
+
+            if let postcode = foundZip {
+                // Postal code Google se mil gaya
+                self.zipcode = postcode
+                self.isSearchLocation = true
+                self.navigateToRegisterSecondVC()
+            } else {
+                // Postal code Google Place se nahi mila, to Apple se reverse-geocode karo
+                let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                CLGeocoder().reverseGeocodeLocation(location) { [weak self] placemarks, error in
+                    guard let self = self else { return }
+                    if let pin = placemarks?.first?.postalCode {
+                        self.zipcode = pin
+                        print("Reverse geocoded pin: \(pin)")
+                    } else {
+                        self.zipcode = nil
+                        print("No pin even with Apple geocoder!")
+                    }
+                    self.isSearchLocation = true
+                    self.navigateToRegisterSecondVC()
+                }
+                // Yahan return karo — taki aage method na chale jab tak reverse complete na ho
+                return
+            }
+        }
         tableView.deselectRow(at: indexPath, animated: true)
     }
+
 
   
     
     
     // Get current location and update the label
     @IBAction func getCurrentLocationTapped(_ sender: Any) {
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        activityIndicator.startAnimating() // Start loader
-        print("tab Current button\(locationManager)")
-        locationManager.requestLocation()
-        locationManager.startUpdatingLocation()
-       
+        LocationPermissionManager.shared.checkPermission(from: self) { granted in
+            if granted {
+                print("✅ Location access granted, start location work here.")
+                
+                self.locationManager.delegate = self
+                self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
+                
+                self.activityIndicator.startAnimating() // Start loader
+                print("📍 Requesting current location: \(self.locationManager)")
+                
+                self.locationManager.requestLocation()
+                self.locationManager.startUpdatingLocation()
+                
+            } else {
+                print("❌ Location access denied.")
+                // Alert is already handled inside LocationPermissionManager
+            }
+        }
     }
-   
     
     // CLLocationManagerDelegate methods
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -222,23 +313,22 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
             registerSecondVC.city = self.city
             registerSecondVC.state = self.state
             registerSecondVC.zipcode = self.zipcode ?? ""
-
             // Pass latitude and longitude
             registerSecondVC.latitudeS = self.selectedLatitude ?? 0.0
             registerSecondVC.longitudeS = self.selectedLongitude ?? 0.0
             registerSecondVC.isFromProfile = true
+            registerSecondVC.isComingFromSearchVC = true
             registerSecondVC.profileData = profileData
-            
+
             // Debugging to ensure the data being passed
             print("Passing latitude: \(registerSecondVC.latitudeS), longitude: \(registerSecondVC.longitudeS)")
-            
             // Check kis tarah ka location data pass ho raha hai
             if isSearchLocation {
                 print("Passing Search Location Data")
             } else {
                 print("Passing Current Location Data")
             }
-
+            
             // Debugging prints to check values
             print("Location Data: \(selectedLocation ?? "No location")")
             print("City: \(self.city ?? "No city")")
@@ -250,7 +340,6 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
             navigationController?.pushViewController(registerSecondVC, animated: true)
         }
     }
-    
     
     func callUserProfileWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -316,6 +405,7 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
                 self.lblCurrentLocationDataShow.text = address
                 self.selectedLocation = address
                 self.isSearchLocation = true
+                print(address)
 
                 // Get latitude and longitude
                 if let location = placemark.location {
@@ -347,5 +437,38 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
         }
     }
 
-
+    func reverseGeocode(location: CLLocation) {
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            if let error = error {
+                print("Error in reverse geocoding: \(error.localizedDescription)")
+                return
+            }
+            
+            if let placemark = placemarks?.first {
+                let address = [
+                    placemark.name,
+                    placemark.subLocality,
+                    placemark.locality,
+                    placemark.administrativeArea,
+                    placemark.postalCode,
+                    placemark.country
+                ].compactMap { $0 }.joined(separator: ", ")
+                
+                self.lblCurrentLocationDataShow.text = address
+                self.selectedLocation = address
+                self.city = placemark.locality
+                self.state = placemark.administrativeArea
+                self.zipcode = placemark.postalCode
+                
+                if !self.isNavigated {
+                    self.isNavigated = true
+                    DispatchQueue.main.async {
+                        self.navigateToRegisterSecondVC()
+                    }
+                }
+            }
+        }
+    }
+    
 }

@@ -15,7 +15,7 @@ class WishListmarketViewController: UIViewController,UICollectionViewDelegate,UI
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        lblHeading.text = "Wish List"
         collectionViewMyEvent.delegate = self
         collectionViewMyEvent.dataSource = self
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
@@ -97,6 +97,7 @@ class WishListmarketViewController: UIViewController,UICollectionViewDelegate,UI
     
     }
     
+    //dev.
     func callMarketWishlistWebService(completion: @escaping () -> Void) {
         
         guard let id = UserDefaults.standard.string(forKey: "userid"), !id.isEmpty else {

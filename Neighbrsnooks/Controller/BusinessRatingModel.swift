@@ -8,7 +8,11 @@
 import Foundation
 
 // MARK: - Welcome
-struct BusinessRatingModel: Codable {
-    let status, message, rating: String?
-}
+//struct BusinessRatingModel: Codable {
+//    let status, message, rating: String?
+//}
 
+struct BusinessRatingModel: Codable {
+    let status, message: String?
+    let rating: Int?
+}

@@ -14,6 +14,7 @@ import AVKit
 import SystemConfiguration
 import Vision
 import Alamofire
+import TOCropViewController
 
 
 protocol ProfileneigSelectionDelegate: AnyObject {
@@ -27,7 +28,7 @@ protocol ProfileLocationDelegate: AnyObject {
 
 
 @available(iOS 16.0, *)
-class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
+class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, TOCropViewControllerDelegate  {
     
     @IBOutlet weak var tabNeighourhoodView: UIView!
     @IBOutlet weak var lblSector: UILabel!
@@ -94,7 +95,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     
     @IBOutlet weak var lblAdharDetails: UILabel!
     @IBOutlet weak var saveButton: UIButton!
-    
+    @IBOutlet weak var viewYourAddress: UIView!
     
     @IBOutlet weak var lblBack: UILabel!
     @IBOutlet weak var lblFront: UILabel!
@@ -124,7 +125,8 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     let defaultBackImage = UIImage(named: "PhotoIDProof")
     
     var isFromProfile: Bool = false
-    
+    var isSearchLocation: Bool = false // Default is false (assume current)
+
     
     var allowMultipleSelection: Bool = true
     var data: [String] = []
@@ -132,7 +134,8 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     
     var labelTag: Int = 0
     var selectedIndexPath: IndexPath?
-    
+    var activityIndicator: UIActivityIndicatorView?
+
     
     // code irshad malik
     var selectedIndex: IndexPath?
@@ -183,20 +186,17 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     var secname: String?
     var from = 0
     var serch = 0
-    
-    
-    @IBOutlet weak var viewYourAddress: UIView!
-    
-    
+    var isDocumentSelected: Bool = false
     var city: String?
     var state: String?
     var zipcode: String = ""
+    var isComingFromSearchVC: Bool = false
+
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setUp()
-        
         callUploaddocumentWebService { [weak self] in
             DispatchQueue.main.async {
                 guard let self = self else { return }
@@ -219,48 +219,100 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
                 }
             }
         }
+        self.btnReachout.isHidden = true
+
     }
+    
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        
+//        print("Profile Data:", profileData ?? "No Data") // Debugging
+//        
+//        if let newLocation = selectedLocation {
+//            lblSector.text = newLocation
+//            let components = newLocation.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+//            if components.count > 1 {
+//                lblArea.text = components[1]
+//                lblForNeighourhood_ID.text = "(For \(components[1]))"
+//                lblForNeighourhood_Address.text = "(For \(components[1]))"
+//            } else {
+//                lblArea.text = "Sub Locality not found"
+//            }
+//         } else {
+//            if let profileData = profileData {
+//                lblArea.text = profileData.neighborhood
+//                lblForNeighourhood_ID.text = "(For \(profileData.neighborhood))"
+//                lblForNeighourhood_Address.text = "(For \(profileData.neighborhood))"
+//                lblSector.text = "\(profileData.addlineone ?? ""), \(profileData.addlinetwo ?? "")"
+//                tfFlat.text = profileData.addlineone
+//                tfStreet.text = profileData.addlinetwo
+//                tfState.text = profileData.state
+//                tfCity.text = profileData.city
+//                tfPincode.text = profileData.pincode
+//                genderTextField.text = profileData.gender
+//                dobTextField.text = profileData.dob
+//             } else {
+//                print("⚠️ profileData is nil")
+//            }
+//        }
+//        
+//        // ✅ Ensure updated `lblArea.text` is being used
+//        print("🔹 lblArea.text before API call:", lblArea.text ?? "No Value")
+//        self.callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: self.latitudeS ?? 0.0, longitude: self.longitudeS ?? 0.0))
+//
+//    }
+    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+
         print("Profile Data:", profileData ?? "No Data") // Debugging
-        
+
         if let newLocation = selectedLocation {
             lblSector.text = newLocation
-            
             let components = newLocation.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            // 👇 Agar multiple components hain, then display sub locality; warna simply location show karo.
             if components.count > 1 {
-                lblArea.text = components[1] // Sub locality ya street ko set karo
-                lblForNeighourhood_ID.text = components[1]
-                lblForNeighourhood_Address.text = components[1]
+                let subLocality = components[1]
+                lblArea.text = subLocality
+                lblForNeighourhood_ID.text = "(For \(subLocality))"
+                lblForNeighourhood_Address.text = "(For \(subLocality))"
             } else {
-                lblArea.text = "Sub Locality not found"
+                // 👇 No comma? Bas wahi location dikhado, "not found" ki jagah.
+                lblArea.text = newLocation
+                lblForNeighourhood_ID.text = "(For \(newLocation))"
+                lblForNeighourhood_Address.text = "(For \(newLocation))"
             }
+        } else if let profileData = profileData {
+            lblArea.text = profileData.neighborhood
+            lblForNeighourhood_ID.text = "(For \(profileData.neighborhood))"
+            lblForNeighourhood_Address.text = "(For \(profileData.neighborhood))"
+            lblSector.text = "\(profileData.addlineone ?? ""), \(profileData.addlinetwo ?? "")"
+            tfFlat.text = profileData.addlineone
+            tfStreet.text = profileData.addlinetwo
+            tfState.text = profileData.state
+            tfCity.text = profileData.city
+            tfPincode.text = profileData.pincode
+            genderTextField.text = profileData.gender
+            dobTextField.text = profileData.dob
         } else {
-            if let profileData = profileData {
-                lblArea.text = profileData.neighborhood
-                lblForNeighourhood_ID.text = profileData.neighborhood
-                lblForNeighourhood_Address.text = profileData.neighborhood
-                lblSector.text = "\(profileData.addlineone ?? ""), \(profileData.addlinetwo ?? "")"
-                tfFlat.text = profileData.addlineone
-                tfStreet.text = profileData.addlinetwo
-                tfState.text = profileData.state
-                tfCity.text = profileData.city
-                tfPincode.text = profileData.pincode
-                genderTextField.text = profileData.gender
-                dobTextField.text = profileData.dob
-            } else {
-                print("⚠️ profileData is nil")
-            }
+            print("⚠️ profileData is nil")
+            lblArea.text = ""
+            lblForNeighourhood_ID.text = ""
+            lblForNeighourhood_Address.text = ""
+            lblSector.text = ""
         }
-        
+
         // ✅ Ensure updated `lblArea.text` is being used
         print("🔹 lblArea.text before API call:", lblArea.text ?? "No Value")
-        callCurrentSearchNeighbrWebService()  // API call viewWillAppear ke andar ho
+        self.callSearchNeighbrWebService(
+            location: CLLocationCoordinate2D(
+                latitude: self.latitudeS ?? 0.0,
+                longitude: self.longitudeS ?? 0.0
+            )
+        )
     }
-    
-    
+
     
     func setUp(){
         frontImageView.isHidden = true
@@ -273,7 +325,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         
         tfFlat.text = profileData?.addlineone
         let addressline = (profileData?.addlineone ?? "") + " " + (profileData?.addlinetwo ?? "")
-        tfStreet.text = addressline
+        tfStreet.text = profileData?.addlinetwo
         genderTextField.text = profileData?.gender
         dobTextField.text = profileData?.dob
         
@@ -286,25 +338,55 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         print("Zipcode in RegisterSecondVC: \(zipcode ?? "No Zipcode")")
         print("Received Latitude: \(latitudeS ?? 0.0)")
         print("Received Longitude: \(longitudeS ?? 0.0)")
-        if let location = selectedLocation {
-            // Directly set the full address to lblSector
-            lblSector.text = location
-            
-            // Optional: You can still split the address if you need individual components for other purposes
-            let components = location.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-            print("Components: \(components)") // Debugging
-            
-            // Sub Locality ko lblArea par set karo
-            if components.count > 1 {
-                // Assuming sub locality is in the second index (components[1])
-                lblArea.text = components[1]
-            } else {
-                lblArea.text = "Sub Locality not found"
-            }
-        }
         
-        callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: latitudeS ?? 0.0, longitude: longitudeS ?? 0.0))
-        tabNeighourhoodView.layer.cornerRadius = 10
+        
+        if let newLocation = selectedLocation {
+            lblSector.text = newLocation
+            let components = newLocation.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            if components.count > 1 {
+                lblArea.text = components[1]
+                lblForNeighourhood_ID.text = "(For \(components[1]))"
+                lblForNeighourhood_Address.text = "(For \(components[1]))"
+            } else {
+                // Agar only 1 hai, wahi dikha do instead of 'not found'
+                lblArea.text = newLocation
+                lblForNeighourhood_ID.text = "(For \(newLocation))"
+                lblForNeighourhood_Address.text = "(For \(newLocation))"
+            }
+        } else {
+            lblArea.text = "Area not found"
+        }
+
+        
+        
+        
+//        if let location = selectedLocation {
+//            lblSector.text = location
+//            let coordinate = CLLocationCoordinate2D(
+//                latitude: self.latitudeS ?? 0.0,
+//                longitude: self.longitudeS ?? 0.0
+//            )
+//            let geocoder = CLGeocoder()
+//            let clLocation = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+//            geocoder.reverseGeocodeLocation(clLocation) { [weak self] placemarks, error in
+//                guard let self = self else { return }
+//                if let placemark = placemarks?.first {
+//                    let subLocality = placemark.subLocality ?? "Sub Locality not found"
+//                    self.lblArea.text = subLocality
+//                    self.lblForNeighourhood_ID.text = "(For \(subLocality))"
+//                    self.lblForNeighourhood_Address.text = "(For \(subLocality))"
+//                    print("✅ SubLocality set:", subLocality)
+//                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                        self.callRegSecWebService {}
+//                        self.callSearchNeighbrWebService(location: coordinate)
+//                    }
+//                } else {
+//                    self.lblArea.text = "Sub Locality not found"
+//                }
+//            }
+//        }
+        
+         tabNeighourhoodView.layer.cornerRadius = 10
         tabNeighourhoodView.clipsToBounds = true
         yourneighbourhoodViewCornR.layer.cornerRadius = 20 // Adjust the value as needed
         yourneighbourhoodViewCornR.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner] // Top corners only
@@ -393,7 +475,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         setupDatePicker()
         updateButtonStates()
         setupImageViews()
-        self.callNeighorhodStatusStateCity()
+        
         let areaTapGesture = UITapGestureRecognizer(target: self, action: #selector(areaLabelTapped))
         tabNeighourhoodView.isUserInteractionEnabled = true
         tabNeighourhoodView.addGestureRecognizer(areaTapGesture)
@@ -551,7 +633,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         let font = UIFont(name: "Montserrat-Regular", size: 12) // Apna font aur size specify karein
         
         // Aadhaar Button
-        let aadhaarTitle = "Aadhar"
+        let aadhaarTitle = "Aadhaar"
         let aadhaarAttributes: [NSAttributedString.Key: Any] = [
             .font: font as Any
         ]
@@ -607,23 +689,23 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         switch documentType {
         case "aadhar":
             selectedDocumentType = .aadhar
-            handleDocumentSelection(.aadhaar)
+            handleDocumentSelection(.aadhaar, showAlert: false)
             showImageViews()
-            
         case "passport":
             selectedDocumentType = .passport
-            handleDocumentSelection(.passport)
+            handleDocumentSelection(.passport, showAlert: false)
             showImageViews()
         case "voterid":
             selectedDocumentType = .voterID
-            handleDocumentSelection(.voterID)
+            handleDocumentSelection(.voterID, showAlert: false)
+            showImageViews()
         case "drivingLicense":
             selectedDocumentType = .drivingLicense
-            handleDocumentSelection(.drivingLicense)
+            handleDocumentSelection(.drivingLicense, showAlert: false)
             showImageViews()
         case "rentDocs":
             selectedDocumentType = .RentDoc
-            handleDocumentSelection(.RentDoc)
+            handleDocumentSelection(.RentDoc, showAlert: false)
             showImageViews()
         default:
             return
@@ -661,50 +743,123 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     
     
     // Document selection update function
-    private func handleDocumentSelection(_ document: SelectedDocument) {
+    private func handleDocumentSelection(_ document: SelectedDocument, showAlert: Bool = true) {
         selectedDocument = document
         updateButtonStates()
-        
-        // Aadhaar, passport, voter ID, ya driving license ke liye dono images enable honi chahiye
-        frontImageView.isUserInteractionEnabled = true
-        lblFront.isUserInteractionEnabled = true
-        
-        if document == .RentDoc {
-            backImageView.isHidden = true
-            lblBack.isHidden = true
-            backImageView.isUserInteractionEnabled = false
-            lblBack.isUserInteractionEnabled = false
-        } else {
-            backImageView.isHidden = false
-            lblBack.isHidden = false
-            backImageView.isUserInteractionEnabled = true
-            lblBack.isUserInteractionEnabled = true
+        isDocumentSelected = true
+        frontImageView.isUserInteractionEnabled = selectedDocument != .none
+        backImageView.isUserInteractionEnabled = selectedDocument != .none
+        lblFront.isUserInteractionEnabled = selectedDocument != .none
+        lblBack.isUserInteractionEnabled = selectedDocument != .none
+        showImageViews()
+        // Document name
+        var documentName = ""
+        switch document {
+        case .aadhaar:
+            documentName = "Aadhaar card"
+        case .passport:
+            documentName = "Passport"
+        case .voterID:
+            documentName = "Voter ID"
+        case .drivingLicense:
+            documentName = "Driving License"
+        case .RentDoc:
+            documentName = "Rent Lease / Electricity Bill"
+        case .none:
+            return
         }
+        // Neighbourhood/area
+        let sector = lblArea.text ?? "your neighbourhood"
+        // Build attributed message
+        let fullMessage = NSMutableAttributedString()
+        
+        // Common message for all
+        let messagePart = NSAttributedString(
+            string: "Please upload your \(documentName)—must show address in ",
+            attributes: [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                .foregroundColor: UIColor.darkGray
+            ]
+        )
+        fullMessage.append(messagePart)
+        // Area/sector name
+        let areaPart = NSAttributedString(
+            string: "\(sector).", // ya sirf "." agar space bilkul nahi chahiye
+            attributes: [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                .foregroundColor: UIColor.fromHex("#008000")
+            ]
+        )
+        
+        
+        fullMessage.append(areaPart)
+        // Aadhaar-specific safety note
+        // Aadhaar-specific safety note
+        if document == .aadhaar {
+            let safetyNote = NSAttributedString(
+                string: "\nFor your safety, it will be automatically masked.",
+                attributes: [
+                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                    .foregroundColor: UIColor.gray
+                ]
+            )
+            fullMessage.append(safetyNote)
+        }
+        
+        // ✅ Show the alert only if allowed
+        if showAlert {
+            let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+            alert.setValue(fullMessage, forKey: "attributedMessage")
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            present(alert, animated: true)
+        }
+        
     }
-    
     
     
     @IBAction func aadhaarButtonTapped(_ sender: UIButton) {
+        clearUploadedImages()
+        selectedDocumentType = .aadhar
+        updateButtonStates()
         showImageViews()
     }
-    
+
     @IBAction func passportButtonTapped(_ sender: UIButton) {
+        clearUploadedImages()
+        selectedDocumentType = .passport
+        updateButtonStates()
         showImageViews()
     }
-    
+
     @IBAction func voterIDButtonTapped(_ sender: UIButton) {
+        clearUploadedImages()
+        selectedDocumentType = .voterID
+        updateButtonStates()
         showImageViews()
     }
-    
+
     @IBAction func drivingLicenseButtonTapped(_ sender: UIButton) {
+        clearUploadedImages()
+        selectedDocumentType = .drivingLicense
+        updateButtonStates()
         showImageViews()
     }
-    
+
     @IBAction func rentdocsTapped(_ sender: Any) {
+        clearUploadedImages()
+        selectedDocumentType = .RentDoc
+        updateButtonStates()
         showImageViews()
     }
-    
-    
+
+
+     
+    func clearUploadedImages() {
+        frontImageView.image = UIImage(named: "PhotoIDProof")
+        backImageView.image = UIImage(named: "PhotoIDProof")
+//        updateImageViewStylesIfEmpty()
+    }
+
     func showImageViews() {
         frontImageView.isHidden = false
         lblFront.isHidden = false
@@ -719,6 +874,33 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         }
     }
     
+    func clearUploadedImagesIfDocumentChanged(to newDocument: SelectedDocument) {
+        // Clear images first BEFORE updating selectedDocument
+        if selectedDocument != newDocument {
+            frontImageView.image = UIImage(named: "PhotoIDProof")
+            backImageView.image = UIImage(named: "PhotoIDProof")
+         }
+
+         selectedDocument = newDocument
+        updateButtonStates()
+    }
+
+
+
+    func updateImageViewStylesIfEmpty() {
+        [frontImageView, backImageView].forEach { imageView in
+            if imageView?.image == nil || imageView?.image == UIImage(named: "PhotoIDProof") {
+                imageView?.backgroundColor = UIColor(white: 0.95, alpha: 1)
+                imageView?.layer.borderWidth = 1
+                imageView?.layer.borderColor = UIColor.lightGray.cgColor
+            } else {
+                imageView?.backgroundColor = .clear
+                imageView?.layer.borderWidth = 0
+            }
+        }
+    }
+
+
     
     
     // Update buttons and image views states
@@ -884,57 +1066,211 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     // Image picker ko dikhane ka function
     private func presentImageSourceOptions() {
         let alertController = UIAlertController()
-        
+
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             let cameraAction = UIAlertAction(title: "Take photo", style: .default) { _ in
-                self.openImagePicker(sourceType: .camera)
+                checkCameraPermission { granted in
+                    if granted {
+                        self.openImagePicker(sourceType: .camera)
+                    }
+                    // Agar denied h, to `checkCameraPermission` function khud hi alert dikha dega
+                }
             }
             alertController.addAction(cameraAction)
         }
-        
+
         let galleryAction = UIAlertAction(title: "Choose photo", style: .default) { _ in
             self.openImagePicker(sourceType: .photoLibrary)
         }
         alertController.addAction(galleryAction)
-        
+
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         alertController.addAction(cancelAction)
-        
+
         present(alertController, animated: true, completion: nil)
     }
+
     
-    // 8. Jab image select ho jaaye
+    
+    
+    //MARK: -  crop start  Jab image select ho jaaye
     private func openImagePicker(sourceType: UIImagePickerController.SourceType) {
         let imagePicker = UIImagePickerController()
         imagePicker.sourceType = sourceType
-        imagePicker.allowsEditing = true
         imagePicker.delegate = self
+        imagePicker.allowsEditing = false // VERY IMPORTANT
         present(imagePicker, animated: true, completion: nil)
     }
-    
+
     
     
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        // Retrieve the edited (cropped) image
-        if let editedImage = info[.editedImage] as? UIImage {
-            // Set the cropped image to the selected image view
-            imageViewToUpdate?.image = editedImage
-        } else if let originalImage = info[.originalImage] as? UIImage {
-            // Fallback to original image if editing was not done
-            imageViewToUpdate?.image = originalImage
+        picker.dismiss(animated: true)
+
+        if let originalImage = info[.originalImage] as? UIImage {
+            let cropViewController = TOCropViewController(croppingStyle: .default, image: originalImage)
+            cropViewController.delegate = self
+            cropViewController.aspectRatioPreset = .presetSquare
+            cropViewController.aspectRatioLockEnabled = true
+            present(cropViewController, animated: true)
+        }
+    }
+
+    
+ 
+    
+    
+//    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, with cropRect: CGRect, angle: Int) {
+//                cropViewController.dismiss(animated: true)
+//                detectText(in: image) { observations in
+//                    let aadhaarObservations = self.findAadhaarNumbers(in: observations)
+//
+//                    DispatchQueue.main.async {
+//                        if !aadhaarObservations.isEmpty,
+//                           let maskedImage = self.maskDigits(in: image, from: observations) {
+//                            // ✅ Masked image
+//                            self.imageViewToUpdate?.image = maskedImage
+//                        } else {
+//                            // ⚠️ No Aadhaar detected
+//                            self.imageViewToUpdate?.image = image
+//                        }
+//
+//                        self.imageViewToUpdate = nil
+//                    }
+//                }
+//            }
+    
+    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, with cropRect: CGRect, angle: Int) {
+            cropViewController.dismiss(animated: true)
+            
+            // Aadhaar validation only if selectedDocumentType == .aadhar
+            if selectedDocumentType == .aadhar {
+                detectText(in: image) { observations in
+                    let aadhaarObservations = self.findAadhaarNumbers(in: observations)
+
+                    DispatchQueue.main.async {
+                        if !aadhaarObservations.isEmpty,
+                           let maskedImage = self.maskDigits(in: image, from: observations) {
+                            // ✅ Aadhaar found, apply masked image
+                            self.imageViewToUpdate?.image = maskedImage
+                        } else {
+                            // ❌ Aadhaar not found, show placeholder for front/back
+                            if self.imageViewToUpdate === self.frontImageView || self.imageViewToUpdate === self.backImageView {
+                                self.imageViewToUpdate?.image = UIImage(named: "PhotoIDProof")
+                            } else {
+                                self.imageViewToUpdate?.image = nil
+                            }
+                        }
+                        self.imageViewToUpdate = nil
+                    }
+                }
+            } else {
+                // For other document types, just assign the image directly
+                DispatchQueue.main.async {
+                    self.imageViewToUpdate?.image = image
+                    self.imageViewToUpdate = nil
+                }
+            }
+        }
+    
+    
+    //MARK: -   crop end
+ 
+    func detectText(in image: UIImage, completion: @escaping ([VNRecognizedTextObservation]) -> Void) {
+            guard let cgImage = image.cgImage else { return }
+            
+            let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            let request = VNRecognizeTextRequest { (request, error) in
+                if let observations = request.results as? [VNRecognizedTextObservation] {
+                    completion(observations)
+                }
+            }
+            
+            request.recognitionLevel = .accurate
+            request.recognitionLanguages = ["en-IN"]
+            request.usesLanguageCorrection = true
+            
+            try? requestHandler.perform([request])
         }
         
-        // Dismiss the picker
-        picker.dismiss(animated: true, completion: nil)
-        guard let image = info[.editedImage] as? UIImage else { return }
         
-        // Set the uploaded image in the correct UIImageView
-        imageViewToUpdate?.image = image
-        imageViewToUpdate = nil
-    }
+//        func findAadhaarNumbers(in observations: [VNRecognizedTextObservation]) -> [(text: String, boundingBox: CGRect)] {
+//            var result: [(text: String, boundingBox: CGRect)] = []
+//            
+//            for observation in observations {
+//                guard let candidate = observation.topCandidates(1).first else { continue }
+//                let text = candidate.string.replacingOccurrences(of: " ", with: "")
+//                
+//                if text.range(of: #"^\d{12}$"#, options: .regularExpression) != nil {
+//                    result.append((candidate.string, observation.boundingBox))
+//                }
+//            }
+//            
+//            return result
+//        }
     
-    
+    func findAadhaarNumbers(in observations: [VNRecognizedTextObservation]) -> [(text: String, boundingBox: CGRect)] {
+                var result: [(text: String, boundingBox: CGRect)] = []
+                
+                for observation in observations {
+                    guard let candidate = observation.topCandidates(1).first else { continue }
+                    let text = candidate.string.replacingOccurrences(of: " ", with: "")
+                    
+                    if text.range(of: #"^\d{12}$"#, options: .regularExpression) != nil {
+                        result.append((candidate.string, observation.boundingBox))
+                        print("Musk text is : \(text)")
+                    }
+                }
+                
+                if result.isEmpty {
+                    DispatchQueue.main.async {
+                        let alert = UIAlertController(title: nil, message: "Couldn’t read the Aadhaar card. Please take a clearer photo.", preferredStyle: .alert)
+                        let attributedMessage = NSAttributedString(
+                            string: "Couldn’t read the Aadhaar card. Please take a clearer photo.",
+                            attributes: [
+                                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),.foregroundColor: #colorLiteral(red: 0.3764705882, green: 0.3725490196, blue: 0.3725490196, alpha: 1)
+                            ])
+                        alert.setValue(attributedMessage, forKey: "attributedMessage")
+                        
+                        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                        okAction.setValue( #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1) , forKey: "titleTextColor")
+                        alert.addAction(okAction)
+                        self.present(alert, animated: true, completion: nil)
+                    }
+                }
+                
+                return result
+            }
+        
+        
+        func maskDigits(in image: UIImage, from observations: [VNRecognizedTextObservation]) -> UIImage? {
+            UIGraphicsBeginImageContextWithOptions(image.size, false, 0)
+            image.draw(at: .zero)
+            guard let context = UIGraphicsGetCurrentContext() else { return nil }
+            
+            for obs in observations {
+                guard let candidate = obs.topCandidates(1).first else { continue }
+                let fullText = candidate.string.replacingOccurrences(of: " ", with: "")
+                
+                if fullText.count == 12 {
+                    let box = obs.boundingBox
+                    let imageSize = image.size
+                    let rect = CGRect(x: box.origin.x * imageSize.width,
+                                      y: (1 - box.origin.y - box.size.height) * imageSize.height,
+                                      width: box.size.width * imageSize.width,
+                                      height: box.size.height * imageSize.height)
+                    let digitWidth = rect.width / 12.0
+                    let maskRect = CGRect(x: rect.origin.x, y: rect.origin.y, width: digitWidth * 8, height: rect.height)
+                    context.setFillColor(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1))
+                    context.fill(maskRect)
+                }
+            }
+            
+            let resultImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            return resultImage
+        }
     
     
     // Jab image picker cancel ho jaye
@@ -1137,7 +1473,9 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     //    **************************** Button Call Api Next Button *************************/
     
     @IBAction func nextBtn(_ sender: UIButton){
-        
+        sender.isEnabled = false
+            sender.alpha = 0.5
+            showLoader()
         // Country check
         if tfCountry.text == "" {
             showAlert(message: "Please enter country")
@@ -1151,9 +1489,9 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             showAlert(message: "Please enter flat/house /door #, tower/unit #")
         }
         // Street check
-        else if tfStreet.text == "" {
-            showAlert(message: "Please enter apartment name, road/street name")
-        }
+        //        else if tfStreet.text == "" {
+        //            showAlert(message: "Please enter apartment name, road/street name")
+        //        }
         else if selectedIndexPath == nil {
             showAlert(message: "Please select the neighbourhood")
         }
@@ -1180,19 +1518,19 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             showConfirmationAlert()
             
             
-//            callRegSecWebService {
-//                print("Call API")
-//                
-//                let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as! NeigbrnookViewController
-//                vc.name = self.name ?? ""
-//                vc.secname = self.secname ?? ""
-//                if let selectedIndexPath = self.selectedIndexPath {
-//                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
-//                } else {
-//                    vc.Neighbourname = "" // Default value
-//                }
-//                self.navigationController?.pushViewController(vc, animated: true)
-//            }
+            //            callRegSecWebService {
+            //                print("Call API")
+            //
+            //                let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as! NeigbrnookViewController
+            //                vc.name = self.name ?? ""
+            //                vc.secname = self.secname ?? ""
+            //                if let selectedIndexPath = self.selectedIndexPath {
+            //                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+            //                } else {
+            //                    vc.Neighbourname = "" // Default value
+            //                }
+            //                self.navigationController?.pushViewController(vc, animated: true)
+            //            }
             
             
             
@@ -1216,9 +1554,15 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         
         // Confirm button (green)
         let confirmAction = UIAlertAction(title: "Confirm", style: .default, handler: { _ in
+            self.showLoader()  // ✅ Show loader before API call
+
             self.callRegSecWebService {
                 print("API call successful")
-                self.showThankYouAlert()
+                
+                DispatchQueue.main.async {
+                    self.hideLoader()  // ✅ Hide loader after API finishes
+                    self.showThankYouAlert()
+                }
             }
         })
         confirmAction.setValue(UIColor(hex: "#008000"), forKey: "titleTextColor")
@@ -1233,21 +1577,30 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         
         self.present(alert, animated: true, completion: nil)
     }
-
-    // Function to show the "Thank You" alert
+    
+    //MARK: - Function to show the "Thank You" alert
+    
     func showThankYouAlert() {
-        let alert = UIAlertController(title: "Thank You", message: "Thank you for choosing Neighbournook. Your account will be active after a quick verification.", preferredStyle: .alert)
+        let messageText = "Thank you for choosing Neighbournook. Your account will be active after a quick verification."
         
-        // OK button to dismiss the alert and move to the next screen
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-            // Push to the next view controller after the user clicks "OK"
+        let alert = UIAlertController(title: nil, message: messageText, preferredStyle: .alert)
+        
+        // Apply same font and color as in confirmation alert
+        let messageFont = [NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 13)!,
+                           NSAttributedString.Key.foregroundColor: UIColor.darkGray]
+        let messageAttrString = NSAttributedString(string: messageText, attributes: messageFont)
+        alert.setValue(messageAttrString, forKey: "attributedMessage")
+        
+        // OK button
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: { _ in
             self.pushToNeighbournookViewController()
-        }))
+        })
+        alert.addAction(okAction)
         
-        // Present the alert
         self.present(alert, animated: true, completion: nil)
     }
 
+    
     // Function to push to NeighbournookViewController
     func pushToNeighbournookViewController() {
         let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as! NeigbrnookViewController
@@ -1255,14 +1608,14 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         vc.secname = self.secname ?? ""
         
         if let selectedIndexPath = self.selectedIndexPath {
-            vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+            vc.Neighbourname = self.NeighbrhdData?.data?[selectedIndexPath.row].nbdName ?? ""
         } else {
             vc.Neighbourname = "" // Default value
         }
         
         self.navigationController?.pushViewController(vc, animated: true)
     }
-
+    
     
     
     
@@ -1290,7 +1643,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             "userid": userID,
             "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
             "dob": self.dobTextField.text ?? "",
-            "areas": self.NeighbrhdData?.data.first?.nbdID ?? "",
+            "areas": self.NeighbrhdData?.data?.first?.nbdID ?? "",
             "gender": genderValue,
             "addlineone": self.tfFlat.text ?? "",
             "addlinetwo": self.tfStreet.text ?? "",
@@ -1387,7 +1740,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
             return
         }
         
-        // Set URL
+        // Set URL dev.
         guard let url = URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=reg-step-II") else {
             print("URL invalid hai")
             return
@@ -1581,7 +1934,7 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     func callReachoutWebService() {
         // Define the parameters for the API call
         let dictParams: Dictionary<String, Any> = [
-            "areas": self.NeighbrhdData?.data.first?.nbdID ?? "",
+            "areas": self.NeighbrhdData?.data?.first?.nbdID ?? "",
             "addlineone": self.tfFlat.text ?? "",
             "addlinetwo": self.tfStreet.text ?? "",
             "pincode": self.tfPincode.text ?? "",
@@ -1608,46 +1961,25 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     
     
     
-    
-    // ---------***********   Neighborhood Status By State/City/Pincode api  post ---------------**************/
-    
-    func callNeighorhodStatusStateCity() {
-        let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
-        let dictParams: [String: Any] = [
-            "area": lblArea.text ?? "",
-            "countryid": "100",
-            "stateid": self.tfState.text ?? "",
-            "cityid": self.tfCity.text ?? "",
-            "pincode": self.tfPincode.text ?? "",
-            "userid": userID
-        ]
-        
-        print("Calling API with parameters:", dictParams)
-        
-        // Directly expect NeighborhoodStatusByStateModel type
-        WebService.sharedInstance.callNeighborhoodStatusByState(withParams: dictParams) { [weak self] (responseModel: NeighborhoodStatusByStateModel) in
-            guard let self = self else { return }
-            
-            print("API Response - Status: \(responseModel.status), Message: \(responseModel.message)")
-            
-            // Check the status and message to show popup
-            if responseModel.status == "success" && responseModel.message == "Oops! Seems like we missed your area. Please share your address details and we will have a neighborhood created for you." {
-                
-                // Show popup alert on the main thread
-                DispatchQueue.main.async {
-                    self.showNeighborhoodAlert(withMessage: responseModel.message)
-                }
-            }
-        }
-    }
-    
-    
-    
-    // Function to show alert
+    //MARK: - Function to show alert
     func showNeighborhoodAlert(withMessage message: String) {
-        let alert = UIAlertController(title: "Neighborhood", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
         
+        // Message attributed
+        let messageFont = [
+            NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 14)!,
+            NSAttributedString.Key.foregroundColor: UIColor.darkGray
+        ]
+        let attributedMessage = NSAttributedString(string: message, attributes: messageFont)
+        alert.setValue(attributedMessage, forKey: "attributedMessage")
+        
+        // Add OK button
+        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+            alert.dismiss(animated: true, completion: nil)
+        }
+        alert.addAction(okAction)
+        
+        // Present alert
         if let topController = UIApplication.shared.keyWindow?.rootViewController {
             topController.present(alert, animated: true, completion: nil)
         } else {
@@ -1655,48 +1987,118 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         }
     }
     
+  
     
+    //MARK: - call Search Neighborhood api
     
-    // call Search Neighborhood api
     func callSearchNeighbrWebService(location: CLLocationCoordinate2D) {
         let dictParams: [String: Any] = [
             "lati": latitudeS ?? 0.0,
             "longi": longitudeS ?? 0.0,
             "areas": lblArea.text ?? ""
         ]
-        print(dictParams)
         
-        // API Call
+        print("📤 [callSearchNeighbrWebService] Params:", dictParams)
+        
         WebService.sharedInstance.callSearchNeighbrWebService(withParams: dictParams) { [weak self] data in
-            guard let self = self else { return }
-            
-            // Clear previous data and load new data
-            self.NeighbrhdData?.data.removeAll()
-            
-            // Call other web services
-            self.callStateWebService()
-            self.callCityWebService()
+            guard let self = self else {
+                print("⚠️ Self is nil")
+                return
+            }
             
             DispatchQueue.main.async {
-                // Check if data is successful and not empty
-                if data.status == "success" {
-                    if !data.data.isEmpty {
+                let status = data.status?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                print("📥 Status: \(status ?? "nil")")
+                
+                self.NeighbrhdData?.data?.removeAll()
+                
+                if status == "success" {
+                    print("✅ CASE 1: SUCCESS")
+                    if let validData = data.data, !validData.isEmpty {
                         self.NeighbrhdData = data
-                        self.btnReachout.isHidden = true
-                        self.saveButton.isHidden = false
+                        
                     } else {
-                        // Handle case where no data is found for the given parameters
+                        print("⚠️ Success but no data")
                         self.NeighbrhdData = nil
-                        self.btnReachout.isHidden = false
-                        self.saveButton.isHidden = true
                     }
                 } else {
-                    // Handle failure case when status is not "success"
+                    print("❌ CASE 0: FAILURE — calling fallback")
                     self.NeighbrhdData = nil
-                    self.btnReachout.isHidden = false
-                    self.saveButton.isHidden = true
+                    self.callNeighorhodStatusStateCity()
                 }
                 
+                // ✅ always called now
+                self.neighbourhoodDataShowTableView.reloadData()
+                self.updateTableViewHeight()
+            }
+        }
+    }
+    
+    
+
+
+
+    
+    
+    
+    // MARK: - ---------***********   Neighborhood Status By State/City/Pincode api  post ---------------**************
+    
+    func callNeighorhodStatusStateCity() {
+        let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
+        let dictParams: [String: Any] = [
+            //            "area": lblArea.text ?? "",
+            "countryid": "100",
+            "lati": latitudeS ?? 0.0,
+            "longi": longitudeS ?? 0.0,
+            "stateid": self.tfState.text ?? "",
+            "cityid": self.tfCity.text ?? "",
+            //            "pincode": self.tfPincode.text ?? "",
+            "userid": userID
+        ]
+        print("Calling API with parameters:", dictParams)
+        WebService.sharedInstance.callNeighborhoodStatusByState(withParams: dictParams) { [weak self] (responseModel: NeighborhoodStatusByStateModel) in
+            guard let self = self else { return }
+            print("API Response - Status: \(responseModel.status), Message: \(responseModel.message)")
+            DispatchQueue.main.async {
+                if responseModel.message == "Neighborhood found." {
+                    self.btnReachout.isHidden = true
+                    self.saveButton.isHidden = false
+                } else {
+                    self.btnReachout.isHidden = false
+                    self.saveButton.isHidden = true
+                    self.showNeighborhoodAlert(withMessage: responseModel.message)
+                }
+            }
+        }
+    }
+    
+    
+    //MARK: - Current location
+    
+    func callCurrentSearchNeighbrWebService(withArea area: String) {
+        let dictParams: [String: Any] = [
+            "areas": lblArea.text ?? "",
+            "lati": lat ?? 0.0,
+            "longi": long ?? 0.0
+        ]
+        print(dictParams)
+        // API Call
+        WebService.sharedInstance.callCurrentSearchNeighbrWebService(withParams: dictParams) { [weak self] data in
+            guard let self = self else { return }
+            // Clear previous data and load new data
+            self.NeighbrhdData?.data?.removeAll()
+            DispatchQueue.main.async {
+                // Update neighbourhood data
+                self.NeighbrhdData = data
+                
+                // Check if neighbourhood data is available
+                if let neighbourhoods = self.NeighbrhdData?.data, !neighbourhoods.isEmpty {
+                    //                    self.btnReachout.isHidden = true
+                    //                    self.saveButton.isHidden = false
+                } else {
+                    //                    self.btnReachout.isHidden = false
+                    //                    self.saveButton.isHidden = true
+                }
                 
                 // Reload table view and update height
                 self.neighbourhoodDataShowTableView.reloadData()
@@ -1705,44 +2107,151 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
         }
     }
     
-    func callCurrentSearchNeighbrWebService() {
-        let dictParams: [String: Any] = [
-            "areas": lblArea.text ?? "",
-            "lati": lat ?? 0.0,
-            "longi": long ?? 0.0
+    
+    // MARK: - Address api call
+    
+    //    func callAddressWebService() {
+    //        let id = UserDefaults.standard.string(forKey: "userid")
+    //        if self.from == 1
+    //        {
+    //            let dictParams: Dictionary<String, Any> = [
+    //                "lati":  latitudeCurrentLocation,
+    //                "longi":longitudeCurrentLocation,
+    //                "areas": self.NeighbrhdData?.data.first?.nbdID ?? 0,
+    //                "addlineone":self.tfFlat.text ?? "",
+    //                "addlinetwo":self.tfStreet.text ?? "",
+    //                "countryid": countryId ?? "",
+    //                "stateid": stateId ?? "",
+    //                "cityid":cityId ?? "",
+    //                "pincode":self.tfPincode.text ?? "",
+    //                "userid": id ?? ""
+    //            ]
+    //
+    //            print(dictParams)
+    //            WebService.sharedInstance.callAddressWebService(withParams: dictParams) { data in
+    //                self.AddressData = data
+    //                self.callStateWebService()
+    //                self.callCityWebService()
+    //                let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
+    //                vc.name = self.name ?? ""
+    //                vc.secname = self.secname ?? ""
+    //                //       vc.Neighbourname = self.lblNeighbr.text ?? ""
+    //                if let selectedIndexPath = self.selectedIndexPath {
+    //                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+    //                } else {
+    //                    vc.Neighbourname = "" // Default value
+    //                }
+    //                self.navigationController?.pushViewController(vc, animated: false)
+    //                //
+    //            }
+    //        }
+    //
+    //        else if self.from == 2
+    //        {
+    //            let dictParams: Dictionary<String, Any> = [
+    //                "lati":  lat,
+    //                "longi":long,
+    //                "areas": self.NeighbrhdData?.data.first?.nbdID ?? 0,
+    //                "addlineone":self.tfFlat.text ?? "",
+    //                "addlinetwo":self.tfStreet.text ?? "",
+    //                "countryid": countryId ?? "",
+    //                "stateid": stateId ?? "",
+    //                "cityid":cityId ?? "",
+    //                "pincode":self.tfPincode.text ?? "",
+    //                "userid": id ?? ""
+    //            ]
+    //            WebService.sharedInstance.callAddressWebService(withParams: dictParams) { data in
+    //                self.AddressData = data
+    //                let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegisterFirstViewController")as! RegisterFirstViewController
+    //                vc.name = self.name ?? ""
+    //                vc.secname = self.secname ?? ""
+    //                //                vc.Neighbourname = self.lblNeighbr.text ?? ""
+    //                if let selectedIndexPath = self.selectedIndexPath {
+    //                    vc.Neighbourname = self.NeighbrhdData?.data[selectedIndexPath.row].nbdName ?? ""
+    //                } else {
+    //                    vc.Neighbourname = "" // Default value
+    //                }
+    //                self.navigationController?.pushViewController(vc, animated: false)
+    //                //
+    //            }
+    //
+    //        }
+    //    }
+    
+    
+    // MARK: -  CALL API FOR USER LOCATION   UserLocation current dev.
+    
+    func callUserLocationWebService() {
+        let id = UserDefaults.standard.string(forKey: "userid")
+        print("✅ User ID after login: \(id ?? "Not Found")")
+        let url = "https://dev.neighbrsnook.com/admin/api/user-location"
+        let params: [String: Any] = [
+            "userid": id,
+            "latitude": lat ?? 0.0,
+            "longitude": long ?? 0.0,
+            "area_name": (self.lblArea.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines),
+            "addlineone": self.tfFlat.text ?? "",
+            "addlinetwo": self.tfStreet.text ?? "",
+            "country_name": "India",
+            "state_name": self.tfState.text ?? "",
+            "city_name": self.tfCity.text ?? "",
+            "pincode": Int(self.tfPincode.text ?? "0") ?? 0
         ]
-        
-        // API Call
-        WebService.sharedInstance.callCurrentSearchNeighbrWebService(withParams: dictParams) { [weak self] data in
-            guard let self = self else { return }
-            
-            // Clear previous data and load new data
-            self.NeighbrhdData?.data.removeAll()
-            
-            // Call other web services
-            self.callNeighorhodStatusStateCity()
-            self.callStateWebService()
-            self.callCityWebService()
-            
-            DispatchQueue.main.async {
-                // Update neighbourhood data
-                self.NeighbrhdData = data
-                
-                // Check if neighbourhood data is available
-                if let neighbourhoods = self.NeighbrhdData?.data, !neighbourhoods.isEmpty {
-                    self.btnReachout.isHidden = true
-                    self.saveButton.isHidden = false
-                } else {
-                    self.btnReachout.isHidden = false
-                    self.saveButton.isHidden = true
-                }
-                
-                // Reload table view and update height
-                self.neighbourhoodDataShowTableView.reloadData()
-                self.updateTableViewHeight()
+        print(params)
+        AF.request(url, method: .post, parameters: params, encoding: JSONEncoding.default, headers: ["Content-Type": "application/json"]).responseJSON { response in
+            switch response.result {
+            case .success(let data):
+                print("✅ Response: \(data)")
+            case .failure(let error):
+                print("❌ API Error: \(error.localizedDescription)")
             }
         }
     }
+    
+    
+    func fetchAddress(from location: CLLocation) {
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            guard let placemark = placemarks?.first, error == nil else {
+                print("Error in reverse geocoding: \(error?.localizedDescription ?? "Unknown error")")
+                return
+            }
+            
+            let sector = placemark.subLocality ?? "Sector Not Found"
+            let city = placemark.locality ?? "City Not Found"
+            let state = placemark.administrativeArea ?? "State Not Found"
+            let postalCode = placemark.postalCode ?? "PIN Not Found"
+            let country = placemark.country ?? "Country Not Found"
+            
+            DispatchQueue.main.async {
+                // ✅ Update properties
+                self.lat = location.coordinate.latitude
+                self.long = location.coordinate.longitude
+                self.city = city
+                self.state = state
+                self.zipcode = postalCode
+                
+                // ✅ Set UI values
+                self.lblSector.text = "\(sector), \(city), \(state), \(postalCode), \(country)"
+                self.lblArea.text = "\(sector)" // <-- Yeh yahan set ho raha hai
+                self.tfCity.text = city
+                self.tfState.text = state
+                self.tfPincode.text = postalCode
+                self.lblForNeighourhood_ID.text = "(For \(sector).)"
+                self.lblForNeighourhood_Address.text = "(For \(sector).)"
+                
+                print("✅ lblArea.text:", self.lblArea.text ?? "nil")
+                print("✅ Lat:", self.lat ?? 0.0)
+                print("✅ Long:", self.long ?? 0.0)
+                 // ✅ Ab yahan API call karo, jab lblArea.text set ho chuka
+                 self.callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: self.lat ?? 0.0, longitude: self.long ?? 0.0))
+                
+            }
+        }
+    }
+
+    
+    
     
     
     //
@@ -1821,6 +2330,23 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
     //
     
     
+    func showLoader() {
+        activityIndicator = UIActivityIndicatorView(style: .large)
+        if let activityIndicator = activityIndicator {
+            activityIndicator.center = self.view.center
+            activityIndicator.color = .gray
+            activityIndicator.startAnimating()
+            self.view.addSubview(activityIndicator)
+        }
+    }
+
+    func hideLoader() {
+        activityIndicator?.stopAnimating()
+        activityIndicator?.removeFromSuperview()
+        activityIndicator = nil
+    }
+
+    
     
 }
 
@@ -1830,11 +2356,11 @@ class MyProfileEditViewController: UIViewController, UIPickerViewDelegate, UIPic
 
 
 @available(iOS 16.0, *)
-extension MyProfileEditViewController: UITableViewDataSource, UITableViewDelegate{
+extension MyProfileEditViewController: UITableViewDataSource, UITableViewDelegate,NeighbourhoodDataShowTableViewCellDelegate{
     
     // MARK: - TableView DataSource and Delegate Methods
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let numberOfItems = NeighbrhdData?.data.count ?? 0
+        let numberOfItems = NeighbrhdData?.data?.count ?? 0
         
         // Update label text based on the number of items
         if numberOfItems == 1 {
@@ -1856,14 +2382,14 @@ extension MyProfileEditViewController: UITableViewDataSource, UITableViewDelegat
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "NeighbourhoodDataShowTableViewCell", for: indexPath) as! NeighbourhoodDataShowTableViewCell
         
-        let data = NeighbrhdData?.data[indexPath.row]
+        let data = NeighbrhdData?.data?[indexPath.row]
         cell.textLabel?.text = data?.nbdName // Set name in the cell
         
         cell.textLabel?.textColor = UIColor.darkGray
         cell.textLabel?.font = UIFont(name: "Montserrat-Regular", size: 16)
         
         // If there's only one item, automatically select it
-        if NeighbrhdData?.data.count == 1 {
+        if NeighbrhdData?.data?.count == 1 {
             selectedIndexPath = indexPath // Set first row as selected
         }
         
@@ -1879,11 +2405,24 @@ extension MyProfileEditViewController: UITableViewDataSource, UITableViewDelegat
             cell.textLabel?.textColor = UIColor.darkGray // Default color
         }
         
+        // Mark selection
+           cell.isCheckedNeig = (selectedIndexPath == indexPath)
+           cell.updateButtonAppearanceN()
+
+           // Label color change
+           cell.textLabel?.textColor = (selectedIndexPath == indexPath)
+               ? UIColor(red: 0.0, green: 128/255.0, blue: 0.0, alpha: 1.0)
+               : .darkGray
+
+           // Delegate setup
+           cell.delegate = self
+           cell.indexPath = indexPath
+        
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedData = NeighbrhdData?.data[indexPath.row]
+        let selectedData = NeighbrhdData?.data?[indexPath.row]
         
         // If there are more than one items, allow selection
         if let previousIndexPath = selectedIndexPath {
@@ -1913,8 +2452,21 @@ extension MyProfileEditViewController: UITableViewDataSource, UITableViewDelegat
         }
     }
     
+    
+    func didTapCheckbox(at indexPath: IndexPath) {
+           // Select new index path
+           if selectedIndexPath == indexPath {
+               // Optional: allow deselection
+               selectedIndexPath = nil
+           } else {
+               selectedIndexPath = indexPath
+           }
+
+        neighbourhoodDataShowTableView.reloadData()
+       }
+    
     func updateTableViewHeight() {
-        let numberOfItems = NeighbrhdData?.data.count ?? 0
+        let numberOfItems = NeighbrhdData?.data?.count ?? 0
         let contentHeight = neighbourhoodDataShowTableView.contentSize.height
         
         if numberOfItems > 0 {
@@ -1926,7 +2478,7 @@ extension MyProfileEditViewController: UITableViewDataSource, UITableViewDelegat
         }
         
         // Call layoutIfNeeded to update the layout
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.0) {
             self.view.layoutIfNeeded() // Ensure layout update
         }
     }

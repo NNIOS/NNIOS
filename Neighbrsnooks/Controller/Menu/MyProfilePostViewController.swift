@@ -27,7 +27,8 @@ class MyProfilePostViewController: BaseViewController {
     var MonthName = ""
     var GeneralName = ""
     var DescriptionlName = ""
-    
+    var userid: String?
+        var sourceViewController: String?
     //    private let bottomPanelView = BottomPanelView()
     
     let items = [
@@ -141,6 +142,18 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
         cell.UserName = PostListData?.listdata?[indexPath.row].username ?? ""
         cell.reactionButton.addTarget(self, action: #selector(emojiTapped), for: .touchUpInside)
         
+        let postImages = PostListData?.listdata?[indexPath.row].postImages
+        let imageExists = postImages?.first?.img != nil
+        let videoExists = postImages?.first?.video != nil
+
+        if imageExists || videoExists {
+            cell.collectionViewBanner.isHidden = false
+            cell.collectionViewMyProfileHeight.constant = 523
+        } else {
+            cell.collectionViewBanner.isHidden = true
+            cell.collectionViewMyProfileHeight.constant = 0
+        }
+
         
         if let favouriteStatus = PostListData?.listdata?[indexPath.row].favouritstatus {
             cell.updateFavouriteButton(isFavourite: favouriteStatus == 1)
@@ -164,14 +177,14 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
                 self.callFavouriteRemoveBussinessWebService(postId: postId) { message in
                     mutablePostData.favouritstatus = 0 // Update status
                     cell.updateFavouriteButton(isFavourite: false) // Update button icon
-                    self.showAlert(message: message) // Show alert
+//                    self.showAlert(message: message) // Show alert
                 }
             } else {
                 // Favourite Action
                 self.callFavouriteBussinessWebService(postId: postId) { message in
                     mutablePostData.favouritstatus = 1 // Update status
                     cell.updateFavouriteButton(isFavourite: true) // Update button icon
-                    self.showAlert(message: message) // Show alert
+//                    self.showAlert(message: message) // Show alert
                 }
             }
         }
@@ -410,11 +423,33 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
     
     func callPostListWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
-        let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-        let idPost = UserDefaults.standard.string(forKey: "postid")
-        let dictParams: Dictionary<String, Any> = [
-            "userid":id ?? ""
-        ]
+                let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
+                let idPost = UserDefaults.standard.string(forKey: "postid")
+                var dictParams: [String: Any] = [:]
+                
+                if sourceViewController == "MyProfile" {
+                    dictParams = [
+                        "userid": id ?? "",
+                        "postuserlist":id ?? "",
+                    ]
+                } else if sourceViewController == "OtherProfile" {
+                    dictParams = [
+                        "userid": userid ?? "",
+                        "postuserlist":userid ?? ""
+                    ]
+                }
+                else if sourceViewController == "Neighbourhood" {
+                    dictParams = [
+                        "userid": id ?? "",
+                        "neighbrhood": idNeighbour ?? ""
+                    ]
+                }
+                else if sourceViewController == "Menu" {
+                    dictParams = [
+                        "userid": id ?? ""
+                    ]
+                }
+                print("Param is :\(dictParams)")
         WebService.sharedInstance.callPostListWebService(withParams: dictParams) { data in
             self.PostListData = data
             //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")

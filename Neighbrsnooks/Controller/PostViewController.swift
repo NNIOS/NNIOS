@@ -51,7 +51,7 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
         if let selectedIndex = selectedTabIndex {
             bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
         }
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.searchView.isHidden = true
         tfSearch.delegate = self
     }
@@ -62,7 +62,7 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
         super.viewWillAppear(animated)
         
         // SVProgressHUD.show()
-        updateColors()
+//        updateColors()
         
         callPostListWebService(searchQuery: "") {
             SVProgressHUD.dismiss()
@@ -84,7 +84,7 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+//        updateColors()
     }
     
     
@@ -255,6 +255,18 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
         cell.imgData = filteredPostData?.listdata?[indexPath.row].postImages ?? []
         cell.UserName = filteredPostData?.listdata?[indexPath.row].username ?? ""
         
+        let postImages = filteredPostData?.listdata?[indexPath.row].postImages
+        let imageExists = postImages?.first?.img != nil
+        let videoExists = postImages?.first?.video != nil
+
+        if imageExists || videoExists {
+            cell.collectionViewBanner.isHidden = false
+            cell.collectionViewHeight.constant = 523
+        } else {
+            cell.collectionViewBanner.isHidden = true
+            cell.collectionViewHeight.constant = 0
+        }
+        
         if let favouriteStatus = filteredPostData?.listdata?[indexPath.row].favouritstatus {
             cell.updateFavouriteButton(isFavourite: favouriteStatus == 1)
         } else {
@@ -302,14 +314,14 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
                 self.callFavouriteRemoveBussinessWebService(postId: postId) { message in
                     mutablePostData.favouritstatus = 0 // Update status
                     cell.updateFavouriteButton(isFavourite: false) // Update button icon
-                    self.showAlert(Message: message) // Show alert
+//                    self.showAlert(Message: message) // Show alert
                 }
             } else {
                 // Favourite Action
                 self.callFavouriteBussinessWebService(postId: postId) { message in
                     mutablePostData.favouritstatus = 1 // Update status
                     cell.updateFavouriteButton(isFavourite: true) // Update button icon
-                    self.showAlert(Message: message) // Show alert
+//                    self.showAlert(Message: message) // Show alert
                 }
             }
         }

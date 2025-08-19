@@ -34,7 +34,7 @@ class GroupMemberTableViewCell: UITableViewCell {
         super.awakeFromNib()
         // Initialization code
         defaultTextColor = lblName.textColor
-        updateColors()
+//        updateColors()
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -81,11 +81,11 @@ class GroupMemberTableViewCell: UITableViewCell {
         }
       //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
-        }
-    }
+//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+//        super.traitCollectionDidChange(previousTraitCollection)
+//        
+//        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+//            updateColors()
+//        }
+//    }
 }

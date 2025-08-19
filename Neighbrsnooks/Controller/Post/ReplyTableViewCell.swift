@@ -23,6 +23,7 @@ class ReplyTableViewCell: UITableViewCell {
         super.awakeFromNib()
         userPicImageView.layer.cornerRadius = userPicImageView.frame.height/2
         actionReply.addTarget(self, action: #selector(replyButtonTappedAction), for: .touchUpInside)
+        self.userNameLabel.font = UIFont(name: "Montserrat-Regular", size: 14)
     }
     
     @objc func replyButtonTappedAction() {

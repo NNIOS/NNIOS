@@ -9,26 +9,20 @@ import UIKit
 import Alamofire
 import Photos
 import PhotosUI
+import SVProgressHUD
 import TOCropViewController
 
 @available(iOS 16.0, *)
-class CreateEventViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, ImageCollectionViewControllerDelegate, UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,UICollectionViewDataSource,CropViewControllerDelegate {
-   
-    
-    
-    func didTapDeleteButton(at index: Int) {
-        
-    }
-    
+class CreateEventViewController: UIViewController{
     
     func didDeleteImage(at index: Int) {
         images.remove(at: index)
+        updateCollectionView()
     }
     
     var allImages: [UIImage] {
         return images + imageArray
     }
-
     
     @IBOutlet weak var tfStartTime: UITextField!
     @IBOutlet weak var tfEndTime: UITextField!
@@ -41,14 +35,12 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     @IBOutlet weak var tfAdd2: UITextField!
     @IBOutlet weak var tfDesc: UITextView!
     @IBOutlet weak var tfDescHeightConstraint: NSLayoutConstraint!
-   // @IBOutlet weak var tfDesc: UITextView!
-   // @IBOutlet weak var placeholderLabel: UILabel!
     @IBOutlet weak var lblHeading: UILabel!
     @IBOutlet weak var lblEventAddress: UILabel!
     @IBOutlet weak var lblUploadEvent: UILabel!
-    @IBOutlet weak var lblmaxImg: UILabel!
+    @IBOutlet weak var lblmaxImg: UILabel! // This label might need its text updated if you enforce 1 max image
     
-     @IBOutlet weak var WicketRangeCollectionView: UICollectionView!
+    @IBOutlet weak var WicketRangeCollectionView: UICollectionView!
     
     @IBOutlet weak var TitleeView: UIView!
     @IBOutlet weak var EndDateView: UIView!
@@ -63,7 +55,6 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     @IBOutlet weak var Add2: UIView!
     @IBOutlet weak var createEventView: UIView!
     @IBOutlet weak var AddressEventView: UIView!
-   
     
     
     @IBOutlet weak var collectionviewWicketRangeHeight: NSLayoutConstraint!
@@ -76,32 +67,27 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     let timePicker = UIDatePicker()
     let datePicker = UIDatePicker()
     var imagePicker:UIImagePickerController?
-    var imageArray = [UIImage]()
-    var CamimageArray = [UIImage]()
-    var selectedImages: [UIImage] = []
-    var images: [UIImage] = []
-    var selectedImge: UIImage? = nil
+    var imageArray = [UIImage]() // This array will now be cleared or only hold the single image
+    var CamimageArray = [UIImage]() // This array seems unused and can be removed, but sticking to your constraint.
+    var selectedImages: [UIImage] = [] // This array seems unused and can be removed, but sticking to your constraint.
+    var images: [UIImage] = [] // This array will now be cleared or only hold the single image
+    var selectedImge: UIImage? = nil // This property seems unused and can be removed, but sticking to your constraint.
     var createEventData : CreateEventModel?
     
     var selectedDate: Date?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateColors()
-        openTimePicker()
         timePickerContainer.removeFromSuperview()
-        
+        tfTitle.delegate = self
         TitleeView.backgroundColor = UIColor.systemBackground
         startDateView.backgroundColor = UIColor.systemBackground
         EndDateView.backgroundColor = UIColor.systemBackground
         startTimeView.backgroundColor = UIColor.systemBackground
         EndTimeView.backgroundColor = UIColor.systemBackground
-        updateColors()
         
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
-        tfTitle.autocapitalizationType = .sentences
-        tfadd1.autocapitalizationType = .sentences
-        tfAdd2.autocapitalizationType = .sentences
+        tfTitle.autocapitalizationType = .words
         NetworkMonitor.shared.startMonitoring()
         self.tfStartTime.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.tfEndTime.font = UIFont(name: "Montserrat-Regular", size: 17)
@@ -113,159 +99,42 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         self.lblUploadEvent.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.tfadd1.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.tfAdd2.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.imagePicker?.delegate = self
         self.imagePicker = UIImagePickerController()
-        tfDesc.isScrollEnabled = false // Scroll disable karein
-               tfDesc.delegate = self
+        self.imagePicker?.delegate = self
+        tfDesc.isScrollEnabled = false
+        tfDesc.delegate = self
         updateCollectionView()
         
         tfDesc.delegate = self
         tfDesc.text = "Description"
-  
+        tfDesc.textColor = UIColor(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) // Using actual color values
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
     }
-    
-    private func updateColors() {
-        if traitCollection.userInterfaceStyle == .dark {
-            // Dark mode colors
-            TitleeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            EndDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            startDateView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            
-            EndTimeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            tfEndTime.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            Description.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            startTimeView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            AddressEventView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-//            Add1View.layer.borderColor = UIColor.lightGray.cgColor
-//            Add2.layer.borderColor = UIColor.lightGray.cgColor
-            
-            TitleeView.layer.borderWidth = 1.0 // Enable border in dark mode
-            EndDateView.layer.borderWidth = 1.0
-            startDateView.layer.borderWidth = 1.0
-            startTimeView.layer.borderWidth = 1.0
-            EndTimeView.layer.borderWidth = 1.0 // Enable border in dark mode
-            
-            Description.layer.borderWidth = 1.0
-            Add1View.layer.borderWidth = 1.0
-            Add2.layer.borderWidth = 1.0
-            AddressEventView.layer.borderWidth = 1.0
-            createEventView.backgroundColor = .black
-            Add1View.backgroundColor = .black
-            Add2.backgroundColor = .black
-            tfadd1.backgroundColor = .black
-            tfAdd2.backgroundColor = .black
-            UploadImageView.backgroundColor = .black
-            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            UploadImageView.layer.borderWidth = 1.0
-            tfTitle.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-            tfStartTime.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-            tfEndTime.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-            tfStartDatee.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-            tfEndDate.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-            tfDesc.textColor =  .white
-            
-            tfadd1.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-            tfAdd2.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-            
-           
-            
-        } else {
-            // Light mode mein storyboard ke original colors preserve karna
-          //  questionView.textColor = UIColor.secondaryLabel
-            TitleeView.isUserInteractionEnabled = true // Disable in light mode
-            EndDateView.isUserInteractionEnabled = true
-            startDateView.isUserInteractionEnabled = true
-            
-            EndTimeView.isUserInteractionEnabled = true // Disable in light mode
-            tfEndTime.isUserInteractionEnabled = true
-            Description.isUserInteractionEnabled = true
-            UploadImageView.isUserInteractionEnabled = true
-            
-            Add1View.isUserInteractionEnabled = true
-            Add2.isUserInteractionEnabled = true
-            startTimeView.isUserInteractionEnabled = true
-            
-            TitleeView.layer.borderWidth = 0 // Remove border in light mode
-            tfStartDatee.layer.borderWidth = 0
-            startDateView.layer.borderWidth = 0
-            startTimeView.layer.borderWidth = 0
-            EndDateView.layer.borderWidth = 0
-            AddressEventView.layer.borderWidth = 0
-            tfadd1.backgroundColor = .white
-            tfAdd2.backgroundColor = .white
-            
-            Add1View.backgroundColor = .white
-            Add2.backgroundColor = .white
-            UploadImageView.backgroundColor = .white
-            
-            EndTimeView.layer.borderWidth = 0 // Remove border in light mode
-            tfEndTime.layer.borderWidth = 0
-            Description.layer.borderWidth = 0
-            Add1View.layer.borderWidth = 0
-            Add2.layer.borderWidth = 0
-           // option4.layer.borderWidth = 0
-            UploadImageView.layer.borderWidth = 0
-            createEventView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-            
-        }
-      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
-    }
-    
-    func updateCollectionView() {
-        WicketRangeCollectionView.reloadData()
-        collectionviewWicketRangeHeight.constant = allImages.isEmpty ? 0 : 150
-
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
-    }
-
-    @IBAction func BackButtionAction(_ : UIButton){
-
-        _ = navigationController?.popViewController(animated: true)
-
-    }
-    
-   
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+            //            updateColors() // Uncomment if you want dynamic dark/light mode updates
         }
     }
+  
     
-    func textViewDidChange(_ textView: UITextView) {
-           let size = CGSize(width: textView.frame.width, height: CGFloat.greatestFiniteMagnitude)
-           let estimatedSize = textView.sizeThatFits(size)
-           
-           tfDescHeightConstraint.constant = estimatedSize.height // Height adjust karein
-           
-           UIView.animate(withDuration: 0.2) {
-               self.view.layoutIfNeeded() // Animation ke saath update karein
-           }
-       }
-    
-//    func textViewDidChange(_ textView: UITextView) {
-//            // Show or hide placeholder label based on text view content
-//            placeholderLabel.isHidden = !textView.text.isEmpty
-//        }
+    @IBAction func BackButtionAction(_ : UIButton){
+        self.navigationController?.popViewController(animated: true)
+    }
     
     @IBAction func btnStartTime(_ sender: UIButton) {
         from = 1
-        openTimePicker()
+        openTimePicker(defaultHour: 10, defaultMinute: 0)
     }
     
     @IBAction func btnEndTime(_ sender: UIButton) {
         from = 2
-        openTimePicker()
+        openTimePicker(defaultHour: 19, defaultMinute: 0)
     }
     
     @IBAction func btnStartDate(_ sender: UIButton) {
@@ -277,38 +146,308 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     }
     
     @IBAction func selectPhotos(_ sender: UIButton) {
+        checkCameraPermission { [weak self] granted in
+            guard let self = self else { return }
+            if granted {
+                self.openCameraGalleryForSingleImage()
+            }
+        }
+    }
     
-        selectImages()
-    
-       }
-    
-    @IBAction func PublishBtn(_ sender: UIButton){
-        
+    @IBAction func PublishBtn(_ sender: UIButton) {
         if tfTitle.text == "" {
-                showAlert(message: "Please enter title")
-            } else if tfStartDatee.text == "" {
-                showAlert(message: "Please select start date")
-            } else if tfEndDate.text == "" {
-                showAlert(message: "Please select end date")
-            } else if tfStartTime.text == "" {
-                showAlert(message: "Please select start time")
-            } else if tfEndTime.text == "" {
-                showAlert(message: "Please select end time")
-            } else if tfDesc.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || tfDesc.text == "Description" {
-                showAlert(message: "Please enter description")
+            showAlert(message: "Please enter title")
+        } else if tfStartDatee.text == "" {
+            showAlert(message: "Please select start date")
+        } else if tfEndDate.text == "" {
+            showAlert(message: "Please select end date")
+        } else if tfStartTime.text == "" {
+            showAlert(message: "Please select start time")
+        } else if tfEndTime.text == "" {
+            showAlert(message: "Please select end time")
+        } else if tfDesc.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || tfDesc.text == "Description" {
+            showAlert(message: "Please enter description")
+        } else if tfadd1.text == "" {
+            showAlert(message: "Please enter flat/houseno. apartment name ")
+        } else if tfAdd2.text == "" {
+            showAlert(message: "Please enter road/ street name")
+        } else if containsBadWords(tfTitle.text ?? "") {
+            showAlert(message: "Please remove inappropriate words from Title")
+        } else if containsBadWords(tfDesc.text ?? "") {
+            showAlert(message: "Please remove inappropriate words from Description")
+        } else if containsBadWords(tfadd1.text ?? "") {
+            showAlert(message: "Please remove inappropriate words from Address Line 1")
+        } else if containsBadWords(tfAdd2.text ?? "") {
+            showAlert(message: "Please remove inappropriate words from Address Line 2")
+        } else if images.isEmpty {
+            showAlert(message: "Plesae upload a banner")
+        } else {
+            SVProgressHUD.show()
+            callCreateEventWebService {
+                // success callback
+                
             }
- else if tfadd1.text == "" {
-                showAlert(message: "Please enter flat/ houseno. appartment name ")
-            } else if tfAdd2.text == "" {
-                showAlert(message: "Please enter road/ street name")
         }
-        else{
-            callCreateEventWebService{
+    }
+    
+}
 
-            }
+
+@available(iOS 16.0, *)
+extension CreateEventViewController: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.text == "Description" {
+            textView.text = ""
+            textView.textColor = UIColor(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+        }
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            textView.text = "Description"
+        }
+    }
+    
+    func adjustTextViewScrollingIfNeeded() {
+        guard let font = tfDesc.font else { return }
+        
+        let lineHeight = font.lineHeight
+        let maxLines: CGFloat = 5
+        let maxHeight = lineHeight * maxLines + tfDesc.textContainerInset.top + tfDesc.textContainerInset.bottom
+        let size = CGSize(width: tfDesc.frame.width, height: .greatestFiniteMagnitude)
+        let estimatedSize = tfDesc.sizeThatFits(size)
+        if estimatedSize.height > maxHeight {
+            tfDesc.isScrollEnabled = true
+            tfDescHeightConstraint.constant = maxHeight
+        } else {
+            tfDesc.isScrollEnabled = false
+        }
+        tfDesc.setNeedsLayout()
+        tfDesc.layoutIfNeeded()
+    }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        adjustTextViewScrollingIfNeeded()
+    }
+}
+
+// MARK: - UICollectionViewDelegate
+extension CreateEventViewController: UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return allImages.count
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoCollectionViewCell", for: indexPath) as! photoCollectionViewCell
+        
+        cell.LargeImgView.image = allImages[indexPath.row]
+        cell.LargeImgView.contentMode = .scaleAspectFill
+        cell.FullImgCallback = { [self] value in
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "BeforePostEnlargeViewController") as! BeforePostEnlargeViewController
+            vc.imageArray = self.allImages
+            self.navigationController?.pushViewController(vc, animated: true)
         }
         
-      
+        return cell
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        thisWidth = CGFloat(self.WicketRangeCollectionView.width) / 1
+        return CGSize(width: thisWidth, height: 214)
+    }
+}
+
+// MARK: - Extension for UITextFieldDelegate
+extension CreateEventViewController: UITextFieldDelegate {
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = textField.text ?? ""
+        
+        guard let stringRange = Range(range, in: currentText) else { return false }
+        
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+        
+        let maxAllowedLines = 5
+        
+        guard let font = textField.font else { return true }
+        
+        let singleLineHeight = "A".height(withConstrainedWidth: textField.frame.width, font: font)
+        if singleLineHeight == 0 { return true }
+        
+        let updatedTextHeight = updatedText.height(withConstrainedWidth: textField.frame.width, font: font)
+        
+        let estimatedLines = Int(ceil(updatedTextHeight / singleLineHeight))
+        
+        return estimatedLines <= maxAllowedLines
+    }
+}
+
+// MARK: - Extension for ImageCollectionViewControllerDelegate
+extension CreateEventViewController: ImageCollectionViewControllerDelegate {
+    func didTapDeleteButton(at index: Int) {
+        // This method is still empty, as per your original code.
+    }
+}
+
+// MARK: - Extension for UIImagePickerControllerDelegate, UINavigationControllerDelegate
+extension CreateEventViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        guard let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage) else { return }
+        
+        picker.dismiss(animated: true, completion: nil)
+        showCrop(image: image)
+    }
+}
+
+// MARK: - Extension for CropViewControllerDelegate
+extension CreateEventViewController: CropViewControllerDelegate {
+
+    func cropViewController(_ cropViewController: CropViewController, didFinishCancelled cancelled: Bool) {
+        cropViewController.dismiss(animated: true)
+    }
+    
+    func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+        cropViewController.dismiss(animated: true)
+        print("Did crop and received image")
+        
+        self.images.removeAll()
+        self.imageArray.removeAll()
+        self.images.append(image)
+        
+        self.WicketRangeCollectionView.reloadData()
+        updateCollectionView()
+    }
+    
+    func showCrop(image: UIImage) {
+        let vc = CropViewController(croppingStyle: .default, image: image)
+//        vc.aspectRatioPreset = .presetSquare
+        vc.aspectRatioLockEnabled = true
+        vc.toolbarPosition = .bottom
+        vc.doneButtonTitle = "continue"
+        vc.cancelButtonTitle = "Quit"
+        vc.delegate = self
+        present(vc, animated: true)
+    }
+}
+
+// MARK: - Extension for ViewController
+extension CreateEventViewController {
+    
+    func callCreateEventWebService(_ completionClosure: @escaping () -> ()) {
+        let id = UserDefaults.standard.string(forKey: "userid")
+        let dictParams: Dictionary<String, Any> = [
+            "userid":id ?? "",
+            "eventstarttime":self.tfStartTime.text ?? "",
+            "eventendtime":self.tfEndTime.text ?? "",
+            "eventdate": self.tfStartDatee.text ?? "",
+            "eventenddate": self.tfEndDate.text ?? "",
+            "title":self.tfTitle.text ?? "",
+            "eventdetails": self.tfDesc.text ?? "",
+            "addlineone":self.tfadd1.text ?? "",
+            "addlinetwo":self.tfAdd2.text ?? "",
+            "datelong": "5",
+            "eventpic": "",
+        ]
+        
+        callsendImageAPI(param: dictParams, arrImage: images, imageKey: "eventpic", URlName: kBASEURL + WebServiceName.kCreateEvent, withblock: {
+            self.navigationController?.popViewController(animated: true)
+        })
+    }
+    
+    func callsendImageAPI(param:[String: Any],arrImage:[UIImage],imageKey:String,URlName:String, withblock:@escaping ()->Void){
+        
+        let headers: HTTPHeaders
+        headers = ["Content-type": "multipart/form-data"]
+        
+        AF.upload(multipartFormData: { (multipartFormData) in
+            
+            for (key, value) in param {
+                if let stringValue = value as? String, let data = stringValue.data(using: String.Encoding.utf8) {
+                    multipartFormData.append(data, withName: key)
+                } else {
+                    print("Warning: Parameter '\(key)' is not a String or cannot be converted to Data.")
+                }
+            }
+            
+            for img in arrImage {
+                guard let imgData = img.jpegData(compressionQuality:0.1) else {
+                    print("Warning: Failed to convert image to JPEG data.")
+                    return
+                }
+                multipartFormData.append(imgData, withName: imageKey, fileName: "\(NSDate().timeIntervalSince1970.rounded())" + ".jpeg", mimeType: "image/jpeg")
+            }
+            
+            
+        },to: URL.init(string: URlName)!, usingThreshold: UInt64.init(),
+                  method: .post,
+                  headers: headers).response{ response in
+            
+            if((response.error == nil)){
+                do{
+                    if let jsonData = response.data{
+                        SVProgressHUD.dismiss()
+                        let parsedData = try JSONSerialization.jsonObject(with: jsonData) as! Dictionary<String, AnyObject>
+                        print(parsedData)
+                        withblock()
+                        if let jsonArray = parsedData["data"] as? [[String: Any]] {
+                            // Logic here if needed, currently empty
+                        }
+                    }
+                }catch let error{
+                    SVProgressHUD.dismiss()
+                    print("Error parsing JSON response: \(error.localizedDescription)") // More specific error
+                }
+            }else{
+                SVProgressHUD.dismiss()
+                print(response.error?.localizedDescription ?? "Network request failed with unknown error.") // Improved error message
+            }
+        }
+    }
+    
+    @objc func openCameraGalleryForSingleImage() {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        
+        alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { [weak self] _ in
+            guard let self = self else { return }
+            print("User clicked Camera button")
+            
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                let picker = UIImagePickerController()
+                picker.sourceType = .camera
+                picker.allowsEditing = false
+                picker.delegate = self
+                self.present(picker, animated: true, completion: nil)
+            } else {
+                print("Camera not available")
+            }
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { [weak self] _ in
+            guard let self = self else { return }
+            print("User clicked Gallery button")
+            
+            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+                let picker = UIImagePickerController()
+                picker.sourceType = .photoLibrary
+                picker.allowsEditing = false
+                picker.delegate = self
+                self.present(picker, animated: true, completion: nil)
+            } else {
+                print("Photo library not available")
+            }
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { _ in
+            print("User clicked Dismiss button")
+        }))
+        
+        self.present(alert, animated: true, completion: {
+            print("completion block")
+        })
     }
     
     func showAlert(message: String) {
@@ -330,139 +469,14 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     }
     
     
-    @objc func selectImages() {
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+    func updateCollectionView() {
+        WicketRangeCollectionView.reloadData()
+        collectionviewWicketRangeHeight.constant = allImages.isEmpty ? 0 : 150
         
-        alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
-            print("User clicked Camera button")
-            
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                let picker = UIImagePickerController()
-                picker.sourceType = .camera
-                picker.allowsEditing = true
-                picker.delegate = self
-                self.present(picker, animated: true, completion: nil)
-            } else {
-                print("Camera not available")
-            }
-        }))
-        
-        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
-            print("User clicked Gallery button")
-            
-            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-                let picker = UIImagePickerController()
-                picker.sourceType = .photoLibrary
-                picker.allowsEditing = true
-                picker.delegate = self
-                self.present(picker, animated: true, completion: nil)
-            } else {
-                print("Photo library not available")
-            }
-        }))
-        
-        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { _ in
-            print("User clicked Dismiss button")
-        }))
-        
-        self.present(alert, animated: true, completion: {
-            print("completion block")
-        })
+        UIView.animate(withDuration: 0.0) {
+            self.view.layoutIfNeeded()
+        }
     }
-
-
-    
-    func openCameraGallery() {
-        let alert = UIAlertController()
-
-        alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
-            print("User clicked Camera button")
-
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                self.imagePicker = UIImagePickerController()
-                self.imagePicker?.sourceType = .camera
-                self.imagePicker?.allowsEditing = false
-                self.imagePicker?.delegate = self
-                self.present(self.imagePicker!, animated: true, completion: nil)
-            } else {
-                print("Camera not available")
-            }
-        }))
-
-        alert.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
-            print("User clicked Gallery button")
-
-            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-                self.imagePicker = UIImagePickerController()
-                self.imagePicker?.sourceType = .photoLibrary
-                self.imagePicker?.allowsEditing = false
-                self.imagePicker?.delegate = self
-                self.present(self.imagePicker!, animated: true, completion: nil)
-            } else {
-                print("Photo library not available")
-            }
-        }))
-
-        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: { _ in
-            print("User clicked Dismiss button")
-        }))
-
-        self.present(alert, animated: true, completion: {
-            print("completion block")
-        })
-    }
-
-    
-
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        guard let image = (info[UIImagePickerController.InfoKey.originalImage] as? UIImage) else { return }
-        
-        picker.dismiss(animated: true, completion: nil)
-        showCrop(image: image)
-        
-     //   self.presentCropViewController(image: image)
-        self.images.append(image)
-       // self.selectedImge = image
-        //  self.presentCropViewController(image: image)
-        self.WicketRangeCollectionView.reloadData()
-        updateCollectionView()
-    }
-
-
-    func showCrop(image: UIImage) {
-        let vc = CropViewController(croppingStyle: .default, image: image)
-        vc.aspectRatioPreset = .presetSquare
-        vc.aspectRatioLockEnabled = false
-        vc.toolbarPosition = .bottom
-        vc.doneButtonTitle = "continue"
-        vc.cancelButtonTitle = "Quit"
-        vc.delegate = self
-        present(vc, animated: true)
-    }
-    
-    
-    
-    func cropViewController(_ cropViewController: CropViewController, didFinishCancelled cancelled: Bool) {
-        cropViewController.dismiss(animated: true)
-    }
-
-    func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
-        cropViewController.dismiss(animated: true)
-        print("Did crop")
-        
-        // Assign the cropped image to profilePic
-        self.imageArray.append(image)
-         self.images.append(image)
-        self.WicketRangeCollectionView.reloadData()
-        updateCollectionView()
-     //   updateProfileImageView() // ✅ Yeh line zaroori hai
-    }
-    
-   
-
-
-    
-
     
     func showDatePicker(for textField: UITextField) {
         let datePicker = UIDatePicker()
@@ -470,89 +484,49 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         datePicker.preferredDatePickerStyle = .wheels
         datePicker.minimumDate = Date()
         datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
-
-        // Set the selectedDate to current date if nil
+        
         if selectedDate == nil {
             selectedDate = Date()
         }
         datePicker.date = selectedDate!
-
+        
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
-
+        
         let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneButtonTapped))
         let spaceButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         let cancelButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelButtonTapped))
-
+        
         toolbar.setItems([cancelButton, spaceButton, doneButton], animated: false)
-
+        
         textField.inputAccessoryView = toolbar
         textField.inputView = datePicker
         textField.becomeFirstResponder()
     }
-
+    
     @objc func dateChanged(_ sender: UIDatePicker) {
         selectedDate = sender.date
     }
-
+    
     @objc func doneButtonTapped() {
         let formatter = DateFormatter()
-       
         formatter.dateFormat = "dd-MM-yyyy"
-
-        // Use selectedDate or fallback to the current date
+        
         let dateToSet = selectedDate ?? Date()
         let dateString = formatter.string(from: dateToSet)
-
+        
         if tfStartDatee.isFirstResponder {
             tfStartDatee.text = dateString
         } else if tfEndDate.isFirstResponder {
             tfEndDate.text = dateString
         }
-
+        
         view.endEditing(true)
     }
-
+    
     @objc func cancelButtonTapped() {
         view.endEditing(true)
     }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return allImages.count
-    }
-
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoCollectionViewCell", for: indexPath) as! photoCollectionViewCell
-
-        // Ensure correct array is used
-        cell.LargeImgView.image = allImages[indexPath.row]
-
-        cell.FullImgCallback = { [self] value in
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: "BeforePostEnlargeViewController") as! BeforePostEnlargeViewController
-            vc.imageArray = self.allImages  // Correct array pass karein
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
-        
-        return cell
-    }
-
-
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-                  thisWidth = CGFloat(self.WicketRangeCollectionView.width) / 1
-                  return CGSize(width: thisWidth, height: 214)
- 
-              }
-    
-    
-//    @objc func doneButtonTapped() {
-//           view.endEditing(true)
-//       }
-//
-//       @objc func cancelButtonTapped() {
-//           view.endEditing(true)
-//       }
     
     @objc func donePicker() {
         
@@ -562,180 +536,149 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         formatter.dateFormat = "hh:mm aa"
         let timeSelected = formatter.string(from: timePicker.date)
         
-        if from==1
-        {
+        if from==1 {
             tfStartTime.text = timeSelected
-        }
-        else
-        {
+        } else {
             tfEndTime.text = timeSelected
         }
-        
     }
     
     @objc func dismissPicker() {
         timePickerContainer.removeFromSuperview()
     }
-    func openTimePicker() {
-        timePickerContainer.frame = CGRect(x: 0.0,
-                                           y: (self.view.frame.height - 250),
-                                           width: self.view.frame.width,
-                                           height: 250.0)
-
+    
+    
+    func openTimePicker(defaultHour: Int, defaultMinute: Int) {
+        timePickerContainer.frame = CGRect( x: 0.0, y: (self.view.frame.height - 250), width: self.view.frame.width, height: 250.0  )
+        
         let isDarkMode = traitCollection.userInterfaceStyle == .dark
-
         timePickerContainer.backgroundColor = isDarkMode ? .black : .white
-
-        let buttonHeight: CGFloat = 50.0
-
-        let doneButton = UIButton()
+        
+        let doneButton = UIButton(frame: CGRect(x: (self.view.frame.width - 100), y: 5.0, width: 70.0, height: 40.0))
         doneButton.setTitle("Done", for: .normal)
-        doneButton.setTitleColor(UIColor.systemBlue, for: .normal)
-        doneButton.frame = CGRect(x: (self.view.frame.width - 100), y: 5.0, width: 70.0, height: 40.0)
-        timePickerContainer.addSubview(doneButton)
+        doneButton.setTitleColor(.systemBlue, for: .normal)
         doneButton.addTarget(self, action: #selector(donePicker), for: .touchUpInside)
-
-        let cancelButton = UIButton()
+        timePickerContainer.addSubview(doneButton)
+        
+        let cancelButton = UIButton(frame: CGRect(x: 20.0, y: 5.0, width: 70.0, height: 40.0))
         cancelButton.setTitle("Cancel", for: .normal)
-        cancelButton.setTitleColor(UIColor.systemBlue, for: .normal)
-        cancelButton.frame = CGRect(x: 20.0, y: 5.0, width: 70.0, height: 40.0)
-        timePickerContainer.addSubview(cancelButton)
+        cancelButton.setTitleColor(.systemBlue, for: .normal)
         cancelButton.addTarget(self, action: #selector(dismissPicker), for: .touchUpInside)
-
-        let separatorLine = UIView()
-        separatorLine.frame = CGRect(x: 0, y: buttonHeight, width: self.view.frame.width, height: 0.5)
+        timePickerContainer.addSubview(cancelButton)
+        
+        let buttonHeight: CGFloat = 50.0
+        let separatorLine = UIView(frame: CGRect(x: 0, y: buttonHeight, width: self.view.frame.width, height: 0.5))
         separatorLine.backgroundColor = isDarkMode ? UIColor.lightGray.withAlphaComponent(0.3) : UIColor.lightGray
         timePickerContainer.addSubview(separatorLine)
-
+        
         timePicker.frame = CGRect(x: 0.0, y: buttonHeight + 0.5, width: self.view.frame.width, height: 200.0)
         timePicker.datePickerMode = .time
-
+        
         if #available(iOS 13.4, *) {
             timePicker.preferredDatePickerStyle = .wheels
         }
-
+        
         timePicker.backgroundColor = isDarkMode ? .black : .white
-        timePicker.setValue(UIColor.label, forKey: "textColor") // Applies text color in Dark/Light mode
-
-        timePicker.locale = Locale(identifier: "en_US") // For AM/PM
-
+        timePicker.setValue(UIColor.label, forKey: "textColor")
+        timePicker.locale = Locale(identifier: "en_US")
+        
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: Date())
+        components.hour = defaultHour
+        components.minute = defaultMinute
+        if let defaultDate = calendar.date(from: components) {
+            timePicker.date = defaultDate
+        }
+        
         timePickerContainer.addSubview(timePicker)
-
         self.view.addSubview(timePickerContainer)
     }
-
-
     
-    func callCreateEventWebService(_ completionClosure: @escaping () -> ()) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-      //  let idcategory = UserDefaults.standard.string(forKey: "idCategory")
-          let dictParams: Dictionary<String, Any> = [
-                                                    "userid":id ?? "",
-                                                    "eventstarttime":self.tfStartTime.text ?? "",
-                                                    "eventendtime":self.tfEndTime.text ?? "",
-                                                   
-                                                    "eventdate": self.tfStartDatee.text ?? "",
-                                                    
-                                                    "eventenddate":  self.tfEndDate.text ?? "",
-                                                    "title":self.tfTitle.text ?? "",
-                                                    "eventdetails": self.tfDesc.text ?? "",
-                                                    
-                                                    "addlineone":self.tfadd1.text ?? "",
-                                                    "addlinetwo":self.tfAdd2.text ?? "",
-                                                    "datelong": "5",
-                                                    "eventpic": "",
-                                                                        ]
-        if self.from == 1
-        {
+    private func updateColors() {
+        if traitCollection.userInterfaceStyle == .dark {
+            TitleeView.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
+            EndDateView.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
+            startDateView.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
             
-            callsendImageAPI(param: dictParams, arrImage: imageArray, imageKey: "eventpic", URlName: kBASEURL + WebServiceName.kCreateEvent, withblock: {
-                
-                self.navigationController?.popViewController(animated: true)
-            })
-//            callsendImageAPI(param: dictParams, arrImage: imageArray, imageKey: "document[]", URlName: kBASEURL + WebServiceName.kCreateBussines, withblock: {
-//
-//                self.navigationController?.popViewController(animated: true)
-//            })
-        }
-        else if self.from == 2
-        {
-            callsendImageAPI(param: dictParams, arrImage: images, imageKey: "eventpic", URlName: kBASEURL + WebServiceName.kCreateEvent, withblock: {
-                
-                self.navigationController?.popViewController(animated: true)
-            })
+            EndTimeView.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
+            tfEndTime.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
+            Description.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
+            UploadImageView.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
+            startTimeView.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
+            AddressEventView.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
             
-        }
-    }
-    
-    func callsendImageAPI(param:[String: Any],arrImage:[UIImage],imageKey:String,URlName:String, withblock:@escaping ()->Void){
-
-        let headers: HTTPHeaders
-        headers = ["Content-type": "multipart/form-data"]
-        
-        AF.upload(multipartFormData: { (multipartFormData) in
+            TitleeView.layer.borderWidth = 1.0
+            EndDateView.layer.borderWidth = 1.0
+            startDateView.layer.borderWidth = 1.0
+            startTimeView.layer.borderWidth = 1.0
+            EndTimeView.layer.borderWidth = 1.0
             
-            for (key, value) in param {
-                multipartFormData.append((value as! String).data(using: String.Encoding.utf8)!, withName: key)
-            }
+            Description.layer.borderWidth = 1.0
+            Add1View.layer.borderWidth = 1.0
+            Add2.layer.borderWidth = 1.0
+            AddressEventView.layer.borderWidth = 1.0
+            createEventView.backgroundColor = .black
+            Add1View.backgroundColor = .black
+            Add2.backgroundColor = .black
+            tfadd1.backgroundColor = .black
+            tfAdd2.backgroundColor = .black
+            UploadImageView.backgroundColor = .black
+            UploadImageView.layer.borderColor = UIColor(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1).cgColor
+            UploadImageView.layer.borderWidth = 1.0
+            tfTitle.textColor = UIColor(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfStartTime.textColor = UIColor(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfEndTime.textColor = UIColor(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfStartDatee.textColor = UIColor(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfEndDate.textColor = UIColor(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfDesc.textColor = .white
             
-            for img in arrImage {
-            guard let imgData = img.jpegData(compressionQuality:0.1) else { return }
-            multipartFormData.append(imgData, withName: imageKey, fileName: "\(NSDate().timeIntervalSince1970.rounded())" + ".jpeg", mimeType: "image/jpeg")
-//            guard let imgData2 = self.profilePic.image?.jpegData(compressionQuality: 1) else { return }
-//            multipartFormData.append(imgData, withName: "aadharBack", fileName: "\(NSDate().timeIntervalSince1970.rounded())" + ".jpeg", mimeType: "image/jpeg")
-            
-            }
+            tfadd1.textColor = UIColor(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+            tfAdd2.textColor = UIColor(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
             
             
-        },to: URL.init(string: URlName)!, usingThreshold: UInt64.init(),
-          method: .post,
-          headers: headers).response{ response in
+        } else {
+            TitleeView.isUserInteractionEnabled = true
+            EndDateView.isUserInteractionEnabled = true
+            startDateView.isUserInteractionEnabled = true
             
-            if((response.error == nil)){
-                do{
-                    if let jsonData = response.data{
-                        let parsedData = try JSONSerialization.jsonObject(with: jsonData) as! Dictionary<String, AnyObject>
-                        print(parsedData)
-                        withblock()
-                     //   withblock(parsedData)
-//                        let status = parsedData[Message.Status] as? NSInteger ?? 0
-//
-//                        if (status == 1){
-                            if let jsonArray = parsedData["data"] as? [[String: Any]] {
-                               
-                            }
-//
-//                        }else if (status == 2){
-//                            print("error message")
-//                        }else{
-//                            print("error message")
-//                        }
-                    }
-                }catch{
-                    print("error message")
-                }
-            }else{
-                print(response.error?.localizedDescription ?? "hgh")
-            }
+            EndTimeView.isUserInteractionEnabled = true
+            tfEndTime.isUserInteractionEnabled = true
+            Description.isUserInteractionEnabled = true
+            UploadImageView.isUserInteractionEnabled = true
+            
+            Add1View.isUserInteractionEnabled = true
+            Add2.isUserInteractionEnabled = true
+            startTimeView.isUserInteractionEnabled = true
+            
+            TitleeView.layer.borderWidth = 0
+            tfStartDatee.layer.borderWidth = 0
+            startDateView.layer.borderWidth = 0
+            startTimeView.layer.borderWidth = 0
+            EndDateView.layer.borderWidth = 0
+            AddressEventView.layer.borderWidth = 0
+            tfadd1.backgroundColor = .white
+            tfAdd2.backgroundColor = .white
+            
+            Add1View.backgroundColor = .white
+            Add2.backgroundColor = .white
+            UploadImageView.backgroundColor = .white
+            
+            EndTimeView.layer.borderWidth = 0
+            tfEndTime.layer.borderWidth = 0
+            Description.layer.borderWidth = 0
+            Add1View.layer.borderWidth = 0
+            Add2.layer.borderWidth = 0
+            UploadImageView.layer.borderWidth = 0
+            createEventView.backgroundColor = UIColor(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
         }
     }
-    
 }
- 
 
-@available(iOS 16.0, *)
-extension CreateEventViewController: UITextViewDelegate {
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.text == "Description" {
-            textView.text = ""
-            textView.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1) // Actual text color (Dark Gray)
-        }
-    }
-
-    func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            textView.text = "Description"
-           // textView.textColor = #colorLiteral(red: 0.5647058824, green: 0.9333333333, blue: 0.5647058824, alpha: 1) // Light Green Placeholder
-        }
+// MARK: - Extension for String
+extension String {
+    func height(withConstrainedWidth width: CGFloat, font: UIFont) -> CGFloat {
+        let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
+        let boundingBox = self.boundingRect(with: constraintRect, options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: [NSAttributedString.Key.font: font], context: nil)
+        return ceil(boundingBox.height)
     }
 }

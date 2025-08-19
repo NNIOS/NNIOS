@@ -6,13 +6,14 @@
 //
 
 import UIKit
- 
+
 @available(iOS 16.0, *)
 class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource,UITextViewDelegate,PopupSelectionDelegate, PopupSelectionReportDelegate {
     
     
     
     @IBOutlet weak var collectionViewBanner: UICollectionView!
+    @IBOutlet weak var collectionViewBannerHeight: NSLayoutConstraint!
     @IBOutlet weak var lblName: UILabel!
     @IBOutlet weak var lblSector: UILabel!
     @IBOutlet weak var lblGeneral: UILabel!
@@ -39,7 +40,7 @@ class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowL
     var timer: Timer?
     var counter = 0
     var serviceName = [String]()
-//    var imgData = [PostImage]()
+    //    var imgData = [PostImage]()
     //    var imgDataAll = [postImagesN]()
     var imgDataF = [PostImageF]()
     var PostidDe = [Postlistdatum]()
@@ -47,7 +48,7 @@ class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowL
     var ReportCatData : ReportCategory?
     var ReportFinalData : FinalReportModel?
     let placeholderText = "State your concern"
-//    var serviceDropdownData = DropDown()
+    //    var serviceDropdownData = DropDown()
     var imgDataAll: [String] = []  // Images
     var videoDataAll: [String] = [] // Videos
     var mediaData: [PostImage] = []
@@ -56,18 +57,22 @@ class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowL
     override func viewDidLoad() {
         super.viewDidLoad()
         print(postid)
-        
-        
-        mediaDatas.forEach { media in
-                print("🖼 Image: \(media.img ?? "No Image") | 🎥 Video: \(media.video ?? "No Video")")
-            }
+        self.view.layoutIfNeeded()
 
-            // ✅ Correct Appending Logic
-            mediaData = mediaDatas.map { PostImage(img: $0.img, video: $0.video) }
-        // ✅ imgData ko imgDataAll me convert karke add karo
-         mediaData.append(contentsOf: mediaData.map { PostImage(img: $0.img, video: $0.video) })
- 
-          collectionViewBanner.delegate = self
+        // Check media data and update height
+           if mediaData.isEmpty {
+               // No media, so hide the collection view
+               collectionViewBanner.isHidden = true
+               collectionViewBannerHeight.constant = 0
+               print("⚠️ No media found, hiding collection view")
+           } else {
+               // Media is present, show collection view
+               collectionViewBanner.isHidden = false
+               collectionViewBannerHeight.constant = 500
+               print("✅ Media found, showing collection view with height 500")
+           }
+           
+         collectionViewBanner.delegate = self
         collectionViewBanner.dataSource = self
         collectionViewBanner.reloadData()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
@@ -128,7 +133,7 @@ class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowL
         
     }
     
-   
+    
     @objc func professionLabelTapped() {
         showPopup(for: 1, allowMultipleSelection: false) // Single selection for profession
     }
@@ -208,33 +213,33 @@ class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowL
     
     
     
-   
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return mediaData.count
     }
-
+    
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ReportPostCollectionViewCell", for: indexPath) as? ReportPostCollectionViewCell else {
-                fatalError("❌ Failed to dequeue PostBannerCollectionViewCell")
-            }
-            
-            let media = mediaData[indexPath.row]
-
-            if let imageUrl = media.img, !imageUrl.isEmpty {
-                print("🖼 Setting Image: \(imageUrl)")
-                if let url = URL(string: imageUrl) {
-                    cell.profileImgView.kf.setImage(with: url)
-                }
-            } else if let videoUrl = media.video, !videoUrl.isEmpty {
-                print("🎥 Setting Video: \(videoUrl)")
-                if let url = URL(string: videoUrl) {
-                    cell.configureVideo(with: url)
-                }
-            }
-
-            return cell
+            fatalError("❌ Failed to dequeue PostBannerCollectionViewCell")
         }
+        
+        let media = mediaData[indexPath.row]
+        
+        if let imageUrl = media.img, !imageUrl.isEmpty {
+            print("🖼 Setting Image: \(imageUrl)")
+            if let url = URL(string: imageUrl) {
+                cell.profileImgView.kf.setImage(with: url)
+            }
+        } else if let videoUrl = media.video, !videoUrl.isEmpty {
+            print("🎥 Setting Video: \(videoUrl)")
+            if let url = URL(string: videoUrl) {
+                cell.configureVideo(with: url)
+            }
+        }
+        
+        return cell
+    }
     
     
     //    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -295,7 +300,7 @@ class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowL
             for value in self.ReportCatData?.listdata ?? [] {
                 self.serviceName.append(value.name ?? "")
             }
-//            self.serviceDropdownData.dataSource = self.serviceName
+            //            self.serviceDropdownData.dataSource = self.serviceName
         }
     }
 }

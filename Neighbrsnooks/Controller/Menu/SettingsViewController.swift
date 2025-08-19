@@ -62,7 +62,7 @@ class SettingsViewController: BaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.lblNotification.font = UIFont(name: "Montserrat-SemiBold", size: 17)
         self.lblActivity.font = UIFont(name: "Montserrat-SemiBold", size: 17)
         self.lblPublic.font = UIFont(name: "Montserrat-SemiBold", size: 17)
@@ -71,60 +71,19 @@ class SettingsViewController: BaseViewController {
         self.lblEmerShow.font = UIFont(name: "Montserrat-Regular", size: 11)
         self.lblAddLine1Hide.font = UIFont(name: "Montserrat-Regular", size: 11)
         self.lblAddLine1Show.font = UIFont(name: "Montserrat-Regular", size: 11)
-        
         self.lblAddLine2Hide.font = UIFont(name: "Montserrat-Regular", size: 11)
         self.lblAddLine2Show.font = UIFont(name: "Montserrat-Regular", size: 11)
         callGetSettingsWebService{}
-        
-       // NameLbl.text = UserDefaults.standard.object(forKey: "Ratingid") as? String
-       // self.NameLbl.text = self.SettingData?.notificationeventmail
-
-//        callSettingsWebService{
-//
-//        }
-        // Do any additional setup after loading the view.
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-       // callGetSettingsWebService{}
         SVProgressHUD.dismiss()
-        
-//        if data["status"].stringValue == "1" {
-//            cell.lblStatus.text = "Success"
-//            cell.viewStatus.backgroundColor = UIColor(named:"green")
-//        } else if data["status"].stringValue == "2" {
-//            cell.lblStatus.text = "Failed"
-//            cell.viewStatus.backgroundColor = UIColor(named:"red")
-//        } else if data["status"].stringValue == "3" {
-//            cell.lblStatus.text = "Pending"
-//            cell.viewStatus.backgroundColor = UIColor(named:"magenta")
-//        }
-
         callGetSettingsWebService{ [self] in
-            
-            
-          //  self.NameLbl.text = self.SettingData?.pollvotemail
-           
-            if SettingData?.addresslineone == "1" {
-//                self.btnAPhonePost.setImage(UIImage(named: "icons8-tick-30"), for: .normal)
-//                self.btnAPhonePost.backgroundColor = UIColor(named:"green")
+            if SettingData?.address == "1" {
                 btnAPhonePost.setImage(UIImage(named: "icons8-tick-30"), for: .normal)
-             //   btnContactShow.setImage(UIImage(named: "check"), for: .normal)
-               // self.lblPost.text = self.SettingData?.addresslineone
-
-            } else if SettingData?.addresslineone == "0" {
+            } else if SettingData?.addresslinetwo == "0" {
                 self.btnAPhonePost.setImage(UIImage(named: "radio-blank"), for: .normal)
-             
-            }
-            else if SettingData?.addresslinetwo == "1" {
-                self.btnAdd1Show.setImage(UIImage(named: "icons8-tick-30"), for: .normal)
-             
-            }
-            else if SettingData?.addresslinetwo == "0" {
-                self.btnAdd1Show.setImage(UIImage(named: "radio-blank"), for: .normal)
-             
             }
         }
         
@@ -132,8 +91,7 @@ class SettingsViewController: BaseViewController {
     
 
     @IBAction func BackButtionAction(_ : UIButton){
-
-        _ = navigationController?.popViewController(animated: true)
+        self.navigationController?.popViewController(animated: true)
 
     }
     
@@ -430,4 +388,3 @@ class SettingsViewController: BaseViewController {
         }
 
 }
- 

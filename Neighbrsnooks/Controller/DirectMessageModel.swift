@@ -7,15 +7,17 @@
 
 import Foundation
 
-// MARK: - Welcome
+// MARK: - 
 struct DirectMessageModel: Codable {
-    let status, messages: String
-    let nbdata: [DirectMessageData]
+    let status: String?
+    let messages: String?
+    let nbdata: [DirectMessageData]?
 }
 
-// MARK: - Nbdatum
 struct DirectMessageData: Codable {
-    let id, username: String
-    let userpic: String
-    let dttime: String
+    var id: String?
+    let username: String?
+    let userpic: String?
+    let dttime: String?
 }
+

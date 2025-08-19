@@ -27,6 +27,7 @@ class EventHomeTableViewCell: UITableViewCell {
     @IBOutlet weak var lblStartEvent: UILabel!
     @IBOutlet weak var btnDotsImg : UIButton!
     
+    @IBOutlet weak var lblEndEvent: CustomLabelNormal!
     weak var delegateFav: ProfileFavTapDelegate?
     private var defaultTextColor: UIColor?
 

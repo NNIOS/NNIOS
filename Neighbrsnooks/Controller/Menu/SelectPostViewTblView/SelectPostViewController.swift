@@ -29,6 +29,7 @@ class SelectPostViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         fetchAndSetData()
+        selectPostTblView.showsVerticalScrollIndicator = false
         // Set transparent background
         self.view.backgroundColor = UIColor.black.withAlphaComponent(0.5) // Semi-transparent black
         self.view.isOpaque = false
@@ -88,6 +89,7 @@ extension SelectPostViewController: UITableViewDataSource, UITableViewDelegate{
         self.selectPostTblView.separatorStyle = .none
         cell.selectPostLbl?.text = currentItem
         cell.isChecked = selectedItems.contains(currentItem)
+        
         return cell
     }
     

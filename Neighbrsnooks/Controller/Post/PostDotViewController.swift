@@ -41,9 +41,15 @@ class PostDotViewController: BottomPopupViewController {
     @IBOutlet weak var lblReportPost: UILabel!
     @IBOutlet weak var imgReport: UIImageView!
     
+    
+    @IBOutlet weak var viewBlockHeight: NSLayoutConstraint!
+    @IBOutlet weak var imgBlock: UIImageView!
+    @IBOutlet weak var lblBlock: CustomMontserratLabel!
+    @IBOutlet weak var lblBlovkThisUsaer: CustomMontserratLabel!
+    
     var createdBy: String?
     var userId: String?
-
+    
     
     var postUserID: String?
     var DotCallback : ((UIButton) -> Void)?
@@ -79,9 +85,13 @@ class PostDotViewController: BottomPopupViewController {
     var navigateToMDCallback: (() -> Void)?
     var navigateToDeleteCallback: (() -> Void)?
     var navigateToReportCallback: (() -> Void)?
-    
-    
-    
+    var HomeNewData: HomeNewData?  // ✅ Corrected type
+    var onUpdateForBlock: (() -> Void)?
+    var objBlockUserData : BlockUserModel?
+    var isComingFromMenuPostVC:Bool = true
+    var onUpdateForFav: (() -> Void)?
+     var callbackf: ((Int) -> Void)? // 👈 Yeh callback
+
     
     override var popupTopCornerRadius: CGFloat {
         return topCornerRadius ?? CGFloat(0) // Customize top corner radius
@@ -101,7 +111,12 @@ class PostDotViewController: BottomPopupViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        postUserID = createdBy
+        print("🟢 poststs at viewDidLoad: \(poststs ?? 0)")
+
+        
+        
+        
+        
         checkUserID()
         
         self.FvrtLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
@@ -115,10 +130,46 @@ class PostDotViewController: BottomPopupViewController {
         self.lblShareThisPost.font = UIFont(name: "Montserrat-Regular", size: 13)
         self.lblReportThisPost.font = UIFont(name: "Montserrat-Regular", size: 13)
         self.lblDeleteThisPost.font = UIFont(name: "Montserrat-Regular", size: 13)
-    
-        
     }
     
+    func ConfirmBlock() {
+        let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+        let titleText =  "Block"
+        let messageText = "Are you sure you want to block this user ?"
+        
+        let titleColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .label
+        let messageColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .secondaryLabel
+        let attributedTitle = NSAttributedString(string: titleText, attributes: [ .foregroundColor: titleColor, .font: UIFont.boldSystemFont(ofSize: 17)])
+        let attributedMessage = NSAttributedString(string: messageText, attributes: [.foregroundColor: messageColor, .font: UIFont.systemFont(ofSize: 15) ])
+        alertController.setValue(attributedTitle, forKey: "attributedTitle")
+        alertController.setValue(attributedMessage, forKey: "attributedMessage")
+        
+        let confirmAction = UIAlertAction(title: "Yes", style: .default) { _ in
+            self.dismiss(animated: true,completion: {
+                self.handleBlockUnblockAPI(completion: {
+                    self.dismiss(animated: true)
+                })
+            })
+        }
+        confirmAction.setValue(#colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1), forKey: "titleTextColor")
+        let cancelAction = UIAlertAction(title: "No", style: .cancel) { [weak self] _ in
+            guard let self = self else { return }
+            self.dismiss(animated: true, completion: nil)
+        }
+        alertController.addAction(confirmAction)
+        alertController.addAction(cancelAction)
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
+    
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//
+//        print("📥 Received FAVOURITE STATUS: \(String(describing: poststs))")
+//        updateFavouriteUI(for: poststs)
+//    }
+//
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -126,21 +177,24 @@ class PostDotViewController: BottomPopupViewController {
             if self.poststs == 0 {
                 self.btnUnFavourite.isHidden = true
                 self.FvrtLbl.text = "Favourite"
+                self.removeLbl.text = "Add this to my favourite post"
             } else if self.poststs == 1 {
                 self.btnFavourite.isHidden = true
                 self.FvrtLbl.text = "Unfavourite"
+                self.removeLbl.text = "Remove this from my favourite post"
             }
-
+            
             // ✅ Recalculate height after UI updates
-             self.height = self.calculateDynamicHeight()
+            self.height = self.calculateDynamicHeight()
             self.view.setNeedsLayout()
         }
     }
 
+    
     override var popupHeight: CGFloat {
         return calculateDynamicHeight() // ✅ Dynamically set height
     }
-
+    
     
     @IBAction func btnDotPoll(_ sender: UIButton) {
         DotCallback?(sender)
@@ -151,10 +205,10 @@ class PostDotViewController: BottomPopupViewController {
 
         print("📌 Saved User ID: \(savedUserID ?? "nil")")
         print("📌 Post Created By: \(createdBy ?? "nil")")
-
+        
         if savedUserID == createdBy {
             print("✅ Same User ID - Hiding labels and images")
-
+            
             lblReportThisPost.isHidden = true
             lblReportPost.isHidden = true
             imgReport.isHidden = true
@@ -163,12 +217,16 @@ class PostDotViewController: BottomPopupViewController {
             lblSendDM.isHidden = true
             viewHideDmDown.isHidden = true
             
+            lblBlock.isHidden = true
+            lblBlovkThisUsaer.isHidden = true
+            imgBlock.isHidden = true
+            viewBlockHeight.constant = 0
             // ✅ Height 0 kar do jab hide ho
             viewDMHeight.constant = 0
             viewReportHeight.constant = 0
         } else {
             print("❌ Different User ID - Showing labels and images")
-
+            
             lblReportThisPost.isHidden = false
             lblReportPost.isHidden = false
             imgReport.isHidden = false
@@ -179,19 +237,24 @@ class PostDotViewController: BottomPopupViewController {
             lblDeleteThisPost.isHidden = true
             imgDelete.isHidden = true
             btnDeletePost.isHidden = true
-
+            
+            lblBlock.isHidden = false
+            lblBlovkThisUsaer.isHidden = false
+            imgBlock.isHidden = false
+            viewBlockHeight.constant = 45
+            
             // ✅ Height wapas set kar do jab show ho
             viewDMHeight.constant = 44  // Jo bhi original height ho
             viewReportHeight.constant = 44
-             
+            
         }
-
+        
         // 🛠 Smooth animation ke liye layout update
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
     }
-
+    
     func calculateDynamicHeight() -> CGFloat {
         var totalHeight: CGFloat = 0
         
@@ -206,13 +269,15 @@ class PostDotViewController: BottomPopupViewController {
         if !lblDeleteThisPost.isHidden { totalHeight += lblDeleteThisPost.frame.height + 10 }
         if !imgDelete.isHidden { totalHeight += imgDelete.frame.height + 10 }
         if !btnDeletePost.isHidden { totalHeight += btnDeletePost.frame.height + 10 }
-
+        if !lblBlock.isHidden { totalHeight += lblBlock.frame.height + 10 }
+        if !lblBlovkThisUsaer.isHidden { totalHeight += lblBlovkThisUsaer.frame.height + 10 }
+        if !imgBlock.isHidden { totalHeight += imgBlock.frame.height + 10 }
+        
         // ✅ Ensure minimum height for UI to look good
         return max(totalHeight + 50, 200) // At least 200 height
     }
-
     
-
+    
     
     
     @IBAction func navigateButtonTapped(_ sender: UIButton) {
@@ -225,25 +290,72 @@ class PostDotViewController: BottomPopupViewController {
         self.dismiss(animated: true, completion: nil)
     }
     
+    
     @IBAction func btnFavourite(_ : UIButton){
+            
+            callFavouriteBussinessWebService{
+                self.onUpdateForFav?()
+
+                self.dismiss(animated: true)
+            }
+            
+        }
+    
+//
+//      @IBAction func btnUnFavourite(_ sender: UIButton) {
+//          self.callbackf?(0) // 👈 status 0 means unfavourite
+//          self.dismiss(animated: true, completion: nil)
+//      }
+
+
+
+    @IBAction func btnUnFavourite(_ : UIButton){
         
-        callFavouriteBussinessWebService{
-            self.showTemporaryAlert(message: "Added to favorite successfully")
+        callFavouriteRemoveBussinessWebService{
+            self.onUpdateForFav?()
+            self.dismiss(animated: true)
         }
         
     }
+
     
     @IBAction func actionDelete(_ : UIButton) {
         navigateToDeleteCallback?()
     }
     
-    @IBAction func btnUnFavourite(_ : UIButton){
-        
-        callFavouriteRemoveBussinessWebService{
-            self.showTemporaryAlert(message: "Removed to favorite successfully")
-        }
-        
-    }
+    
+
+    
+//    callFavouriteRemoveBussinessWebService {
+//        self.showTemporaryAlert(message: "Removed from favorite successfully")
+//
+//        // ✅ Update local model BEFORE calling UI update
+//        self.HomeNewData?.favouritstatus = 0
+//        self.updateFavouriteUI(for: self.HomeNewData?.favouritstatus)
+//    }
+    
+    
+//    func updateFavouriteUI(for status: Int?) {
+//        print("🧪 Current Favourite Status: \(String(describing: status))")
+//        
+//        guard let status = status else {
+//            btnFavourite.isHidden = false
+//            btnUnFavourite.isHidden = true
+//            return
+//        }
+//
+//        if status == 1 {
+//            btnFavourite.isHidden = true
+//            btnUnFavourite.isHidden = false
+//        } else {
+//            btnFavourite.isHidden = false
+//            btnUnFavourite.isHidden = true
+//        }
+//    }
+
+
+
+    
     
     @IBAction func shareTapped(sender: UIButton)
     {
@@ -262,7 +374,7 @@ class PostDotViewController: BottomPopupViewController {
     
     @IBAction func btnReport(_ : UIButton){
         navigateToReportCallback?()
-     }
+    }
     
     @IBAction func actionDirectMessage(_ sender: Any) {
         navigateToMDCallback?()
@@ -272,7 +384,10 @@ class PostDotViewController: BottomPopupViewController {
     }
     
     
-   
+    @IBAction func btnBlockAction(_ sender: UIButton) {
+        ConfirmBlock()
+    }
+    
     
     func showTemporaryAlert(message: String) {
         // Create the alert controller
@@ -287,44 +402,90 @@ class PostDotViewController: BottomPopupViewController {
         }
     }
     
-    func callFavouriteBussinessWebService(_ completionClosure: @escaping () -> ()) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-        let idPost = UserDefaults.standard.string(forKey: "postid")
-        let Newid = UserDefaults.standard.string(forKey: "useidProfile")
-        let Busid = UserDefaults.standard.string(forKey: "Businessid")
-        let Busimg = UserDefaults.standard.string(forKey: "Businessfirstimg")
-        let dictParams: Dictionary<String, Any> = [
-            "userid":id ?? "" ,
-            "postid":business_id ?? "",
-            "type": "Post" ,
-            "neighbrhood":idNeighbour ?? "",
-        ]
-        WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
-            self.BussinessFavouriteData = data
-            
-            
-            completionClosure()
-        }
-    }
     
-    func callFavouriteRemoveBussinessWebService(_ completionClosure: @escaping () -> ()) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-        let idPost = UserDefaults.standard.string(forKey: "postid")
-        let Newid = UserDefaults.standard.string(forKey: "useidProfile")
-        let Busid = UserDefaults.standard.string(forKey: "Businessid")
-        let Busimg = UserDefaults.standard.string(forKey: "Businessfirstimg")
-        let dictParams: Dictionary<String, Any> = [
-            "userid":id ?? "" ,
-            "postid":business_id ?? "",
-            "type": "Post" ,
-        ]
-        WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
-            self.BussinessRemoveFavouriteData = data
-            completionClosure()
+    
+//    // MARK: - API Call: Favourite
+//     func callFavouriteBussinessWebService(postId: String, completion: @escaping (String) -> Void) {
+//         let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
+//         let neighbourhoodId = UserDefaults.standard.string(forKey: "neighbrshood") ?? ""
+//         
+//         let dictParams: [String: Any] = [
+//             "userid": userId,
+//             "postid": business_id ?? "",
+//             "type": "Post",
+//             "neighbrhood": neighbourhoodId
+//         ]
+//
+//         WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
+//             completion("Favorite successfully")
+//         }
+//     }
+//
+//     // MARK: - API Call: Unfavourite
+//     func callFavouriteRemoveBussinessWebService(postId: String, completion: @escaping (String) -> Void) {
+//         let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
+//         let neighbourhoodId = UserDefaults.standard.string(forKey: "neighbrshood") ?? ""
+//         
+//         let dictParams: [String: Any] = [
+//             "userid": userId,
+//             "postid": business_id ?? "",
+//             "type": "Post",
+//             "neighbrhood": neighbourhoodId
+//         ]
+//
+//         WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
+//             completion("Removed from favorite successfully")
+//         }
+//     }
+//
+    
+    
+    
+    func callFavouriteBussinessWebService(_ completionClosure: @escaping () -> ()) {
+            let id = UserDefaults.standard.string(forKey: "userid")
+            let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
+            let idPost = UserDefaults.standard.string(forKey: "postid")
+            let Newid = UserDefaults.standard.string(forKey: "useidProfile")
+            let Busid = UserDefaults.standard.string(forKey: "Businessid")
+            let Busimg = UserDefaults.standard.string(forKey: "Businessfirstimg")
+            let dictParams: Dictionary<String, Any> = [
+                "userid":id ?? "" ,
+                "postid":business_id ?? "",
+                "type": "Post" ,
+                "neighbrhood":idNeighbour ?? "",
+            ]
+            WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
+                self.BussinessFavouriteData = data
+                
+                
+                completionClosure()
+            }
         }
-    }
+        
+        func callFavouriteRemoveBussinessWebService(_ completionClosure: @escaping () -> ()) {
+            let id = UserDefaults.standard.string(forKey: "userid")
+            let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
+            let idPost = UserDefaults.standard.string(forKey: "postid")
+            let Newid = UserDefaults.standard.string(forKey: "useidProfile")
+            let Busid = UserDefaults.standard.string(forKey: "Businessid")
+            let Busimg = UserDefaults.standard.string(forKey: "Businessfirstimg")
+            let dictParams: Dictionary<String, Any> = [
+                "userid":id ?? "" ,
+                "postid":business_id ?? "",
+                "type": "Post" ,
+                "neighbrhood":idNeighbour ?? "",
+            ]
+            print("Param is :\(dictParams)")
+            WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
+                self.BussinessRemoveFavouriteData = data
+                
+                completionClosure()
+            }
+        }
+    
+    
+    
+
     
     func callPostCommenteWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -338,6 +499,58 @@ class PostDotViewController: BottomPopupViewController {
         WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
             self.CommentPostListData = data
             completionClosure()
+        }
+    }
+    
+    // dev.
+    func handleBlockUnblockAPI(completion: @escaping () -> Void) {
+        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
+        guard let blockerId = UserDefaults.standard.string(forKey: "userid") else {
+            print("Error: Missing blocker ID")
+            return
+        }
+        
+        guard let blockedId = createdBy else {
+            print("Error: Missing blocked ID")
+            return
+        }
+        let dictParams: [String: Any] = [
+            "blocker_userid": blockerId,
+            "blocked_userid": blockedId,
+            "action": "block"
+        ]
+        print("Block dictParams :\(dictParams)")
+        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true) {
+            (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+            switch statusCode {
+            case .SUCCESS ,.CREATED:
+                do {
+                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+                    self.objBlockUserData = data
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        if self.isComingFromMenuPostVC == false {
+                            self.onUpdateForBlock!()
+                            self.dismiss(animated: true)
+                        } else if self.isComingFromMenuPostVC == true {
+                            self.onUpdateForBlock!()
+                            self.dismiss(animated: true)
+                        }
+                    }
+                } catch {
+                    print(error.localizedDescription)
+                }
+            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                do {
+                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+                    self.objBlockUserData = data
+                } catch {
+                    print(error.localizedDescription)
+                }
+            case .UNAUTHORIZED:
+                print(error?.localizedDescription ?? "")
+            default:
+                break
+            }
         }
     }
     

@@ -15,10 +15,8 @@ protocol ConfirmEventDelegate {
 @available(iOS 16.0, *)
 class EventJoinListViewController: UIViewController {
     
-//    @IBOutlet weak var tableViewConst: NSLayoutConstraint!
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var LblAttendes: UILabel!
-//    @IBOutlet weak var tableViewConst: NSLayoutConstraint!
     
     var EventJoinListData : EventJionListModel?
     @IBOutlet weak var viewAtt: UIView!
@@ -35,13 +33,24 @@ class EventJoinListViewController: UIViewController {
         
         viewAtt.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         viewAtt.layer.cornerRadius = cornerRadius
+        
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleOutsideTap(_:)))
+        tapGesture.cancelsTouchesInView = false
+        self.view.addGestureRecognizer(tapGesture)
     }
     
-//    func updateTableViewHeight() {
-//        self.tableviewMembers.layoutIfNeeded()
-//        let contentHeight = self.tableviewMembers.contentSize.height
-//        self.tableViewConst.constant = contentHeight
-//    }
+    @objc func handleOutsideTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: self.view)
+
+        // 👇 Check if tap is outside the tableview
+        if !tableviewMembers.frame.contains(location) {
+            self.dismiss(animated: true, completion: nil)
+        }
+    }
+
+    
+
 
     
     override func viewWillAppear(_ animated: Bool) {
@@ -65,7 +74,7 @@ class EventJoinListViewController: UIViewController {
         let id = UserDefaults.standard.string(forKey: "userid")
         let dictParams: Dictionary<String, Any> = [
             "userid":id ?? "",
-            "eventid": eventid ?? "",
+            "eventid": eventid ,
             "type": "1",
             
         ]

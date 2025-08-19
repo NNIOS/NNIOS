@@ -122,7 +122,7 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+//        updateColors()
     }
     
     private func updateColors() {
@@ -513,7 +513,7 @@ extension UpdateEventViewController: UIImagePickerControllerDelegate, UINavigati
 
     func showCrop(image: UIImage) {
         let vc = CropViewController(croppingStyle: .default, image: image)
-        vc.aspectRatioPreset = .presetSquare
+//        vc.aspectRatioPreset = .presetSquare
         vc.aspectRatioLockEnabled = false
         vc.toolbarPosition = .bottom
         vc.doneButtonTitle = "continue"

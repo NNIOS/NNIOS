@@ -47,9 +47,9 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     @IBOutlet weak var lblState: UILabel!
     @IBOutlet weak var lblPinCode: UILabel!
     @IBOutlet weak var lblNeighborhood: UILabel!
+    @IBOutlet weak var lblCountPdfFile: UILabel!
     
-    
-    
+     
     var UpdateBusinessData : UpdateBusinessModel?
     var BussinessDetailData : BusinessDetailModel?
     let pickerView = UIPickerView()
@@ -57,7 +57,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     let placeholderText = "Describe your business"
     var selectedPDFURL: URL?
     var account = ""
-    var docType = ""
+    var docType: String?
     //    var serviceDropdownData = DropDown()
     var serviceName = [String]()
     var AddPCategoryData : CategoryBussinessModel?
@@ -91,6 +91,9 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     let endTimePicker = UIDatePicker()
     let hiddenTextField = UITextField()
     var loaderView: UIActivityIndicatorView!
+    var existingDocumentURL: String?
+    var Oid: String?
+    var shouldCallAPI = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -127,8 +130,6 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         self.imagePicker?.delegate = self
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped(_:)))
         callCatBussinessWebService()
-        
-        
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(previewLabelTapped))
         lblMediaCount.isUserInteractionEnabled = true
         lblMediaCount.addGestureRecognizer(tapGesture)
@@ -164,13 +165,30 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         updateViewHeight()
         viewWeeklyOfHeight.constant = 0 // Reset height to 0
         
-        // show tha data home to AddbussinessVC
-        //        lblNeighborhood.text = UserDefaults.standard.string(forKey: "myNeighbhrhhod") ?? "N/A"
-        //        lblCity.text = UserDefaults.standard.string(forKey: "city") ?? "N/A"
-        //        lblState.text = UserDefaults.standard.string(forKey: "state") ?? "N/A"
-        //        lblPinCode.text = UserDefaults.standard.string(forKey: "pincode") ?? "N/A"
-        //        tfAdd1.text = UserDefaults.standard.string(forKey: "addressLineOne") ?? ""
-        //        tfAdd2.text = UserDefaults.standard.string(forKey: "addressLineTwo") ?? ""
+        if docType == nil, let type = BussinessDetailData?.doctype {
+                switch type {
+                case "Menu":
+                    updateSelection(selectedButton: btnMenu, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
+                    docType = "Menu"
+                case "Rate":
+                    updateSelection(selectedButton: btnRate, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
+                    docType = "Rate"
+                case "Tarrif":
+                    updateSelection(selectedButton: btnTerrif, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
+                    docType = "Tarrif"
+                case "Others":
+                    updateSelection(selectedButton: btnOthers, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
+                    docType = "Others"
+                default:
+                    break
+                }
+            }
+        
+        
+        let tapGesturePdf = UITapGestureRecognizer(target: self, action: #selector(handlePdfLabelTap))
+            lblCountPdfFile.isUserInteractionEnabled = true
+            lblCountPdfFile.addGestureRecognizer(tapGesturePdf)
+        configureTimePickers()
         
     }
     
@@ -178,15 +196,20 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        NotificationCenter.default.addObserver(self, selector: #selector(pdfWasDeleted), name: NSNotification.Name("PDFDeleted"), object: nil)
+
+        guard shouldCallAPI else {
+               shouldCallAPI = true // Reset for next time
+               return
+           }
         showLoader()
         callBussinesDetailPostWebService { [self] in
-            
+            hideLoader()
             self.tfBussinessName.text = self.BussinessDetailData?.businessName
             self.lblHeading.text = self.BussinessDetailData?.businessName
             self.tfTag.text = self.BussinessDetailData?.tagline
             self.tfCategory.text = self.BussinessDetailData?.category
             self.tvDescribe.text = self.BussinessDetailData?.description
-            
             self.lblStartTime.text = self.BussinessDetailData?.fromtime
             self.lblEndTime.text = self.BussinessDetailData?.totime
             self.tfAdd1.text = self.BussinessDetailData?.add1
@@ -194,16 +217,16 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
             self.lblState.text = self.BussinessDetailData?.state
             self.lblCity.text = self.BussinessDetailData?.city
             self.lblPinCode.text = self.BussinessDetailData?.pincode
-            
             self.tfWeb.text = self.BussinessDetailData?.web
             self.tfEmail.text = self.BussinessDetailData?.email
             self.tfMob.text = self.BussinessDetailData?.mobile
             self.tfTel.text = self.BussinessDetailData?.telephone
             self.lblSelectWeeklyOfDay.text = self.BussinessDetailData?.weeklyOff
             self.lblNeighborhood.text = self.BussinessDetailData?.neighborhood
-            
             // API response ke baad doctype ke basis pe button select karna
-            selectButtonBasedOnDocType()
+            if docType == nil {
+                selectButtonBasedOnDocType()
+            }
             selectWeeklyOffButton()
             
             // **Images & Videos ko API Response se set karna**
@@ -227,10 +250,74 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
                     }
                 }
             }
+            
+            if let documents = self.BussinessDetailData?.document, !documents.isEmpty {
+                self.existingDocumentURL = documents[0].doc
+                print("📄 Document found: \(documents)")
+                
+                let count = documents.count
+                self.lblCountPdfFile.text = count == 1 ? "1 previews" : "\(count) previews"
+                print("📄 Document URL found: \(self.existingDocumentURL ?? "")")
+            } else {
+                self.lblCountPdfFile.text = "No document"
+                print("⚠️ No document found.")
+            }
             self.updateMediaCount() // Media count update karna
-            hideLoader()
+            
         }
     }
+
+    @objc func pdfWasDeleted() {
+        print("📂 PDF deleted")
+        self.existingDocumentURL = nil
+        self.selectedPDFURL = nil // ✅ Add this line
+        self.lblCountPdfFile.text = "No document"
+    }
+
+
+    
+    @objc func handlePdfLabelTap() {
+        openPDF()
+    }
+    
+    
+    func openPDF() {
+        guard let urlString = self.existingDocumentURL, let remoteURL = URL(string: urlString) else { return }
+
+        let fileName = remoteURL.lastPathComponent
+        let destinationURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent(fileName)
+
+        // Agar already downloaded hai to direct open
+        if FileManager.default.fileExists(atPath: destinationURL.path) {
+            openPDFfromLocal(url: destinationURL)
+        } else {
+            // Download
+            URLSession.shared.downloadTask(with: remoteURL) { tempURL, response, error in
+                guard let tempURL = tempURL else { return }
+                do {
+                    try FileManager.default.moveItem(at: tempURL, to: destinationURL)
+                    DispatchQueue.main.async {
+                        self.openPDFfromLocal(url: destinationURL)
+                    }
+                } catch {
+                    print("❌ Failed to save PDF: \(error)")
+                }
+            }.resume()
+        }
+    }
+
+    func openPDFfromLocal(url: URL) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let pdfVC = storyboard.instantiateViewController(withIdentifier: "PDFViewController") as? PDFViewController {
+            pdfVC.pdfURL = url
+            pdfVC.shouldHideDeleteButton = false
+
+            self.navigationController?.pushViewController(pdfVC, animated: true)
+        }
+    }
+
+
+    
     
     func setupLoader() {
         loaderView = UIActivityIndicatorView(style: .large)
@@ -262,9 +349,15 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     }
     
     func selectButtonBasedOnDocType() {
-        guard let docType = BussinessDetailData?.doctype else { return }
+        // ✅ If user already selected docType manually, don't override it
+        if self.docType != nil {
+            return
+        }
+
+        guard let type = BussinessDetailData?.doctype else { return }
+        self.docType = type // ✅ Set docType for use in API
         
-        switch docType {
+        switch type {
         case "Menu":
             updateSelection(selectedButton: btnMenu, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
         case "Rate":
@@ -277,6 +370,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
             break
         }
     }
+
     func selectWeeklyOffButton() {
         guard let weeklyOff = BussinessDetailData?.weeklyOff?.lowercased() else { return }
         
@@ -289,38 +383,62 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     }
     
     
-    // Start Time label click event
+    func configureTimePickers() {
+        startTimePicker.datePickerMode = .time
+        endTimePicker.datePickerMode = .time
+        
+        // Default start time = 10:00 AM
+        if let defaultStartTime = getDateFromString("10:00 AM") {
+            startTimePicker.date = defaultStartTime
+        }
+
+        // Default end time = 07:00 PM
+        if let defaultEndTime = getDateFromString("07:00 PM") {
+            endTimePicker.date = defaultEndTime
+        }
+
+        // Optional: Use 12-hour format
+        if #available(iOS 13.4, *) {
+            startTimePicker.preferredDatePickerStyle = .wheels
+            endTimePicker.preferredDatePickerStyle = .wheels
+        }
+    }
+
+    func getDateFromString(_ timeString: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "hh:mm a"
+        return formatter.date(from: timeString)
+    }
+
     @objc func startTimeTapped() {
         showPickerAlert(title: "Select Start Time", picker: startTimePicker, label: lblStartTime)
     }
-    
-    // End Time label click event
+
     @objc func endTimeTapped() {
         showPickerAlert(title: "Select End Time", picker: endTimePicker, label: lblEndTime)
     }
-    
-    // Function to show time picker in an alert
+
+    // Picker Alert Function
     func showPickerAlert(title: String, picker: UIDatePicker, label: UILabel) {
         let alert = UIAlertController(title: title, message: "\n\n\n\n\n\n\n\n", preferredStyle: .actionSheet)
-        
+
         picker.frame = CGRect(x: 10, y: 10, width: alert.view.frame.width - 20, height: 200)
         alert.view.addSubview(picker)
-        
+
         let selectAction = UIAlertAction(title: "Select", style: .default) { _ in
             self.updateLabel(picker, label: label)
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-        
+
         alert.addAction(selectAction)
         alert.addAction(cancelAction)
-        
+
         present(alert, animated: true)
     }
-    
-    // Update the UILabel with selected time
+
     func updateLabel(_ sender: UIDatePicker, label: UILabel) {
         let formatter = DateFormatter()
-        formatter.dateFormat = "hh:mm a"  // AM/PM format
+        formatter.dateFormat = "hh:mm a"
         label.text = formatter.string(from: sender.date)
     }
     
@@ -355,7 +473,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         print("Image Count: \(imageArray.count)")
         print("Video Count: \(videoArray.count)")
         let totalMedia = imageArray.count + videoArray.count
-        lblMediaCount.text = "\(totalMedia) preview"
+        lblMediaCount.text = "\(totalMedia) previews"
         lblMediaCount.isHidden = totalMedia == 0 // Hide the label if no media
     }
     
@@ -451,6 +569,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     //-------------------- opne tha camra and upload image and videos ---------
     
     @objc func selectImages() {
+        self.shouldCallAPI = false
         let actionSheet = UIAlertController()
         
         actionSheet.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
@@ -527,53 +646,105 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        picker.dismiss(animated: true, completion: nil)
-        
+         picker.dismiss(animated: true, completion: nil)
+
         if let image = info[.originalImage] as? UIImage {
-            // Crop karne ke liye function ko call karein
+            self.shouldCallAPI = false // ✅ Add this line
             presentCropViewController(image: image)
-            // Add image to the image array
-            imageArray.append(image)
+        } else if let videoURL = info[.mediaURL] as? URL {
+            videoArray.append(videoURL)
             DispatchQueue.main.async {
                 self.updateMediaCount()
             }
-        } else if let videoURL = info[.mediaURL] as? URL {
-            // Add video to the video array
-            videoArray.append(videoURL)
-            DispatchQueue.main.async {
-                self.updateMediaCount() // ✅ Video count update ho jayega
-            }
         }
     }
+
     
     
     
-    
+//    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+//        shouldCallAPI = false
+//        picker.dismiss(animated: true, completion: nil)
+//
+//        for result in results {
+//            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+//                result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
+//                    if let imageNew = object as? UIImage {
+//                        DispatchQueue.main.async {
+//                            self.shouldCallAPI = false // ✅ Add this line
+//                            self.presentCropViewController(image: imageNew)
+//                        }
+//                    }
+//                }
+//            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
+//                result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
+//                    if let videoURL = url {
+//                        DispatchQueue.main.async {
+//                            self.shouldCallAPI = false
+//                            self.videoArray.append(videoURL)
+//                            self.updateMediaCount()
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        shouldCallAPI = false
         picker.dismiss(animated: true, completion: nil)
-        for result in results {
-            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
-                result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
-                    if let imageNew = object as? UIImage {
-                        DispatchQueue.main.async {
-                            self.imageArray.append(imageNew)
-                            self.updateMediaCount() // ✅ Media count update ho raha hai
-                            self.presentCropViewController(image: imageNew)
-                        }
+
+        // ✅ Filter only images
+        let imageResults = results.filter {
+            $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier)
+        }
+
+        // ✅ Limit to max 3 images total
+        let remainingSlots = max(0, 3 - self.imageArray.count)
+
+        // ✅ Alert if user selected more than allowed
+        if imageResults.count > remainingSlots {
+            DispatchQueue.main.async {
+                let alert = UIAlertController(title: "Limit Reached", message: "You can select up to 3 images only.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+            }
+        }
+
+        let allowedResults = Array(imageResults.prefix(remainingSlots))
+
+        if remainingSlots == 0 {
+            print("Image limit reached: Already have 3 images.")
+            return
+        }
+
+        for result in allowedResults {
+            result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
+                if let imageNew = object as? UIImage {
+                    DispatchQueue.main.async {
+                        self.shouldCallAPI = false
+                        self.presentCropViewController(image: imageNew)
                     }
                 }
-            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
+            }
+        }
+
+        // ✅ Handle videos as before (no change here)
+        for result in results {
+            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
                 result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
                     if let videoURL = url {
                         DispatchQueue.main.async {
+                            self.shouldCallAPI = false
                             self.videoArray.append(videoURL)
-                            self.updateMediaCount() // ✅ Video count update ho jayega
+                            self.updateMediaCount()
                         }
                     }
                 }
             }
         }
     }
+
     
     
     
@@ -584,7 +755,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     }
     func didUpdateMediaCount(totalMedia: Int) {
         DispatchQueue.main.async {
-            self.lblMediaCount.text = "\(totalMedia) preview"
+            self.lblMediaCount.text = "\(totalMedia) previews"
             self.lblMediaCount.isHidden = totalMedia == 0
         }
     }
@@ -631,7 +802,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     @IBAction func actionSelectWeekyOf(_ sender: UIButton) {
         viewWeekly.isHidden = false
         updateSelection(selectedButton: btnSelectWeekyOf, allButtons: [btnOpenOnAllDay, btnSelectWeekyOf])
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.0) {
             self.view.layoutIfNeeded()
         }
         updateViewHeight() // Call function to update height dynamically
@@ -646,7 +817,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         
         viewWeeklyOfHeight.constant = newHeight // UIView ki height update karein
         
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.0) {
             self.view.layoutIfNeeded() // Smooth animation effect ke liye
         }
     }
@@ -698,12 +869,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     @IBAction func serviceBtnAction(_ sender: UIButton) {
         self.view.endEditing(true)
-        //        self.showDropdownData(showOn: tfCategory, DropdownName: serviceDropdownData)
-        //        serviceDropdownData.cellHeight = 35
-        //
-        //        serviceDropdownData.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
-        
-        let storyboard = UIStoryboard(name: "Main", bundle: nil) // ✅ Apna storyboard ka naam check karein
+         let storyboard = UIStoryboard(name: "Main", bundle: nil) // ✅ Apna storyboard ka naam check karein
         if let popupVC = storyboard.instantiateViewController(withIdentifier: "BusinessSelectCategoryPopupVC") as? BusinessSelectCategoryPopupVC {
             popupVC.delegate = self
             popupVC.modalPresentationStyle = .overFullScreen  // ✅ Background transparent hoga
@@ -753,22 +919,31 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     @IBAction func pdfrBtnAction(_ sender: UIButton) {
         
-        // Initialize the document picker
+        // Reset selectedPDFURL
+        selectedPDFURL = nil
+        
         let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf], asCopy: true)
         documentPicker.delegate = self
-        documentPicker.allowsMultipleSelection = false // Single file selection
+        documentPicker.allowsMultipleSelection = false
         present(documentPicker, animated: true, completion: nil)
     }
     
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         guard let selectedFileURL = urls.first else { return }
-        
-        // Save the selected PDF URL to use it later
+
         selectedPDFURL = selectedFileURL
-        
-        // Optionally: Print the URL and size
-        print("Selected PDF URL: \(selectedFileURL)")
+
+        do {
+            let fileData = try Data(contentsOf: selectedFileURL)
+
+            // ✅ PDF Upload Call
+            uploadPDFFile(fileURL: selectedFileURL, fileData: fileData)
+
+        } catch {
+            print("❌ Error reading PDF data: \(error.localizedDescription)")
+        }
     }
+
     
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
         print("User cancelled document picker.")
@@ -776,11 +951,17 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     // Function to upload PDF file
     func uploadPDFFile(fileURL: URL, fileData: Data) {
-        // Implement your API call or upload logic here
-        print("PDF File URL: \(fileURL)")
-        print("PDF File Size: \(fileData.count / 1024) KB")
+        print("📤 Uploading PDF File: \(fileURL.lastPathComponent)")
+        print("📤 File Size: \(fileData.count / 1024) KB")
+
+        // 🧪 Simulate Upload — Replace with actual API call
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.lblCountPdfFile.text = "1 preview"
+            self.existingDocumentURL = fileURL.absoluteString // ✅ Store this
+            print("✅ PDF upload done")
+        }
     }
-    
+
     @IBAction func actionShowPdf(_ sender: Any) {
         // Check if a PDF URL is selected
         guard let pdfURL = selectedPDFURL else {
@@ -795,80 +976,165 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
             navigationController?.pushViewController(pdfViewController, animated: true)
         }
     }
+ 
     
-    @IBAction func PublishBtn(_ sender: UIButton){
-        
-           // Form Validation
-        if tfBussinessName.text == "" {
-   
-            sender.isEnabled = true // Enable the button
-            let alert = UIAlertController(title: "", message: "Please Enter Business Name", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        } else if tfTag.text == "" {
- 
-            let alert = UIAlertController(title: "", message: "Please Enter Category", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        } else {
-            // Simulate API call delay for testing loader
-            // API Call Simulation
-            callCreateBussinessWebService {
-                DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
-                    DispatchQueue.main.async {
- 
-                         
-                        // Safe storyboard VC instantiation
-                        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController {
-                            self.navigationController?.pushViewController(vc, animated: false)
-                        } else {
-                            print("❌ Could not find 'NeigbrnookViewController'. Check Storyboard ID.")
-                        }
-                    }
-                }
+    
+    
+    @IBAction func PublishBtn(_ sender: UIButton) {
+        sender.isEnabled = false
+
+        // ✅ Loader setup
+        let loader = UIActivityIndicatorView(style: .medium)
+        loader.translatesAutoresizingMaskIntoConstraints = false
+        loader.color = .white
+        sender.addSubview(loader)
+
+        NSLayoutConstraint.activate([
+            loader.centerXAnchor.constraint(equalTo: sender.centerXAnchor),
+            loader.centerYAnchor.constraint(equalTo: sender.centerYAnchor)
+        ])
+        loader.startAnimating()
+
+        // ✅ Business Name
+        guard let businessName = tfBussinessName.text?.trimmingCharacters(in: .whitespacesAndNewlines), !businessName.isEmpty else {
+            showValidationError("Please enter Business Name")
+            return
+        }
+
+        // ✅ Category
+        guard let category = tfCategory.text?.trimmingCharacters(in: .whitespacesAndNewlines), !category.isEmpty else {
+            showValidationError("Please enter Category")
+            return
+        }
+
+        // ✅ Address Line 1
+        guard let add1 = tfAdd1.text?.trimmingCharacters(in: .whitespacesAndNewlines), !add1.isEmpty else {
+            showValidationError("Please enter Address Line 1")
+            return
+        }
+
+        // ✅ Address Line 2
+        guard let add2 = tfAdd2.text?.trimmingCharacters(in: .whitespacesAndNewlines), !add2.isEmpty else {
+            showValidationError("Please enter Address Line 2")
+            return
+        }
+
+        // ✅ Start Time
+        guard let startTime = lblStartTime.text?.trimmingCharacters(in: .whitespacesAndNewlines), !startTime.isEmpty else {
+            showValidationError("Please select Start Time")
+            return
+        }
+
+        // ✅ End Time
+        guard let endTime = lblEndTime.text?.trimmingCharacters(in: .whitespacesAndNewlines), !endTime.isEmpty else {
+            showValidationError("Please select End Time")
+            return
+        }
+
+        // ✅ Description
+        let description = tvDescribe.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if description.isEmpty || description == "Describe your business" {
+            showValidationError("Please enter a valid Description")
+            return
+        }
+
+        // ✅ Inappropriate Content Check
+        if containsBadWords(description) {
+            showValidationError("""
+            Inappropriate content!
+            This post goes against our community guidelines.
+            Please keep things respectful.
+            """)
+            return
+        }
+
+        // ✅ Weekly Off Day
+        let weekoff = lblSelectWeeklyOfDay.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if weekoff.isEmpty || weekoff == "Select day" {
+            showValidationError("Please select a weekly off day")
+            return
+        }
+
+        // ✅ Everything is validated, call API now
+        callCreateBussinessWebService {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                loader.stopAnimating()
+                loader.removeFromSuperview()
+                sender.isEnabled = true
+                
+                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "BussinesViewController") as? BussinesViewController else { return }
+                vc.sourceViewControlleraddbuss = "AddBussiness"
+                vc.Newid = UserDefaults.standard.string(forKey: "userid") ?? ""
+                if let myProfileVC = self.navigationController?.viewControllers.first(where: { $0 is MyProfileViewController }) {
+                          (myProfileVC as? MyProfileViewController)?.fromScreen = "AddBussiness" // ✅ Pass fromScreen
+                          self.navigationController?.setViewControllers([myProfileVC, vc], animated: true)
+                      } else {
+                          let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                          guard let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {
+                              return
+                          }
+                          myProfileVC.fromScreen = "AddBussiness" // ✅ Pass fromScreen
+                          self.navigationController?.setViewControllers([myProfileVC, vc], animated: true)
+                      }
             }
         }
+
+        // ✅ Helper to handle loader + alert
+        func showValidationError(_ message: String) {
+            loader.stopAnimating()
+            loader.removeFromSuperview()
+            sender.isEnabled = true
+            showAlert(message: message)
+        }
     }
+
+    
+    
+    @IBAction func actionViewDocument(_ sender: Any) {
+//        openPDF()
+    }
+    
     
     
     func callCreateBussinessWebService(_ completionClosure: @escaping () -> ()) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idcategory = UserDefaults.standard.string(forKey: "idCategory") // ✅ Selected Category ID
+        guard let selectedDocType = docType, !selectedDocType.isEmpty else {
+            print("❌ docType missing")
+            completionClosure() // ✅ call this even on early return
+            return
+        }
         
-        let dictParams: Dictionary<String, Any> = [
+        let id = UserDefaults.standard.string(forKey: "userid")
+        let idcategory = UserDefaults.standard.string(forKey: "idCategory")
+        let Busid = UserDefaults.standard.string(forKey: "Businessid")
+        
+        let dictParams: [String: Any] = [
             "userid": id ?? "",
-            "businessname": self.tfBussinessName.text ?? "",
-            "tagline": self.tfTag.text ?? "",
-            "cat": idcategory ?? "", // ✅ **Pass Selected Category ID**
-            "description": self.tvDescribe.text ?? "",
-            "image[]": "",
-            "opentime": self.lblStartTime.text ?? "", // change irshad malik
-            "closetime": self.lblEndTime.text ?? "", // change irshad malik
-            "weekoff": self.lblSelectWeeklyOfDay.text ?? "",
-            "doctype": docType,
-            "address1": self.tfAdd1.text ?? "",
-            "address2": self.tfAdd2.text ?? "",
-            "pin": self.lblPinCode.text ?? "",
-            "web": self.tfWeb.text ?? "",
-            "email": self.tfEmail.text ?? "",
-            "mobile": self.tfMob.text ?? "",
-            "telephone": self.tfTel.text ?? ""
+            "businessid": Busid ?? "",
+            "businessname": tfBussinessName.text ?? "",
+            "tagline": tfTag.text ?? "",
+            "cat": idcategory ?? "",
+            "description": tvDescribe.text ?? "",
+            "opentime": lblStartTime.text ?? "",
+            "closetime": lblEndTime.text ?? "",
+            "weekoff": lblSelectWeeklyOfDay.text ?? "",
+            "address1": tfAdd1.text ?? "",
+            "address2": tfAdd2.text ?? "",
+            "pin": lblPinCode.text ?? "",
+            "web": tfWeb.text ?? "",
+            "email": tfEmail.text ?? "",
+            "mobile": tfMob.text ?? "",
+            "telephone": tfTel.text ?? "",
+            "doctype": selectedDocType // ✅ Must be included here
         ]
         
-        print(dictParams)
-        if !imageArray.isEmpty || !videoArray.isEmpty || selectedPDFURL != nil {
-            callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: selectedPDFURL, mediaKey: "image[]", URlName: kBASEURL + WebServiceName.kCreateBussines) {
-                print("Upload successful")
-                completionClosure()
-            }
-        } else {
-            print("No media available for upload.")
+        print("✅ FINAL PARAMS: \(dictParams)")
+        
+        // 🔁 Send to API via multipart form-data
+        callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: selectedPDFURL, mediaKey: "image[]", URlName: kBASEURL + WebServiceName.kCreateBussines) {
+            print("✅ Upload completed.")
             completionClosure()
         }
     }
-    
-    
-    
     
     func callBussinesDetailPostWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -896,75 +1162,102 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         }
     }
     
-    
-    func callsendMediaAPI(param: [String: Any], images: [UIImage], videos: [URL], pdfURL: URL?, mediaKey: String, URlName: String, withblock: @escaping () -> Void) {
+    func callsendMediaAPI(param: [String: Any],
+                          images: [UIImage],
+                          videos: [URL],
+                          pdfURL: URL?,
+                          mediaKey: String,
+                          URlName: String,
+                          withblock: @escaping () -> Void) {
+
         let headers: HTTPHeaders = ["Content-type": "multipart/form-data"]
-        
+
         AF.upload(multipartFormData: { multipartFormData in
-            // Add parameters
+
+            // ✅ Append only non-empty string parameters
             for (key, value) in param {
-                if let valueString = value as? String {
-                    multipartFormData.append(valueString.data(using: .utf8)!, withName: key)
+                if let valueString = value as? String, !valueString.isEmpty {
+                    if let data = valueString.data(using: .utf8) {
+                        multipartFormData.append(data, withName: key)
+                    }
                 }
             }
-            
-            // Add images
+
+            // ✅ Append images
             for img in images {
                 if let imgData = img.jpegData(compressionQuality: 0.7) {
                     multipartFormData.append(imgData, withName: mediaKey, fileName: "image\(Date().timeIntervalSince1970).jpg", mimeType: "image/jpeg")
                 }
             }
-            
-            // Add videos
+
+            // ✅ Append videos
             for videoURL in videos {
                 do {
                     let videoData = try Data(contentsOf: videoURL)
                     multipartFormData.append(videoData, withName: mediaKey, fileName: "video\(Date().timeIntervalSince1970).mp4", mimeType: "video/mp4")
                 } catch {
-                    print("Error loading video: \(error.localizedDescription)")
+                    print("❌ Error loading video: \(error.localizedDescription)")
                 }
             }
-            
-            // Add PDF file (if exists)
-            if let pdfURL = pdfURL, let pdfData = try? Data(contentsOf: pdfURL) {
-                multipartFormData.append(pdfData, withName: "document[]", fileName: "document\(Date().timeIntervalSince1970).pdf", mimeType: "application/pdf")
+
+            // ✅ Append PDF if available
+            if let pdfURL = pdfURL {
+                do {
+                    let pdfData = try Data(contentsOf: pdfURL)
+                    multipartFormData.append(pdfData, withName: "document[]", fileName: "document\(Date().timeIntervalSince1970).pdf", mimeType: "application/pdf")
+                } catch {
+                    print("❌ Error loading PDF: \(error.localizedDescription)")
+                }
             }
-            
+
         }, to: URlName, method: .post, headers: headers).response { response in
+
             switch response.result {
             case .success(let data):
-                do {
-                    let parsedData = try JSONSerialization.jsonObject(with: data!, options: [])
-                    print("Upload successful: \(parsedData)")
-                    withblock() // Callback
-                } catch {
-                    print("JSON parsing error: \(error)")
+                if let data = data {
+                    do {
+                        let parsed = try JSONSerialization.jsonObject(with: data, options: [])
+                        print("✅ Upload successful:", parsed)
+                        withblock()
+                    } catch {
+                        print("❌ JSON parsing error:", error.localizedDescription)
+                        if let raw = response.data, let rawStr = String(data: raw, encoding: .utf8) {
+                            print("🔍 Raw response:", rawStr)
+                        }
+                    }
+                } else {
+                    print("❌ Empty response data.")
                 }
+
             case .failure(let error):
-                print("Upload failed: \(error.localizedDescription)")
+                print("❌ Upload failed:", error.localizedDescription)
                 self.retryUpload(param: param, images: images, videos: videos, pdfURL: pdfURL, mediaKey: mediaKey, URlName: URlName, withblock: withblock)
-                
             }
         }
     }
-    
+
     
     
     
     // Retry Function
-    func retryUpload(param: [String: Any], images: [UIImage], videos: [URL], pdfURL: URL?, mediaKey: String, URlName: String, withblock: @escaping () -> Void) {
-        // Implement a delay before retrying
+    func retryUpload(param: [String: Any],
+                     images: [UIImage],
+                     videos: [URL],
+                     pdfURL: URL?,
+                     mediaKey: String,
+                     URlName: String,
+                     withblock: @escaping () -> Void) {
+        
         DispatchQueue.global().asyncAfter(deadline: .now() + 2) {
-            self.callsendMediaAPI(param: param, images: images, videos: videos, pdfURL: pdfURL, mediaKey: mediaKey, URlName: URlName, withblock: withblock)
+            self.callsendMediaAPI(param: param,
+                                  images: images,
+                                  videos: videos,
+                                  pdfURL: pdfURL,
+                                  mediaKey: mediaKey,
+                                  URlName: URlName,
+                                  withblock: withblock)
         }
     }
-    
-    
-    
-    
-    
-    
-    
     
     
     
@@ -974,9 +1267,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         
         let headers: HTTPHeaders
         headers = ["Content-type": "multipart/form-data"]
-        
         AF.upload(multipartFormData: { (multipartFormData) in
-            
             for (key, value) in param {
                 multipartFormData.append((value as! String).data(using: String.Encoding.utf8)!, withName: key)
             }
@@ -1018,11 +1309,10 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
 
 @available(iOS 16.0, *)
 extension UpdateBusinessViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    
-    
     func showCrop(image: UIImage) {
+        self.shouldCallAPI = false
         let vc = CropViewController(croppingStyle: .default, image: image)
-        vc.aspectRatioPreset = .presetSquare
+//        vc.aspectRatioPreset = .presetSquare
         vc.aspectRatioLockEnabled = false
         vc.toolbarPosition = .bottom
         vc.doneButtonTitle = "continue"
@@ -1034,12 +1324,13 @@ extension UpdateBusinessViewController: UIImagePickerControllerDelegate, UINavig
     
     func openCameraGallery()
     {
-        
+        self.shouldCallAPI = false
         
         let alert = UIAlertController()
         alert.addAction(UIAlertAction(title: "Take Photo", style: .default , handler:{ (UIAlertAction)in
             print("User click Camera button")
             self.present(self.imagePicker!, animated: true, completion: {
+                self.shouldCallAPI = false
                 self.imagePicker?.sourceType = .camera
                 self.imagePicker?.allowsEditing = true
                 self.imagePicker?.delegate = self
@@ -1050,6 +1341,7 @@ extension UpdateBusinessViewController: UIImagePickerControllerDelegate, UINavig
             print("User click Gallery button")
             
             self.present(self.imagePicker!, animated: true, completion: {
+                self.shouldCallAPI = false
                 self.imagePicker?.sourceType = .photoLibrary
                 self.imagePicker?.allowsEditing = true
                 self.imagePicker?.delegate = self
@@ -1072,18 +1364,41 @@ extension UpdateBusinessViewController: UIImagePickerControllerDelegate, UINavig
 
 @available(iOS 16.0, *)
 extension UpdateBusinessViewController: TOCropViewControllerDelegate {
-    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, withRect cropRect: CGRect, angle: Int)
-    
-    {
-        self.imageArray.append(image)
-        self.images.append(image)
-        cropViewController.dismiss(animated: true, completion: nil)
+    func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, withRect cropRect: CGRect, angle: Int) {
+        print("Crop completed successfully!")
+        self.shouldCallAPI = false
+        cropViewController.dismiss(animated: true) {
+            if self.imageArray.count < 3 {
+                self.imageArray.append(image)
+                print("Image added to array. Current count: \(self.imageArray.count)")
+                self.updateMediaCount()
+            } else {
+                print("Image count limit reached!")
+            }
+            self.shouldCallAPI = false
+
+        }
+        self.shouldCallAPI = false
+
     }
     
     
-    
-    @nonobjc func cropViewController(_ cropViewController: TOCropViewController, didFinishCancelled cancelled: Bool) {
-        cropViewController.dismiss(animated: true, completion: nil)
+    func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+        print("Crop completed successfully!")
+        self.shouldCallAPI = false
+        cropViewController.dismiss(animated: true) {
+            if self.imageArray.count < 3 {
+                self.imageArray.append(image)
+                print("Image added to array. Current count: \(self.imageArray.count)")
+                self.updateMediaCount()
+                self.shouldCallAPI = false
+            } else {
+                print("Image count limit reached!")
+            }
+            
+        }
     }
+    
 }
+
 

@@ -30,7 +30,7 @@ class ChatMemberTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         defaultTextColor = lblName.textColor
-        updateColors()
+//        updateColors()
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -63,7 +63,7 @@ class ChatMemberTableViewCell: UITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
 

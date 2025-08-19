@@ -6,8 +6,8 @@
 //
 
 import UIKit
-@available(iOS 16.0, *)
-class MarketChatListViewController: BaseViewController {
+
+class MarketChatListViewController: UIViewController {
     
    
     @IBOutlet weak var lblHeading: UILabel!
@@ -21,6 +21,7 @@ class MarketChatListViewController: BaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.lblHeading.text = "Chat List"
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         // Do any additional setup after loading the view.
     }
@@ -44,6 +45,7 @@ class MarketChatListViewController: BaseViewController {
         _ = navigationController?.popViewController(animated: true)
         
     }
+    //dev.
     func callMarketChatListWebService(completion: @escaping () -> Void) {
        // let url = "https://dev.neighbrsnook.com/marketplace/api/seller-chat-list/"
         let baseURL = "https://dev.neighbrsnook.com/admin/api/seller-chat-list/"
@@ -138,15 +140,71 @@ extension MarketChatListViewController: UITableViewDataSource, UITableViewDelega
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketChatViewController")as! MarketChatViewController
-      //  vc.userImage = DirectMessageData?.nbdata[indexPath.row].userpic
-
+        //  vc.userImage = DirectMessageData?.nbdata[indexPath.row].userpic
+        
         vc.userName = (self.MarketChatListData?.chats?[indexPath.row].senderName)!
         vc.Sid = String(self.MarketChatListData?.chats?[indexPath.row].senderID ?? 0)
         UserDefaults.standard.set(vc.Sid, forKey: "SenderidN")
-
+        let selectedChat = self.MarketChatListData?.chats?[indexPath.row]
+        let senderId = String(selectedChat?.senderID ?? 0)
+        let productId = String(selectedChat?.productID ?? 0)
+        
+        vc.userName = selectedChat?.senderName ?? ""
+        vc.Sid = senderId
+        vc.Productid = productId
+        vc.senderUserpic = selectedChat?.senderUserpic
+        // ✅ Save to UserDefaults for consistency
+        UserDefaults.standard.set(senderId, forKey: "SenderidN")
+        UserDefaults.standard.set(productId, forKey: "producttId")
+        
+        // ✅ First call API
+        self.callMarketReadStatus2 {
+            // ✅ Then push to next screen after API success
+            //               self.navigationController?.pushViewController(vc, animated: true)
+        }
+        
+        
         vc.Productid = String(self.MarketChatListData?.chats?[indexPath.row].productID ?? 0)
-
-      //  vc.Productid = (self.MarketChatListData?.chats?[indexPath.row].productID)!
+        
+        //  vc.Productid = (self.MarketChatListData?.chats?[indexPath.row].productID)!
         self.navigationController?.pushViewController(vc, animated: true)
     }
+    
+    
+    
+    func callMarketReadStatus2(completion: @escaping () -> Void) {
+        let url = "https://neighbrsnook.com/admin/api/chat_read_status"
+        
+        let senderID = UserDefaults.standard.string(forKey: "SenderidN") ?? ""
+        let receiverID = UserDefaults.standard.string(forKey: "userid") ?? ""
+        let productID = UserDefaults.standard.string(forKey: "producttId") ?? ""
+
+        let dictParams: [String: Any] = [
+            "product_id": productID,
+            "sender_id": senderID,
+            "receiver_id": receiverID
+        ]
+        
+        print("📩 Params (didSelect): \(dictParams)")
+        
+        RSNetworkManager.shared.newRequestApi(
+            withServiceName: url,
+            requestMethod: .PUT,
+            requestParameters: dictParams,
+            withProgressHUD: true
+        ) { (result, error, errorType, statusCode) in
+            switch statusCode {
+            case .SUCCESS, .CREATED:
+                print("🟢 Chat read updated from didSelect")
+            default:
+                print("❌ Chat read update failed")
+            }
+            DispatchQueue.main.async {
+                completion()
+            }
+        }
+    }
+
+    
+    
 }

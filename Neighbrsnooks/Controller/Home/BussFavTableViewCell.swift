@@ -17,6 +17,8 @@ protocol BussFavDelegate: AnyObject {
 class BussFavTableViewCell: UITableViewCell {
     
     @IBOutlet weak var colleViewBusFav : UICollectionView!
+    @IBOutlet weak var collectionViewHeightConstraint: NSLayoutConstraint!
+
     @IBOutlet weak var lblUserName: UILabel!
     @IBOutlet weak var lblSector: UILabel!
     @IBOutlet weak var lblProduct: UILabel!

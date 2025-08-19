@@ -9,7 +9,7 @@ import Foundation
 
 struct RegistrationSecModel: Codable{
     let status: String?
-    let data: [RegistrationSec]?
+    var data: [RegistrationSec]?
     let message: String?
 }
 struct RegistrationSec: Codable {
@@ -24,3 +24,9 @@ struct RegistrationSec: Codable {
 }
 
  
+
+struct RegistrationNewSecModel: Codable {
+    let status: String?
+    var data: String?
+    let message: String?
+}

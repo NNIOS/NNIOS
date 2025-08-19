@@ -27,7 +27,7 @@ class PublicDirectoryTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateColors()
+//        updateColors()
         // Initialization code
     }
 
@@ -68,7 +68,7 @@ class PublicDirectoryTableViewCell: UITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
 

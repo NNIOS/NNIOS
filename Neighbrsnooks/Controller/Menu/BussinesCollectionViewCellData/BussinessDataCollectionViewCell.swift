@@ -30,52 +30,76 @@ class BussinessDataCollectionViewCell: UICollectionViewCell {
     
     var player: AVPlayer?
     var playerLayer: AVPlayerLayer?
-//    weak var delegate: BusinessCollectionViewCellDelegate?
     var FullImgCallback : ((UIButton) -> Void)?
     var controlVisibilityTimer: Timer?
-    
+    private var currentImageURL: String?
+
     
     
     override func prepareForReuse() {
         super.prepareForReuse()
         profileImage.image = nil
+        currentImageURL = nil
+        profileImage.layer.sublayers?.removeAll(where: { $0 is AVPlayerLayer })
         player?.pause()
-        playerLayer?.removeFromSuperlayer()
         player = nil
         playerLayer = nil
-        controlVisibilityTimer?.invalidate() // Timer ko invalidate karein
-        muteButton.isHidden = false
-        pauseButton.isHidden = false
-        profileImage.layer.cornerRadius = 10
-        profileImage.clipsToBounds = true
+        controlVisibilityTimer?.invalidate()
+        pauseButton.isHidden = true
+        muteButton.isHidden = true
     }
+
+
     
     func configure(with BussImage: ImageBussi) {
-        if let imageUrl = BussImage.img {
+        profileImage.image = nil
+        playerLayer?.removeFromSuperlayer()
+        player?.pause()
+        player = nil
+        playerLayer = nil
+
+        if let imageUrl = BussImage.img, !imageUrl.isEmpty {
+            currentImageURL = imageUrl
             profileImage.isHidden = false
+            pauseButton.isHidden = true
+            muteButton.isHidden = true
             loadImage(from: imageUrl)
-            pauseButton.isHidden = true // Hide for images
-            muteButton.isHidden = true // Hide for images
-        } else if let videoUrl = BussImage.video {
+        } else if let videoUrl = BussImage.video, !videoUrl.isEmpty {
+            currentImageURL = nil
             profileImage.isHidden = false
-            playVideo(from: videoUrl) // Load video without playing
-            pauseButton.isHidden = false // Show for videos
-            muteButton.isHidden = false // Show for videos
-            muteButton.setTitle("", for: .normal) // Set default title
+            pauseButton.isHidden = false
+            muteButton.isHidden = false
+            playVideo(from: videoUrl)
+        } else {
+            currentImageURL = nil
+            profileImage.image = nil
+            pauseButton.isHidden = true
+            muteButton.isHidden = true
         }
     }
 
+    
     private func loadImage(from urlString: String) {
-        if let url = URL(string: urlString) {
-            URLSession.shared.dataTask(with: url) { data, response, error in
-                guard let data = data, error == nil else { return }
+        profileImage.image = nil
+        guard let url = URL(string: urlString) else { return }
+
+        let expectedURL = urlString
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            guard let self = self else { return }
+            if let data = data, let image = UIImage(data: data), error == nil {
                 DispatchQueue.main.async {
-                    self.profileImage.image = UIImage(data: data)
+                    // ❗ Only set image if still the same URL
+                    if self.currentImageURL == expectedURL {
+                        self.profileImage.image = image
+                    }
                 }
-            }.resume()
-        }
+            }
+        }.resume()
     }
 
+    
+    
+    
     private func playVideo(from urlString: String) {
         guard let url = URL(string: urlString) else { return }
         player = AVPlayer(url: url)
@@ -87,47 +111,45 @@ class BussinessDataCollectionViewCell: UICollectionViewCell {
         }
         // Do not call player?.play() here
     }
-  
-  // Helper function to format time
-  private func formatTime(from seconds: Double) -> String {
-      let mins = Int(seconds) / 60
-      let secs = Int(seconds) % 60
-      return String(format: "%02d:%02d", mins, secs)
-  }
-  
-    override func awakeFromNib() {
-            super.awakeFromNib()
-        self.isUserInteractionEnabled = true
-            
-
-        }
     
-
+    // Helper function to format time
+    private func formatTime(from seconds: Double) -> String {
+        let mins = Int(seconds) / 60
+        let secs = Int(seconds) % 60
+        return String(format: "%02d:%02d", mins, secs)
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.isUserInteractionEnabled = true
+        
+        
+    }
+    
+    
     
     
     @IBAction func muteButtonTapped(_ sender: UIButton) {
         if let player = player {
-                   player.isMuted.toggle()
-                   let buttonImage = player.isMuted ? UIImage(systemName: "speaker.slash.fill") : UIImage(systemName: "speaker.fill")
-                   muteButton.setImage(buttonImage, for: .normal)
-               }
-//               startControlVisibilityTimer() // Button action par bhi timer reset karein
-    }
+            player.isMuted.toggle()
+            let buttonImage = player.isMuted ? UIImage(systemName: "speaker.slash.fill") : UIImage(systemName: "speaker.fill")
+            muteButton.setImage(buttonImage, for: .normal)
+        }
+     }
     
     
     @IBAction func pauseButtonTapped(_ sender: UIButton) {
         if let player = player {
-                    if player.timeControlStatus == .playing {
-                        player.pause()
-                        sender.setImage(UIImage(systemName: "play.fill"), for: .normal)
-                    } else {
-                        player.play()
-                        sender.setImage(UIImage(systemName: "pause.fill"), for: .normal)
-                    }
-                }
-//                startControlVisibilityTimer() // Button action par bhi timer reset karein
+            if player.timeControlStatus == .playing {
+                player.pause()
+                sender.setImage(UIImage(systemName: "play.fill"), for: .normal)
+            } else {
+                player.play()
+                sender.setImage(UIImage(systemName: "pause.fill"), for: .normal)
             }
-    }
-    
-    
+        }
+     }
+}
+
+
 

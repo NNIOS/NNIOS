@@ -14,23 +14,19 @@ class EventEnlargementViewController: UIViewController, UICollectionViewDataSour
         var otherImages: [String] = [] // You can pass other image URLs as well
 
         @IBOutlet weak var collectionView: UICollectionView!
+    
     override func viewDidLoad() {
-        super.viewDidLoad()
-
-//        collectionView.register(UINib(nibName: "EventEnlargementCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "EventEnlargementCollectionViewCell")
-//        
-//        collectionView.register(UINib(nibName: "EventEnlargementCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "EventEnlargementCollectionViewCell")
-
-               // Assign the delegate and data source
-               collectionView.delegate = self
-               collectionView.dataSource = self
-
-               // Add the initial image to the array of images if needed
-               if let url = url?.absoluteString {
-                   otherImages.insert(url, at: 0)
-               }
-        // Do any additional setup after loading the view.
-    }
+            super.viewDidLoad()
+            collectionView.clipsToBounds = true
+            view.clipsToBounds = true
+            self.view.backgroundColor = .black
+            collectionView.backgroundColor = .clear
+            collectionView.delegate = self
+            collectionView.dataSource = self
+//            if let url = url?.absoluteString {
+//                otherImages.insert(url, at: 0)
+//            }
+        }
     
     @IBAction func BackButtionAction(_ : UIButton){
 

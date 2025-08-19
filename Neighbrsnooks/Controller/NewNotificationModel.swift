@@ -1,4 +1,3 @@
-//
 //  NewNotificationModel.swift
 //  NeighbrsNook Latest Latest
 //
@@ -15,8 +14,8 @@ struct NewNotificationModel: Codable {
     let commentLikesOnYourSuggestionMB, commentsuggestionmail, pollForVoteMB, pollvotemail: String
     let notificationForEventMB, notificationeventmail, directMessageMB, directmsgmail: String
     let newGroupMB, groupcreatemail, ratingReviewsOnYourBusinessMB, ratingCommentbusinessmail: String
-    let sendMessageMarketMB, sendMessageMarketEmail, contactNo, emergencyContactno: String
-    let addresslineone, addresslinetwo: String
+    var sendMessageMarketMB, sendMessageMarketEmail, contactNo, emergencyContactno: String
+    var address,profession: String
 
     enum CodingKeys: String, CodingKey {
         case status, message
@@ -36,6 +35,6 @@ struct NewNotificationModel: Codable {
         case ratingCommentbusinessmail = "rating_commentbusinessmail"
         case sendMessageMarketMB = "SendMessageMarketMB"
         case sendMessageMarketEmail = "SendMessageMarketEmail"
-        case contactNo, emergencyContactno, addresslineone, addresslinetwo
+        case contactNo, emergencyContactno,profession,address
     }
 }

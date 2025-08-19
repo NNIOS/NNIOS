@@ -98,6 +98,7 @@ class CategoryDetailViewController: UIViewController,UICollectionViewDelegate,UI
         cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
         cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
       //  cell.LargeImgView.image = imageArray[indexPath.row]
+        cell.secttLbl.text = CatMarketData?.producthomelist?[indexPath.row].neighborhoodName
         
         cell.EventLbl.text = CatMarketData?.producthomelist?[indexPath.row].pTitle
     //    self.lblImgLimit.text = "Max Images: " + (self.EventDetauilData?.eventImgRemainLimit ?? "")
@@ -173,6 +174,7 @@ class CategoryDetailViewController: UIViewController,UICollectionViewDelegate,UI
 //      }
 //  }
     
+    // dev.
     func callMarketcatWebService() {
                   let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_home?"
 

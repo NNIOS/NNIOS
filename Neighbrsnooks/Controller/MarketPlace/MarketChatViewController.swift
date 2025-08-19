@@ -1,7 +1,6 @@
 import UIKit
 
-@available(iOS 16.0, *)
-class MarketChatViewController: BaseViewController, UITextViewDelegate {
+class MarketChatViewController: BaseViewC, UITextViewDelegate {
     
     @IBOutlet weak var lblHeading: UILabel!
     
@@ -10,7 +9,10 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
     @IBOutlet weak var profileImgView : UIImageView!
     @IBOutlet weak var viewItems: UIView!
     
+    @IBOutlet weak var messageViewHeight: NSLayoutConstraint!
     @IBOutlet weak var placeholderLabel: UILabel!
+    @IBOutlet weak var viewMessageBottomConstraint: NSLayoutConstraint!
+
     var MarketChatData : MarketChatModel?
     var MarketChatPostData : CreateChatMarketModel?
     
@@ -24,31 +26,32 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
     var counter = 0
     var Sid = ""
     var isFromChatList: Bool = false
-
+    let maxTextViewHeight: CGFloat = 200
     override func viewDidLoad() {
         super.viewDidLoad()
         placeholderLabel.text = "Type a message..."
         placeholderLabel.textColor = UIColor.lightGray
         placeholderLabel.isHidden = !tvmessage.text.isEmpty
         tvmessage.delegate = self
+        tvmessage.isScrollEnabled = false
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.tvmessage.font = UIFont(name: "Montserrat-Regular", size: 15)
-        if let imageUrlString = senderUserpic, let url = URL(string: imageUrlString) {
-            profileImgView.kf.indicatorType = .activity
-            profileImgView.kf.setImage(with: url, placeholder: UIImage(named: ""))
-        } else {
-            profileImgView.image = UIImage(named: "") // Fallback image
-        }
+        
         
         self.viewItems.layer.shadowColor = UIColor.gray.cgColor
         self.viewItems.layer.shadowOpacity = 0.5
         self.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
         self.viewItems.layer.shadowRadius = 5
-        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshTableView), userInfo: nil, repeats: true)
+//        timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshTableView), userInfo: nil, repeats: true)
         //   tableviewMembers.transform = CGAffineTransform(scaleX: 1, y: -1) // Flip the table view
-        tableviewMembers.transform = CGAffineTransform(scaleX: 1, y: -1) // Flip the table view
-        tableviewMembers.reloadData()
+         tableviewMembers.reloadData()
+        tableviewMembers.rowHeight = UITableView.automaticDimension
+        tableviewMembers.estimatedRowHeight = 44
+        tableviewMembers.register(UINib(nibName: "SentMessageCell", bundle: nil), forCellReuseIdentifier: "SentMessageCell")
+        tableviewMembers.register(UINib(nibName: "ReceivedMessageCell", bundle: nil), forCellReuseIdentifier: "ReceivedMessageCell")
         // Do any additional setup after loading the view.
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+            view.addGestureRecognizer(tap)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -57,17 +60,23 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
         //callProductListWebService{}
         
         lblHeading.text = userName
-        callMarketChatWebService{ [self] in
-            
-            if let imageUrlString = senderUserpic, let url = URL(string: imageUrlString) {
+        callMarketChatWebService { [self] in
+            if let imageUrlString = senderUserpic,
+               !imageUrlString.isEmpty,
+               let url = URL(string: imageUrlString) {
                 profileImgView.kf.indicatorType = .activity
-                profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "letter-b"))
+                profileImgView.kf.setImage(with: url, placeholder: generatePlaceholderImage(for: userName))
             } else {
-                profileImgView.image = UIImage(named: "letter-b") // Fallback image
+                profileImgView.image = generatePlaceholderImage(for: userName)
             }
-            self.tableviewMembers.reloadData()
             
+            self.tableviewMembers.reloadData()
+            self.scrollToBottomWithoutAnimation()
         }
+        startChatRefreshTimer()
+
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
     }
     
@@ -99,6 +108,34 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
     }
     
     
+    @objc func keyboardWillShow(_ notification: Notification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            let keyboardHeight = keyboardFrame.height
+
+            // Animate bottom constraint change
+            UIView.animate(withDuration: 0.3) {
+                self.viewMessageBottomConstraint.constant = keyboardHeight
+                self.view.layoutIfNeeded()
+            }
+
+            // Scroll to bottom
+            self.scrollToBottom()
+        }
+    }
+
+    @objc func keyboardWillHide(_ notification: Notification) {
+        UIView.animate(withDuration: 0.3) {
+            self.viewMessageBottomConstraint.constant = 0
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc override func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
+    
+    
     @IBAction func BackButtionAction(_ : UIButton){
         
         _ = navigationController?.popViewController(animated: true)
@@ -108,12 +145,27 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
     @objc func refreshTableView() {
         // Call reloadData to refresh the table view
         tableviewMembers.reloadData()
+        self.scrollToBottomWithoutAnimation()
         //   scrollToBottom()
     }
     
     func textViewDidChange(_ textView: UITextView) {
         // Show or hide placeholder label based on text view content
         placeholderLabel.isHidden = !textView.text.isEmpty
+        let size = CGSize(width: textView.frame.width, height: .infinity)
+        let estimatedSize = textView.sizeThatFits(size)
+        
+        if estimatedSize.height <= maxTextViewHeight {
+            textView.isScrollEnabled = false
+            messageViewHeight.constant = estimatedSize.height + 16  // Add padding
+        } else {
+            textView.isScrollEnabled = true
+            messageViewHeight.constant = maxTextViewHeight
+        }
+        
+        UIView.animate(withDuration: 0.2) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     func showNewAlert(message: String) {
@@ -136,31 +188,32 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
     
     
     
-    @IBAction func SendBtn(_ sender: UIButton){
-        
-        if tvmessage.text == "" {
-                showAlert(message: "Please enter your message")
-            } else {
-                placeholderLabel.isHidden = true // Placeholder hide karein
+    @IBAction func SendBtn(_ sender: UIButton) {
+        if tvmessage.text?.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
+            showAlert(message: "Please enter your message")
+        }
+        // 🔴 Bad word check
+        else if containsBadWords(tvmessage.text ?? "") {
+            showAlert(message: "Please remove inappropriate words from your message")
+        }
+        else {
+            placeholderLabel.isHidden = true
 
-                let messageText = tvmessage.text! // Message store karein
-                tvmessage.text = "" // Button press hote hi text clear karein
-                
-                callMarketChatPostWebService(message: messageText) { [self] in
-                    callMarketChatWebService {
-                        // API call ke baad additional actions
+            let messageText = tvmessage.text!
+            tvmessage.text = ""
 
-                        // Placeholder wapas dikhayein agar text field blank hai
-                        DispatchQueue.main.async {
-                            if tvmessage.text == "" {
-                                placeholderLabel.isHidden = false
-                            }
+            callMarketChatPostWebService(message: messageText) { [self] in
+                callMarketChatWebService {
+                    DispatchQueue.main.async {
+                        if tvmessage.text == "" {
+                            placeholderLabel.isHidden = false
                         }
                     }
                 }
             }
-        
+        }
     }
+
     
     func showAlert(message: String) {
         let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
@@ -182,6 +235,7 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
     
     //  "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?"
     
+    //dev.
     func callMarketChatWebService(completion: @escaping () -> Void) {
         let baseURL = "https://dev.neighbrsnook.com/admin/api/messages/"
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -207,7 +261,7 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
                     self.MarketChatData = data
                     UserDefaults.standard.set(self.MarketChatData?.messages?.first?.senderID, forKey: "Senderid")
                     self.tableviewMembers.reloadData()
-
+                    self.scrollToBottomWithoutAnimation()
                     DispatchQueue.global().async {
                         sleep(2)
                         self.MarketChatData = data
@@ -235,70 +289,9 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
         }
     }
 
-   // nichee
+  
     
-    
-//    func callMarketChatWebService(completion: @escaping () -> Void) {
-//
-//        let baseURL = "https://dev.neighbrsnook.com/admin/api/messages/"
-//           let id = UserDefaults.standard.string(forKey: "userid") ?? ""
-//
-//           // ✅ Condition: If Sid is passed from MarketChatListViewController, use it, otherwise fallback to UserDefaults
-//           let senderId = self.Sid ?? UserDefaults.standard.string(forKey: "SenderidN") ?? ""
-//
-//           let url = "\(baseURL)\(id)/\(senderId)"
-//           print("Final URL: \(url)")
-//
-//           let dictParams: [String: Any] = [
-//               "product_id": Productid ?? ""
-//           ]
-//
-//        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
-//        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-//            switch statusCode {
-//            case .SUCCESS ,.CREATED:
-//
-//                do {
-//                    let data = try JSONDecoder().decode(MarketChatModel.self, from: result!)
-//                    self.MarketChatData = data
-//                    //                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-//                    UserDefaults.standard.set(self.MarketChatData?.messages?.first?.senderID, forKey: "Senderid")
-//                    self.tableviewMembers.reloadData()
-//
-//
-//                    DispatchQueue.global().async {
-//                        // Simulate network delay
-//                        sleep(2)
-//
-//                        // Update MarketWDetailData with fetched data
-//                        // Example data assignment
-//                        self.MarketChatData = data // Your actual data fetching logic
-//
-//                        DispatchQueue.main.async {
-//                            completion() // Call completion handler
-//                        }
-//                    }
-//                } catch {
-//                    print(error.localizedDescription)
-//                }
-//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-//                do {
-//                    let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-//                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-//                } catch {
-//                    print(error.localizedDescription)
-//                }
-//            case .UNAUTHORIZED:
-//                print(error?.localizedDescription)
-//                //   self.showLogoutAlert()
-//            default:
-//                break
-//            }
-//        }
-//    }
-    
-    
-    //  "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?"
+    //  "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?" dev.
     func callMarketChatPostWebService(message: String, completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/send-message"
         
@@ -328,6 +321,7 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
                     let data = try JSONDecoder().decode(CreateChatMarketModel.self, from: resultData)
                     self.MarketChatPostData = data
                     self.tableviewMembers.reloadData()
+                    self.scrollToBottomWithoutAnimation()
                 } catch {
                     print("Decoding Error:", error.localizedDescription)
                 }
@@ -340,7 +334,6 @@ class MarketChatViewController: BaseViewController, UITextViewDelegate {
 }
 
 
-@available(iOS 16.0, *)
 extension MarketChatViewController: UITableViewDataSource, UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -357,71 +350,65 @@ extension MarketChatViewController: UITableViewDataSource, UITableViewDelegate{
         }
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MarketChatTableViewCell", for: indexPath) as! MarketChatTableViewCell
-        
-        let reversedIndex = (MarketChatData?.messages?.count ?? 0) - 1 - indexPath.row
-       
-        cell.lblMessage.text = MarketChatData?.messages?[reversedIndex].message
-        cell.lblTime.text = MarketChatData?.messages?[reversedIndex].createdAts
-        
-        cell.lblMessage.font = UIFont(name: "Montserrat-Regular", size: 14)
-        
-
-        
-        
-        cell.lblTime.font = UIFont(name: "Montserrat-Regular", size: 9)
-        
-        cell.transform = CGAffineTransform(scaleX: 1, y: -1)
-        
-        cell.lblMessage.numberOfLines = 0  // Allows multi-line messages
-        
-       
-
-        // Set preferred max width (adjusted for padding)
-        cell.lblMessage.preferredMaxLayoutWidth = tableView.frame.width * 0.9
-
-        cell.viewNotification.setNeedsLayout()
-        cell.viewNotification.layoutIfNeeded()
-        
-        
-        
-
-
-        // Calculate message width
-        let maxWidth = tableView.frame.width * 0.7
-        let messageSize = cell.lblMessage.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
-
-        let messageWidth = min(maxWidth, messageSize.width - 20)
-
-        // Let Auto Layout determine the height dynamically (NO need for manual height adjustment)
-        cell.viewNotification.setNeedsLayout()
-        cell.viewNotification.layoutIfNeeded()
-        
-       
-        if MarketChatData?.messages![reversedIndex].sendertype == "receiver" {
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)
-          
-         //  cell.viewNotification.frame.origin.x = 5
-            cell.updateLeadingConstraint(newConstant: 10)
-            cell.updateTrailingConstraint(newConstant: tableView.frame.width - messageWidth - 30)
-            cell.applyChatBubbleStyle(isSender: false)
-          
-            
-        }
-        if MarketChatData?.messages![reversedIndex].sendertype == "sender" {
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.862745098, green: 0.9294117647, blue: 0.7882352941, alpha: 1)
-            let extraShift: CGFloat = 20  // Adjust this value to shift more left
-            cell.updateLeadingConstraint(newConstant: tableView.frame.width - messageWidth - 30 - extraShift)
-            cell.updateTrailingConstraint(newConstant: 0)
-            cell.applyChatBubbleStyle(isSender: true)
-        }
-
-       
-        return cell
-    }
-   
     
+    func scrollToBottomWithoutAnimation() {
+        DispatchQueue.main.async {
+            let sections = self.tableviewMembers.numberOfSections
+            if sections > 0 {
+                let rows = self.tableviewMembers.numberOfRows(inSection: sections - 1)
+                if rows > 0 {
+                    let indexPath = IndexPath(row: rows - 1, section: sections - 1)
+                    self.tableviewMembers.scrollToRow(at: indexPath, at: .bottom, animated: false)
+                }
+            }
+        }
+    }
+
+    
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let messages = MarketChatData?.messages else {
+            return UITableViewCell()
+        }
+
+        // Reverse index (for flipped table)
+        let message = messages[indexPath.row]
+
+        if message.sendertype == "sender" {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "SentMessageCell", for: indexPath) as! SentMessageCell
+            cell.lblMessage.text = message.message
+            cell.lblTime.text = message.createdAts
+             return cell
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ReceivedMessageCell", for: indexPath) as! ReceivedMessageCell
+            cell.lblMessage.text = message.message
+            cell.lblTime.text = message.createdAts
+ 
+            // Optional: Set profile image
+            if let urlStr = message.senderUserpic, let url = URL(string: urlStr) {
+                cell.profileImageView.kf.setImage(with: url)
+            } else {
+                cell.profileImageView.image = UIImage(named: "defaultProfile")
+            }
+
+            return cell
+        }
+    }
+
+    func generatePlaceholderImage(for name: String) -> UIImage {
+        let letter = String(name.first ?? "U")
+        let label = UILabel(frame: CGRect(x: 0, y: 0, width: 60, height: 60))
+        label.text = letter.uppercased()
+        label.textAlignment = .center
+        label.backgroundColor = .lightGray
+        label.textColor = .white
+        label.font = UIFont.systemFont(ofSize: 28, weight: .bold)
+        UIGraphicsBeginImageContext(label.bounds.size)
+        label.layer.render(in: UIGraphicsGetCurrentContext()!)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image ?? UIImage(named: "letter-b")!
+    }
+
     
 }

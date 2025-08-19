@@ -8,124 +8,123 @@
 import UIKit
 import SVProgressHUD
 @available(iOS 16.0, *)
-class ContactUsViewController: BaseViewController, UITextViewDelegate {
+class ContactUsViewController: BaseViewController {
     
+    // MARK: - Outlets
+    @IBOutlet weak var lblHello: UILabel!
     @IBOutlet weak var NameLbl: UILabel!
-    @IBOutlet weak var SecLbl: UILabel!
-  //  @IBOutlet weak var EmailLbl: UILabel!
     @IBOutlet weak var MobileLbl: UILabel!
     @IBOutlet weak var lblHeading: UILabel!
     @IBOutlet weak var tvmessage: UITextView!
     @IBOutlet weak var placeholderLabel: UILabel!
     @IBOutlet weak var tfMail: UITextField!
-    var profileData : ProfileModel?
-    var ContactUsData : ContactUsModel?
     
+    // MARK: - Variables
+    var profileData: ProfileModel?
+    var ContactUsData: ContactUsModel?
+    var loadingAlert: UIAlertController?
+    
+    // MARK: - Life cycle methods
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        placeholderLabel.text = "Type a message..."
-               placeholderLabel.textColor = UIColor.lightGray
-               placeholderLabel.isHidden = !tvmessage.text.isEmpty
-
-        tvmessage.delegate = self
-      //  MobileLbl.text = UserDefaults.standard.object(forKey: "emer_phone") as? String
-        
-        // Do any additional setup after loading the view.
-    }
-    
-    func textViewDidChange(_ textView: UITextView) {
-            // Show or hide placeholder label based on text view content
-            placeholderLabel.isHidden = !textView.text.isEmpty
-        }
-    
-    @IBAction func BackButtionAction(_ : UIButton){
-
-        _ = navigationController?.popViewController(animated: true)
-
+        didloadSetup()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
+        willAppearSetup()
+    }
+    
+    // MARK: - Button's Action
+    @IBAction func BackButtionAction(_ : UIButton){
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func SendBtn(_ sender: UIButton) {
+        guard let messageText = tvmessage.text?.trimmingCharacters(in: .whitespacesAndNewlines), !messageText.isEmpty else {
+            showEmtyAlert(message: "Please Enter Your Message")
+            return
+        }
+        if containsBadWords(messageText) { showEmtyAlert(message: "Contains inappropriate words."); return }
+        callContactUsWebService { self.navigationController?.popViewController(animated: true) }
+    }
+}
+
+// MARK: - Extension for ViewController
+extension ContactUsViewController {
+    
+    func callUserProfileWebService(_ completionClosure: @escaping () -> ()) { // function for user profile api
+        let id = UserDefaults.standard.string(forKey: "userid")
+        let dictParams: Dictionary<String, Any> = ["userid":id ?? "", "loggeduser": id ?? ""]
+        print("Param is: \(dictParams)")
+        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+            self.profileData = data
+            completionClosure()
+        }
+    }
+    
+    func callContactUsWebService(_ completionClosure: @escaping () -> ()) { // function for contact us api
+        let id = UserDefaults.standard.string(forKey: "userid")
+        let dictParams:Dictionary<String,Any> = ["userid":id ?? "", "textmessage":self.tvmessage.text!, "emailid":self.tfMail.text!, "phoneno":self.MobileLbl.text!]
+        print("Param is: \(dictParams)")
+        self.loadingAlert = self.showLoadingAlert(on: self)
+        WebService.sharedInstance.callContactUsWebService(withParams: dictParams) { data in
+            self.ContactUsData = data
+            self.loadingAlert?.dismiss(animated: true, completion: {
+                if self.ContactUsData?.status == "success" {
+                    self.showAlert(message: self.ContactUsData?.message ?? "" ,yesNo: "OK")
+                    completionClosure()
+                } else if self.ContactUsData?.status == "failed" {
+                    completionClosure()
+                }
+            })
+        }
+    }
+    
+    func didloadSetup() { // function for handle UI in viewDidLoad
+        tvmessage.delegate = self
+        placeholderLabel.text = "Type a message..."
+        placeholderLabel.textColor = UIColor.lightGray
+        tvmessage.tintColor = #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1)
+        tfMail.tintColor = #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1)
+        placeholderLabel.isHidden = !tvmessage.text.isEmpty
+    }
+    
+    func willAppearSetup() { // function for handle UI in viewWillAppear
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
+        self.lblHello.font = UIFont(name: "Montserrat-SemiBold", size: 20)
         self.NameLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-        self.SecLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
         self.tfMail.font = UIFont(name: "Montserrat-Regular", size: 15)
-        
-        SVProgressHUD.show()
         callUserProfileWebService{ [self] in
-            
-            SVProgressHUD.dismiss()
-            
-            
-            
-            self.NameLbl.text = self.profileData?.firstname
-            self.SecLbl.text = self.profileData?.lastname
-           
-            
+            self.tvmessage.leftPadding()
+            self.NameLbl.text = self.profileData?.username
             self.tfMail.text = self.profileData?.emailid
             self.MobileLbl.text = self.profileData?.phoneno
-            
-           
         }
-        // Do any additional setup after loading the view.
     }
     
-    @IBAction func SendBtn(_ sender: UIButton){
-        
-        if tvmessage.text == "" {
-        let alert = UIAlertController(title: "", message: "Please Enter Your Message", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
+    func showEmtyAlert(message:String) { //function for show Alert
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        let attributedMessage = NSAttributedString( string:message,
+                                                    attributes: [.font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),.foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)])
+        alert.setValue(attributedMessage, forKey: "attributedMessage")
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        okAction.setValue( #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1) , forKey: "titleTextColor")
+        alert.addAction(okAction)
         self.present(alert, animated: true, completion: nil)
-                         
-        }
-        else{
-            callContactUsWebService{
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController")as! NeigbrnookViewController
-
-                 self.navigationController?.pushViewController(vc, animated: false)
-            }
-        }
-        
-      
     }
-   
-    func callUserProfileWebService(_ completionClosure: @escaping () -> ()) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-          let dictParams: Dictionary<String, Any> = [
-                                                    
-                                                    "userid":id ?? "",
-                                                    "loggeduser": id ?? ""
-                                                   
-                                                   
-                                                                        ]
-          WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-              UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
-              UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
-
-            completionClosure()
-          }
-        }
-    
-    func callContactUsWebService(_ completionClosure: @escaping () -> ()) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-       // let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-          let dictParams: Dictionary<String, Any> = [
-                                                    "userid":id ?? "",
-                                                    "textmessage":self.tvmessage.text ?? "",
-                                                    "emailid":self.tfMail.text ?? "",
-                                                    "phoneno":self.MobileLbl.text ?? ""
-                                                   
-                                                                        ]
-        
-          WebService.sharedInstance.callContactUsWebService(withParams: dictParams) { data in
-            self.ContactUsData = data
-
-
-            completionClosure()
-          }
-        }
 }
-//"https://dev.neighbrsnook.com/admin/groupimage/UP_665d91a80a243.png";
-//"https://dev.neighbrsnook.com/admin/groupimage/UP_665d922457ef9.png";
+
+// MARK: - Extension for UITextViewDelegate
+extension ContactUsViewController : UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) { placeholderLabel.isHidden = true }
+    func textViewDidChange(_ textView: UITextView) { placeholderLabel.isHidden = !textView.text.isEmpty }
+    func textViewDidEndEditing(_ textView: UITextView) { placeholderLabel.isHidden = !textView.text.isEmpty }
+}
+
+// MARK: - Extension for UITextView
+extension UITextView {
+    
+    func leftPadding() { self.textContainerInset = UIEdgeInsets(top: 4, left: 6, bottom: 4, right: 30) } } //function for handle left padding in textview
+
+// MARK: - Ends here

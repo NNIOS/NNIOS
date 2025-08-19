@@ -16,21 +16,33 @@ class MembersTableViewCell: UITableViewCell {
     @IBOutlet weak var BgView: UIView!
     
    
+    @IBOutlet weak var btnThreeDots: UIButton!
     private var defaultTextColor: UIColor?
+    // One callback with sender view
+       var onAnyTap: ((_ tappedView: UIView) -> Void)?
 
     override func awakeFromNib() {
         super.awakeFromNib()
         defaultTextColor = lblName.textColor
-
-        // Then update for dark/light mode
-        updateColors()
-        // Initialization code
+        setupTapGestures()
     }
+    
+    private func setupTapGestures() {
+            [lblName, lblSec, profileImgView].forEach { view in
+                view?.isUserInteractionEnabled = true
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
+                view?.addGestureRecognizer(tapGesture)
+            }
+        }
+    
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+            if let tappedView = gesture.view {
+                onAnyTap?(tappedView)
+            }
+        }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
     
     private func updateColors() {
@@ -48,16 +60,14 @@ class MembersTableViewCell: UITableViewCell {
             lblName.textColor = defaultTextColor
 
             lblSec.textColor = UIColor.secondaryLabel
-           // BgView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
         }
-      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
     

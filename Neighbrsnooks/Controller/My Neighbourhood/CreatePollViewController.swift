@@ -37,7 +37,7 @@ class CreatePollViewController: UIViewController, UITextViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.tvQuest.font = UIFont(name: "Montserrat-Regular", size: 17)
         
         self.tfop1.font = UIFont(name: "Montserrat-Regular", size: 17)
@@ -49,35 +49,36 @@ class CreatePollViewController: UIViewController, UITextViewDelegate {
         self.tfEndDate.font = UIFont(name: "Montserrat-Regular", size: 17)
         tvQuest.delegate = self
         NetworkMonitor.shared.startMonitoring()
-        PollsView.backgroundColor = UIColor.systemBackground
-        option1.backgroundColor = UIColor.systemBackground
-        option2.backgroundColor = UIColor.systemBackground
-        option3.backgroundColor = UIColor.systemBackground
-        option4.backgroundColor = UIColor.systemBackground
-        updateColors()
-              // Set initial placeholder
+        tvQuest.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
+        //        PollsView.backgroundColor = UIColor.systemBackground
+        //        option1.backgroundColor = UIColor.systemBackground
+        //        option2.backgroundColor = UIColor.systemBackground
+        //        option3.backgroundColor = UIColor.systemBackground
+        //        option4.backgroundColor = UIColor.systemBackground
+        //        updateColors()
+        // Set initial placeholder
         tvQuest.text = placeholderText
-      //  tvQuest.textColor =  #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
+        //  tvQuest.textColor =  #colorLiteral(red: 0.3098039216, green: 0.4745098039, blue: 0.3490196078, alpha: 1)
         
-//        tfStartDatee.attributedPlaceholder = NSAttributedString(
-//            string: "Start date", // Placeholder text
-//            attributes: [NSAttributedString.Key.foregroundColor: UIColor.darkGray] // Set the color
-//        )
-//
-//        tfEndDate.attributedPlaceholder = NSAttributedString(
-//            string: "End date", // Placeholder text
-//            attributes: [NSAttributedString.Key.foregroundColor: UIColor.darkGray] // Set the color
-//        )
+        //        tfStartDatee.attributedPlaceholder = NSAttributedString(
+        //            string: "Start date", // Placeholder text
+        //            attributes: [NSAttributedString.Key.foregroundColor: UIColor.darkGray] // Set the color
+        //        )
+        //
+        //        tfEndDate.attributedPlaceholder = NSAttributedString(
+        //            string: "End date", // Placeholder text
+        //            attributes: [NSAttributedString.Key.foregroundColor: UIColor.darkGray] // Set the color
+        //        )
         
-      //  tfBrand.autocapitalizationType = .sentences
-        tvQuest.autocapitalizationType = .sentences
-        tfop1.autocapitalizationType = .sentences
-        tfop2.autocapitalizationType = .sentences
-        tfop3.autocapitalizationType = .sentences
-        tfop4.autocapitalizationType = .sentences
-        
-        // Do any additional setup after loading the view.
-    }
+          //  tfBrand.autocapitalizationType = .sentences
+            tvQuest.autocapitalizationType = .sentences
+            tfop1.autocapitalizationType = .sentences
+            tfop2.autocapitalizationType = .sentences
+            tfop3.autocapitalizationType = .sentences
+            tfop4.autocapitalizationType = .sentences
+            
+            // Do any additional setup after loading the view.
+        }
     
     @IBAction func BackButtionAction(_ : UIButton){
 
@@ -137,7 +138,7 @@ class CreatePollViewController: UIViewController, UITextViewDelegate {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
     
@@ -258,42 +259,61 @@ class CreatePollViewController: UIViewController, UITextViewDelegate {
     @IBAction func PublishBtn(_ sender: UIButton) {
         
         let option1 = tfop1.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            let option2 = tfop2.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            let option3 = tfop3.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            let option4 = tfop4.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let option2 = tfop2.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let option3 = tfop3.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let option4 = tfop4.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let question = tvQuest.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // 🔴 Empty check
+        if question.isEmpty || question == placeholderText {
+            showPopAlert(message: "Please enter poll title")
+            return
+        }
+        
+        // 🚫 Bad word check for question
+        if containsBadWords(question) {
+            showPopAlert(message: "Poll title contains inappropriate words. Please revise.")
+            return
+        }
+        
+        if tfStartDatee.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true {
+            showPopAlert(message: "Please enter poll open date")
+            return
+        } else if tfEndDate.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true {
+            showPopAlert(message: "Please enter poll close date")
+            return
+        } else if option1.isEmpty {
+            showPopAlert(message: "Please enter poll option 1")
+            return
+        } else if option2.isEmpty {
+            showPopAlert(message: "Please enter at least one other option.")
+            return
+        }
 
-            if tvQuest.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || tvQuest.text == placeholderText {
-                showPopAlert(message: "Please enter poll title")
-                return
-            } else if tfStartDatee.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true {
-                showPopAlert(message: "Please enter poll open date")
-                return
-            } else if tfEndDate.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == true {
-                showPopAlert(message: "Please enter poll close date")
-                return
-            } else if option1.isEmpty {
-                showPopAlert(message: "Please enter poll option 1")
-                return
-            } else if option2.isEmpty {
-                showPopAlert(message: "Please enter at least one other option.")
+        // 🚫 Bad word check for options
+        let allOptions = [option1, option2, option3, option4]
+        for (index, option) in allOptions.enumerated() where !option.isEmpty {
+            if containsBadWords(option) {
+                showPopAlert(message: "Poll option \(index + 1) contains inappropriate words.")
                 return
             }
+        }
 
-            // Remove empty options before checking for duplicates
-            let nonEmptyOptions = [option1, option2, option3, option4].filter { !$0.isEmpty }
-            let optionsSet = Set(nonEmptyOptions)
+        // ✅ Duplicate check
+        let nonEmptyOptions = allOptions.filter { !$0.isEmpty }
+        let optionsSet = Set(nonEmptyOptions)
+        
+        if optionsSet.count < nonEmptyOptions.count {
+            showNewAlert(message: "Options contain duplicate data. Please enter unique values.")
+            return
+        }
 
-            if optionsSet.count < nonEmptyOptions.count {
-                showNewAlert(message: "Options contain duplicate data. Please enter unique values.")
-                return
-            }
-
-            // If no duplicates, proceed with calling the web service
-            callPollCreateWebService {
-                self.navigationController?.popViewController(animated: true)
-            }
-      
+        // ✅ Proceed with web service
+        callPollCreateWebService {
+            self.navigationController?.popViewController(animated: true)
+        }
     }
+
     
     func showNewAlert(message: String) {
         let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)

@@ -18,7 +18,7 @@ class FAQViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         callFAQWebService{
            
             self.tableviewMembers.reloadData()
@@ -50,7 +50,7 @@ class FAQViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+//        updateColors()
     }
     
     

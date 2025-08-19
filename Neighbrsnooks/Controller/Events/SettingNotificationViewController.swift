@@ -104,7 +104,7 @@ class SettingNotificationViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateColors()
+//        updateColors()
         self.postLbl.font = UIFont(name: "Montserrat-Regular", size: 19)
         self.NotificationLbl.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.pollLbl.font = UIFont(name: "Montserrat-Regular", size: 19)
@@ -145,7 +145,7 @@ class SettingNotificationViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+//        updateColors()
     }
     
     private func updateColors() {
@@ -211,7 +211,7 @@ class SettingNotificationViewController: UIViewController {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
     

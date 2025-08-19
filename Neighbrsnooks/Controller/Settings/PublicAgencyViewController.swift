@@ -42,8 +42,8 @@ class PublicAgencyViewController: BaseViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateColors()
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
+//        updateColors()
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.lblHospital.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.lblAmbu.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.lblPolice.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -139,7 +139,7 @@ class PublicAgencyViewController: BaseViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+//        updateColors()
     }
     
     private func updateColors() {
@@ -166,7 +166,7 @@ class PublicAgencyViewController: BaseViewController {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
     
@@ -379,7 +379,8 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
             let cell = tableView.dequeueReusableCell(withIdentifier: "PublicDirectoryTableViewCell", for: indexPath) as! PublicDirectoryTableViewCell
             cell.EventLbl.text = data.name
             cell.AddLbl.text = data.address
-            cell.Number1Lbl.text = data.number1
+            cell.Number1Lbl.text = data.number1 ?? "Not Available"
+            cell.Number2Lbl.text = data.number2 ?? "Not Available"
             cell.viewLine.isHidden = expandedIndexPath != indexPath
             if let number2 = data.number2, !number2.isEmpty {
                    cell.Number2View.isHidden = false

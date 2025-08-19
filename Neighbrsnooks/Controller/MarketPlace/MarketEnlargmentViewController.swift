@@ -17,28 +17,22 @@ class MarketEnlargmentViewController: UIViewController, UICollectionViewDelegate
        @IBOutlet weak var collectionView: UICollectionView!
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-
-        collectionView.delegate = self
-               collectionView.dataSource = self
-               
-               // Scroll to the selected image
-//               let indexPath = IndexPath(item: selectedIndex, section: 0)
-//               collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
-        
-        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            super.viewDidLoad()
+            collectionView.clipsToBounds = true
+            view.clipsToBounds = true
+            self.view.backgroundColor = .black
+            collectionView.backgroundColor = .clear
+            collectionView.delegate = self
+            collectionView.dataSource = self
+            if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
                 layout.scrollDirection = .horizontal
-                layout.minimumLineSpacing = 0 // No space between images
+                layout.minimumLineSpacing = 0
                 layout.itemSize = CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
             }
-
-            collectionView.isPagingEnabled = true // Enable paging
-
-            // Scroll to the selected image
+            collectionView.isPagingEnabled = true
             let indexPath = IndexPath(item: selectedIndex, section: 0)
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
-        // Do any additional setup after loading the view.
-    }
+        }
     
     @IBAction func BackButtionAction(_ : UIButton){
         

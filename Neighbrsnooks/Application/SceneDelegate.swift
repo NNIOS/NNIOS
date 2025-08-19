@@ -9,30 +9,47 @@
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
+    
     var window: UIWindow?
-
-
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        NetworkMonitor.shared.startMonitoring()
-        
-        guard let windowScene = (scene as? UIWindowScene) else { return }
-        window = UIWindow(windowScene: windowScene)
-        
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        
-        if let userID = UserDefaults.standard.string(forKey: "userid"), !userID.isEmpty {
-            // User logged in hai, toh home screen dikhaye
-            let homeVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController")
-            window?.rootViewController = UINavigationController(rootViewController: homeVC)
-        } else {
-            // User logged out hai, toh login screen dikhaye
-            let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
-            window?.rootViewController = UINavigationController(rootViewController: loginVC)
+            NetworkMonitor.shared.startMonitoring()
+            
+            guard let windowScene = (scene as? UIWindowScene) else { return }
+            window = UIWindow(windowScene: windowScene)
+            window?.overrideUserInterfaceStyle = .light
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            
+        // Always show SplashVC first
+                let splashVC = storyboard.instantiateViewController(withIdentifier: "SplashVC")
+                window?.rootViewController = splashVC
+                window?.makeKeyAndVisible()
+                
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) { // 2 seconds splash delay
+                if let userID = UserDefaults.standard.string(forKey: "userid"), !userID.isEmpty {
+                    let registrationStep = UserDefaults.standard.string(forKey: "registrationStep") ?? "done"
+                    
+                    switch registrationStep {
+                    case "step1":
+                        let vc = storyboard.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC")
+                        self.window?.rootViewController = UINavigationController(rootViewController: vc)
+                    case "step2":
+                        let vc = storyboard.instantiateViewController(withIdentifier: "RegistationAdressProofVC")
+                        self.window?.rootViewController = UINavigationController(rootViewController: vc)
+                    default:
+                        let homeVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController")
+                        self.window?.rootViewController = UINavigationController(rootViewController: homeVC)
+                    }
+                } else {
+                    let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
+                    self.window?.rootViewController = UINavigationController(rootViewController: loginVC)
+                }
+                
+                    self.window?.makeKeyAndVisible()
+            }
         }
-        
-        window?.makeKeyAndVisible()
-    }
+
 
 
     func sceneDidDisconnect(_ scene: UIScene) {

@@ -47,30 +47,76 @@ class BusinessDetailsCollectionViewCell: UICollectionViewCell {
     }
     
     // Function to configure the cell with image or video data
+//    func configureCell(with data: ImageBd) {
+//        if let imgUrl = data.img, !imgUrl.isEmpty {
+//            // Display Image
+//            if let url = URL(string: imgUrl) {
+//                profileImgView.kf.indicatorType = .activity
+//                profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "NewEvents"))
+//            }
+//            stopVideoPlayback() // Stop video if image is displayed
+//            muteButton.isHidden = true // Hide mute button
+//            pauseButton.isHidden = true // Hide play/pause button
+//        } else if let videoUrl = data.video, !videoUrl.isEmpty {
+//            // Display Video Thumbnail
+//            if let url = URL(string: videoUrl) {
+//                generateThumbnail(for: url) { [weak self] thumbnail in
+//                    DispatchQueue.main.async {
+//                        self?.profileImgView.image = thumbnail // Set video thumbnail as image
+//                    }
+//                }
+//                startVideoPlayback(for: videoUrl) // Start video playback
+//                muteButton.isHidden = false // Show mute button
+//                pauseButton.isHidden = false // Show play/pause button
+//            }
+//        }
+//    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        profileImgView.image = nil
+        profileImgView.isHidden = false
+        stopVideoPlayback()
+        muteButton.isHidden = true
+        pauseButton.isHidden = true
+    }
+
+    
     func configureCell(with data: ImageBd) {
-        if let imgUrl = data.img, !imgUrl.isEmpty {
-            // Display Image
-            if let url = URL(string: imgUrl) {
+        // Clean previous state
+        profileImgView.image = nil
+        profileImgView.isHidden = false
+        muteButton.isHidden = true
+        pauseButton.isHidden = true
+        stopVideoPlayback()
+
+        let hasImage = !(data.img?.isEmpty ?? true)
+        let hasVideo = !(data.video?.isEmpty ?? true)
+
+        if hasImage {
+            if let url = URL(string: data.img!) {
                 profileImgView.kf.indicatorType = .activity
                 profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "NewEvents"))
             }
-            stopVideoPlayback() // Stop video if image is displayed
-            muteButton.isHidden = true // Hide mute button
-            pauseButton.isHidden = true // Hide play/pause button
-        } else if let videoUrl = data.video, !videoUrl.isEmpty {
-            // Display Video Thumbnail
-            if let url = URL(string: videoUrl) {
+        } else if hasVideo {
+            if let url = URL(string: data.video!) {
                 generateThumbnail(for: url) { [weak self] thumbnail in
                     DispatchQueue.main.async {
-                        self?.profileImgView.image = thumbnail // Set video thumbnail as image
+                        self?.profileImgView.image = thumbnail
                     }
                 }
-                startVideoPlayback(for: videoUrl) // Start video playback
-                muteButton.isHidden = false // Show mute button
-                pauseButton.isHidden = false // Show play/pause button
+                startVideoPlayback(for: data.video!)
+                muteButton.isHidden = false
+                pauseButton.isHidden = false
             }
+        } else {
+            // ❗ No image or video → hide all UI
+            profileImgView.isHidden = true
+            muteButton.isHidden = true
+            pauseButton.isHidden = true
         }
     }
+
     
     // Start video playback using AVPlayer
     private func startVideoPlayback(for videoUrl: String) {

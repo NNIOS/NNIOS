@@ -111,6 +111,21 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
         }
     }
 
+    func convertFileData(fieldName: String,
+                         fileName: String,
+                         mimeType: String,
+                         fileData: Data,
+                         using boundary: String) -> Data {
+        var data = Data()
+
+        data.append("--\(boundary)\r\n".data(using: .utf8)!)
+        data.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+        data.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+        data.append(fileData)
+        data.append("\r\n".data(using: .utf8)!)
+
+        return data
+    }
 
 
 
@@ -515,6 +530,58 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
         return result
     }
     
+    
+    func showLoadingAlert(on viewController: UIViewController) -> UIAlertController {
+            let alert = UIAlertController(title: nil, message: "", preferredStyle: .alert)
+
+            // Create and configure the loading spinner
+            let loadingIndicator = UIActivityIndicatorView(style: .large)
+            loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+            loadingIndicator.isUserInteractionEnabled = false
+            loadingIndicator.startAnimating()
+            loadingIndicator.color = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 0.505553784)
+
+            // Add spinner to alert view
+            alert.view.addSubview(loadingIndicator)
+
+            // Setup constraints
+            NSLayoutConstraint.activate([
+                loadingIndicator.centerXAnchor.constraint(equalTo: alert.view.centerXAnchor),
+                loadingIndicator.centerYAnchor.constraint(equalTo: alert.view.centerYAnchor),
+                loadingIndicator.widthAnchor.constraint(equalToConstant: 30),
+                loadingIndicator.heightAnchor.constraint(equalToConstant: 30),
+                alert.view.widthAnchor.constraint(equalToConstant: 60),
+                alert.view.heightAnchor.constraint(equalToConstant: 60)
+            ])
+
+            // Present the alert, then clear the visual artifacts (backgrounds, corner radius)
+            viewController.present(alert, animated: true) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    // Fully remove all visual background layers
+                    alert.view.backgroundColor = .clear
+                    alert.view.layer.cornerRadius = 0
+
+                    // Traverse and clear nested subviews
+                    for subview in alert.view.subviews {
+                        subview.backgroundColor = .clear
+                        subview.layer.cornerRadius = 0
+                        for innerSubview in subview.subviews {
+                            innerSubview.backgroundColor = .clear
+                            innerSubview.layer.cornerRadius = 0
+                            for deeperView in innerSubview.subviews {
+                                deeperView.backgroundColor = .clear
+                                deeperView.layer.cornerRadius = 0
+                            }
+                        }
+                    }
+
+                    // Optional: remove shadows if any
+                    alert.view.layer.shadowOpacity = 0
+                }
+            }
+
+            return alert
+        }
   
     
     //MARK: - -------------------------    get Device info Irshad malik --------------------/
@@ -559,6 +626,28 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
             return modelCode ?? "Unknown iPhone"
         }
     }
+    
+    
+    
+    func isEnglishOnly(_ text: String) -> Bool {
+        let englishRegex = "^[A-Za-z\\s]+$"
+        let predicate = NSPredicate(format: "SELF MATCHES %@", englishRegex)
+        return predicate.evaluate(with: text)
+    }
+    
+    func showAlert(with message: String, sender: UIButton, loader: UIActivityIndicatorView, originalTitle: String?) {
+        DispatchQueue.main.async {
+            loader.stopAnimating()
+            loader.removeFromSuperview()
+            sender.setTitle(originalTitle, for: .normal)
+            sender.isEnabled = true
+
+            let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true)
+        }
+    }
+
     
     
 }
@@ -840,7 +929,120 @@ extension UIViewController {
             alert.dismiss(animated: true)
         }
     }
+    
+    
+    
+    @objc func showAlert(message: String,yesNo: String) {
+            let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+            let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+            ]
+            let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+            let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+            alert.setValue(attributedTitle, forKey: "attributedTitle")
+            alert.setValue(attributedMessage, forKey: "attributedMessage")
+            let okAction = UIAlertAction(title: yesNo, style: .default, handler: { _ in
+                alert.dismiss(animated: true, completion: {
+                    self.navigationController?.popViewController(animated: true)
+                })
+            })
+            okAction.setValue(messageAttributes, forKey: "titleTextColor")
+            okAction.setValue(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1), forKey: "titleTextColor")
+            alert.addAction(okAction)
+            self.present(alert, animated: true, completion: nil)
+        }
+    
+    func showSuccessAlert(withTitle title: String, andMessage message: String) {
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+        
+        // ✅ Title styling
+        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .semibold)]
+        let attributedTitle = NSAttributedString(string: title, attributes: titleFont)
+        alert.setValue(attributedTitle, forKey: "attributedTitle")
+
+        // ✅ Message styling
+        let messageAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+        ]
+        let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+        alert.setValue(attributedMessage, forKey: "attributedMessage")
+        
+        // ✅ OK button styling
+        let okAction = UIAlertAction(title: NSLocalizedString("OK", comment: "OK button title"), style: .default, handler: nil)
+        okAction.setValue(messageAttributes, forKey: "titleTextColor") // same styling as message
+        okAction.setValue(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1), forKey: "titleTextColor") // optional override
+        
+        alert.addAction(okAction)
+        
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+
 }
 
 
 
+extension UIColor {
+    static func colorForAlphabet(_ letter: String) -> UIColor {
+        let hexColors: [String] = [
+            "#EF8DA1", // A
+            "#F08A56", // B
+            "#7AE48A", // C
+            "#8F8DF3", // D
+            "#F5889D", // E
+            "#88CDEC", // F
+            "#88EC9E", // G
+            "#88DEEC", // H
+            "#EC8894", // I
+            "#BFEC88", // J
+            "#EF8DA1", // K
+            "#F08A56", // L
+            "#7AE48A", // M
+            "#8F8DF3", // N
+            "#F5889D", // O
+            "#88CDEC", // P
+            "#88EC9E", // Q
+            "#88DEEC", // R
+            "#EC8894", // S
+            "#BFEC88", // T
+            "#EF8DA1", // U
+            "#F08A56", // V
+            "#7AE48A", // W
+            "#8F8DF3", // X
+            "#F5889D", // Y
+            "#88CDEC"  // Z
+        ]
+        
+        guard let first = letter.uppercased().unicodeScalars.first else {
+            return .lightGray
+        }
+        
+        let index = Int(first.value) - 65 // A-Z maps to 0–25
+        if index >= 0 && index < hexColors.count {
+            return UIColor(hexColor: hexColors[index])
+        } else {
+            return .lightGray
+        }
+    }
+    
+    // 🔄 Renamed to avoid conflict
+    convenience init(hexColor: String) {
+        var hexSanitized = hexColor.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        if hexSanitized.hasPrefix("#") {
+            hexSanitized.remove(at: hexSanitized.startIndex)
+        }
+        
+        var rgb: UInt64 = 0
+        Scanner(string: hexSanitized).scanHexInt64(&rgb)
+        
+        let r = CGFloat((rgb & 0xFF0000) >> 16) / 255.0
+        let g = CGFloat((rgb & 0x00FF00) >> 8) / 255.0
+        let b = CGFloat(rgb & 0x0000FF) / 255.0
+        
+        self.init(red: r, green: g, blue: b, alpha: 1.0)
+    }
+}

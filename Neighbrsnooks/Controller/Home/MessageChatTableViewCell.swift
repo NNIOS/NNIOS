@@ -50,12 +50,7 @@ class MessageChatTableViewCell: UITableViewCell {
            self.layoutIfNeeded()  // Apply changes immediately
        }
     
-//    override func layoutSubviews() {
-//        super.layoutSubviews()
-//        // Reapply the chat bubble style to ensure proper layout
-//        let isSender = viewNotification.backgroundColor == #colorLiteral(red: 0.862745098, green: 0.9294117647, blue: 0.7882352941, alpha: 1)
-//        applyChatBubbleStyle(isSender: isSender)
-//    }
+ 
 
     
     func applyChatBubbleStyle(isSender: Bool) {

@@ -24,6 +24,7 @@ protocol PostvTableViewCellDelegate: AnyObject {
 
 class PostTableViewCell: UITableViewCell {
     @IBOutlet weak var collectionViewBanner: UICollectionView!
+    @IBOutlet weak var collectionViewHeight: NSLayoutConstraint!
     @IBOutlet weak var lblName: UILabel!
     @IBOutlet weak var lblGeneral: UILabel!
     @IBOutlet weak var lblDescription: UILabel!
@@ -126,7 +127,7 @@ class PostTableViewCell: UITableViewCell {
         let tapGestureS = UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap(_:)))
         collectionViewBanner.addGestureRecognizer(tapGestureS)
         defaultTextColor = lblName.textColor
-        updateColors()
+//        updateColors()
         
         
     }
@@ -166,7 +167,7 @@ class PostTableViewCell: UITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
     
@@ -484,8 +485,12 @@ class PostTableViewCell: UITableViewCell {
                    }
                    
                    // Update UI
-                   lblLikeCount.text = "\(likeCount)"
-                   likebtn.setImage(UIImage(named: isLikedByUser ? "Unlike" : "Like"), for: .normal)
+                   lblLikeCount.text = likeCount > 0 ? "\(likeCount)" : ""
+
+//                   lblLikeCount.text = "\(likeCount)"
+//                   likebtn.setImage(UIImage(named: isLikedByUser ? "Unlike" : "Like"), for: .normal)
+                   likebtn.setImage(UIImage(systemName: isLikedByUser ? "hand.thumbsup.circle.fill" : "hand.thumbsup.circle"), for: .normal)
+                   likebtn.tintColor = isLikedByUser ?   #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1) : #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
                } else {
                    // If emoji is already selected, update like with emoji
                    updateLikeWithEmoji()
@@ -514,7 +519,7 @@ class PostTableViewCell: UITableViewCell {
                emojiSelectionView.tag = 9999 // Unique tag for easy identification and removal
                
                // Emojis list
-               let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳", "♡"]
+               let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳"]
                
                // Create a horizontal scroll view to hold emoji buttons
                let scrollView = UIScrollView(frame: emojiSelectionView.bounds)
@@ -560,7 +565,9 @@ class PostTableViewCell: UITableViewCell {
                }
                
                // Update the UI
-               lblLikeCount.text = "\(likeCount)"
+               lblLikeCount.text = likeCount > 0 ? "\(likeCount)" : ""
+
+//               lblLikeCount.text = "\(likeCount)"
                likebtn.setTitle(emoji, for: .normal)
                likebtn.setImage(nil, for: .normal)
            }

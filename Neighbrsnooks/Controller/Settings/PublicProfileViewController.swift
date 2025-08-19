@@ -91,7 +91,7 @@ class PublicProfileViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+//        updateColors()
     }
     
     private func updateColors() {
@@ -115,21 +115,10 @@ class PublicProfileViewController: UIViewController {
             Add1View.layer.borderWidth = 1.0
             ContactView.layer.borderWidth = 1.0
             Add2View.layer.borderWidth = 1.0
-            
-           
-           
-            
         } else {
-            // Light mode mein storyboard ke original colors preserve karna
-          
             FullPublicView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
             PublicView.backgroundColor = .white
-//            NotificationLbl.textColor = UIColor.secondaryLabel
-//            lblActivity.textColor = UIColor.secondaryLabel
-//            NotificationFullView.layer.borderWidth = 0
-            
         }
-      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
     
     
@@ -156,7 +145,7 @@ class PublicProfileViewController: UIViewController {
         
        
         
-        if let addresslineone = self.UpdateNewNotificationsData?.addresslineone {
+        if let addresslineone = self.UpdateNewNotificationsData?.address {
             if addresslineone == "1" {
                 self.btnAdd1Show.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
             } else if addresslineone == "0" {
@@ -165,13 +154,13 @@ class PublicProfileViewController: UIViewController {
         }
         
        
-        if let addresslinetwo = self.UpdateNewNotificationsData?.addresslinetwo {
-            if addresslinetwo == "1" {
-                self.btnAdd2Show.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
-            } else if addresslinetwo == "0" {
-                self.btnAdd2Hide.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
-            }
-        }
+//        if let addresslinetwo = self.UpdateNewNotificationsData?.addresslinetwo {
+//            if addresslinetwo == "1" {
+//                self.btnAdd2Show.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
+//            } else if addresslinetwo == "0" {
+//                self.btnAdd2Hide.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
+//            }
+//        }
        
     }
     

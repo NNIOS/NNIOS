@@ -38,63 +38,61 @@ class UpdateGroupViewController: BaseViewController,CropViewControllerDelegate {
     var selectedImge: UIImage? = nil
 
     override func viewDidLoad() {
-        super.viewDidLoad()
-
-        self.imagePicker = UIImagePickerController()
-        self.imagePicker?.delegate = self
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped(_:)))
-        profileImgView.isUserInteractionEnabled = true
-        profileImgView.addGestureRecognizer(tapGestureRecognizer)
-        profileImgView.layer.masksToBounds = true
-     //   profileImgView.layer.cornerRadius = profileImgView.frame.height / 2
-        
-        
-        self.tfGroupName.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.tvaboutGroup.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.lblUploadImg.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.lblWho.font = UIFont(name: "Montserrat-Regular", size: 15)
-        self.lblAnyone.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.lblApproved.font = UIFont(name: "Montserrat-Regular", size: 17)
-        
-        let url = URL(string: (self.GrouDetailsData?.image ?? ""))
-        self.profileImgView.kf.indicatorType = .activity
-       self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "groupImg"))
-        
-        // Do any additional setup after loading the view.
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        self.HEADINGLbl.font = UIFont(name: "Montserrat-Regular", size: 20)
-        
-        SVProgressHUD.show()
-       
-       
-        callDetailsGroupWebService{ [self] in
-            SVProgressHUD.dismiss()
-            self.tfGroupName.text = self.GrouDetailsData?.groupname
-            self.tvaboutGroup.text = self.GrouDetailsData?.description
-         
+            super.viewDidLoad()
+            account = "1"
+            print("By Default group is :\(account)")
+            self.imagePicker = UIImagePickerController()
+            self.imagePicker?.delegate = self
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped(_:)))
+            profileImgView.isUserInteractionEnabled = true
+            profileImgView.addGestureRecognizer(tapGestureRecognizer)
+            profileImgView.layer.masksToBounds = true
+            
+            
+            self.tfGroupName.font = UIFont(name: "Montserrat-Regular", size: 17)
+            self.tvaboutGroup.font = UIFont(name: "Montserrat-Regular", size: 17)
+            self.lblUploadImg.font = UIFont(name: "Montserrat-Regular", size: 17)
+            self.lblWho.font = UIFont(name: "Montserrat-Regular", size: 15)
+            self.lblAnyone.font = UIFont(name: "Montserrat-Regular", size: 17)
+            self.lblApproved.font = UIFont(name: "Montserrat-Regular", size: 17)
+            
             let url = URL(string: (self.GrouDetailsData?.image ?? ""))
             self.profileImgView.kf.indicatorType = .activity
            self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "groupImg"))
-            
-            if GrouDetailsData?.groupType == "Public" {
-
-                btnAnyone.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
-              
-
-            } else if GrouDetailsData?.groupType == "Private" {
-                self.btnApprove.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
-             
-            }
-           
-            
-            
-            // Do any additional setup after loading the view.
         }
-    }
+        
+        override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+            self.HEADINGLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
+            SVProgressHUD.show()
+            callDetailsGroupWebService{ [self] in
+                SVProgressHUD.dismiss()
+                self.tfGroupName.text = self.GrouDetailsData?.groupname
+                self.tvaboutGroup.text = self.GrouDetailsData?.description
+             
+                let url = URL(string: (self.GrouDetailsData?.image ?? ""))
+                self.profileImgView.kf.indicatorType = .activity
+               self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "groupImg"))
+                
+                if GrouDetailsData?.groupType == "Public" {
+
+                    btnAnyone.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
+                  
+
+                } else if GrouDetailsData?.groupType == "Private" {
+                    self.btnApprove.setImage(UIImage(named: "icons8-radio-button-24"), for: .normal)
+                 
+                }
+               
+                if GrouDetailsData?.groupType == "Public" {
+                    account = "1"
+                } else if GrouDetailsData?.groupType == "Private" {
+                    account = "0"
+                }
+            }
+        }
+    
+     
     
     @IBAction func BackButtionAction(_ : UIButton){
 
@@ -118,10 +116,16 @@ class UpdateGroupViewController: BaseViewController,CropViewControllerDelegate {
    }
     
     @objc func imageViewTapped(_ sender:AnyObject){
-     //   selectPictureThroughPhotoGallery()
-        openCameraGallery()
-        
-    }
+         //   selectPictureThroughPhotoGallery()
+    //        openCameraGallery()
+            checkCameraPermission { [weak self] granted in
+                guard let self = self else { return }
+                if granted {
+                    openCameraGallery()
+                }
+            }
+            
+        }
     
     @IBAction func PicUploadBtnAction(_ sender: UIButton) {
         
@@ -129,41 +133,53 @@ class UpdateGroupViewController: BaseViewController,CropViewControllerDelegate {
     }
     
     @IBAction func CreateBtn(_ sender: UIButton) {
-        
-        if tfGroupName.text == "" {
-        let alert = UIAlertController(title: "", message: "Please Enter Your Group Name", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-                         
-        } else if tvaboutGroup.text == ""{
-        let alert = UIAlertController(title: "", message: "Please Enter Description", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
+
+        let groupName = tfGroupName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let groupDescription = tvaboutGroup.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        if groupName.isEmpty {
+            let alert = UIAlertController(title: "", message: "Please Enter Your Group Name", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
         }
-//        else{
-//            callUpdateGroupWebService {
-//                self.navigationController?.popViewController(animated: true)
-//             //   _ = navigationController?.popViewController(animated: true)
-//
-//            }
-//        }
-        
-        else {
-            callUpdateGroupWebService { success in
-                DispatchQueue.main.async {
-                    if success {
-                        if let eventsVC = self.navigationController?.viewControllers.first(where: { $0 is GroupsViewController }) {
-                            self.navigationController?.popToViewController(eventsVC, animated: true)
-                        } else {
-                            self.navigationController?.popToRootViewController(animated: true)
-                        }
+
+        if containsBadWords(groupName) {
+            let alert = UIAlertController(title: "", message: "Group name contains inappropriate words", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+
+        if groupDescription.isEmpty {
+            let alert = UIAlertController(title: "", message: "Please Enter Description", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+
+        if containsBadWords(groupDescription) {
+            let alert = UIAlertController(title: "", message: "Description contains inappropriate words", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+
+        callUpdateGroupWebService { success in
+            DispatchQueue.main.async {
+                if success {
+                    if let eventsVC = self.navigationController?.viewControllers.first(where: { $0 is GroupsViewController }) {
+                        self.navigationController?.popToViewController(eventsVC, animated: true)
                     } else {
-                        self.showAutoDismissAlert(message: "Failed to update event. Please try again.")
+                        self.navigationController?.popToRootViewController(animated: true)
                     }
+                } else {
+                    self.showAutoDismissAlert(message: "Failed to update event. Please try again.")
                 }
             }
         }
     }
+
     
 
     func callDetailsGroupWebService(_ completionClosure: @escaping () -> ()) {
@@ -253,6 +269,7 @@ class UpdateGroupViewController: BaseViewController,CropViewControllerDelegate {
                                                     
                                                    
                                                                         ]
+        print("param is :\(dictParams)")
         WebService.sharedInstance.callUpdateGroupWebService(withParams: dictParams) { [self] data in
               
               self.GrouUpdatesData = data
@@ -286,7 +303,7 @@ extension UpdateGroupViewController: UIImagePickerControllerDelegate, UINavigati
     // Show Crop View Controller
     func showCrop(image: UIImage) {
         let vc = CropViewController(croppingStyle: .default, image: image)
-        vc.aspectRatioPreset = .presetSquare
+//        vc.aspectRatioPreset = .presetSquare
         vc.aspectRatioLockEnabled = false
         vc.toolbarPosition = .bottom
         vc.doneButtonTitle = "Continue"

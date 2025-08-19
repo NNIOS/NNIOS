@@ -85,7 +85,7 @@ class AllCategoryilViewController: UIViewController,UICollectionViewDelegateFlow
     
     }
     
-    
+    //dev.
     func callMarketMyItemsWebService() {
                   let url = "https://dev.neighbrsnook.com/admin/api/category"
 

@@ -8,6 +8,7 @@
 import UIKit
 import AVKit
 import AVFoundation
+import Kingfisher
 
 
 protocol HomeCollectionViewCellDelegate: AnyObject {
@@ -74,14 +75,12 @@ class HomeCollectionViewCell: UICollectionViewCell {
     
     private func loadImage(from urlString: String) {
         if let url = URL(string: urlString) {
-            URLSession.shared.dataTask(with: url) { data, _, error in
-                guard let data = data, error == nil else { return }
-                DispatchQueue.main.async {
-                    self.profileImgView.image = UIImage(data: data)
-                }
-            }.resume()
+            // 👇 Placeholder image dikhayega jab tak asli image load ho
+            profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder"))
         }
     }
+
+
     
     private func setupVideo(from urlString: String) {
         guard let url = URL(string: urlString) else { return }

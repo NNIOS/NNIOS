@@ -41,19 +41,21 @@ class BusinessRatingViewController: UIViewController {
           self.dismiss(animated: true)
     }
     
-    @IBAction func ExitYesBtn(_ sender: UIButton){
+    @IBAction func ExitYesBtn(_ sender: UIButton) {
+        print("⭐ ExitYesBtn tapped")
         
-       
-        callRatingBusinessWebService{
-            self.delegate?.tapConfirm()
+        sender.isUserInteractionEnabled = false // 👈 prevent double tap
+        // Optionally show loader here
+        callRatingBusinessWebService {
+            print("✅ API completed")
+            
+            DispatchQueue.main.async {
+                self.delegate?.tapConfirm()
                 self.dismiss(animated: true)
-               
             }
-        
-        
-      
+        }
     }
-
+ 
     private func setupButtons() {
            for _ in 0..<5 {
                let button = UIButton()
@@ -104,22 +106,16 @@ class BusinessRatingViewController: UIViewController {
         let id = UserDefaults.standard.string(forKey: "userid")
         let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
         let Busid = UserDefaults.standard.string(forKey: "Businessid")
-          let dictParams: Dictionary<String, Any> = [
-                                                    "userid":id ?? "",
-                                                    "neighbrhood":idNeighbour ?? "",
-                                                    "business_id":Busid ?? "",
-                                                    "rateno":  rating
-                                                   
-                                                                        ]
-          WebService.sharedInstance.callRatingBusinessWebService(withParams: dictParams) { data in
+        let dictParams: Dictionary<String, Any> = [
+            "userid":id ?? "",
+            "neighbrhood":idNeighbour ?? "",
+            "business_id":Busid ?? "",
+            "rateno":  rating
+            
+        ]
+        WebService.sharedInstance.callRatingBusinessWebService(withParams: dictParams) { data in
             self.BusinessRatingtData = data
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.BusinessRatingtData?.listdata?.first?.userid, forKey: "profileImage")
-
             completionClosure()
-          }
         }
+    }
 }

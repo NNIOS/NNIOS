@@ -15,7 +15,7 @@ class CategoryCollectionViewCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateColors() // Call updateColors when the cell is loaded
+//        updateColors() // Call updateColors when the cell is loaded
     }
    
 //    func configure(with category: Category) {
@@ -62,7 +62,7 @@ class CategoryCollectionViewCell: UICollectionViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
 }

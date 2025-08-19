@@ -10,7 +10,7 @@ import Foundation
 //// MARK: - Welcome
 struct CommentPostModel: Codable {
     let status, message: String
-    let postlistdata: [Postlistdatum]
+    var postlistdata: [Postlistdatum]
 }
 
 struct Postlistdatum: Codable {

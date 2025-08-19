@@ -6,7 +6,7 @@
 //
 
 import UIKit
- 
+
 import Alamofire
 import Photos
 import PhotosUI
@@ -18,27 +18,23 @@ import AVFoundation
 class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewControllerDelegate,PHPickerViewControllerDelegate, PostDataSelectionDelegate  {
     
     
-    
     @IBOutlet weak var DescriptionText: UITextView!
     @IBOutlet weak var tfCategory: UITextField!
     @IBOutlet weak var profilePic: UIImageView!
     weak var delegate: ImageCollectionGalViewControllerDelegate?
     @IBOutlet weak var placeholderLabel: UILabel!
     @IBOutlet weak var tpyePostLbl: UILabel!
-    
     @IBOutlet weak var lblUploadImgVideo: UILabel!
     @IBOutlet weak var lblMaxImgVid: UILabel!
     @IBOutlet weak var lblMediaCount: UILabel!
     @IBOutlet weak var btnPreview: UIButton!
-    
     @IBOutlet weak var btnPlusImg: UIButton!
     @IBOutlet weak var createPostView: UIView!
     @IBOutlet weak var SelectPostView: UIView!
     @IBOutlet weak var DescView: UIView!
-    
     @IBOutlet weak var UploadView: UIView!
     
-//    var serviceDropdownData = DropDown()
+    //    var serviceDropdownData = DropDown()
     var serviceName = [String]()
     var CategoryPostData : CategoryPostModel?
     var CreatePostData : CreatePostModel?
@@ -62,11 +58,12 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
     var NewselectedImages: [UIImage] = []
     let NewmagePicker = UIImagePickerController()
     var cropViewController: TOCropViewController?
+    var imagesToCrop: [UIImage] = []
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateColors()
+        //        updateColors()
         btnPlusImg.layer.cornerRadius = btnPlusImg.frame.height/2
         btnPlusImg.clipsToBounds = true
         btnPlusImg.contentEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
@@ -84,10 +81,10 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
         DescriptionText.delegate = self
         tfCategory.inputView = pickerView
         NewmagePicker.delegate = self
-//        NewmagePicker.sourceType = .camera
-//        NewmagePicker.allowsEditing = false
-//        NewmagePicker.mediaTypes = ["public.image"]
-//        NewmagePicker.showsCameraControls = true // Optional: Customize camera con
+        //        NewmagePicker.sourceType = .camera
+        //        NewmagePicker.allowsEditing = false
+        //        NewmagePicker.mediaTypes = ["public.image"]
+        //        NewmagePicker.showsCameraControls = true // Optional: Customize camera con
         
         
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
@@ -96,7 +93,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
             print("📵 Camera not available, using photo library instead")
             NewmagePicker.sourceType = .photoLibrary
         }
- 
+        
         self.tpyePostLbl.tintColor = .darkGray
         self.lblMaxImgVid.font  = UIFont(name: "Montserrat-Regular", size: 12)
         self.lblUploadImgVideo.font  = UIFont(name: "Montserrat-Regular", size: 16)
@@ -178,7 +175,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
             self.present(popupVC, animated: true, completion: nil)
         }
     }
-   
+    
     // MARK: - deleteMedia Protocol Method
     func didUpdateMedia(imageArray: [UIImage], videoArray: [URL]) {
         self.imageArray = imageArray
@@ -190,17 +187,16 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
         }
     }
     
-    
-    
     func updateMediaCount() {
-        let totalMedia = imageArray.count + videoArray.count
-        lblMediaCount.text = "\(totalMedia) preview"
-        
-        // Button remove kar diya hai, so isko use nahi karna
-        // btnPreview.isHidden = totalMedia == 0
-        
-        lblMediaCount.isHidden = totalMedia == 0 // Agar koi media nahi hai toh label bhi hide ho jaye
-    }
+            let totalMediaCount = imageArray.count + videoArray.count
+            lblMediaCount.text = "\(totalMediaCount) preview\(totalMediaCount > 1 ? "s" : "")"
+        }
+    
+//    func updateMediaCount() {
+//        let totalMedia = imageArray.count + videoArray.count
+//        lblMediaCount.text = "\(totalMedia) preview"
+//         lblMediaCount.isHidden = totalMedia == 0 // Agar koi media nahi hai toh label bhi hide ho jaye
+//    }
     
     @objc func previewLabelTapped() {
         if imageArray.isEmpty && videoArray.isEmpty {
@@ -244,7 +240,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+        //        updateColors()
     }
     
     
@@ -252,7 +248,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-           
+            
             createPostView.backgroundColor = .black
             SelectPostView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
             DescView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
@@ -288,7 +284,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+            //            updateColors()
         }
     }
     
@@ -303,38 +299,6 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
     @IBAction func PicUploadBtnAction(_ sender: UIButton) {
     }
     
-//    @IBAction func serviceBtnAction(_ sender: UIButton) {
-//        self.view.endEditing(true)
-//        self.showDropdownData(showOn: tfCategory, DropdownName: serviceDropdownData)
-//        serviceDropdownData.cellHeight = 35
-//        serviceDropdownData.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
-//    }
-//
-//    private func showDropdownData(showOn textField: UITextField, DropdownName dropdown : DropDown) {
-//        dropdown.show()
-//        dropdown.anchorView = textField
-//        dropdown.bottomOffset = CGPoint(x: 30, y: (dropdown.anchorView?.plainView.bounds.height)!)
-//        dropdown.selectionAction = { [unowned self] (index: Int, item: String) in
-//            if index != 0{
-//                self.tfCategory.text = self.serviceName[index]
-//            }else{
-//                self.tfCategory.text = ""
-//            }
-//            // self.serviceId = "\(AddProjectData?.nbdata[index].id ?? 0)"
-//            UserDefaults.standard.set(self.serviceName[index], forKey: "id")
-//            if index != 0{
-//                UserDefaults.standard.set(self.CategoryPostData?.nbdata[index - 1].id, forKey: "idCategory")
-//            }
-//            dropdown.backgroundColor = UIColor.white
-//            dropdown.cellHeight = 35
-//            dropdown.direction = .bottom
-//            dropdown.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
-//            DropDown.appearance().setupCornerRadius(10)
-//            //dropdown.serviceName = .left
-//            dropdown.width = 200
-//        }
-//    }
-//
     func dismissAndNavigateToMenuGroupViewController() {
         // Dismiss the current view controller
         self.dismiss(animated: true) { [weak self] in
@@ -354,93 +318,247 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
         }
     }
     
-    @IBAction func CreateBtn(_ sender: UIButton){
-        activityIndicator.startAnimating()
-        sender.isEnabled = false // Button ko disable karo to prevent multiple taps
-        
-        // Check Category
+//    @IBAction func CreateBtn(_ sender: UIButton) {
+//        activityIndicator.startAnimating()
+//        
+//            sender.isEnabled = false
+//            defer { stopLoader(sender) } // Ensure loader stops in all cases
+//
+//            // Check Category
+//            guard let categoryText = tpyePostLbl.text, !categoryText.isEmpty else {
+//                showAlert(with: "Please enter post type", sender: sender)
+//                return
+//            }
+//
+//            // Check Description
+//            guard let descriptionText = DescriptionText.text, !descriptionText.isEmpty else {
+//                showAlert(with: "Please enter description", sender: sender)
+//                return
+//            }
+//
+//            // Check for abusive words in description
+//            if containsBadWords(descriptionText) {
+//                let message = """
+//                Inappropriate content!
+//                This post goes against our community guidelines.
+//                Please keep things respectful.
+//                """
+//                showAlert(with: message, sender: sender)
+//                return
+//            }
+//
+//            // Image validations
+//            if !imageArray.isEmpty {
+//                if imageArray.count > 2 {
+//                    showAlert(with: "You can upload a maximum of 2 images", sender: sender)
+//                    return
+//                }
+//
+//                for image in imageArray {
+//                    if let imageData = image.jpegData(compressionQuality: 1.0) {
+//                        let imageSizeMB = Double(imageData.count) / (1024 * 1024)
+//                        if imageSizeMB > 5 {
+//                            showAlert(with: "Each image must be less than 5 MB", sender: sender)
+//                            return
+//                        }
+//                    }
+//                }
+//            }
+//
+//            // Video validations
+//            if !videoArray.isEmpty {
+//                if videoArray.count > 1 {
+//                    showAlert(with: "You can upload a maximum of 1 video", sender: sender)
+//                    return
+//                }
+//
+//                for videoURL in videoArray {
+//                    do {
+//                        let videoData = try Data(contentsOf: videoURL)
+//                        let videoSizeMB = Double(videoData.count) / (1024 * 1024)
+//                        if videoSizeMB > 25 {
+//                            showAlert(with: "Each video must be less than 25 MB", sender: sender)
+//                            return
+//                        }
+//                    } catch {
+//                        print("Error calculating video size: \(error.localizedDescription)")
+//                        return
+//                    }
+//                }
+//            }
+//
+//            // All validations passed
+//            callCreatePostWebService {
+//                self.stopLoader(sender)
+//                self.navigationController?.popViewController(animated: true)
+//            }
+//    }
+//
+    
+    
+    
+    // MARK: - Button Action with loader inside button
+    @IBAction func CreateBtn(_ sender: UIButton) {
+        // 🔄 Disable button & show loader in center of button
+        sender.isEnabled = false
+        let originalTitle = sender.title(for: .normal)
+        sender.setTitle("", for: .normal)
+
+        let loader = UIActivityIndicatorView(style: .medium)
+        loader.translatesAutoresizingMaskIntoConstraints = false
+        loader.color = .white
+        sender.addSubview(loader)
+
+        NSLayoutConstraint.activate([
+            loader.centerXAnchor.constraint(equalTo: sender.centerXAnchor),
+            loader.centerYAnchor.constraint(equalTo: sender.centerYAnchor)
+        ])
+        loader.startAnimating()
+
+        // 🟡 Post Type Validation
         guard let categoryText = tpyePostLbl.text, !categoryText.isEmpty else {
-            showAlert(with: "Please enter post type", sender: sender)
-            stopLoader(sender)
+            showAlert(with: "Please enter post type", sender: sender, loader: loader, originalTitle: originalTitle)
             return
         }
-        
-        // Check Description
+
+        // 🟡 Description Validation
         guard let descriptionText = DescriptionText.text, !descriptionText.isEmpty else {
-            showAlert(with: "Please enter description", sender: sender)
-            stopLoader(sender)
+            showAlert(with: "Please enter description", sender: sender, loader: loader, originalTitle: originalTitle)
             return
         }
-        
-        // Image Size Validation
-        for image in imageArray {
-            if let imageData = image.jpegData(compressionQuality: 1.0) {
-                let imageSizeMB = Double(imageData.count) / (1024 * 1024)
-                if imageSizeMB > 10 {
-                    showAlert(with: "Each image must be less than 5 MB", sender: sender)
-                    stopLoader(sender)
-                    return
-                }
-            }
-        }
-        
-        // Image Count Validation
-        if imageArray.count > 3 {
-            showAlert(with: "You can upload a maximum of 2 images", sender: sender)
-            stopLoader(sender)
+
+        // 🔞 Abusive Words
+        if containsBadWords(descriptionText) {
+            let message = """
+            Inappropriate content!
+            This post goes against our community guidelines.
+            Please keep things respectful.
+            """
+            showAlert(with: message, sender: sender, loader: loader, originalTitle: originalTitle)
             return
         }
-        
-        // Video Size Validation
-        for videoURL in videoArray {
-            do {
-                let videoData = try Data(contentsOf: videoURL)
-                let videoSizeMB = Double(videoData.count) / (1024 * 1024)
-                print("Video Size: \(videoSizeMB) MB") // Debug print for video size
-                if videoSizeMB > 25 { // Check agar video size 25 MB se zyada hai
-                    showAlert(with: "Each video must be less than 25 MB", sender: sender)
-                    stopLoader(sender)
-                    return
-                }
-            } catch {
-                print("Error calculating video size: \(error.localizedDescription)")
-                stopLoader(sender)
+
+        // 🖼️ Image Validation
+        if !imageArray.isEmpty {
+            if imageArray.count > 2 {
+                showAlert(with: "You can upload a maximum of 2 images", sender: sender, loader: loader, originalTitle: originalTitle)
                 return
             }
+
+            for image in imageArray {
+                if let imageData = image.jpegData(compressionQuality: 0.7) {
+                    let imageSizeMB = Double(imageData.count) / (1024 * 1024)
+                    print("📸 Compressed image size: \(imageSizeMB) MB")
+                    if imageSizeMB > 5 {
+                        showAlert(with: "Each image must be less than 5 MB", sender: sender, loader: loader, originalTitle: originalTitle)
+                        return
+                    }
+                }
+            }
         }
-        
-        // Video Count Validation
-        if videoArray.count > 1 {
-            showAlert(with: "You can upload a maximum of 1 video", sender: sender)
-            stopLoader(sender)
-            return
+
+        // 🎥 Video Validation
+        if !videoArray.isEmpty {
+            if videoArray.count > 1 {
+                showAlert(with: "You can upload a maximum of 1 video", sender: sender, loader: loader, originalTitle: originalTitle)
+                return
+            }
+
+            for videoURL in videoArray {
+                do {
+                    let videoData = try Data(contentsOf: videoURL)
+                    let videoSizeMB = Double(videoData.count) / (1024 * 1024)
+                    print("🎞️ Video size: \(videoSizeMB) MB")
+                    if videoSizeMB > 25 {
+                        showAlert(with: "Each video must be less than 25 MB", sender: sender, loader: loader, originalTitle: originalTitle)
+                        return
+                    }
+                } catch {
+                    print("❌ Video size check failed: \(error.localizedDescription)")
+                    return
+                }
+            }
         }
-        
-        // Call the create post API if all validations pass
+
+        // ✅ All validations passed
         callCreatePostWebService {
-            self.stopLoader(sender)
-            self.navigationController?.popViewController(animated: true)
+            DispatchQueue.main.async {
+                loader.stopAnimating()
+                loader.removeFromSuperview()
+                sender.setTitle(originalTitle, for: .normal)
+                sender.isEnabled = true
+                self.navigationController?.popViewController(animated: true)
+            }
         }
     }
-    
-    // Helper function for showing alerts and stopping loader
-    private func showAlert(with message: String, sender: UIButton) {
-        let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
-        stopLoader(sender)
-        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
-    // Stop Loader function
+
+
     func stopLoader(_ button: UIButton) {
-        activityIndicator.stopAnimating()
-        button.isEnabled = true // Button enable karo jab process complete ho
+        DispatchQueue.main.async {
+            self.activityIndicator.stopAnimating()
+            button.isEnabled = true
+        }
     }
+
+   
+
     
+    private func showAlert(with message: String, sender: UIButton) {
+            let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+            stopLoader(sender)
+
+            // Full message
+            let fullMessage = message
+
+            // Create attributed string
+            let attributedMessage = NSMutableAttributedString(string: fullMessage)
+
+            // Define fonts
+            let boldFont = UIFont(name: "Montserrat-Bold", size: 16) ?? UIFont.boldSystemFont(ofSize: 16)
+            let regularFont = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 14)
+
+            // Apply regular font to full message
+            attributedMessage.addAttribute(.font, value: regularFont, range: NSRange(location: 0, length: fullMessage.count))
+            attributedMessage.addAttribute(.foregroundColor, value: #colorLiteral(red: 0.3764705882, green: 0.3725490196, blue: 0.3725490196, alpha: 1), range: NSRange(location: 0, length: fullMessage.count))
+
+            // Apply bold only to "Inappropriate content!"
+            if let boldRange = fullMessage.range(of: "Inappropriate content!") {
+                let nsRange = NSRange(boldRange, in: fullMessage)
+                attributedMessage.addAttribute(.font, value: boldFont, range: nsRange)
+            }
+
+            alert.setValue(attributedMessage, forKey: "attributedMessage")
+            // OK Action
+               let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+               okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor") // Set your preferred color here
+               alert.addAction(okAction)
+               
+               self.present(alert, animated: true, completion: nil)
+        }
+
+    
+    func showAlert(title: String = "", message: String) {
+            let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+            let attributedMessage = NSAttributedString(
+                string: message,
+                attributes: [
+                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),.foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                ])
+            alert.setValue(attributedMessage, forKey: "attributedMessage")
+            
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            okAction.setValue( #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1) , forKey: "titleTextColor")
+            alert.addAction(okAction)
+            
+            self.present(alert, animated: true, completion: nil)
+        }
+    
+     
     
     @IBAction func selectPhotos(_ sender: UIButton) {
         // Agar user ne max 2 images aur 1 video upload kar liya hai to alert show karna hai
-        if imageArray.count >= 3 && videoArray.count >= 1 {
-            showAlert(message: "You can only add up to 3 media items (1 video and 2 images).")
+        if imageArray.count >= Int("\(CategoryPostData?.postImgLimit ?? "0")") ?? 0 && videoArray.count >= Int("\(CategoryPostData?.postVideoLimit ?? "0")") ?? 0 {
+            showAlert(message: "You have already reached maximum limit.")
             return
         }
         // Warna permission check karke image/video select karne dena hai
@@ -451,183 +569,253 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
             }
         }
     }
-
     
-    
+    @objc func selectImages() {
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
-        
-        @objc func selectImages() {
-            let actionSheet = UIAlertController()
-            
-            
-            actionSheet.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
-                self.openCamera()
-            }))
-            
-            actionSheet.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
-                self.openGallery()
-            }))
-            
-            actionSheet.addAction(UIAlertAction(title: "Take Video", style: .default, handler: { _ in
-                self.openVideoCamera()
-            }))
-            
-            actionSheet.addAction(UIAlertAction(title: "Choose Video", style: .default, handler: { _ in
-                self.openVideoGallery()
-            }))
-            
-            actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-            
-            present(actionSheet, animated: true, completion: nil)
-        }
-        
-        
-        
-        
-        func openCamera() {
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                let imagePickerController = UIImagePickerController()
-                imagePickerController.delegate = self
-                imagePickerController.sourceType = .camera
-                imagePickerController.cameraCaptureMode = .photo // Use default photo mode
-                present(imagePickerController, animated: true, completion: nil)
-            } else {
-                // Handle case where camera is not available
-                print("Camera is not available")
+        // ✅ Take Photo
+        actionSheet.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
+            checkCameraPermission { granted in
+                if granted {
+                    self.openCamera()
+                }
             }
+        }))
+
+        // ✅ Choose Photo (no permission needed)
+        actionSheet.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
+            self.openGallery()
+        }))
+
+        // ✅ Take Video
+        actionSheet.addAction(UIAlertAction(title: "Take Video", style: .default, handler: { _ in
+            checkCameraPermission { granted in
+                if granted {
+                    self.openVideoCamera()
+                }
+            }
+        }))
+
+        // ✅ Choose Video (no permission needed)
+        actionSheet.addAction(UIAlertAction(title: "Choose Video", style: .default, handler: { _ in
+            self.openVideoGallery()
+        }))
+
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+
+        self.present(actionSheet, animated: true, completion: nil)
+    }
+
+    
+    
+    
+    func openCamera() {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            let imagePickerController = UIImagePickerController()
+            imagePickerController.delegate = self
+            imagePickerController.sourceType = .camera
+            imagePickerController.cameraCaptureMode = .photo // Use default photo mode
+            present(imagePickerController, animated: true, completion: nil)
+        } else {
+            // Handle case where camera is not available
+            print("Camera is not available")
         }
-        
-        
-        func openGallery() {
-            from = 1
+    }
+    
+    
+    func openGallery() {
+            let totalLimit = Int(CategoryPostData?.postImgLimit ?? "") ?? 0
+            let remainingLimit = totalLimit - imageArray.count
+            guard remainingLimit > 0 else {
+                showAlert(message: "You have already reached maximum limit for images.")
+                return
+            }
+
             var config = PHPickerConfiguration()
-            config.selectionLimit = 0 // 0 means no limit
+            config.selectionLimit = remainingLimit
             config.filter = .images
+
             let picker = PHPickerViewController(configuration: config)
             picker.delegate = self
             present(picker, animated: true, completion: nil)
         }
-        
-        
-        func openVideoCamera() {
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                let videoPickerController = UIImagePickerController()
-                videoPickerController.delegate = self
-                videoPickerController.sourceType = .camera
-                videoPickerController.mediaTypes = ["public.movie"]
-                present(videoPickerController, animated: true, completion: nil)
-            }
+    
+    func openVideoCamera() {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            let videoPickerController = UIImagePickerController()
+            videoPickerController.delegate = self
+            videoPickerController.sourceType = .camera
+            videoPickerController.mediaTypes = ["public.movie"]
+            present(videoPickerController, animated: true, completion: nil)
         }
-        
-        func openVideoGallery() {
+    }
+    
+    func openVideoGallery() {
+            let totalLimit = Int(CategoryPostData?.postVideoLimit ?? "") ?? 0
+            let remainingLimit = totalLimit - videoArray.count
+            guard remainingLimit > 0 else {
+                showAlert(message: "You have already reached maximum limit for videos.")
+                return
+            }
+            
             let videoPickerController = UIImagePickerController()
             videoPickerController.delegate = self
             videoPickerController.sourceType = .photoLibrary
             videoPickerController.mediaTypes = ["public.movie"]
             present(videoPickerController, animated: true, completion: nil)
         }
-        
-         
-        
-        func resetMediaArrays() {
-            imageArray.removeAll()  // Clear all images
-            videoArray.removeAll()  // Clear all videos
-            DispatchQueue.main.async {
-                self.updateMediaCount()  // Update the media count to 0
+    
+    
+    
+    func resetMediaArrays() {
+        imageArray.removeAll()  // Clear all images
+        videoArray.removeAll()  // Clear all videos
+        DispatchQueue.main.async {
+            self.updateMediaCount()  // Update the media count to 0
+        }
+    }
+    
+    
+    
+    
+    // MARK: - Image Picker Delegates (Keep your original code exactly as is)
+//    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+//        picker.dismiss(animated: true, completion: nil)
+//        
+//        if let image = info[.originalImage] as? UIImage {
+//            if imageArray.count >= 3 {
+//                showAlert(message: "You can only upload a maximum of 2 images.")
+//                return
+//            }
+//            showCrop(image: image)
+//        } else if let videoURL = info[.mediaURL] as? URL {
+//            if videoArray.count >= 1 {
+//                showAlert(message: "You can only upload a maximum of 1 video.")
+//                return
+//            }
+//            if !videoArray.contains(where: { $0 == videoURL }) {
+//                videoArray.append(videoURL)
+//                DispatchQueue.main.async {
+//                    self.updateMediaCount()
+//                }
+//            }
+//        }
+//    }
+//    
+//    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+//        picker.dismiss(animated: true, completion: nil)
+//        
+//        let selectedImages = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) }
+//        let selectedVideos = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) }
+//        
+//        if imageArray.count + selectedImages.count > 2 {
+//            showAlert(message: "You can only upload a maximum of 2 images.")
+//            return
+//        }
+//        
+//        if videoArray.count + selectedVideos.count > 1 {
+//            showAlert(message: "You can only upload a maximum of 1 video.")
+//            return
+//        }
+//        
+//        for result in results {
+//            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+//                result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
+//                    if let imageNew = object as? UIImage {
+//                        DispatchQueue.main.async {
+//                            self.showCrop(image: imageNew)
+//                        }
+//                    }
+//                }
+//            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
+//                result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
+//                    if let videoURL = url {
+//                        DispatchQueue.main.async {
+//                            if self.videoArray.count < 1 {
+//                                self.videoArray.append(videoURL)
+//                                self.updateMediaCount()
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    
+    
+    
+    // MARK: - Image Picker Delegates (Keep your original code exactly as is)
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+            picker.dismiss(animated: true, completion: nil)
+            
+            if let image = info[.originalImage] as? UIImage {
+                if imageArray.count >= Int("\(CategoryPostData?.postImgLimit ?? "0")") ?? 0 {
+                    showAlert(message: "You can only upload a maximum of \(Int("\(CategoryPostData?.postImgLimit ?? "0")") ?? 0) images.")
+                    return
+                }
+                showCrop(image: image)
+            } else if let videoURL = info[.mediaURL] as? URL {
+                if videoArray.count >= Int("\(CategoryPostData?.postVideoLimit ?? "0")") ?? 0 {
+                    showAlert(message: "You can only upload a maximum of 1 video.")
+                    return
+                }
+                if !videoArray.contains(where: { $0 == videoURL }) {
+                    videoArray.append(videoURL)
+                    DispatchQueue.main.async {
+                        self.updateMediaCount()
+                    }
+                }
             }
         }
         
- 
-
-    
-    // MARK: - Image Picker Delegates (Keep your original code exactly as is)
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        picker.dismiss(animated: true, completion: nil)
-        
-        if let image = info[.originalImage] as? UIImage {
-            if imageArray.count >= 3 {
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            picker.dismiss(animated: true, completion: nil)
+            
+            let selectedImages = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) }
+            let selectedVideos = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) }
+            
+            if imageArray.count + selectedImages.count > Int("\(CategoryPostData?.postImgLimit ?? "0")") ?? 0 {
                 showAlert(message: "You can only upload a maximum of 2 images.")
                 return
             }
-            showCrop(image: image)
-        } else if let videoURL = info[.mediaURL] as? URL {
-            if videoArray.count >= 1 {
+            
+            if videoArray.count + selectedVideos.count > Int("\(CategoryPostData?.postVideoLimit ?? "0")") ?? 0 {
                 showAlert(message: "You can only upload a maximum of 1 video.")
                 return
             }
-            if !videoArray.contains(where: { $0 == videoURL }) {
-                videoArray.append(videoURL)
-                DispatchQueue.main.async {
-                    self.updateMediaCount()
-                }
-            }
-        }
-    }
-
-    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true, completion: nil)
-        
-        let selectedImages = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) }
-        let selectedVideos = results.filter { $0.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) }
-        
-        if imageArray.count + selectedImages.count > 2 {
-            showAlert(message: "You can only upload a maximum of 2 images.")
-            return
-        }
-        
-        if videoArray.count + selectedVideos.count > 1 {
-            showAlert(message: "You can only upload a maximum of 1 video.")
-            return
-        }
-
-        for result in results {
-            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
-                result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
-                    if let imageNew = object as? UIImage {
-                        DispatchQueue.main.async {
-                            self.showCrop(image: imageNew)
+            
+            for result in results {
+                if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+                    result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
+                        if let imageNew = object as? UIImage {
+                            DispatchQueue.main.async {
+                                self.imagesToCrop.append(imageNew)
+                                if self.imagesToCrop.count == 1 {
+                                    self.showCrop(image: imageNew)
+                                }
+                            }
                         }
                     }
-                }
-            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
-                result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
-                    if let videoURL = url {
-                        DispatchQueue.main.async {
-                            if self.videoArray.count < 1 {
-                                self.videoArray.append(videoURL)
-                                self.updateMediaCount()
+                }  else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
+                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
+                        if let videoURL = url {
+                            DispatchQueue.main.async {
+                                if self.videoArray.count < 1 {
+                                    self.videoArray.append(videoURL)
+                                    self.updateMediaCount()
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
-
     
     
     
     
     
     
-    // Alert show karne ka function
-    func showAlert(title: String = "", message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        
-        // ✅ OK button add karein, jo alert ko turant dismiss karega
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-            alert.dismiss(animated: true, completion: nil)
-        }))
-        
-        present(alert, animated: true) {
-            // ✅ 2 second ke baad alert automatically dismiss hoga
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-//                alert.dismiss(animated: true, completion: nil)
-//            }
-        }
-    }
-
- 
     
     func getVideoThumbnail(url: URL) -> UIImage? {
         let asset = AVAsset(url: url)
@@ -660,7 +848,7 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
                 self.serviceName.append(value.postTitle ?? "")
                 
             }
-//            self.serviceDropdownData.dataSource = self.serviceName
+            //            self.serviceDropdownData.dataSource = self.serviceName
             
             
             
@@ -670,28 +858,62 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
     
     //  -----------------------------******************* video and image upload create post api-------------********---------******/
     
+//    func callCreatePostWebService(_ completionClosure: @escaping () -> ()) {
+//        let id = UserDefaults.standard.string(forKey: "userid") ?? ""
+//        let idcategory = UserDefaults.standard.string(forKey: "idCategory") ?? ""
+//        // Confirming idCategory retrieved from UserDefaults
+//        print("Retrieved idCategory from UserDefaults in callCreatePostWebService: \(idcategory)")
+//
+//        let dictParams: Dictionary<String, Any> = [
+//            "userid": id,
+//            "posttype": idcategory,
+//            "postmsg": self.DescriptionText.text ?? ""
+//        ]
+//
+//        // Check if both images and videos are available
+//        if !imageArray.isEmpty || !videoArray.isEmpty {
+//            callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, mediaKey: "photo[]", URlName: kBASEURL + WebServiceName.kCreatePost) {
+//                print("Upload successful") // Success message
+//                self.navigationController?.popViewController(animated: true)
+//            }
+//        } else {
+//            print("No media available for upload.")
+//        }
+//    }
+    
+    
     func callCreatePostWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid") ?? ""
         let idcategory = UserDefaults.standard.string(forKey: "idCategory") ?? ""
-        // Confirming idCategory retrieved from UserDefaults
         print("Retrieved idCategory from UserDefaults in callCreatePostWebService: \(idcategory)")
-        
+
         let dictParams: Dictionary<String, Any> = [
             "userid": id,
             "posttype": idcategory,
             "postmsg": self.DescriptionText.text ?? ""
         ]
-        
-        // Check if both images and videos are available
+
+        // ✅ If image/video available, upload media
         if !imageArray.isEmpty || !videoArray.isEmpty {
             callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, mediaKey: "photo[]", URlName: kBASEURL + WebServiceName.kCreatePost) {
-                print("Upload successful") // Success message
-                self.navigationController?.popViewController(animated: true)
+                print("Upload successful with media")
+                completionClosure()
             }
         } else {
-            print("No media available for upload.")
+            // ✅ If no media, make simple POST request without media
+            AF.request(kBASEURL + WebServiceName.kCreatePost, method: .post, parameters: dictParams, encoding: URLEncoding.default).responseJSON { response in
+                switch response.result {
+                case .success(let value):
+                    print("Post created without media: \(value)")
+                    completionClosure()
+                case .failure(let error):
+                    print("Error creating post without media: \(error)")
+                }
+            }
         }
     }
+
+    
     
     func callsendMediaAPI(param:[String: Any], images:[UIImage], videos:[URL], mediaKey:String, URlName:String, withblock:@escaping ()->Void) {
         let headers: HTTPHeaders = ["Content-type": "multipart/form-data"]
@@ -805,11 +1027,11 @@ extension CreatePostViewController: UIImagePickerControllerDelegate, UINavigatio
         vc.aspectRatioLockEnabled = false
         present(vc, animated: true)
     }
-
+    
     
 }
 
- 
+
 @available(iOS 16.0, *)
 extension CreatePostViewController: MediaCountUpdateDelegate {
     func didUpdateMediaCount(totalMedia: Int) {
@@ -835,23 +1057,35 @@ extension CreatePostViewController: TOCropViewControllerDelegate {
         }
     }
     
-    
     func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
-        print("Crop completed successfully!")
-        cropViewController.dismiss(animated: true) {
-            if self.imageArray.count < 2 {
+            cropViewController.dismiss(animated: true) {
                 self.imageArray.append(image)
-                print("Image added to array. Current count: \(self.imageArray.count)")
                 self.updateMediaCount()
-            } else {
-                print("Image count limit reached!")
+                
+                // Only remove if the array is not empty
+                if !self.imagesToCrop.isEmpty {
+                    self.imagesToCrop.removeFirst()
+                }
+                
+                // Show next image if available
+                if let nextImage = self.imagesToCrop.first {
+                    self.showCrop(image: nextImage)
+                }
             }
         }
-    }
-
+    
+    
+//    func cropViewController(_ cropViewController: CropViewController, didCropToImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+//        print("Crop completed successfully!")
+//        cropViewController.dismiss(animated: true) {
+//            if self.imageArray.count < 2 {
+//                self.imageArray.append(image)
+//                print("Image added to array. Current count: \(self.imageArray.count)")
+//                self.updateMediaCount()
+//            } else {
+//                print("Image count limit reached!")
+//            }
+//        }
+//    }
+    
 }
-
-
-
-
- 

@@ -19,19 +19,71 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
     var homeData: HomeAllModel?
     var profileData : ProfileModel?
     var selectedNeighborhoodId: String?
-    let menuItems = ["My Profile", "My neighbourhood", "Business", "Event", "Group", "Poll", "Post", "Public Agency directory", "Share app", "Setting", "Contact us"]
+    let menuItems = ["My Profile", "My Neighbourhood", "Business", "Event", "Group", "Poll", "Post", "Public Agency Directory", "Share App", "Setting", "Contact Us"]
     let menuItemImages = ["person", "location 1", "Market", "calendar", "person.2", "icons8-poll-24", "envelope", "bag", "arrowshape.turn.up.right", "gearshape", "phone"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.lblUserName.text = "\(self.profileData?.firstname ?? "") \(self.profileData?.lastname ?? "")"
-        let url = URL(string: (self.profileData?.userpic ?? ""))
-        self.userProfileImg.kf.indicatorType = .activity
-        self.userProfileImg.kf.setImage(with:url ,placeholder: UIImage(named: "profile 1"))
-        self.lblNeighbourhood.text = self.profileData?.neighborhood
-        userProfileImg.layer.cornerRadius = userProfileImg.frame.size.width / 2
+        print(profileData)
+        userProfileImg.layer.cornerRadius = userProfileImg.frame.height/2
         userProfileImg.clipsToBounds = true
+        
+        
+//        self.lblUserName.text = self.profileData?.username ?? ""
+//
+//        let userName = self.profileData?.username ?? ""
+//        let firstLetter = String(userName.prefix(1)).uppercased()
+//
+//        if let imageUrlString = self.profileData?.userpic,
+//           let url = URL(string: imageUrlString),
+//           !imageUrlString.trimmingCharacters(in: .whitespaces).isEmpty {
+//            
+//            self.userProfileImg.kf.indicatorType = .activity
+//            self.userProfileImg.kf.setImage(with: url, placeholder: UIImage(named: "profile 1")) { result in
+//                switch result {
+//                case .success(_):
+//                    // Image loaded successfully, kuch nahi karna
+//                    break
+//                case .failure(_):
+//                    // Agar load fail ho gaya toh first letter set karo
+//                    self.setInitialLetterProfile(firstLetter)
+//                }
+//            }
+//        } else {
+//            // Agar URL hi empty hai toh direct first letter set karo
+//            self.setInitialLetterProfile(firstLetter)
+//        }
+//        
+      
+        
+        self.view.layoutIfNeeded()
+        self.lblUserName.text = self.profileData?.username
+            let userName = self.profileData?.username ?? ""
+            let firstLetter = String(userName.prefix(1)).uppercased()
+            
+            if let imageUrlString = self.profileData?.userpic,
+               let url = URL(string: imageUrlString),
+               !imageUrlString.trimmingCharacters(in: .whitespaces).isEmpty {
+                
+                self.userProfileImg.kf.indicatorType = .activity
+                self.userProfileImg.kf.setImage(with: url, placeholder: UIImage(named: "profile 1")) { result in
+                    switch result {
+                    case .success(_):
+                        self.userProfileImg.backgroundColor = .clear // Image load ho gaya toh color reset
+                    case .failure(_):
+                        self.setInitialLetterProfile(firstLetter)
+                    }
+                }
+            } else {
+                self.setInitialLetterProfile(firstLetter)
+            }
+       
+        self.lblNeighbourhood.text = self.profileData?.neighborhood ?? ""
+
+    
+        
         let desiredWidth: CGFloat = 280
+        
         if sideMenuContainer.frame.width != desiredWidth {
             var frame = sideMenuContainer.frame
             frame.size.width = desiredWidth
@@ -45,6 +97,10 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
         UIView.animate(withDuration: 0.3) {
             self.sideMenuContainer.transform = .identity
         }
+        
+        let professionLabelTap = UITapGestureRecognizer(target: self, action: #selector(professionLabelTapped))
+        lblUserName.isUserInteractionEnabled = true
+        lblUserName.addGestureRecognizer(professionLabelTap)
         // Tap outside to dismiss
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissMenu))
         tapGesture.delegate = self
@@ -55,9 +111,39 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
         }
     }
     
+    
+    
+    func setInitialLetterProfile(_ letter: String) {
+        // 1️⃣ First letter label ya imageView ke andar set karo
+        self.userProfileImg.image = nil // Purana image clear karo
+        
+        // 2️⃣ Background color set karo based on letter
+        self.userProfileImg.backgroundColor = UIColor.colorForAlphabet(letter)
+        
+        // 3️⃣ Initial letter ko show karne ke liye ek UILabel lagao
+        let initialLabel = UILabel(frame: self.userProfileImg.bounds)
+        initialLabel.text = letter
+        initialLabel.textColor = .white
+        initialLabel.textAlignment = .center
+        initialLabel.font = UIFont.boldSystemFont(ofSize: self.userProfileImg.bounds.width / 2)
+        self.userProfileImg.layer.cornerRadius = self.userProfileImg.bounds.width / 2
+        self.userProfileImg.clipsToBounds = true
+        // Pehle se added subviews remove karo
+        self.userProfileImg.subviews.forEach { $0.removeFromSuperview() }
+        
+        self.userProfileImg.addSubview(initialLabel)
+    }
+    
+    
+    @objc func professionLabelTapped() {
+        guard let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else { return }
+        vc.sourceViewController = "HomeViewController"
+        vc.headingTitle = "My Profile"
+        self.pushTo(vc)
+        print("Abdul Aleem Usmani")
+    }
     @IBAction func actionSidemenuHide(_ sender: Any) {
         dismissMenu()
-
     }
     
     // Add your updated method here 👇
@@ -69,7 +155,7 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
             self.dismiss(animated: false, completion: nil)
         }
     }
-   
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let desiredWidth: CGFloat = 280
@@ -81,7 +167,7 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
             self.view.backgroundColor = UIColor.black.withAlphaComponent(0.3)
         }
     }
-
+    
     
     // MARK: - TableView
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -93,7 +179,6 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
         cell.lblItmeName.text = menuItems[indexPath.row]
         // Get image name
         let imageName = menuItemImages[indexPath.row]
-        
         // Try to use SF Symbol first, if it fails, use image from Assets
         if let systemImage = UIImage(systemName: imageName) {
             cell.imgItme.image = systemImage
@@ -110,15 +195,17 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
         DispatchQueue.main.async{
             switch selectedItem {
             case "My Profile":
+                let id = UserDefaults.standard.string(forKey: "userid")
                 guard let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {
                     print("❌ MyProfileViewController not found")
                     return
                 }
-                vc.sourceViewController = "HomeViewController"
+                vc.sourceViewController = "MyProfile"
                 vc.headingTitle = "My Profile"
+                vc.Oid = id
                 self.pushTo(vc)
                 
-            case "My neighbourhood":
+            case "My Neighbourhood":
                 guard let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "NeighbourhoodViewController") as? NeighbourhoodViewController else {
                     print("❌ NeighbourhoodViewController not found")
                     return
@@ -134,8 +221,12 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
                     print("❌ BussinesViewController not found")
                     return
                 }
+//                vc.selectedNeighborhoodId = self.selectedNeighborhoodId
+//                vc.sourceViewController = "Neighbourhood"
+//                vc.sourceViewController = "MyProfile"
                 vc.selectedNeighborhoodId = self.selectedNeighborhoodId
                 vc.sourceViewController = "Neighbourhood"
+                
                 self.pushTo(vc)
                 
             case "Event":
@@ -170,14 +261,14 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 self.pushTo(vc)
                 
-            case "Public Agency directory":
+            case "Public Agency Directory":
                 guard let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PublicAgencyViewController") as? PublicAgencyViewController else {
                     print("❌ PublicAgencyViewController not found")
                     return
                 }
                 self.pushTo(vc)
                 
-            case "Share app":
+            case "Share App":
                 let appName = "NeighboursNook"
                 let appDescription = "NeighbrsNook is a hyperlocal social networking service. Connect with your neighborhood today!"
                 let appLink = "https://testflight.apple.com/join/1G74jNEC"
@@ -193,7 +284,7 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 self.pushTo(vc)
                 
-            case "Contact us":
+            case "Contact Us":
                 guard let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ContactUsViewController") as? ContactUsViewController else {
                     print("❌ ContactUsViewController not found")
                     return
@@ -205,6 +296,11 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
         }
     }
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 50 // ya jo bhi constant height aapko chahiye
+    }
+    
+    
     
     //MARK: - Helper method to push view controller safely
     
@@ -215,13 +311,11 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
             print("❌ NavigationController not found")
             return
         }
-        
         print("✅ Found rootNav: \(rootNav)")
         self.dismiss(animated: false) {
             rootNav.pushViewController(vc, animated: true)
         }
     }
-    
     
 }
 

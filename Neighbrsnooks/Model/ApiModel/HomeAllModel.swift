@@ -10,6 +10,7 @@ struct HomeAllModel: Codable {
     let verfiedMsg, missmatchRemarks, awaitStatus, memberCount: String?
     let verifiedStatus: String?
     let popupVerifiedStatus: Int?
+    let missmatchStatus: String?
     var listdata: [HomeNewData]?
 
     enum CodingKeys: String, CodingKey {
@@ -17,6 +18,7 @@ struct HomeAllModel: Codable {
         case myNeighborhoodID = "my_neighborhood_id"
         case myNeighborhood = "my_neighborhood"
         case verfiedMsg = "verfied_msg"
+        case missmatchStatus = "missmatch_status"
         case popupVerifiedStatus = "popup_verified_status"
         case missmatchRemarks = "missmatch_remarks"
         case awaitStatus = "await_status"
@@ -45,15 +47,15 @@ struct HomeNewData: Codable {
     let bannerimage, action, eventid, eventName: String?
     let eventDescription, eventCoverImage, eventStartDate, eventEndDate: String?
     let willeventstart, iseventrunning, welcomeid, welcomeMsg: String?
-    let firstname, welcomeImg, likeStatus, userBokay: String?
-    let totalLike, totalBokay: Int?
+    var firstname, welcomeImg, like_status, user_bokay: String?
+    var total_like, total_bokay: Int?
     let likedata, bokaydata: [Datum]?
     let postid, postType, postMessage, status: String?
-    let emojiStatus, userEmoji: String?
+    var emojiStatus, userEmoji: String?
     let totalEmojis: Int?
     let emojilistdata: [EmojilistdatumN]?
     var postImagesN: [postImagesN]?
-    let postlike, postemojiunicode, totcomment, totallike: String?
+    var postlike, postemojiunicode, totcomment, totallike: String?
     let pollid, pollTitle, pollQuestion, pollStartDate: String?
     let pollEndDate, isvoted, totalvote, ispollrunning: String?
     let bID, businessName, businessTagline, businessDesc: String?
@@ -61,6 +63,9 @@ struct HomeNewData: Codable {
     let businessImage: [BusinessImageH]?
     let businessVideo: [String]?
     let review: Int?
+    var didGiveLike: Bool = false
+    var didGiveBookay: Bool = false
+
 
     enum CodingKeys: String, CodingKey {
         case type
@@ -84,7 +89,7 @@ struct HomeNewData: Codable {
         case eventEndDate = "event_end_date"
         case willeventstart, iseventrunning, welcomeid
         case welcomeMsg = "welcome_msg"
-        case firstname, welcomeImg, likeStatus, userBokay, totalLike, totalBokay
+        case firstname, welcomeImg, like_status, user_bokay, total_like, total_bokay
         case likedata, bokaydata, postid, status
         case emojiStatus = "emoji_status"
         case userEmoji = "user_emoji"
@@ -133,4 +138,18 @@ struct BusinessImageH: Codable {
 struct postImagesN: Codable {
     let img: String?
     let video: String?
+}
+
+extension HomeNewData {
+    var isLiked: Bool {
+        return postlike == "1"
+    }
+
+    var likeCount: Int {
+        return Int(totallike ?? "0") ?? 0
+    }
+
+    var emojiunicode: String? {
+        return userEmoji?.isEmpty == false ? userEmoji : postemojiunicode
+    }
 }

@@ -10,7 +10,7 @@ import Foundation
 // MARK: - Welcome
 struct HomeBookayModel: Codable {
     let status, message: String?
-    let totalLike, totalBokay, likeStatus, bokayStatus: Int?
+    var totalLike, totalBokay, likeStatus, bokayStatus: Int?
 
     enum CodingKeys: String, CodingKey {
         case status, message

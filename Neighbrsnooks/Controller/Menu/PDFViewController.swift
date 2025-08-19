@@ -10,13 +10,16 @@ import PDFKit
 class PDFViewController: UIViewController {
     
     @IBOutlet weak var pdfView: UIView!
+    @IBOutlet weak var deleteButton: UIButton!
+
     
     var pdfURL: URL?  // Variable to hold the selected PDF URL
-    
+    var shouldHideDeleteButton: Bool = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupPDFView()
+        deleteButton.isHidden = shouldHideDeleteButton  // ✅ THIS IS IMPORTANT
     }
     
     // Function to setup PDFView and display PDF
@@ -41,39 +44,40 @@ class PDFViewController: UIViewController {
     
     // Close button action to pop the view controller
         @IBAction func actionClose(_ sender: UIButton) {
+            if let updateVC = self.navigationController?.viewControllers.first(where: { $0 is UpdateBusinessViewController }) as? UpdateBusinessViewController {
+                updateVC.shouldCallAPI = false
+            }
             self.navigationController?.popViewController(animated: true)  // Pop the view controller
         }
     
-    
+
+          
     @IBAction func actionDeletePdf(_ sender: UIButton) {
         guard let pdfURL = pdfURL else {
-                  print("No PDF file to delete.")
-                  return
-              }
-              
-              // Delete the file using FileManager
-              do {
-                  try FileManager.default.removeItem(at: pdfURL)
-                  print("PDF file deleted successfully.")
-                  
-                  // Clear the pdfURL and update the view (optional)
-                  self.pdfURL = nil
-                  
-                  // Remove the PDFView (optional)
-                  for subview in self.pdfView.subviews {
-                      subview.removeFromSuperview()
-                  }
-                  
-                  // Show success alert
-                  showAlert(message: "PDF file deleted successfully.")
-                  
-              } catch {
-                  print("Error deleting PDF file: \(error.localizedDescription)")
-                  // Show error alert if deletion fails
-                  showAlert(message: "Failed to delete the PDF file.")
-              }
-          }
-          
+            print("No PDF file to delete.")
+            return
+        }
+
+        do {
+            try FileManager.default.removeItem(at: pdfURL)
+            print("PDF file deleted successfully.")
+            
+            self.pdfURL = nil
+            
+            for subview in self.pdfView.subviews {
+                subview.removeFromSuperview()
+            }
+            
+            // Notify parent controller
+            NotificationCenter.default.post(name: NSNotification.Name("PDFDeleted"), object: nil)
+
+            showAlert(message: "PDF file deleted successfully.")
+        } catch {
+            print("Error deleting PDF file: \(error.localizedDescription)")
+            showAlert(message: "Failed to delete the PDF file.")
+        }
+    }
+
           // Function to show an alert
           private func showAlert(message: String) {
               let alert = UIAlertController()
@@ -81,7 +85,9 @@ class PDFViewController: UIViewController {
               // Add an "OK" action to dismiss the alert
               let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
               alert.addAction(okAction)
-              
+              if let updateVC = self.navigationController?.viewControllers.first(where: { $0 is UpdateBusinessViewController }) as? UpdateBusinessViewController {
+                  updateVC.shouldCallAPI = false
+              }
               // Present the alert
               self.navigationController?.popViewController(animated: true)  // Pop the view controller
           }

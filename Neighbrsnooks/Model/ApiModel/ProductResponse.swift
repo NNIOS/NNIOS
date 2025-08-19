@@ -151,3 +151,9 @@ struct SimilarProduct: Codable {
 }
 
 var ProductDataM: [ProductDetail] = []
+
+
+struct ChatReadModel:Codable {
+    var status: Int?
+    var message: String?
+}

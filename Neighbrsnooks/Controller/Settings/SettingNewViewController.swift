@@ -28,7 +28,7 @@ class SettingNewViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateColors()
+//        updateColors()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.lblNotification.font = UIFont(name: "Montserrat-Regular", size: 16)
         self.lblPublic.font = UIFont(name: "Montserrat-Regular", size: 16)
@@ -48,7 +48,7 @@ class SettingNewViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+//        updateColors()
     }
     
     private func updateColors() {
@@ -129,7 +129,7 @@ class SettingNewViewController: UIViewController {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
     
@@ -142,12 +142,9 @@ class SettingNewViewController: UIViewController {
        }
     
     @IBAction func btnPublicProfile(_ : UIButton){
-
-    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "PublicProfileViewController") as? PublicProfileViewController else {return}
-
-    self.navigationController?.pushViewController(vc, animated: true)
-
-       }
+        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "PublicProfileVisibilityVC") as? PublicProfileVisibilityVC else {return}
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
     
     @IBAction func btnAcct(_ : UIButton){
 

@@ -19,6 +19,7 @@ class latestListMarketViewController: UIViewController,UICollectionViewDelegate,
         collectionViewMyEvent.dataSource = self
         collectionViewMyEvent.reloadData()
         collectionViewMyEvent.tag = 1
+        lblHeading.text = "Latest Listing"
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
         // Do any additional setup after loading the view.
     }
@@ -87,7 +88,7 @@ class latestListMarketViewController: UIViewController,UICollectionViewDelegate,
         return CGSize(width: width , height: height)
     
     }
-    
+    //dev.
     func callMarketLatestWebService() {
                   let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_today_list?"
 

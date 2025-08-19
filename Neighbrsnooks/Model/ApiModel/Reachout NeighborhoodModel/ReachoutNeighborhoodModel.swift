@@ -9,3 +9,5 @@ import Foundation
 struct ReachoutNeighborhoodModel: Codable {
     let status, message: String
 }
+
+

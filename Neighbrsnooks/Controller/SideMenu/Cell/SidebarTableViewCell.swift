@@ -14,6 +14,8 @@ class SidebarTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        lblItmeName.font = UIFont.preferredFont(forTextStyle: .body)
+
 //        imgItme.layer.cornerRadius = imgItme.frame.width/2
         // Initialization code
     }

@@ -27,6 +27,7 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
     @IBOutlet weak var UserPicImgView : UIImageView!
     @IBOutlet weak var placeholderLabel: UILabel!
     @IBOutlet weak var tvmessage: UITextView!
+    @IBOutlet weak var textViewMessage: UITextField!
     @IBOutlet weak var btnComment: UIButton!
     @IBOutlet weak var btnCommentReply: UIButton!
     @IBOutlet weak var btnClickComment: UIButton!
@@ -189,9 +190,6 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
     }
     
     
-    @objc override func dismissKeyboard() {
-        view.endEditing(true) // Hides all keyboards in the view
-    }
     
     
 //    @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
@@ -507,7 +505,7 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
         emojiSelectionView.tag = 9999 // Unique tag for easy identification and removal
         
         // Emojis list
-        let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳", "♡"]
+        let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳"]
         // Create a horizontal scroll view to hold emoji buttons
         let scrollView = UIScrollView(frame: emojiSelectionView.bounds)
         scrollView.contentSize = CGSize(width: emojis.count * 50, height: 60)
@@ -675,54 +673,76 @@ class PostDetailsViewController: BaseViewController,UICollectionViewDelegateFlow
  
     
     
-    @IBAction func SendBtn(_ sender: UIButton){
+    @IBAction func SendBtn(_ sender: UIButton) {
         self.tvmessage.resignFirstResponder()
-          if tvmessage.text == "" {
-            let alert = UIAlertController(title: "", message: "Please Enter Your Message", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
+        
+        guard let messageText = tvmessage.text, !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            let alert = UIAlertController(title: "", message: "Please Enter Your Message", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
-            
+            return
         }
         
-        else{
+        // ✅ Abusive words check
+        if containsBadWords(messageText) {
+            let alertMessage = """
+            Inappropriate content!
+            This post goes against our community guidelines.
+            Please keep things respectful.
+            """
+            let alert = UIAlertController(title: "", message: alertMessage, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+
+        callCommentePostWebService {
+            self.tvmessage.text = "Please Enter Your Message"
+        }
+        self.tableviewPost.reloadData()
+
+
+        DispatchQueue.main.async {
+            self.callPostCommenteWebService { }
+            self.tableviewPost.reloadData()
+
             
-            callCommentePostWebService{ [self] in
-                tvmessage.text = ""
-                
-            }
+        }
+    }
+
+
+    @IBAction func actionCommentReply(_ sender: UIButton) {
+        self.tvmessage.resignFirstResponder()
+        
+        guard let messageText = tvmessage.text, !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            let alert = UIAlertController(title: "", message: "Please Enter Your Message", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+        
+        // ✅ Abusive words check
+        if containsBadWords(messageText) {
+            let alertMessage = """
+            Inappropriate content!
+            This post goes against our community guidelines.
+            Please keep things respectful.
+            """
+            let alert = UIAlertController(title: "", message: alertMessage, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
+
+        callCommenteReplyPostWebService(parentID: parentID, topLevelUsername: topLevelUsername, topLevelUserID: topLevelUserID) {
             DispatchQueue.main.async {
-                self.callPostCommenteWebService{ [self] in
-                    
-                    
-                }
+                print("Reply posted successfully!")
+                self.tvmessage.text = "Please Enter Your Message"
+                self.callPostCommenteWebService { }
             }
-            
-        }
-        
-    }
-    
-    
-    @IBAction func actionCommentReply(_ sender: UIButton){
-        self.tvmessage.resignFirstResponder()
-        if tvmessage.text == "" {
-            let alert = UIAlertController(title: "", message: "Please Enter Your Message", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        } else {
-            callCommenteReplyPostWebService(parentID: parentID, topLevelUsername: topLevelUsername, topLevelUserID: topLevelUserID) {
-                DispatchQueue.main.async {
-                    print("Reply posted successfully!")
-                    self.tvmessage.text = "" // Clear the text after posting
-                    self.callPostCommenteWebService{ [self] in
-                        
-                    }
-                }
-            }
-            
-            
         }
     }
-    
+
     
     func loadPostData() {
         if let listData = PostDetailData?.listdata?.first {

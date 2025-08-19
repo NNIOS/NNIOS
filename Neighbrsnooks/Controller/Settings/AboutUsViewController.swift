@@ -16,7 +16,7 @@ class AboutUsViewController: UIViewController {
     @IBOutlet weak var AboutusLbl: UILabel!
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.AboutusLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.AboutLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
         // Do any additional setup after loading the view.

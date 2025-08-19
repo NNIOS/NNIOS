@@ -11,7 +11,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>Neighbrsnooks.com</string>
+	<string>NeighbrsnookMalik.com</string>
 	<key>PROJECT_ID</key>
 	<string>neighbrsnook-20eef</string>
 	<key>STORAGE_BUCKET</key>
@@ -27,6 +27,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:1008869088846:ios:4bd052ef29df044498ed1f</string>
+	<string>1:1008869088846:ios:06c4df3dc509688f98ed1f</string>
 </dict>
 </plist>

@@ -30,6 +30,11 @@ class GroupThreeDotViewController: BottomPopupViewController {
     var shouldDismissInteractivelty: Bool?
     var eventID : String?
     
+    var createdby: String?
+    var onUpdateForBlock: (() -> Void)?
+    var objBlockUserData : BlockUserModel?
+    var onUpdateForFav: (() -> Void)?
+    var isComingFromMenuBussinessVC:Bool = true
     
     var UserName = ""
     var sectorName = ""
@@ -104,6 +109,32 @@ class GroupThreeDotViewController: BottomPopupViewController {
         
     }
     
+    func ConfirmBlock() {
+            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+            let titleText =  "Block"
+            let messageText = "Are you sure you want to block this user ?"
+            let titleColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .label
+            let messageColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .secondaryLabel
+            let attributedTitle = NSAttributedString(string: titleText, attributes: [ .foregroundColor: titleColor, .font: UIFont.boldSystemFont(ofSize: 17)])
+            let attributedMessage = NSAttributedString(string: messageText, attributes: [.foregroundColor: messageColor, .font: UIFont.systemFont(ofSize: 15) ])
+            alertController.setValue(attributedTitle, forKey: "attributedTitle")
+            alertController.setValue(attributedMessage, forKey: "attributedMessage")
+            let confirmAction = UIAlertAction(title: "Yes", style: .default) { _ in
+                self.dismiss(animated: true,completion: {
+                    self.handleBlockUnblockAPI(completion: {
+                        self.dismiss(animated: true)
+                    })
+                })
+            }
+            confirmAction.setValue(#colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1), forKey: "titleTextColor")
+            let cancelAction = UIAlertAction(title: "No", style: .cancel) { [weak self] _ in
+                guard let self = self else { return }
+                self.dismiss(animated: true, completion: nil)
+            }
+            alertController.addAction(confirmAction)
+            alertController.addAction(cancelAction)
+            self.present(alertController, animated: true, completion: nil)
+        }
     
     
     
@@ -128,7 +159,7 @@ class GroupThreeDotViewController: BottomPopupViewController {
     @IBAction func btnFavourite(_ : UIButton){
         
         callFavouriteBussinessWebService{
-            self.showTemporaryAlert(message: "Added to Group successfully")
+            self.dismiss(animated: true)
         }
         
         
@@ -137,12 +168,16 @@ class GroupThreeDotViewController: BottomPopupViewController {
     @IBAction func btnUnFavourite(_ : UIButton){
         
         callFavouriteRemoveBussinessWebService{
-            self.showTemporaryAlert(message: "Removed to Group successfully")
+            self.onUpdateForFav?()
+            self.dismiss(animated: true)
             
         }
         
     }
     
+    @IBAction func btnBlockAction(_ sender: UIButton) {
+        ConfirmBlock()
+    }
     
     
     func showTemporaryAlert(message: String) {
@@ -209,6 +244,53 @@ class GroupThreeDotViewController: BottomPopupViewController {
         WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
             self.CommentPostListData = data
             completionClosure()
+        }
+    }
+    // dev.
+    
+    func handleBlockUnblockAPI(completion: @escaping () -> Void) {
+        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
+        guard let blockerId = UserDefaults.standard.string(forKey: "userid") else {
+            print("Error: Missing blocker ID")
+            return
+        }
+        
+        guard let blockedId = createdby else {
+            print("Error: Missing blocked ID")
+            return
+        }
+        let dictParams: [String: Any] = [
+            "blocker_userid": blockerId,
+            "blocked_userid": blockedId,
+            "action": "block"
+        ]
+        print("Block dictParams :\(dictParams)")
+        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true) {
+            (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+            switch statusCode {
+            case .SUCCESS ,.CREATED:
+                do {
+                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+                    self.objBlockUserData = data
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self.onUpdateForBlock!()
+                        self.dismiss(animated: true)
+                    }
+                } catch {
+                    print(error.localizedDescription)
+                }
+            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                do {
+                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+                    self.objBlockUserData = data
+                } catch {
+                    print(error.localizedDescription)
+                }
+            case .UNAUTHORIZED:
+                print(error?.localizedDescription ?? "")
+            default:
+                break
+            }
         }
     }
     

@@ -10,29 +10,28 @@ import UIKit
 class UpdateNeigDataShowTableViewCell: UITableViewCell {
 
     var isCheckedNeig: Bool = false
+    weak var delegate: NeighbourhoodDataShowTableViewCellDelegate?
+    var indexPath: IndexPath?
     
     @IBOutlet weak var checkboxButtonNei: UIButton!
     
     func updateButtonAppearanceN() {
-        // SF Symbols configuration for circle size
-        let config = UIImage.SymbolConfiguration(pointSize: 25) // Circle size
-        let selectedImage = UIImage(systemName: "largecircle.fill.circle", withConfiguration: config) // Filled circle
-        let unselectedImage = UIImage(systemName: "circle", withConfiguration: config) // Empty circle
+        let config = UIImage.SymbolConfiguration(pointSize: 25)
+        let selectedImage = UIImage(systemName: "largecircle.fill.circle", withConfiguration: config)
+        let unselectedImage = UIImage(systemName: "circle", withConfiguration: config)
         
-        // Update image and tint color based on state
         checkboxButtonNei.setImage(isCheckedNeig ? selectedImage : unselectedImage, for: .normal)
-        checkboxButtonNei.tintColor = isCheckedNeig
-        ? UIColor(red: 0, green: 100/255.0, blue: 0, alpha: 1) // Dark green for selected
-        : .black // Black for unselected
+        checkboxButtonNei.tintColor = isCheckedNeig ? UIColor(red: 0, green: 100/255.0, blue: 0, alpha: 1) : .black
     }
     
     @IBAction func checkboxTappedN(_ sender: UIButton) {
-        isCheckedNeig.toggle()
-        updateButtonAppearanceN()
+        if let indexPath = indexPath {
+            delegate?.didTapCheckbox(at: indexPath)
+        }
     }
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateButtonAppearanceN() // Initial setup
+        updateButtonAppearanceN()
     }
 }

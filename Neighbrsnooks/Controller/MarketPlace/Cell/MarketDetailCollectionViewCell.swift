@@ -8,6 +8,8 @@
 import UIKit
 import AVKit
 import AVFoundation
+import Kingfisher
+
 
 class MarketDetailCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var profileImgView: UIImageView!
@@ -49,16 +51,19 @@ class MarketDetailCollectionViewCell: UICollectionViewCell {
     }
 
 
-       private func loadImage(from urlString: String) {
-           if let url = URL(string: urlString) {
-               URLSession.shared.dataTask(with: url) { data, response, error in
-                   guard let data = data, error == nil else { return }
-                   DispatchQueue.main.async {
-                       self.profileImgView.image = UIImage(data: data)
-                   }
-               }.resume()
-           }
-       }
+    private func loadImage(from urlString: String) {
+        if let url = URL(string: urlString) {
+            // Optionally show a loading indicator
+            self.profileImgView.kf.indicatorType = .activity
+
+            // Load image with placeholder and caching
+            self.profileImgView.kf.setImage(
+                with: url,
+                placeholder: UIImage(named: "MarketDefault") // जो आपकी default image है
+            )
+        }
+    }
+
 
     private func playVideo(from urlString: String) {
         guard let url = URL(string: urlString) else { return }

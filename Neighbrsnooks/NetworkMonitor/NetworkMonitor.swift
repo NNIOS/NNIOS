@@ -9,17 +9,23 @@ import Foundation
 import Network
 import UIKit
 
+ 
 class NetworkMonitor {
     static let shared = NetworkMonitor()
     
     private let monitor = NWPathMonitor()
     private var isMonitoring = false
     
+    // MARK: - Public connectivity status
+    private(set) var isConnected: Bool = true
+    
     // Start monitoring network changes
     func startMonitoring() {
         if !isMonitoring {
             let queue = DispatchQueue(label: "NetworkMonitorQueue")
             monitor.pathUpdateHandler = { path in
+                self.isConnected = path.status == .satisfied
+                
                 if path.status == .unsatisfied {
                     // No internet connection
                     DispatchQueue.main.async {
@@ -43,6 +49,9 @@ class NetworkMonitor {
     // Show alert when there is no internet connection
     private func showNoConnectionAlert() {
         guard let rootVC = UIApplication.shared.windows.first?.rootViewController else { return }
+        
+        // Avoid showing alert multiple times if already shown
+        if rootVC.presentedViewController is UIAlertController { return }
         
         let alert = UIAlertController(title: "No Internet Connection",
                                       message: "Please check your Wi-Fi or mobile data.",

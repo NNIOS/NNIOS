@@ -26,7 +26,7 @@ class PoliceTableViewCell: UITableViewCell {
     @IBOutlet weak var viewLine: UIView!
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateColors()
+//        updateColors()
         // Initialization code
     }
     
@@ -66,7 +66,7 @@ class PoliceTableViewCell: UITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
         
     }

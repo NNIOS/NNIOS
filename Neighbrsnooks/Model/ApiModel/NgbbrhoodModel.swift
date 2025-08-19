@@ -10,7 +10,8 @@ import Foundation
 // MARK: - Welcome
 struct NgbbrhoodModel: Codable {
     let status: String?
-    var data: [NeighbrhdData]
+    let message: String?
+    var data: [NeighbrhdData]?
 }
 
 // MARK: - Datum

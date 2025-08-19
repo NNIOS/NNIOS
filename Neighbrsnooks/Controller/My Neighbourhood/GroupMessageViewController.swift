@@ -16,13 +16,13 @@ class GroupMessageViewController: BaseViewController, UITextViewDelegate {
     @IBOutlet weak var MembersLbl: UILabel!
     @IBOutlet weak var tfSubject: UITextField!
     @IBOutlet weak var tvmessage: UITextView!
-   
     @IBOutlet weak var placeholderLabel: UILabel!
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var mainView: UIView!
     @IBOutlet weak var MessageFullView: UIView!
-    
-    
+    @IBOutlet weak var messMainViewHeight: NSLayoutConstraint!
+    @IBOutlet weak var viewMessageBottomConstraint: NSLayoutConstraint!
+
     var userName : String?
     var userImage :  String?
     var groupid : String?
@@ -31,152 +31,179 @@ class GroupMessageViewController: BaseViewController, UITextViewDelegate {
     var GroupMessageData : GroupChatModel?
     var id = ""
     var timer: Timer?
-        var counter = 0
-
+    var counter = 0
+    let maxTextViewHeight: CGFloat = 150
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateColors()
         addShadowToMainView()
-
+        tableviewMembers.showsVerticalScrollIndicator = false
         placeholderLabel.text = "Type a message..."
-               placeholderLabel.textColor = UIColor.lightGray
-               placeholderLabel.isHidden = !tvmessage.text.isEmpty
+        placeholderLabel.textColor = UIColor.lightGray
+        placeholderLabel.isHidden = !tvmessage.text.isEmpty
         tvmessage.delegate = self
-        tableviewMembers.transform = CGAffineTransform(scaleX: 1, y: -1) // Flip the table view
+        tvmessage.isScrollEnabled = false
+        tableviewMembers.rowHeight = UITableView.automaticDimension
+        tableviewMembers.estimatedRowHeight = 44
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshTableView), userInfo: nil, repeats: true)
-        
-        
+        tableviewMembers.register(UINib(nibName: "GroupMeTableViewCell", bundle: nil), forCellReuseIdentifier: "GroupMeTableViewCell")
+        tableviewMembers.register(UINib(nibName: "GroupTableViewCell", bundle: nil), forCellReuseIdentifier: "GroupTableViewCell")
         // Do any additional setup after loading the view.
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+            view.addGestureRecognizer(tap)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         self.MembersLbl.font = UIFont(name: "Montserrat-Regular", size: 20)
         self.tfSubject.font = UIFont(name: "Montserrat-SemiBold", size: 13)
-       // self.subjectLbl.font = UIFont(name: "Montserrat-SemiBold", size: 13)
+        // self.subjectLbl.font = UIFont(name: "Montserrat-SemiBold", size: 13)
         var data = GroupChatData?.data
         MembersLbl.text = GroupName
-        
-//        if let url = URL(string: senderUserpic) {
-//            profileImgView.kf.setImage(with: url)
-//        } else {
-//            print("Invalid URL for senderUserpic")
-//        }
-       // SVProgressHUD.show()
-        
         // Load the image
-            if let imageUrl = userImage, let url = URL(string: imageUrl) {
-                profileImgView.kf.setImage(with: url) // Use Kingfisher for async loading
-            } else {
-                profileImgView.image = UIImage(named: "groupImg") // Fallback image
-              //  self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "groupimg"))
-            }
-
-       
-     //   SVProgressHUD.show()
-        
-        
+        if let imageUrl = userImage, let url = URL(string: imageUrl) {
+            profileImgView.kf.setImage(with: url) // Use Kingfisher for async loading
+        } else {
+            profileImgView.image = UIImage(named: "groupImg") // Fallback image
+        }
         callGroupChatListWebService{
-         //   SVProgressHUD.dismiss()
+            //   SVProgressHUD.dismiss()
             self.tableviewMembers.reloadData()
-            
-            
+            self.scrollToBottom()
+            self.scrollToBottomWithoutAnimation()
             // Do any additional setup after loading the view.
         }
         
-     
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        
     }
     
-   
+    
+    @objc func keyboardWillShow(_ notification: Notification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
+            let keyboardHeight = keyboardFrame.height
+
+            // Animate bottom constraint change
+            UIView.animate(withDuration: 0.3) {
+                self.viewMessageBottomConstraint.constant = keyboardHeight
+                self.view.layoutIfNeeded()
+            }
+
+            // Scroll to bottom
+            self.scrollToBottom()
+        }
+    }
+
+    @objc func keyboardWillHide(_ notification: Notification) {
+        UIView.animate(withDuration: 0.3) {
+            self.viewMessageBottomConstraint.constant = 0
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc override func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    
+    
     
     @IBAction func BackButtionAction(_ : UIButton){
-
         _ = navigationController?.popViewController(animated: true)
-
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.scrollToBottom()
+        }
     }
     
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
             // Dark mode colors
-           
             MessageFullView.backgroundColor = .black
             mainView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-
-            
             mainView.layer.borderWidth = 1.0 // En
-           
-           
-            
         } else {
-            // Light mode mein storyboard ke original colors preserve karna
-          //  questionView.textColor = UIColor.secondaryLabel
-          
             MessageFullView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
             mainView.layer.borderWidth = 0 // En
             
         }
-      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
         }
     }
     
     func addShadowToMainView() {
-            mainView.layer.shadowColor = UIColor.black.cgColor
-            mainView.layer.shadowOpacity = 0.25
-            mainView.layer.shadowOffset = CGSize(width: 0, height: 2)
-            mainView.layer.shadowRadius = 4
-            mainView.layer.masksToBounds = false
-            mainView.layer.cornerRadius = 8 // Optional: Add rounded corners
-        }
+        mainView.layer.shadowColor = UIColor.black.cgColor
+        mainView.layer.shadowOpacity = 0.25
+        mainView.layer.shadowOffset = CGSize(width: 0, height: 2)
+        mainView.layer.shadowRadius = 4
+        mainView.layer.masksToBounds = false
+        mainView.layer.cornerRadius = 8 // Optional: Add rounded corners
+    }
     
+    
+     
     
     func textViewDidChange(_ textView: UITextView) {
-            // Show or hide placeholder label based on text view content
-            placeholderLabel.isHidden = !textView.text.isEmpty
+        placeholderLabel.isHidden = !textView.text.isEmpty
+        let size = CGSize(width: textView.frame.width, height: .infinity)
+        let estimatedSize = textView.sizeThatFits(size)
+        
+        if estimatedSize.height <= maxTextViewHeight {
+            textView.isScrollEnabled = false
+            messMainViewHeight.constant = estimatedSize.height + 16  // Add padding
+        } else {
+            textView.isScrollEnabled = true
+            messMainViewHeight.constant = maxTextViewHeight
         }
+        
+        UIView.animate(withDuration: 0.2) {
+            self.view.layoutIfNeeded()
+        }
+    }
     
     @objc func refreshTableView() {
-            // Call reloadData to refresh the table view
-        tableviewMembers.reloadData()
-     //   scrollToBottom()
+        callGroupChatListWebService {
+            self.tableviewMembers.reloadData()
+            self.scrollToBottomWithoutAnimation()
         }
+    }
+
     
     
-   
-    
-    @IBAction func SendBtn(_ sender: UIButton){
-        
-//        tfSubject.text = ""
-       
-        
-        if tvmessage.text == "" {
-                showAlert(message: "Please enter your message")
-            }
-        else{
-            callGroupMessageWebService{ [self] in
-                callGroupChatListWebService{
+    @IBAction func SendBtn(_ sender: UIButton) {
+        if tvmessage.text?.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
+            showAlert(message: "Please enter your message")
+        }
+        // 🔴 Bad word check
+        else if containsBadWords(tvmessage.text ?? "") {
+            showAlert(message: "Please remove inappropriate words from your message")
+        }
+        else {
+            callGroupMessageWebService { [self] in
+                callGroupChatListWebService {
                     tvmessage.text = ""
                     self.placeholderLabel.isHidden = false
+                    
+                    // 🔽 Reset height to default
+                    self.messMainViewHeight.constant = 50 // Full view height
+                    self.view.layoutIfNeeded()
                 }
-
             }
         }
-        
-      
     }
+    
     func showAlert(message: String) {
         let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
-        
         let attributedMessage = NSAttributedString(
             string: message,
             attributes: [
@@ -186,12 +213,10 @@ class GroupMessageViewController: BaseViewController, UITextViewDelegate {
         )
         
         alert.setValue(attributedMessage, forKey: "attributedMessage")
-        
         alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
-        
         self.present(alert, animated: true, completion: nil)
     }
-
+    
 }
 
 
@@ -199,128 +224,107 @@ class GroupMessageViewController: BaseViewController, UITextViewDelegate {
 extension GroupMessageViewController: UITableViewDataSource, UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         return GroupChatData?.data.count ?? 0
     }
     
-    func scrollToBottom(){
+    func scrollToBottom() {
         DispatchQueue.main.async {
-            if let count = self.GroupChatData?.data.count, count > 0 {
-                let indexPath = IndexPath(row: 0, section: 0) // Scroll to the first row (which is actually the last message)
-                self.tableviewMembers.scrollToRow(at: indexPath, at: .top, animated: true)
+            let section = 0
+            let rowCount = self.tableviewMembers.numberOfRows(inSection: section)
+            if rowCount > 0 {
+                let indexPath = IndexPath(row: rowCount - 1, section: section)
+                self.tableviewMembers.scrollToRow(at: indexPath, at: .bottom, animated: false)
+            }
+        }
+    }
+
+
+    func scrollToBottomWithoutAnimation() {
+        DispatchQueue.main.async {
+            let sections = self.tableviewMembers.numberOfSections
+            if sections > 0 {
+                let rows = self.tableviewMembers.numberOfRows(inSection: sections - 1)
+                if rows > 0 {
+                    let indexPath = IndexPath(row: rows - 1, section: sections - 1)
+                    self.tableviewMembers.scrollToRow(at: indexPath, at: .bottom, animated: false)
+                }
             }
         }
     }
     
-   
+    
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MessageChatTableViewCell", for: indexPath) as! MessageChatTableViewCell
-
-        let reversedIndex = (GroupChatData?.data.count ?? 0) - 1 - indexPath.row
-        cell.lblMessage.text = GroupChatData?.data[reversedIndex].message
-        cell.lblTime.text = GroupChatData?.data[reversedIndex].date
-
-        cell.lblTime.font = UIFont(name: "Montserrat-Regular", size: 7)
-        cell.lblMessage.font = UIFont(name: "Montserrat-Regular", size: 13)
-
-        cell.lblMessage.numberOfLines = 0  // Allows multi-line messages
-
-        // Calculate message width
-        let maxWidth = tableView.frame.width * 0.7
-        let messageSize = cell.lblMessage.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude))
-
-        let messageWidth = min(maxWidth, messageSize.width - 20)
-
-        // Let Auto Layout determine the height dynamically (NO need for manual height adjustment)
-        cell.viewNotification.setNeedsLayout()
-        cell.viewNotification.layoutIfNeeded()
-        // Flip the cell back to normal so text appears correctly
-        cell.transform = CGAffineTransform(scaleX: 1, y: -1)
-
-        if GroupChatData?.data[reversedIndex].type == "receiver" {
-            // Move ReciverImgView more towards leading
-            cell.updateLeadingConstraint(newConstant: 40) // Closer to leading
-            cell.updateTrailingConstraint(newConstant: tableView.frame.width - messageWidth - 70) // More padding
-            
-            // Increase padding for viewNotification
-            cell.viewNotification.layoutMargins = UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 15)
-
-            cell.applyChatBubbleStyle(isSender: false)
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.9019607843, green: 0.8901960784, blue: 0.8274509804, alpha: 1)
-
-            if let userpicURLString = GroupChatData?.data[reversedIndex].userpic,
-               let url = URL(string: userpicURLString) {
-                cell.ReciverImgView.kf.indicatorType = .activity
-                cell.ReciverImgView.kf.setImage(with: url, placeholder: UIImage(named: ""))
-            } else {
-                cell.ReciverImgView.image = UIImage(named: "")
-            }
-            cell.ReciverImgView.isHidden = false
-
-        } else if GroupChatData?.data[reversedIndex].type == "sender" {
-            let extraShift: CGFloat = 70  // Shift more left
-            cell.updateLeadingConstraint(newConstant: tableView.frame.width - messageWidth - 70 - extraShift)
-            cell.updateTrailingConstraint(newConstant: 5) // More padding on right
-
-            // Increase padding for viewNotification
-            cell.viewNotification.layoutMargins = UIEdgeInsets(top: 10, left: 15, bottom: 10, right: 15)
-
-            cell.applyChatBubbleStyle(isSender: true)
-            cell.viewNotification.backgroundColor = #colorLiteral(red: 0.862745098, green: 0.9294117647, blue: 0.7882352941, alpha: 1)
-
-            cell.ReciverImgView.isHidden = true
+        guard let message = GroupChatData?.data[indexPath.row] else {
+            return UITableViewCell()
         }
-
-        return cell
+        
+        if message.type == "sender" {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "GroupMeTableViewCell", for: indexPath) as! GroupMeTableViewCell
+            cell.lblMessage.text = message.message
+            cell.lblTime.text = message.date
+            cell.lblMessage.font = UIFont(name: "Montserrat-Regular", size: 16)
+            cell.lblTime.font = UIFont(name: "Montserrat-SemiBold", size: 10)
+            cell.lblMessage.textColor = .darkGray
+            cell.lblMessage.layer.cornerRadius = 8
+            cell.lblMessage.clipsToBounds = true
+            return cell
+            
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "GroupTableViewCell", for: indexPath) as! GroupTableViewCell
+            cell.lblMessage.text = message.message
+            cell.lblTime.text = message.date
+            cell.lblMessage.font = UIFont(name: "Montserrat-Regular", size: 16)
+            cell.lblTime.font = UIFont(name: "Montserrat-SemiBold", size: 10)
+            // ✅ Load user profile image using message.userPic
+            if let imgUrlStr = message.userpic, let url = URL(string: imgUrlStr) {
+                cell.profileImageView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder_profile"))
+            } else {
+                cell.profileImageView.image = UIImage(named: "placeholder_profile")
+            }
+            cell.lblMessage.textColor = .darkGray
+            cell.lblMessage.layer.cornerRadius = 8
+            cell.lblMessage.clipsToBounds = true
+            return cell
+        }
+        
     }
-
-
     
-   
-
-
     
     func callGroupChatListWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
         let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-          let dictParams: Dictionary<String, Any> = [
-                                                    "userid":id ?? "",
-                                                    "groupid": groupid ?? "",
-                                                    
-                                                                        ]
-          WebService.sharedInstance.callGroupChatListWebService(withParams: dictParams) { data in
+        let dictParams: Dictionary<String, Any> = [
+            "userid":id ?? "",
+            "groupid": groupid ?? "",
+            
+        ]
+        WebService.sharedInstance.callGroupChatListWebService(withParams: dictParams) { data in
             self.GroupChatData = data
-              if self.GroupChatData?.status == "success"{
-                  completionClosure()
-              }else{
-                  self.showAlert(Message: self.GroupChatData?.message ?? "")
-              }
-          }
+            if self.GroupChatData?.status == "success"{
+                completionClosure()
+            }else{
+                self.showAlert(Message: self.GroupChatData?.message ?? "")
+            }
         }
+    }
     
     func callGroupMessageWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
         let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-          let dictParams: Dictionary<String, Any> = [
-                                                    "userid":id ?? "",
-                                                    "groupid": groupid ?? "",
-                                                    
-                                                    "message":self.tvmessage.text ?? "",
-                                                                        ]
-          WebService.sharedInstance.callGroupMessageWebService(withParams: dictParams) { data in
+        let dictParams: Dictionary<String, Any> = [
+            "userid":id ?? "",
+            "groupid": groupid ?? "",
+            "message":self.tvmessage.text ?? "",
+        ]
+        WebService.sharedInstance.callGroupMessageWebService(withParams: dictParams) { data in
             self.GroupMessageData = data
-             // UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-              if self.GroupMessageData?.status == "success"{
-                  completionClosure()
-              }else{
-                  self.showAlert(Message: self.GroupMessageData?.message ?? "")
-              }
-          }
+            
+            if self.GroupMessageData?.status == "success"{
+                completionClosure()
+            }else{
+                self.showAlert(Message: self.GroupMessageData?.message ?? "")
+            }
         }
+    }
 }

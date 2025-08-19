@@ -25,7 +25,7 @@ class WishListCollectionViewCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateColors() // Call updateColors when the cell is loaded
+//        updateColors() // Call updateColors when the cell is loaded
     }
     
     var DetailCallback : ((UIButton) -> Void)?
@@ -67,7 +67,7 @@ class WishListCollectionViewCell: UICollectionViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
 }

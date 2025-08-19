@@ -11,6 +11,7 @@ class ShowFullImageViewController: UIViewController {
         super.viewDidLoad()
         setdata()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
+        self.lblHeading.text = "Profile photo"
         // Do any additional setup after loading the view.
     }
     

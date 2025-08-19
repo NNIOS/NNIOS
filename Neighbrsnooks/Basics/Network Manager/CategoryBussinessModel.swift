@@ -12,6 +12,7 @@ struct CategoryBussinessModel: Codable {
     let status, message, businessImgLimit, businessImageSize: String
     let businessDocLimit, businessDocSize, businessVideoSize: String
     let nbdata: [AddPCategoryData]
+    let businessVideoLimit: String
 
     enum CodingKeys: String, CodingKey {
         case status, message
@@ -21,6 +22,7 @@ struct CategoryBussinessModel: Codable {
         case businessDocSize = "business_doc_size"
         case businessVideoSize = "business_video_size"
         case nbdata
+        case businessVideoLimit = "business_video_limit"
     }
 }
 

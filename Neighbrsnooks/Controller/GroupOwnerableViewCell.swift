@@ -21,7 +21,7 @@ class GroupOwnerableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         defaultTextColor = lblName.textColor
-        updateColors()
+//        updateColors()
         // Initialization code
     }
 
@@ -61,7 +61,7 @@ class GroupOwnerableViewCell: UITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
 

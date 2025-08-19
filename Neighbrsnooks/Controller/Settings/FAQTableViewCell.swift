@@ -15,7 +15,7 @@ class FAQTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateColors()
+//        updateColors()
         // Initialization code
     }
     

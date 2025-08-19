@@ -17,16 +17,9 @@ let kDeviceModel                = UIDevice.current.model
  *	--------------------------------------------------------
  */
 
-//let kBASEURL = "http://3.98.21.18:3000/api/"
-//let kBASEURL = "http://18.221.119.161:3000/"
-// api
-
-//let kBASEURL = "http://dev.neighbrsnook.com/admin/api/"
-
-
+ 
+ // dev.
 let kBASEURL = "https://dev.neighbrsnook.com/oldadmin/api/"
-
-
 
 //let kMBASEURL = "https://dev.neighbrsnook.com/marketplace/api/"
 
@@ -43,10 +36,11 @@ let kSharedUserDefaults = UserDefaults.standard
  *	--------------------------------------------------------
  *///   https://vensemart.com/Vensemart/api/
 struct WebServiceName {
-     
     
     static let kLogin = "login"
     static let kOtp = "master?flag=sendotp"
+    static let kRegisterNew = "master?flag=reg-step-I"
+    static let kVerifyEmail = "verify-email"
     static let kForgetOtp = "otpverification"
     static let kForgotPassword = "master?flag=forgotpassword"
     static let kRegister = "master?flag=createuser"
@@ -54,7 +48,7 @@ struct WebServiceName {
     static let kProffesion = "master?flag=profession"
     static let kintrset = "master?flag=interest"
     static let kReason = "master?flag=reason"
-    static let kMoreYou = "master?flag=reg-step-III"
+    static let kMoreYou = "master?flag=moreaboutyou"
     static let kCountry = "master?flag=country"
     static let kstate = "master?flag=state"
     static let kCity = "master?flag=city"
@@ -162,6 +156,10 @@ struct WebServiceName {
     static let kUpdateToken = "update-token"
     static let kEmailVerify = "verify-email"
     static let kDeactivate = "mobilesettings?flag=deactiveaccount"
+    static let KUserDeletePic = "master?flag=deleteuserprofilephoto"
+    static let KAwaitStatus = "master?flag=awaitstatus"
+    static let kCommentPostLike = "posting?flag=likecomment"
+    static let kDeleteMsg = "chat?flag=deletemessage"
     
     
     

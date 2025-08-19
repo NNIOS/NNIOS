@@ -4,6 +4,7 @@ import Photos
 import PhotosUI
 import TOCropViewController
 
+
 @available(iOS 16.0, *)
 class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextFieldDelegate , PHPickerViewControllerDelegate, UIImagePickerControllerDelegate,UINavigationControllerDelegate, TOCropViewControllerDelegate, UITextViewDelegate, MediaCountUpdateDelegate  {
    
@@ -37,8 +38,9 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     @IBOutlet weak var UploadImageView: UIView!
     @IBOutlet weak var DescriptionView: UIView!
    
-    
-    // let pickerView = UIPickerView()
+    var onUpdateForBlock: (() -> Void)?
+    var selectedCategoryId: Int?
+    var selectedCategoryName: String?
     var MarketCatDataNew : MarketCategoryModel?
     var MarketEditDataNew : MarketUpdateModel?
     var SoldDataNew : InactivemarketModel?
@@ -109,6 +111,11 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
             updatePreviewLabel()
         }
         
+        
+        let professionLabelTap = UITapGestureRecognizer(target: self, action: #selector(professionLabelTapped))
+                tfCategory.isUserInteractionEnabled = true
+                tfCategory.addGestureRecognizer(professionLabelTap)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -122,7 +129,13 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
             self.tfItemName.text = self.MarketWDetailData?.productdetail?.first?.pTitle
           
             // cell.rsLbl.text = "Rs." + (MarketWallData?.yourItems![indexPath.row].salePrice ?? "")
-            self.tfItemPrice.text = self.MarketWDetailData?.productdetail?.first?.salePrice ?? ""
+//            self.tfItemPrice.text = self.MarketWDetailData?.productdetail?.first?.salePrice ?? ""
+            if let priceString = MarketWDetailData?.productdetail?.first?.salePrice,
+               let price = Double(priceString) {
+                tfItemPrice.text = "Rs. \(Int(price))"
+            } else {
+                tfItemPrice.text = "Rs. 0"
+            }
             self.tfDesc.text = self.MarketWDetailData?.productdetail?.first?.pDescription
             //   self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
             self.tfCategory.text = self.MarketWDetailData?.productdetail?.first?.catName
@@ -179,8 +192,36 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+//        updateColors()
     }
+    
+    
+    @objc func professionLabelTapped() {
+            showPopup(for: 3, allowMultipleSelection: false) // Single selection for profession
+        }
+        
+    func showPopup(for labelTag: Int, allowMultipleSelection: Bool) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let popupVC = storyboard.instantiateViewController(withIdentifier: "SelectMarketCatViewController") as? SelectMarketCatViewController {
+            
+            popupVC.allowMultipleSelection = allowMultipleSelection
+            popupVC.labelTag = 3
+            
+            popupVC.callback = { [weak self] catId, catName in
+                self?.selectedCategoryName = catName
+                self?.selectedCategoryId = catId
+                self?.tfCategory.text = catName
+                print("Selected ID: \(catId), Name: \(catName)")
+            }
+            
+            popupVC.modalPresentationStyle = .overCurrentContext
+            popupVC.modalTransitionStyle = .crossDissolve
+            self.present(popupVC, animated: true, completion: nil)
+        }
+    }
+        
+        
+    
     
     private func updateColors() {
         if traitCollection.userInterfaceStyle == .dark {
@@ -269,7 +310,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
     
@@ -486,7 +527,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     
     func hideLoader() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            UIView.animate(withDuration: 0.3, animations: {
+            UIView.animate(withDuration: 0.0, animations: {
                 self.loaderView?.alpha = 0
             }) { _ in
                 self.loaderView?.removeFromSuperview()
@@ -580,7 +621,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     }
     
    
-    
+    // dev.
     func callMarketDeactiveWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/product_inactive_status?"
         
@@ -641,6 +682,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
             }
         }
     }
+    //dev.
     
     func callMarketActiveWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/product_active_status"
@@ -703,6 +745,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         }
     }
     
+    //dev.
     
     func callMarketSoldWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/product_sold_status"
@@ -767,7 +810,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         
         
     }
-    
+    //dev.
     func callMarketDetailWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
         
@@ -829,10 +872,10 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         }
     }
     
-    
+    //dev.
     func callMarketCreateWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add?"
-        let idcategory = UserDefaults.standard.string(forKey: "idCategoryMarket")
+       
         
         let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -847,12 +890,13 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
             "total_price": "0",
             "brand_name":  "",
             "seller_name": self.tfDesc.text ?? "",
-            "cat_id": idcategory ?? "",
+            "cat_id": selectedCategoryId ?? "",
             "p_status": "1",
             "neighborhood_id": idNeighbour ?? "",
             "id": idD ?? "",
             
         ]
+        print("Param is: \(dictParams)")
         
         // Determine if image upload is required based on `self.from`
         if self.from == 1 {
@@ -864,7 +908,11 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
             
             // Upload from gallery
             callsendImageAPI(param: dictParams, arrImage: uniqueImageArray, imageKey: "p_images[]", URlName: url, withblock: {
-                self.navigationController?.popViewController(animated: true)
+//                self.navigationController?.popViewController(animated: true)
+                DispatchQueue.main.async {
+                    self.onUpdateForBlock!()
+                    self.navigationController?.popViewController(animated: false)
+                }
                 completion()
             })
         } else if self.from == 2 {
@@ -1015,7 +1063,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     
     
     
-    
+    //dev.
     
     func callMarketCatWebService(completion: @escaping () -> Void) {
         let url = "https://dev.neighbrsnook.com/admin/api/category"

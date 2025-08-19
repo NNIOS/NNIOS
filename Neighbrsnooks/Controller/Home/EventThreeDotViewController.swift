@@ -108,14 +108,6 @@ class EventThreeDotViewController: BottomPopupViewController {
     }
     
     
-   
-    
-    // call api
-    
-    
-    
-    
-    
     
     @IBAction func shareTapped(sender: UIButton)
     {
@@ -136,7 +128,8 @@ class EventThreeDotViewController: BottomPopupViewController {
     @IBAction func btnFavourite(_ : UIButton){
 
         callFavouriteBussinessWebService{
-            self.showTemporaryAlert(message: "Added to favorite successfully")
+            self.dismiss(animated: true)
+            self.callback?(1)
         }
        
 
@@ -145,8 +138,8 @@ class EventThreeDotViewController: BottomPopupViewController {
     @IBAction func btnUnFavourite(_ : UIButton){
 
         callFavouriteRemoveBussinessWebService{
-            self.showTemporaryAlert(message: "Removed to favorite successfully")
-        
+            self.dismiss(animated: true)
+            self.callback?(0)
         }
 
        }
@@ -185,7 +178,6 @@ class EventThreeDotViewController: BottomPopupViewController {
           WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
             self.BussinessFavouriteData = data
         
-
             completionClosure()
           }
         }

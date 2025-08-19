@@ -8,6 +8,7 @@
 import Foundation
 import AVFoundation
 import UIKit
+
 func checkCameraPermission(completion: @escaping (Bool) -> Void) {
     let status = AVCaptureDevice.authorizationStatus(for: .video)
     
@@ -117,3 +118,6 @@ class OrientationManager {
     
     private init() {}
 }
+
+
+

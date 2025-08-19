@@ -512,7 +512,7 @@ class PostDetailsVC:BaseViewController,UICollectionViewDelegateFlowLayout,UIColl
         emojiSelectionView.tag = 9999 // Unique tag for easy identification and removal
         
         // Emojis list
-        let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳", "♡"]
+        let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳"]
         // Create a horizontal scroll view to hold emoji buttons
         let scrollView = UIScrollView(frame: emojiSelectionView.bounds)
         scrollView.contentSize = CGSize(width: emojis.count * 50, height: 60)

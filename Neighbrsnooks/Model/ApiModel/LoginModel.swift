@@ -90,3 +90,9 @@ struct VerifyOTPModel: Codable {
     let status: String?
     let description: VerifyOTPDescription
 }
+
+struct VerifyEmailModel:Codable {
+    var status: Bool?
+    var code: Int?
+    var message: String?
+}

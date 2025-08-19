@@ -18,5 +18,5 @@ struct MemberListData: Codable {
     let id, fullname: String
     let userpic: String
     let neighbrhood: String
+    var is_blocked:Int?
 }
-

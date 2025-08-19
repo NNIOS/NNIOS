@@ -15,6 +15,7 @@ struct NotificationData: Codable {
     let groupchatName: String?
     let groupchatImage: String?
     let groupType: String?
+    var userid:String?
 
     enum CodingKeys: String, CodingKey {
         case notificationID = "notification_id"

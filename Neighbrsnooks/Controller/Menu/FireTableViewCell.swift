@@ -24,7 +24,7 @@ class FireTableViewCell: UITableViewCell {
     var ShareCallback : ((UIButton) -> Void)?
     override func awakeFromNib() {
         super.awakeFromNib()
-        updateColors()
+//        updateColors()
         // Initialization code
     }
 
@@ -64,7 +64,7 @@ class FireTableViewCell: UITableViewCell {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
+//            updateColors()
         }
     }
 

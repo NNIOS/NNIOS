@@ -15,7 +15,9 @@ class BusinessReviwDetailViewController: BottomPopupViewController {
     var BusinessReviewData : BusinessReviewModel?
     var BusinesReviewDelete : DeleteBusinessReviewModel?
     var business_id : String?
-    var callback : ((_ range : String?) ->())?
+//    var callback : ((_ range : String?) ->())?
+    var callback: (() -> Void)?
+
     var reviewID: String?  // ID store karne ke liye variable
     var height: CGFloat?
     var topCornerRadius: CGFloat?
@@ -156,26 +158,34 @@ extension BusinessReviwDetailViewController: UITableViewDataSource, UITableViewD
             "review_id": reviewID ?? ""
         ]
         print("📡 Sending API Request with Params: \(dictParams)")
+        
         WebService.sharedInstance.callBussinesReviewDeleteWebService(withParams: dictParams) { response in
             print("✅ API Response: \(response)")
+            
             if response.status.lowercased() == "failed" {
-                print("🚨 Error: \(response.message)")
                 DispatchQueue.main.async {
                     self.showAutoDismissAlert(message: "Error: \(response.message)")
                     completionClosure(response.message)
                 }
                 return
             }
+
             self.BusinesReviewDelete = response
+            
             DispatchQueue.main.async {
                 self.showAutoDismissAlert(message: response.message)
                 completionClosure(response.message)
             }
+
             self.callBussinesReviewDetailPostWebService {
                 DispatchQueue.main.async {
                     self.tableviewMembers.reloadData()
                     self.updatePopupHeight()
-                    // ✅ Agar sare reviews delete ho gaye, to popup dismiss ho jaye
+
+                    /// ✅ Always call callback so main screen updates
+                    self.callback?()
+                    
+                    // ✅ Dismiss only if all reviews deleted
                     if self.BusinessReviewData?.listdata?.isEmpty == true {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             self.dismiss(animated: true, completion: nil)
@@ -185,6 +195,48 @@ extension BusinessReviwDetailViewController: UITableViewDataSource, UITableViewD
             }
         }
     }
+
+    
+    
+    
+    
+//
+//    func callBussinesReviewDeleteWebService(_ completionClosure: @escaping (String) -> ()) {
+//        let id = UserDefaults.standard.string(forKey: "userid")
+//        let dictParams: [String: Any] = [
+//            "userid": id ?? "",
+//            "review_id": reviewID ?? ""
+//        ]
+//        print("📡 Sending API Request with Params: \(dictParams)")
+//        WebService.sharedInstance.callBussinesReviewDeleteWebService(withParams: dictParams) { response in
+//            print("✅ API Response: \(response)")
+//            if response.status.lowercased() == "failed" {
+//                print("🚨 Error: \(response.message)")
+//                DispatchQueue.main.async {
+//                    self.showAutoDismissAlert(message: "Error: \(response.message)")
+//                    completionClosure(response.message)
+//                }
+//                return
+//            }
+//            self.BusinesReviewDelete = response
+//            DispatchQueue.main.async {
+//                self.showAutoDismissAlert(message: response.message)
+//                completionClosure(response.message)
+//            }
+//            self.callBussinesReviewDetailPostWebService {
+//                DispatchQueue.main.async {
+//                    self.tableviewMembers.reloadData()
+//                    self.updatePopupHeight()
+//                    // ✅ Agar sare reviews delete ho gaye, to popup dismiss ho jaye
+//                    if self.BusinessReviewData?.listdata?.isEmpty == true {
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+//                            self.dismiss(animated: true, completion: nil)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
     
     
 }

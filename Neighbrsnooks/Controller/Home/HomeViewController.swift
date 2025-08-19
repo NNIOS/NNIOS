@@ -9,8 +9,10 @@ import UIKit
 import SVProgressHUD
 import AVFoundation
 import AVKit
+import FirebaseMessaging
 @available(iOS 16.0, *)
 class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTableViewCellDelegate {
+    
     @IBOutlet weak var tableviewMember: UITableView!
     @IBOutlet weak var SectorLbl: UILabel!
     @IBOutlet weak var imgLogo: UIImageView!
@@ -18,6 +20,11 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     @IBOutlet weak var sideMenu: UIButton!
     @IBOutlet weak var searchView: UIView!
     @IBOutlet weak var HomeView: UIView!
+    @IBOutlet weak var veriyfiedView: UIView!
+    @IBOutlet weak var imgVeriyfied: UIImageView!
+    @IBOutlet weak var lblVeriyfied: UILabel!
+    @IBOutlet weak var lblWelcomeVeriyfied: UILabel!
+    
     var filteredData: HomeAllModel? = nil
     var isFromProfile: Bool?
     var isSearching = false
@@ -35,6 +42,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     var profileData : ProfileModel?
     var uploadDoc : UploadedDocumentsModel?
     var HomeBokkayData : HomeBookayModel?
+    var homeLikeData : HomeLikeWelcomeModel?
     var sideMenuVisible = false
     var selectedNeighborhoodId: String?
     var welcomeid = [Datum]()
@@ -43,6 +51,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     var deletePost : DeletePostModel?
     var savedProfileData: ProfileModel?
     var savedUploadedDocuments: UploadedDocumentsModel?
+    var likeListModel : LikeListModel?
     private var activityIndicator: UIActivityIndicatorView?
     var loaderView: UIView?
     var currentPage = 1  // Start with page 1
@@ -52,97 +61,63 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     var isExpanded = false // Track if description is expanded or collapsed
     var sortedSections: [(type: String, items: [Any])] = []
     var dimmingLayer: UIView?
+    var timer: Timer?
+    var fireBaseToken : UpdateTokenModel?
+    var welcomeIDList: [String] = []
+    var bookay_Status:Int?
+    var like_Status:Int?
+    var isHomePageLoadedOnce = false
+    var apiCallCount = 0
+    var tableReloadCount = 0
+    //    var hasRefreshedOnce = false
+    var userGivenLike = Set<String>()      // createdBy userID
+    var userGivenBookay = Set<String>()    // createdBy userID
+    
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //        self.additionalSafeAreaInsets.top = -30
+        tableviewMember.showsVerticalScrollIndicator = false
+        veriyfiedView.layer.shadowColor = UIColor.black.cgColor
+        veriyfiedView.layer.shadowOpacity = 0.3
+        veriyfiedView.layer.shadowOffset = CGSize(width: 0, height: 2)
+        veriyfiedView.layer.shadowRadius = 4
+        // Add view and hide initially
+        self.view.addSubview(self.veriyfiedView)
+        veriyfiedView.isHidden = true
+        //        callUserProfileWebService{}
         self.additionalSafeAreaInsets.top = -view.safeAreaInsets.top
-        NotificationCenter.default.addObserver(self, selector: #selector(showVerificationPopup), name: Notification.Name("ShowVerificationPopup"), object: nil)
-        updateColors()
+        
+        //        NotificationCenter.default.addObserver(self, selector: #selector(showVerificationPopup), name: Notification.Name("ShowVerificationPopup"), object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleHomeRefreshNotification), name: NSNotification.Name("RefreshHomePageNotification"), object: nil)
+        
+        //        updateColors()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
         prepareSortedData(homeModel: HomeNewData)
         NetworkMonitor.shared.startMonitoring()
-        
-        if let verifiedStatus = HomeNewData?.verifiedStatus,
-           let popupVerifiedStatus = HomeNewData?.popupVerifiedStatus,
-           verifiedStatus == "1" && popupVerifiedStatus == 0 {
-            
-            // Create an attributed title
-            let titleAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont(name: "Montserrat-Regular", size: 22) ?? UIFont.systemFont(ofSize: 18),
-                .foregroundColor: UIColor.black
-            ]
-            let attributedTitle = NSAttributedString(string: "Welcome!", attributes: titleAttributes)
-            
-            // Create an attributed message
-            let messageAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont(name: "Montserrat-Regular", size: 14) ?? UIFont.systemFont(ofSize: 16),
-                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-            ]
-            let attributedMessage = NSAttributedString(string: "You are now a verified member.\n Happy Neighbrsnooking!!!", attributes: messageAttributes)
-            
-            // Create UIImageView for the "Welcome" image
-            let welcomeImageView = UIImageView(image: UIImage(named: "Welcome"))
-            welcomeImageView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
-            welcomeImageView.contentMode = .scaleAspectFit
-            
-            // Create a custom view to contain the image and the title
-            let customView = UIView()
-            customView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
-            
-            // Center the image view inside the custom view
-            welcomeImageView.center = CGPoint(x: customView.frame.size.width / 2, y: 50)
-            customView.addSubview(welcomeImageView)
-            
-            // Create the alert controller
-            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
-            
-            // Set the attributed title and message using KVC (Key-Value Coding)
-            alertController.setValue(attributedTitle, forKey: "attributedTitle")
-            alertController.setValue(attributedMessage, forKey: "attributedMessage")
-            
-            // Add custom view to the alert
-            alertController.view.addSubview(customView)
-            
-            // Adjust the size of the alert view to fit the image and title
-            let alertView = alertController.view.subviews.first
-            alertView?.frame = CGRect(x: 0, y: 0, width: 270, height: 270)
-            
-            // Add OK button action
-            let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-                print("OK button tapped")
-                self.callpopupVerificationWebService {}
-            }
-            alertController.addAction(okAction)
-            
-            // Present the alert
-            self.present(alertController, animated: true, completion: nil)
-            
-        } else {
-            print("Conditions not met, popup not shown")
-        }
         // commend irshad check kanre ke liye
-        callDeviceInfoWebService()
         self.searchView.isHidden = true
         // setupBottomPanel()
         tfSearch.delegate = self
         tfSearch.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        SVProgressHUD.show()
-        self.SectorLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-        callDeviceInfoWebService()
         
+        
+        self.SectorLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+        self.lblWelcomeVeriyfied.font = UIFont(name: "Montserrat-Medium", size: 18)
+        lblVeriyfied.textColor = #colorLiteral(red: 0.3764705882, green: 0.3725490196, blue: 0.3725490196, alpha: 1)
+        
+        callDeviceInfoWebService()
         callHomeAllWebService{
             SVProgressHUD.dismiss()
             self.SectorLbl.text = self.HomeNewData?.myNeighborhood
-            
             self.tableviewMember.reloadData()
-            
         }
-        callHomeAllWebService{
-            self.tableviewMember.reloadData()
-            
-        }
-        
         
         // Initialize the refresh control page
         let refreshControl = UIRefreshControl()
@@ -158,60 +133,81 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
                                                name: NSNotification.Name("RefreshHomePageNotification"),
                                                object: nil)
         
-        
-    }
-    
-    @objc func showVerificationPopup() {
-        let titleAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont(name: "Montserrat-Regular", size: 22) ?? UIFont.systemFont(ofSize: 18),
-            .foregroundColor: UIColor.black
-        ]
-        let attributedTitle = NSAttributedString(string: "Welcome!", attributes: titleAttributes)
-        
-        let messageAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont(name: "Montserrat-Regular", size: 14) ?? UIFont.systemFont(ofSize: 16),
-            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-        ]
-        let attributedMessage = NSAttributedString(string: "You are now a verified member.\nHappy Neighbrsnooking!!!", attributes: messageAttributes)
-        
-        let alert = UIAlertController(title: "", message: "", preferredStyle: .alert)
-        alert.setValue(attributedTitle, forKey: "attributedTitle")
-        alert.setValue(attributedMessage, forKey: "attributedMessage")
-        
-        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-            print("OK tapped")
-            self.callpopupVerificationWebService {} // ✅ Optional: call backend after OK
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            if let userID = UserDefaults.standard.string(forKey: "userid") {
+                Messaging.messaging().token { token, error in
+                    if let token = token {
+                        self.callUpdateFirebaseTokenPostWebServiceDirect(userId: userID, firebaseToken: token) {
+                            print("🎯 Token updated from viewDidLoad with direct URL")
+                        }
+                    } else if let error = error {
+                        print("❌ Firebase token fetch error: \(error)")
+                    }
+                }
+            }
         }
-        alert.addAction(okAction)
-        self.present(alert, animated: true, completion: nil)
+        
+        
+        
+        
     }
     
+    
+    @objc func handleHomeRefreshNotification() {
+        print("🔁 Refreshing Home after coming back")
+        callHomeAllWebService {
+            self.tableviewMember.reloadData()
+        }
+    }
+    
+    //    @objc func showVerificationPopup() {
+    //        let titleAttributes: [NSAttributedString.Key: Any] = [
+    //            .font: UIFont(name: "Montserrat-SemiBold", size: 22) ?? UIFont.systemFont(ofSize: 18),
+    //            .foregroundColor: UIColor.black
+    //        ]
+    //        let attributedTitle = NSAttributedString(string: "Welcome!", attributes: titleAttributes)
+    //        let messageAttributes: [NSAttributedString.Key: Any] = [
+    //            .font: UIFont(name: "Montserrat-Bold", size: 18) ?? UIFont.systemFont(ofSize: 20),
+    //            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+    //        ]
+    //        let attributedMessage = NSAttributedString(string: "You are now a verified member. Happy Neighbrsnooking!!!", attributes: messageAttributes)
+    //        let alert = UIAlertController(title: "", message: "", preferredStyle: .alert)
+    //        alert.setValue(attributedTitle, forKey: "attributedTitle")
+    //        alert.setValue(attributedMessage, forKey: "attributedMessage")
+    //        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+    //            print("OK tapped")
+    //            self.callpopupVerificationWebService {} // ✅ Optional: call backend after OK
+    //            self.refreshPage()
+    //        }
+    //        alert.addAction(okAction)
+    //        self.present(alert, animated: true, completion: nil)
+    //    }
+    //
     
     @objc func handleRefreshNotification() {
         print("🔄 Refresh notification received in HomeViewController")
         refreshPage()
     }
     
-    
-    
-    deinit {
-        // Stop monitoring when the view controller is deallocated
-        NetworkMonitor.shared.stopMonitoring()
-    }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        updateColors()
+        refreshPage()
+        NotificationCenter.default.addObserver(self, selector: #selector(checkAwaitStatus), name: Notification.Name("CheckAwaitStatus"), object: nil)
         
     }
     
-    
+    @objc func checkAwaitStatus() {
+        refreshPage()
+    }
     
     // Jab bhi text change hoga yeh function call hoga
     @objc func textFieldDidChange(_ textField: UITextField) {
         if let searchText = textField.text {
+            isSearching = !searchText.trimmingCharacters(in: .whitespaces).isEmpty
             filterData(with: searchText)
         }
     }
+    
     
     // Jab return button press karein
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -224,92 +220,51 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.searchView.isHidden = true
+        self.currentPage = 1
+        
+        // 👇 API call to refresh
+        self.tableviewMember.setContentOffset(.zero, animated: false)
+        
+        callUserProfileWebService { [weak self] in
+            self?.callHomeAllWebService {
+                SVProgressHUD.dismiss()
+                self?.tableviewMember.reloadData()
+            }
+        }
+        
         
         if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
             appDelegate.shouldSupportAllOrientations = false
         }
         
-        if let verifiedStatus = HomeNewData?.verifiedStatus,
-           let popupVerifiedStatus = HomeNewData?.popupVerifiedStatus,
-           verifiedStatus == "1" && popupVerifiedStatus == 0 {
-            // Create an attributed title
-            let titleAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont(name: "Montserrat-Regular", size: 22) ?? UIFont.systemFont(ofSize: 18),
-                .foregroundColor: UIColor.black
-            ]
-            let attributedTitle = NSAttributedString(string: "Welcome!", attributes: titleAttributes)
-            
-            // Create an attributed message
-            let messageAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont(name: "Montserrat-Regular", size: 14) ?? UIFont.systemFont(ofSize: 16),
-                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-            ]
-            let attributedMessage = NSAttributedString(string: "You are now a verified member.\n Happy Neighbrsnooking!!!", attributes: messageAttributes)
-            
-            // Create the alert controller
-            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
-            
-            // Set the attributed title and message using KVC (Key-Value Coding)
-            alertController.setValue(attributedTitle, forKey: "attributedTitle")
-            alertController.setValue(attributedMessage, forKey: "attributedMessage")
-            
-            let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-                print("OK button tapped")
-                self.callpopupVerificationWebService {}
-            }
-            
-            alertController.addAction(okAction)
-            
-            // Present the alert
-            self.present(alertController, animated: true, completion: nil)
-        } else {
-            print("Conditions not met, popup not shown")
-        }
-        
-        SVProgressHUD.show()
-        
-        callHomeAllWebService{
-            SVProgressHUD.dismiss()
-            self.tableviewMember.reloadData()
-            
-        }
-        
-        SVProgressHUD.show()
-        // commend irshad check kanre ke liye
-        callUserProfileWebService{ [self] in
-            SVProgressHUD.dismiss()
-            
-        }
-        
-        //MARK: - side menu hide
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        
+        // Side menu dismiss handler on keyboard show
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
     }
+    
+    @objc func appWillEnterForeground() {
+        print("✅ App came to foreground")
+        if !isSearching {
+            
+            callUserProfileWebService { [weak self] in
+                guard let self = self else { return }
+                self.callHomeAllWebService {
+                    SVProgressHUD.dismiss()
+                    self.tableviewMember.reloadData()
+                }
+            }
+        }
+    }
+    
+    
     
     @objc func keyboardWillShow(notification: NSNotification) {
         if let presented = self.presentedViewController as? SidebarViewController {
             presented.dismiss(animated: false, completion: nil)
-        }
-    }
-    
-    private func updateColors() {
-        if traitCollection.userInterfaceStyle == .dark {
-            HomeView.backgroundColor = .black
-            tableviewMember.backgroundColor = .black
-        } else {
-            HomeView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-            tableviewMember.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-            tableviewMember.separatorStyle = .none
-        }
-        //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
-    }
-    
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateColors()
         }
     }
     
@@ -323,28 +278,96 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     }()
     
     
+    func startPolling() {
+        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+            self?.fetchStatusFromAPI()
+        }
+    }
+    
+    func fetchStatusFromAPI() {
+        // API Call
+        refreshPage()
+    }
+    
+    deinit {
+        timer?.invalidate()
+        NetworkMonitor.shared.stopMonitoring()
+        NotificationCenter.default.removeObserver(self)
+        
+    }
+    
+    //    func refreshPage() {
+    //        callUserProfileWebService {
+    //            self.callHomeAllWebService {
+    //                self.tableviewMember.reloadData()
+    //                self.tableviewMember.refreshControl?.endRefreshing()
+    //            }
+    //        }
+    //    }
+    
+    //    func refreshPage() {
+    //        print("✅ Refreshing page")
+    //
+    //        callUserProfileWebService {
+    //            self.callHomeAllWebService {
+    //                self.tableviewMember.reloadData()
+    //                self.tableviewMember.refreshControl?.endRefreshing()
+    //            }
+    //        }
+    //    }
+    
+    
+    
     func refreshPage() {
-        // Start loading data again (Web service calls)
+        print("✅ Refreshing page")
+        
+        // Scroll to top before reloading
+        DispatchQueue.main.async {
+            self.tableviewMember.setContentOffset(.zero, animated: false)
+        }
+        
         callUserProfileWebService {
-            // This closure will be called once the user profile data is loaded
-            // This closure will be called once the post list data is loaded
             self.callHomeAllWebService {
-                // After all the web service calls are completed, reload the UI
                 self.tableviewMember.reloadData()
-                // Stop the refresh control spinner once everything is loaded
                 self.tableviewMember.refreshControl?.endRefreshing()
             }
         }
     }
     
-    // To trigger the refresh, you can call this function when needed
-    func triggerPageRefresh() {
-        refreshPage()
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        //        hasRefreshedOnce = false
     }
+    
+    
     // @objc function for triggering the refresh
     @objc func refreshPageAction() {
-        refreshPage() // This will refresh the page data
+        //        isHomePageLoadedOnce = false
+        refreshPage()
     }
+    
+    @IBAction func actionVerifiedOK(_ sender: Any) {
+        
+        UIView.animate(withDuration: 0.1, animations: {
+            self.veriyfiedView.alpha = 0
+        }) { _ in
+            self.veriyfiedView.isHidden = true
+            
+            // Remove dimmed background view
+            if let dimmedView = self.view.viewWithTag(999) {
+                dimmedView.removeFromSuperview()
+            }
+            
+            self.view.backgroundColor = .white
+
+        }
+        
+        // Call APIs after animation
+        self.callpopupVerificationWebService {}
+        self.callHomeAllWebService {}
+    }
+    
     
     
     
@@ -360,6 +383,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         }
         vc.homeData = self.HomeNewData
         vc.profileData = self.profileData
+        //        print(vc.profileData)
         vc.modalPresentationStyle = .overCurrentContext
         vc.modalTransitionStyle = .crossDissolve
         present(vc, animated: false, completion: nil)
@@ -373,15 +397,15 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     
     
     
-    @objc private func emojiTapped(sender: UIButton) {
-        callPostUnLikeWebService{
-            self.tableviewMember.reloadData()
-        }
-    }
-    
     
     
     @IBAction func btnCreatePost(_ : UIButton){
+        if !NetworkMonitor.shared.isConnected {
+            // Show your own alert or prevent API call
+            showAlert(message: "Internet not available. Please check your connection.")
+            return
+        }
+        
         if profileData?.verfiedMsg == "User Verification is completed!" {
             
             guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "CreatePostViewController") as? CreatePostViewController else {return}
@@ -419,6 +443,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         }
         
     }
+    
     @objc func presentSideMenu() {
         guard let sideMenuVC = self.storyboard?.instantiateViewController(withIdentifier: "MenuViewController") as? MenuViewController else {return}
         sideMenuVC.modalPresentationStyle = .custom
@@ -435,6 +460,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     }
     
     @IBAction func btncancelSearch(_ : UIButton){
+        refreshPage()
         self.searchView.isHidden = true
         self.tfSearch.text = ""
         self.SectorLbl.isHidden = false
@@ -444,114 +470,47 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     
     
     
-    //MARK: - ----------------------------------- call api userProfile -----------------------/
-    
-    // Function to fetch user profile and handle the response
     func callUserProfileWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid") ?? ""
         let loggedUser = UserDefaults.standard.string(forKey: "loggeduser") ?? ""
-        
         let dictParams: [String: Any] = [
             "userid": id,
-            "loggeduser": id // Use loggedUser instead of id
+            "loggeduser": id
         ]
-        print(dictParams)
-        
-        // Call the web service
+        print("📤 API Call Params: \(dictParams)")
         WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { (data: ProfileModel?) in
-            // Check if data is nil (i.e., the API response was unsuccessful)
-            guard let data = data else {
-                print("Error: API response is nil")
-                completionClosure()
-                return
+            
+            if let data = data {
+                print("✅ API Response received")
+                print("🔍 Full ProfileModel: \(data)")
+                
+                self.profileData = data
+                self.savedProfileData = data
+                
+                // Save UserDefaults
+                UserDefaults.standard.set(data.emerPhone ?? "", forKey: "emer_phone")
+                UserDefaults.standard.set(data.userpic ?? "", forKey: "profileImage")
+                UserDefaults.standard.set(data.lastname ?? "", forKey: "lastName")
+                UserDefaults.standard.set(data.neighborhood ?? "", forKey: "myNeighbhrhhod")
+                UserDefaults.standard.set(data.nbdId ?? "", forKey: "Neighbhrhhod")
+                UserDefaults.standard.set(data.addlineone ?? "", forKey: "addressLineOne")
+                UserDefaults.standard.set(data.addlinetwo ?? "", forKey: "addressLineTwo")
+                UserDefaults.standard.set(data.city ?? "", forKey: "city")
+                UserDefaults.standard.set(data.state ?? "", forKey: "state")
+                UserDefaults.standard.set(data.country ?? "", forKey: "country")
+                UserDefaults.standard.set(data.pincode ?? "", forKey: "pincode")
+                
+            } else {
+                print("❌ API response is nil. Either network failed or model didn't map correctly.")
             }
             
-            // Now, 'data' is a ProfileModel, and we can safely assign it
-            self.profileData = data
-            self.savedProfileData = data
-            print("Profile Data Saved: \(String(describing: self.savedProfileData))")
-            
-            // Save required fields to UserDefaults
-            if let emerPhone = self.profileData?.emerPhone {
-                UserDefaults.standard.set(emerPhone, forKey: "emer_phone")
-            }
-            if let userPic = self.profileData?.userpic {
-                UserDefaults.standard.set(userPic, forKey: "profileImage")
-            }
-            if let lastName = self.profileData?.lastname {
-                UserDefaults.standard.set(lastName, forKey: "lastName")
-            }
-            if let neighborhood = self.profileData?.neighborhood {
-                UserDefaults.standard.set(neighborhood, forKey: "myNeighbhrhhod")
-            }
-            
-            // Save address details
-            let addressLineOne = self.profileData?.addlineone ?? ""
-            let addressLineTwo = self.profileData?.addlinetwo ?? ""
-            let city = self.profileData?.city ?? ""
-            let state = self.profileData?.state ?? ""
-            let country = self.profileData?.country ?? ""
-            let pincode = self.profileData?.pincode ?? ""
-            
-            UserDefaults.standard.set(addressLineOne, forKey: "addressLineOne")
-            UserDefaults.standard.set(addressLineTwo, forKey: "addressLineTwo")
-            UserDefaults.standard.set(city, forKey: "city")
-            UserDefaults.standard.set(state, forKey: "state")
-            UserDefaults.standard.set(country, forKey: "country")
-            UserDefaults.standard.set(pincode, forKey: "pincode")
-            
-            // Final completion callback
             completionClosure()
         }
     }
     
     
     
-    // like api call
-    func callPostLikeWebService(postId : String?,emoji : String?, _ completionClosure: @escaping () -> ()) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-        //    let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-        //     let idPost = UserDefaults.standard.string(forKey: "postid")
-        let dictParams: Dictionary<String, Any> = [
-            "userid":id ?? "" ,
-            "postid":postId ?? "",
-            "likestatus": "1",
-            "emojiunicode": emoji ?? "",
-        ]
-        
-        WebService.sharedInstance.callPostLikeWebService(withParams: dictParams) { data in
-            self.PostLikeData = data
-            // UserDefaults.standard.setValue(nil, forKey: "postid")
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
-            //              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-            // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-            
-            completionClosure()
-        }
-    }
     
-    
-    // unlike api call
-    
-    func callPostUnLikeWebService(_ completionClosure: @escaping () -> ()) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-        let idPost = UserDefaults.standard.string(forKey: "postid")
-        let dictParams: Dictionary<String, Any> = [
-            "userid":id ?? "" ,
-            "postid":idPost ?? "",
-            "likestatus": "0",
-            "emojiunicode":  "",
-        ]
-        
-        WebService.sharedInstance.callPostUnLikeWebService(withParams: dictParams) { data in
-            
-            
-            completionClosure()
-        }
-    }
     
     
     
@@ -614,21 +573,20 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     }
     
     
-    
     func showAwaitPopup(message: String) {
         let fullMessage = "\(message)"
         
         // MARK: - Customize Title
-        let title = "Missmatched Documents"
+        let title = "Mismatched Documents"
         let attributedTitle = NSMutableAttributedString(string: title)
-        attributedTitle.addAttribute(.font, value: UIFont(name: "Montserrat-Regular", size: 18) ?? UIFont.systemFont(ofSize: 18), range: NSRange(location: 0, length: title.count))
+        attributedTitle.addAttribute(.font, value: UIFont(name: "Montserrat-Bold", size: 16) ?? UIFont.systemFont(ofSize: 16), range: NSRange(location: 0, length: title.count))
         attributedTitle.addAttribute(.foregroundColor, value: UIColor(hex: "#353535"), range: NSRange(location: 0, length: title.count))
         
         // MARK: - Customize Message
         let attributedMessage = NSMutableAttributedString(string: fullMessage)
         if let range = fullMessage.range(of: message) {
             let nsRange = NSRange(range, in: fullMessage)
-            attributedMessage.addAttribute(.font, value: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16), range: nsRange)
+            attributedMessage.addAttribute(.font, value: UIFont(name: "Montserrat-Regular", size: 15) ?? UIFont.systemFont(ofSize: 15), range: nsRange)
             attributedMessage.addAttribute(.foregroundColor, value: UIColor(hex: "#353535"), range: nsRange)
         }
         
@@ -639,26 +597,62 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         
         // MARK: - OK Button
         let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-            self.callUserProfileWebService { [weak self] in
-                guard let self = self else { return }
-                self.callUploaddocumentWebService {
-                    self.savedUploadedDocuments = self.uploadDoc
-                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
-                    if let registerVC = storyboard.instantiateViewController(withIdentifier: "ReUploadDocumentsVC") as? ReUploadDocumentsVC {
-                        print("Passing Profile Data: \(self.savedProfileData ?? nil)")
-                        registerVC.uploadedDocuments = self.savedUploadedDocuments
-                        registerVC.profileData = self.savedProfileData
-                        self.navigationController?.pushViewController(registerVC, animated: true)
+            let missmatchStatus = self.HomeNewData?.missmatchStatus
+
+            if missmatchStatus == "name" {
+                // ⭐️ MyProfileViewController push
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
+                    myProfileVC.sourceViewController = "HomeViewController"
+                    self.navigationController?.pushViewController(myProfileVC, animated: true)
+                }
+            } else if missmatchStatus == "address" {
+                // ⭐️ RegistationAdressProofVC push (direct)
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let registerVC = storyboard.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
+                    // set data if needed
+                    registerVC.uploadedDocuments = self.savedUploadedDocuments
+                    registerVC.profileData = self.profileData
+                    registerVC.sourceScreen = "secondStep"
+                    self.navigationController?.pushViewController(registerVC, animated: true)
+                }
+            } else if missmatchStatus == "address_proof" {
+                // ⭐️ NewRegistationSecondStepVC push
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let secondStepVC = storyboard.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
+                    // set data if needed
+                    secondStepVC.uploadedDocuments = self.savedUploadedDocuments
+                    secondStepVC.profileData = self.profileData
+                    secondStepVC.sourceScreen = "home"
+                    self.navigationController?.pushViewController(secondStepVC, animated: true)
+                }
+            } else {
+                // ⭐️ Existing flow (callUserProfileWebService...)
+                self.callUserProfileWebService { [weak self] in
+                    guard let self = self else { return }
+                    self.callUploaddocumentWebService {
+                        self.savedUploadedDocuments = self.uploadDoc
+                        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                        if let registerVC = storyboard.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
+                            registerVC.uploadedDocuments = self.savedUploadedDocuments
+                            registerVC.profileData = self.profileData
+                            registerVC.sourceScreen = "secondStep"
+                            print("Passing Profile Data: \(self.profileData ?? nil)")
+                            self.navigationController?.pushViewController(registerVC, animated: true)
+                        }
                     }
                 }
             }
+
         }
+        
         okAction.setValue(UIColor(hex: "#008000"), forKey: "titleTextColor")
         alert.addAction(okAction)
         self.present(alert, animated: true, completion: nil)
     }
     
-  
+    
+    
     // callUploadDocumentWebService function (already handled properly)
     func callUploaddocumentWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -673,45 +667,38 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
             completionClosure() // Proceed after fetching data
         }
     }
- 
     
-    func callHomebookayWebService(_ completionClosure: @escaping () -> ()) {
+    
+    
+    func callHomebookayWebService(welUserID: String, _ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
-        let Welid = UserDefaults.standard.string(forKey: "welcomeid")
-        let Uwelid = UserDefaults.standard.string(forKey: "userWelid")
-        let dictParams: Dictionary<String, Any> = [
-            "userid":id ?? "",
-            "welcomeid":Welid ?? "",
-            "weluserid":Uwelid ?? "",
-            "bokaystatus":"1"
-            
+        let params: [String: Any] = [
+            "userid": id ?? "",
+            "welcomeid": "4",
+            "weluserid": welUserID,
+            "bokaystatus": "1"
         ]
-        WebService.sharedInstance.callHomebookayWebService(withParams: dictParams) { data in
+        WebService.sharedInstance.callHomebookayWebService(withParams: params) { data in
             self.HomeBokkayData = data
-            // UserDefaults.standard.set(self.HomeBokkayData?.b.id, forKey: "id")
+            self.bookay_Status = data.bokayStatus
             completionClosure()
         }
     }
     
-    // like api
-    func callHomeLikeWelWebService(_ completionClosure: @escaping () -> ()) {
+    func callHomeLikeWelWebService(welUserID: String,_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
-        let Welid = UserDefaults.standard.string(forKey: "welcomeid")
-        let Uwelid = UserDefaults.standard.string(forKey: "userWelid")
-        let dictParams: Dictionary<String, Any> = [
-            "userid":id ?? "",
-            "welcomeid":Welid ?? "",
-            "weluserid":Uwelid ?? "",
-            "likestatus":"1"
-            
+        let params: [String: Any] = [
+            "userid": id ?? "",
+            "welcomeid": "4",
+            "weluserid": welUserID,
+            "likestatus": "1"
         ]
-        WebService.sharedInstance.callHomeLikeWelWebService(withParams: dictParams) { data in
-            //   self.HomeBokkayData = data
-            // UserDefaults.standard.set(self.HomeBokkayData?.b.id, forKey: "id")
-            
+        WebService.sharedInstance.callHomeLikeWelWebService(withParams: params) { data in
+            self.homeLikeData = data
             completionClosure()
         }
     }
+    
     
     
     
@@ -767,29 +754,26 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         
         WebService.sharedInstance.callDeletePostWebService(withParams: dictParams) { data in
             self.deletePost = data
+            self.refreshPage()
             completionClosure()
         }
     }
     
     
     // irshad warknig api
-    // call home all api
     func callHomeAllWebService(_ completionClosure: @escaping () -> ()) {
+        SVProgressHUD.show()
         self.prepareSortedData(homeModel: self.HomeNewData)  // Ensure it's using updated data
-        guard !isLoading, !isLastPage else { return }
-        isLoading = true
-        
         let id = UserDefaults.standard.string(forKey: "userid") ?? ""
         let dictParams: [String: Any] = [
             "userid": id,
             "page": "\(currentPage)"
         ]
         
-        showLoader()
         WebService.sharedInstance.callHomeAllWebService(withParams: dictParams) { data in
-            self.hideLoader()
-            self.isLoading = false
-            
+            print("📥 API callback received") // Add this line to confirm entry
+            print("⏳ awaitStatus: \(data.awaitStatus ?? "nil")")
+            SVProgressHUD.dismiss()
             if data.status == "success" {
                 if let newListData = data.listdata {
                     if self.currentPage == 1 {
@@ -797,11 +781,9 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
                     } else {
                         self.HomeNewData?.listdata?.append(contentsOf: newListData)
                     }
-                    
                     // Debug print
                     if let newListData = data.listdata {
                         print("📢 listdata Count: \(newListData.count)")
-                        
                         for (index, datum) in newListData.enumerated() {
                             print("🔹 Item \(index + 1):")
                             print("   🔸 Type: \(datum.type ?? "N/A")")
@@ -810,8 +792,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
                             print("   🔸 Username: \(datum.username ?? "N/A")")
                             print("   🔸 Caption: \(datum.caption ?? "N/A")")
                             print("   🔸 Post Message: \(datum.postMessage ?? "N/A")")
-                            print("   🔸 Total Likes: \(datum.totalLike ?? 0)")
-                            print("   🔸 Total Bokay: \(datum.totalBokay ?? 0)")
+                            print("   🔸 Total Likes: \(datum.total_like ?? 0)")
+                            print("   🔸 Total Bokay: \(datum.total_bokay ?? 0)")
                             print("-------------------------")
                         }
                     } else {
@@ -820,12 +802,8 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
                     for datum in newListData {
                         print("🚀 API Response Type: \(datum.type ?? "No type available")")
                     }
-                    
                     self.isLastPage = newListData.isEmpty
                 }
-                
-                
-                
                 if let listData = data.listdata {
                     for datum in listData {
                         if let welcomeID = datum.welcomeid, let userID = datum.hID {
@@ -835,47 +813,73 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
                     }
                 }
                 
-                // ✅ Show welcome popup here
+                //MARK: - ✅ Show welcome popup here
+                print("Checking for popup condition...")
+                
                 if let verifiedStatus = data.verifiedStatus,
-                   let popupVerifiedStatus = data.popupVerifiedStatus,
-                   verifiedStatus == "1", popupVerifiedStatus == 0 {
+                   verifiedStatus == "1",
+                   let popupVerifiedStatus = data.popupVerifiedStatus {
                     
-                    let alreadyShown = UserDefaults.standard.bool(forKey: "hasShownWelcomePopup")
-                    if !alreadyShown {
-                        UserDefaults.standard.set(true, forKey: "hasShownWelcomePopup")
-                        
-                        let titleAttributes: [NSAttributedString.Key: Any] = [
-                            .font: UIFont(name: "Montserrat-Regular", size: 22) ?? UIFont.systemFont(ofSize: 18),
-                            .foregroundColor: UIColor.black
-                        ]
-                        let attributedTitle = NSAttributedString(string: "Welcome!", attributes: titleAttributes)
-                        
-                        let messageAttributes: [NSAttributedString.Key: Any] = [
-                            .font: UIFont(name: "Montserrat-Regular", size: 14) ?? UIFont.systemFont(ofSize: 16),
-                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-                        ]
-                        let attributedMessage = NSAttributedString(
-                            string: "You are now a verified member.\nHappy Neighbrsnooking!!!",
-                            attributes: messageAttributes
-                        )
-                        
-                        let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
-                        alertController.setValue(attributedTitle, forKey: "attributedTitle")
-                        alertController.setValue(attributedMessage, forKey: "attributedMessage")
-                        
-                        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-                            self.callpopupVerificationWebService {}
+                    if popupVerifiedStatus == 0 {
+                        print("📣 popup_verified_status == 0: Show Custom Popup View")
+                        DispatchQueue.main.async {
+                            // 🔲 1. Create and add dimmed background view
+                            let dimmedView = UIView(frame: self.view.bounds)
+                            dimmedView.backgroundColor = UIColor.black.withAlphaComponent(0.1)
+                            dimmedView.tag = 999  // So we can remove it later
+                            self.view.addSubview(dimmedView)
+                            dimmedView.isUserInteractionEnabled = false
+                            //                            self.lblVeriyfied.text = "You are now a verified member.Happy Neighbrsnooking!!!"
+                            // 🔲 2. Setup popup view (centered)
+                            let popupWidth: CGFloat = self.view.frame.width - 50
+                            let popupHeight: CGFloat = 230
+                            let x = (self.view.frame.width - popupWidth) / 2
+                            let y = (self.view.frame.height - popupHeight) / 2
+                            self.veriyfiedView.frame = CGRect(x: x, y: y, width: popupWidth, height: popupHeight)
+                            self.veriyfiedView.layer.cornerRadius = 12
+                            self.veriyfiedView.clipsToBounds = true
+                            self.veriyfiedView.alpha = 0
+                            self.veriyfiedView.isHidden = false
+                            // 🔲 3. Show popup on top
+                            self.view.bringSubviewToFront(self.veriyfiedView)
+                            // 🔲 4. Animate popup appearance
+                            UIView.animate(withDuration: 0.1) {
+                                self.veriyfiedView.alpha = 1
+                            }
                         }
-                        alertController.addAction(okAction)
+                        
+                    } else if popupVerifiedStatus == 1 {
+                        print("🚫 popup_verified_status == 1: Hide Custom Popup View (No popup)")
                         
                         DispatchQueue.main.async {
-                            self.present(alertController, animated: true, completion: nil)
+                            // 🔲 1. Animate popup hiding
+                            UIView.animate(withDuration: 0.1, animations: {
+                                self.veriyfiedView.alpha = 0
+                            }) { _ in
+                                self.veriyfiedView.isHidden = true
+                                
+                                // 🔲 2. Remove dimmed background if exists
+                                if let dimmedView = self.view.viewWithTag(999) {
+                                    dimmedView.removeFromSuperview()
+                                }
+                            }
                         }
                     }
+                    
+                } else {
+                    print("❌ Condition not matched or data missing")
                 }
-                if let awaitStatus = data.awaitStatus, awaitStatus == "1" {
-                    let remarks = data.missmatchRemarks ?? "No remarks available"
-                    self.showAwaitPopup(message: remarks)
+                
+                if let awaitStatus = data.awaitStatus {
+                    print("🔎 awaitStatus found: \(awaitStatus)")
+                    if awaitStatus == "1" {
+                        let remarks = data.missmatchRemarks ?? "No remarks available"
+                        DispatchQueue.main.async {
+                            self.showAwaitPopup(message: remarks)
+                        }
+                    }
+                } else {
+                    print("❌ awaitStatus not found")
                 }
                 
                 // Ensure sorted data is updated with the latest response
@@ -901,65 +905,130 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         filterData(with: searchText)
     }
     
+    //    func filterData(with searchText: String) {
+    //        print("🔍 Searching for: \(searchText)")
+    //        guard let list = HomeNewData?.listdata else {
+    //            print("❌ No original data to search")
+    //            return
+    //        }
+    //
+    //        if searchText.trimmingCharacters(in: .whitespaces).isEmpty {
+    //            print("✅ Empty search: show full data")
+    //            filteredData = HomeNewData
+    //            isSearching = false
+    //            prepareSortedData(homeModel: HomeNewData)
+    //            tableviewMember.reloadData()
+    //            return
+    //        }
+    //
+    //        isSearching = true
+    //        let normalizedSearchText = searchText.lowercased().trimmingCharacters(in: .whitespaces)
+    //
+    //        let filteredList = list.filter { datum in
+    //            let username = datum.username ?? ""
+    //            let postMessage = datum.postMessage ?? ""
+    //            let company = datum.company ?? ""
+    //            let eventName = datum.eventName ?? ""
+    //
+    //            print("🔸 Item postMessage: '\(postMessage)'")  // check actual content
+    //
+    //            let match = username.lowercased().contains(normalizedSearchText) ||
+    //            postMessage.lowercased().contains(normalizedSearchText) ||
+    //            company.lowercased().contains(normalizedSearchText) ||
+    //            eventName.lowercased().contains(normalizedSearchText)
+    //
+    //            if match {
+    //                print("✅ Matched item: \(datum.username ?? "No username")")
+    //            }
+    //            return match
+    //        }
+    //
+    //        print("🔎 Filtered items: \(filteredList.count) / \(list.count)")
+    //
+    //        filteredData = HomeAllModel(
+    //            status: HomeNewData?.status,
+    //            message: HomeNewData?.message,
+    //            announcement: HomeNewData?.announcement,
+    //            myNeighborhoodID: HomeNewData?.myNeighborhoodID,
+    //            myNeighborhood: HomeNewData?.myNeighborhood,
+    //            verfiedMsg: HomeNewData?.verfiedMsg,
+    //            missmatchRemarks: HomeNewData?.missmatchRemarks,
+    //            awaitStatus: HomeNewData?.awaitStatus,
+    //            memberCount: HomeNewData?.memberCount,
+    //            verifiedStatus: HomeNewData?.verifiedStatus,
+    //            popupVerifiedStatus: HomeNewData?.popupVerifiedStatus ?? 0,
+    //            missmatchStatus: HomeNewData?.missmatchStatus,
+    //            listdata: filteredList
+    //        )
+    //
+    //
+    //        prepareSortedData(homeModel: filteredData)
+    //        tableviewMember.reloadData()
+    //    }
+    
     func filterData(with searchText: String) {
         print("🔍 Searching for: \(searchText)")
-        guard let list = HomeNewData?.listdata else {
+        guard let originalData = HomeNewData else {
             print("❌ No original data to search")
             return
         }
         
-        if searchText.trimmingCharacters(in: .whitespaces).isEmpty {
+        print("🧾 Original data count: \(originalData.listdata?.count ?? 0)")
+        
+        let trimmedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedSearchText.isEmpty {
             print("✅ Empty search: show full data")
-            filteredData = HomeNewData
+            filteredData = originalData
             isSearching = false
-            prepareSortedData(homeModel: HomeNewData)
-            tableviewMember.reloadData()
+            prepareSortedData(homeModel: originalData)
+            DispatchQueue.main.async {
+                self.tableviewMember.reloadData()
+            }
             return
         }
         
         isSearching = true
-        let normalizedSearchText = searchText.lowercased().trimmingCharacters(in: .whitespaces)
+        let normalizedSearchText = trimmedSearchText.lowercased()
         
-        let filteredList = list.filter { datum in
-            let username = datum.username ?? ""
-            let postMessage = datum.postMessage ?? ""
-            let company = datum.company ?? ""
-            let eventName = datum.eventName ?? ""
+        let filteredList = originalData.listdata?.filter { datum in
+            let username = (datum.username ?? "").lowercased()
+            let postMessage = (datum.postMessage ?? "").lowercased()
+            let company = (datum.company ?? "").lowercased()
+            let eventName = (datum.eventName ?? "").lowercased()
             
-            print("🔸 Item postMessage: '\(postMessage)'")  // check actual content
-            
-            let match = username.lowercased().contains(normalizedSearchText) ||
-                postMessage.lowercased().contains(normalizedSearchText) ||
-                company.lowercased().contains(normalizedSearchText) ||
-                eventName.lowercased().contains(normalizedSearchText)
-            
-            if match {
-                print("✅ Matched item: \(datum.username ?? "No username")")
-            }
-            return match
-        }
-
-        print("🔎 Filtered items: \(filteredList.count) / \(list.count)")
+            return username.contains(normalizedSearchText) ||
+            postMessage.contains(normalizedSearchText) ||
+            company.contains(normalizedSearchText) ||
+            eventName.contains(normalizedSearchText)
+        } ?? []
         
+        print("🔎 Filtered items count: \(filteredList.count)")
+        
+        // Final filtered model
         filteredData = HomeAllModel(
-            status: HomeNewData?.status,
-            message: HomeNewData?.message,
-            announcement: HomeNewData?.announcement,
-            myNeighborhoodID: HomeNewData?.myNeighborhoodID,
-            myNeighborhood: HomeNewData?.myNeighborhood,
-            verfiedMsg: HomeNewData?.verfiedMsg,
-            missmatchRemarks: HomeNewData?.missmatchRemarks,
-            awaitStatus: HomeNewData?.awaitStatus,
-            memberCount: HomeNewData?.memberCount,
-            verifiedStatus: HomeNewData?.verifiedStatus,
-            popupVerifiedStatus: HomeNewData?.popupVerifiedStatus ?? 0,
+            status: originalData.status,
+            message: originalData.message,
+            announcement: originalData.announcement,
+            myNeighborhoodID: originalData.myNeighborhoodID,
+            myNeighborhood: originalData.myNeighborhood,
+            verfiedMsg: originalData.verfiedMsg,
+            missmatchRemarks: originalData.missmatchRemarks,
+            awaitStatus: originalData.awaitStatus,
+            memberCount: originalData.memberCount,
+            verifiedStatus: originalData.verifiedStatus,
+            popupVerifiedStatus: originalData.popupVerifiedStatus,
+            missmatchStatus: originalData.missmatchStatus,
             listdata: filteredList
         )
         
         prepareSortedData(homeModel: filteredData)
-        tableviewMember.reloadData()
+        
+        DispatchQueue.main.async {
+            self.tableviewMember.reloadData()
+        }
     }
-
+    
+    
     // Filtered data ko fetch karna
     func getFilteredData(for type: String, at index: Int) -> HomeNewData? {
         let dataSource = isSearching ? filteredData : HomeNewData
@@ -1019,9 +1088,11 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             print("⚠️ No matching data")
             sortedSections.removeAll()
             tableviewMember.backgroundView = noDataLabel
-            tableviewMember.reloadData()
-            return
+            // ❌ return hata do yahan se
+        } else {
+            tableviewMember.backgroundView = nil
         }
+        
         
         print("✅ listdata found, Count: \(data.count)")
         sortedSections.removeAll()
@@ -1035,7 +1106,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             let type = item.type ?? ""
             sortedSections.append((type, [item]))
         }
-
+        
         
         tableviewMember.backgroundView = nil  // Clear "Data not found"
         tableviewMember.reloadData()
@@ -1091,10 +1162,26 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             let cell = tableView.dequeueReusableCell(withIdentifier: "MemberTableViewCell", for: indexPath) as! MemberTableViewCell
             cell.delegate = self
             cell.delegateCell = self // Delegate assign karo
-             if let postData = item as? HomeNewData {
+            if let postData = item as? HomeNewData {
                 print("Post Data: \(postData)")
-                //      guard var postData = dataSource?.listdata?.filter({ $0.type == "Post" })[indexPath.row] else { return cell }
+                cell.delegateLikeUnlikeCell = self
+                cell.postId = postData.postid ?? ""
+                //guard var postData = dataSource?.listdata?.filter({ $0.type == "Post" })[indexPath.row] else { return cell }
                 cell.lblLikeCount.text = postData.totallike
+                
+                cell.likeCount = Int(postData.totallike ?? "0") ?? 0
+                cell.isLikedByUser = postData.isLiked ?? false
+                cell.selectedEmoji = postData.emojiunicode
+                //                cell.setupLikeUI()
+                
+                cell.configureLikeButton(
+                    likestatus: postData.postlike ?? "0", // ✅ This is correct
+                    totalLike: Int(postData.totallike ?? "0") ?? 0,
+                    selectedEmoji: postData.emojiunicode
+                )
+                
+                
+                
                 cell.lblCommentCount.text = postData.totcomment
                 cell.lblName.text = postData.username
                 cell.lblGeneral.text = postData.postType ?? "N/A"
@@ -1112,6 +1199,15 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 // Handle Favourite Button Tap
                 cell.userId = postData.createdby // Assign user ID
                 print(postData.createdby)
+                
+                
+                cell.showAlertCallback = { [weak self] message in
+                    guard let self = self else { return }
+                    let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                    self.present(alert, animated: true)
+                }
+                
                 cell.delegateM = self
                 if traitCollection.userInterfaceStyle == .dark {
                     cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1) // Dark mode background
@@ -1119,10 +1215,26 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                     cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1) // Light mode background
                 }
                 
+                let imageExists = postData.postImagesN?[indexPath.row].img != nil
+                let videoExists = postData.postImagesN?[indexPath.row].video != nil
+                
+                if imageExists || videoExists {
+                    cell.collectionViewBanner.isHidden = false
+                    cell.collectionViewBannerHeight.constant = 523
+                } else {
+                    cell.collectionViewBanner.isHidden = true
+                    cell.collectionViewBannerHeight.constant = 0
+                }
+                
                 cell.favouriteButtonCallback = { [weak self] in
                     guard let self = self else { return }
-                    refreshPage()
                     // Check verification status
+                    if !NetworkMonitor.shared.isConnected {
+                        // Show your own alert or prevent API call
+                        showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+                    
                     guard self.HomeNewData?.verfiedMsg == "User Verification is completed!" else {
                         let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
                         let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
@@ -1141,7 +1253,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                         self.present(alert, animated: true, completion: nil)
                         return
                     }
-                    
                     var mutablePostData = postData
                     guard let postId = mutablePostData.postid, !postId.isEmpty else { return }
                     if mutablePostData.favouritstatus == 1 {
@@ -1150,7 +1261,12 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                             mutablePostData.favouritstatus = 0
                             self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 0
                             cell.updateFavouriteButton(isFavourite: false)
-                            self.showAutoDismissAlert(message: message)
+                            self.callUserProfileWebService {
+                                self.callHomeAllWebService {
+                                    // Completion block (agar kuch karna ho)
+                                }
+                            }
+                            //                            self.showAutoDismissAlert(message: message)
                         }
                     } else {
                         // Favourite
@@ -1158,11 +1274,16 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                             mutablePostData.favouritstatus = 1
                             self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 1 // or 0
                             cell.updateFavouriteButton(isFavourite: true)
-                            self.showAutoDismissAlert(message: message)
+                            self.callUserProfileWebService {
+                                self.callHomeAllWebService {
+                                    // Completion block (agar kuch karna ho)
+                                }
+                            }
+                            //                            self.showAutoDismissAlert(message: message)
                         }
                     }
                 }
-                 
+                
                 cell.FullImgCallback = { [self] value in
                     let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostEnlargeImageViewController")as! PostEnlargeImageViewController
                     vc.UserName = PostListData?.listdata?[indexPath.row].username ?? ""
@@ -1177,24 +1298,84 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                     let createdByUser = postData.createdby
                     cell.DotCallback = { [weak self] postID in
                         guard let self = self else { return }
+                        if !NetworkMonitor.shared.isConnected {
+                            // Show your own alert or prevent API call
+                            showAlert(message: "Internet not available. Please check your connection.")
+                            return
+                        }
+                        
                         if profileData?.verfiedMsg == "User Verification is completed!" {
                             guard let homeData = self.HomeNewData?.listdata, indexPath.row < homeData.count else { return }
                             guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostDotViewController") as? PostDotViewController else { return }
+                            let selectedPost = homeData[indexPath.row]
+                            
                             vc.business_id = postID // postID pass karo
+                            
                             print("✅ Passing Post ID to PostDotViewController: \(postID ?? "No Post ID")")
-                            vc.poststs = homeData[indexPath.row].favouritstatus // Make sure 'favouritstatus' is an Int
+                            //                            vc.poststs = homeData[indexPath.row].favouritstatus // Make sure 'favouritstatus' is an Int
+                            
+                            
+                            
                             // Configure PostDotViewController appearance and presentation
                             //                            vc.height = 270
                             vc.topCornerRadius = 10.0
                             vc.presentDuration = 0.2
                             vc.dismissDuration = 0.2
                             let selectedPostData = homeData[indexPath.row] // ✅ Correct row ka data lo
-                            vc.poststs = selectedPostData.favouritstatus // Make sure 'favouritstatus' is an Int
-                            // ✅ Yahan `createdby` pass kar rahe hain
-                            vc.createdBy = createdByUser // ✅ Yahan bhi wahi variable use kiya
+                            vc.poststs = selectedPost.favouritstatus
+                            
+                            vc.callbackf = { [weak self] status in
+                                guard let self = self else { return }
+                                print("Callback received with status: \(status)")
+                                
+                                guard let postId = selectedPost.postid else { return }
+                                
+                                if status == 1 {
+                                    // Favourite selected
+                                    self.callFavouriteBussinessWebService(postId: postId) { message in
+                                        self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 1
+                                        self.tableviewMember.reloadRows(at: [indexPath], with: .none) // ✅ UI Refresh
+                                        self.callUserProfileWebService {
+                                            self.callHomeAllWebService {
+                                                // Completion block (agar kuch karna ho)
+                                            }
+                                        }
+                                        //                                        self.showAutoDismissAlert(message: message)
+                                    }
+                                } else if status == 0 {
+                                    // Unfavourite selected
+                                    self.callFavouriteRemoveBussinessWebService(postId: postId) { message in
+                                        self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 0
+                                        self.tableviewMember.reloadRows(at: [indexPath], with: .none) // ✅ UI Refresh
+                                        self.callUserProfileWebService {
+                                            self.callHomeAllWebService {
+                                                // Completion block (agar kuch karna ho)
+                                            }
+                                        }
+                                        //                                        self.showAutoDismissAlert(message: message)
+                                    }
+                                }
+                            }
+                            
+                            
+                            vc.createdBy = createdByUser
                             print("✅ Passing CreatedBy to PostDotViewController: \(createdByUser ?? "nil")")
                             vc.view.backgroundColor = .white
                             // Modify the callback to accept an 'Int' instead of 'Range<Int>' (if required)
+                            vc.onUpdateForBlock = { [weak self] in
+                                self?.refreshPage()
+                            }
+                            
+                            
+                            vc.onUpdateForFav = { [weak self] in
+                                self?.callUserProfileWebService {
+                                    self?.callHomeAllWebService {
+                                        // Completion block (agar kuch karna ho)
+                                    }
+                                }
+                            }
+                            
+                            
                             vc.callback = { status in
                                 // Handle the status (status should be an Int, not Range<Int>)
                                 print("Callback received with status: \(status)")
@@ -1204,29 +1385,32 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                             vc.navigateToReportCallback = { [weak self] in
                                 guard let self = self else { return }
                                 if let reportVC = self.storyboard?.instantiateViewController(withIdentifier: "ReportPostViewController") as? ReportPostViewController {
-                                    let selectedPost = homeData[indexPath.row]
-                                    // Basic post data
-                                    reportVC.UserName = selectedPost.username ?? ""
-                                    reportVC.sectorName = selectedPost.neighborhood ?? ""
-                                    reportVC.MonthName = selectedPost.createdOn ?? ""
-                                    reportVC.GeneralName = selectedPost.postType ?? ""
-                                    reportVC.DescriptionlName = selectedPost.postMessage ?? ""
-                                    reportVC.CommentName = selectedPost.totcomment ?? ""
-                                    reportVC.likeName = selectedPost.totallike ?? ""
+                                    // ✅ Basic details
+                                    reportVC.UserName = postData.username ?? ""
+                                    reportVC.sectorName = postData.neighborhood ?? ""
+                                    reportVC.MonthName = postData.createdOn ?? ""
+                                    reportVC.GeneralName = postData.postType ?? ""
+                                    reportVC.DescriptionlName = postData.postMessage ?? ""
+                                    reportVC.CommentName = postData.totcomment ?? ""
+                                    reportVC.likeName = postData.totallike ?? ""
                                     reportVC.postid = postID ?? ""
                                     
-                                    // Pass the complete media array (both images and videos)
-                                    reportVC.mediaDatas = selectedPost.postImagesN?.filter {
-                                        !($0.img?.isEmpty ?? true) || !($0.video?.isEmpty ?? true)
-                                    } ?? []
+                                    // ✅ 1. Pass postImagesN as-is (if used elsewhere)
+                                    reportVC.mediaDatas = postData.postImagesN ?? []
                                     
-                                    print("📊 Passing Media Data:")
-                                    reportVC.mediaDatas.forEach { media in
+                                    // ✅ 2. Convert to [PostImage] for main `mediaData` usage
+                                    let convertedMedia: [PostImage] = postData.postImagesN?.map {
+                                        PostImage(img: $0.img, video: $0.video)
+                                    } ?? []
+                                    reportVC.mediaData = convertedMedia
+                                    
+                                    print("✅ Passing to ReportPostViewController:")
+                                    convertedMedia.forEach { media in
                                         if let img = media.img, !img.isEmpty {
                                             print("🖼 Image: \(img)")
                                         }
-                                        if let video = media.video, !video.isEmpty {
-                                            print("🎥 Video: \(video)")
+                                        if let vid = media.video, !vid.isEmpty {
+                                            print("🎥 Video: \(vid)")
                                         }
                                     }
                                     
@@ -1235,6 +1419,10 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                                     }
                                 }
                             }
+                            
+                            
+                            
+                            
                             
                             vc.navigateToDeleteCallback = { [weak self] in
                                 guard let self = self else { return }
@@ -1322,41 +1510,169 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             
             let dataSource = isSearching ? filteredData : HomeNewData
             let cell = tableView.dequeueReusableCell(withIdentifier: "WelcomeTableViewCell", for: indexPath) as! WelcomeTableViewCell
-            //            let WlcmData = dataSource?.listdata?.filter { $0.type == "Welcome" }[indexPath.row]
-            if let wlcmData = item as? HomeNewData {
-                print("Welcome Data: \(wlcmData)")
-                // Configure the cell using pollData
-                cell.lblWelcmMsg.text = wlcmData.welcomeMsg
-                cell.lblName.text = wlcmData.username
-                cell.lblName.text = "Let's welcome \(wlcmData.username ?? "")"
-                cell.lblWelcmCount.text = "\(wlcmData.totalLike ?? 0)"
-                cell.lblBookaCount.text = "\(wlcmData.totalBokay ?? 0)"
-                
-                // Use the custom dark green in dark mode, otherwise default gray
-                if traitCollection.userInterfaceStyle == .dark {
-                    //  separator.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
-                    cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
-                } else {
-                    //  separator.isHidden = true
-                    cell.backgroundColor =  #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-                }
-                
-                cell.bookayCallback = { [self] value in
-                    callHomebookayWebService{}
-                    callHomeAllWebService{}
-                    
-                }
-                cell.WelLikeCallback = { [self] value in
-                    callHomeLikeWelWebService{}
-                    callHomeAllWebService{}
-                    
-                }
-                
-                 cell.lblWelcmCount.font = UIFont(name: "Montserrat-Regular", size: 13)
-                cell.lblBookaCount.font = UIFont(name: "Montserrat-Regular", size: 13)
-            }
             
+            if let wlcmData = item as? HomeNewData {
+                
+                print("Welcome Data: \(wlcmData)")
+                let createdBy = wlcmData.createdby ?? ""
+                cell.lblWelcmMsg.text = wlcmData.welcomeMsg
+                cell.lblName.text = "Let's welcome \(wlcmData.username ?? "")"
+                cell.btnLike?.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: 17)
+                cell.btnFlower?.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: 17)
+                cell.btnLike.setTitle("\(wlcmData.total_like ?? 0)", for: .normal)
+                cell.btnFlower.setTitle("\(wlcmData.total_bokay ?? 0)", for: .normal)
+                cell.selectionStyle = .none
+                
+                cell.likeStatus = Int(wlcmData.like_status ?? "0") ?? 0
+                cell.bokayStatus = Int(wlcmData.user_bokay ?? "0") ?? 0
+                cell.welUserID = wlcmData.createdby ?? ""
+                print(wlcmData.like_status)
+                print(wlcmData.user_bokay)
+                
+                //                cell.onLikeTapped = { [weak self] welUserID in
+                //                    guard let self = self else { return }
+                //
+                //                    if cell.bokayStatus == 1 {
+                //                        print("❌ Already Bokayed. Like is not allowed.")
+                //                        return
+                //                    }
+                //
+                //                    // 👉 Immediately +1 in UI
+                //                    let currentLikeCount = Int(cell.btnLike.title(for: .normal) ?? "0") ?? 0
+                //                    cell.btnLike.setTitle("\(currentLikeCount + 1)", for: .normal)
+                //
+                //                    // 👉 Update local status so double tap doesn't happen
+                //                    cell.likeStatus = 1
+                //
+                //                    // 👉 Call API
+                //                    self.callHomeLikeWelWebService(welUserID: welUserID) {
+                //                        // ✅ If needed, reload or sync with real data here
+                //                        // tableView.reloadRows(at: [indexPath], with: .none)
+                //                    }
+                //                }
+                //
+                //                cell.onBokayTapped = { [weak self] welUserID in
+                //                    guard let self = self else { return }
+                //
+                //                    if cell.likeStatus == 1 {
+                //                        print("❌ Already Liked. Bokay is not allowed.")
+                //                        return
+                //                    }
+                //
+                //                    // 👉 Immediately +1 in UI
+                //                    let currentBokayCount = Int(cell.btnFlower.title(for: .normal) ?? "0") ?? 0
+                //                    cell.btnFlower.setTitle("\(currentBokayCount + 1)", for: .normal)
+                //
+                //                    // 👉 Update local status so double tap doesn't happen
+                //                    cell.bokayStatus = 1
+                //
+                //                    // 👉 Call API
+                //                    self.callHomebookayWebService(welUserID: welUserID) {
+                //                        // ✅ If needed, reload or sync with real data here
+                //                        // tableView.reloadRows(at: [indexPath], with: .none)
+                //                    }
+                //                }
+                
+                
+                cell.onLikeTapped = { [weak self] welUserID in
+                    guard let self = self else { return }
+                    
+                    // 1. Network check
+                    if !NetworkMonitor.shared.isConnected {
+                        self.showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+                    // 2. Verification check
+                    guard self.HomeNewData?.verfiedMsg == "User Verification is completed!" else {
+                        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                        let messageAttributes: [NSAttributedString.Key: Any] = [
+                            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                        ]
+                        let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                        let attributedMessage = NSAttributedString(
+                            string: "You have limited access till verification is complete. We thank you for your patience.",
+                            attributes: messageAttributes
+                        )
+                        alert.setValue(attributedTitle, forKey: "attributedTitle")
+                        alert.setValue(attributedMessage, forKey: "attributedMessage")
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                            alert.dismiss(animated: true, completion: nil)
+                        }))
+                        self.present(alert, animated: true, completion: nil)
+                        return
+                    }
+                    
+                    // Action not allowed if already bokayed
+                    if cell.bokayStatus == 1 {
+                        print("❌ Already Bokayed. Like is not allowed.")
+                        return
+                    }
+                    
+                    // Like action UI/logic
+                    let currentLikeCount = Int(cell.btnLike.title(for: .normal) ?? "0") ?? 0
+                    cell.btnLike.setTitle("\(currentLikeCount + 1)", for: .normal)
+                    cell.likeStatus = 1
+                    
+                    self.callHomeLikeWelWebService(welUserID: welUserID) {
+                        // Optionally reload UI if needed
+                    }
+                }
+                
+                
+                cell.onBokayTapped = { [weak self] welUserID in
+                    guard let self = self else { return }
+                    
+                    // 1. Network check
+                    if !NetworkMonitor.shared.isConnected {
+                        self.showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+                    // 2. Verification check
+                    guard self.HomeNewData?.verfiedMsg == "User Verification is completed!" else {
+                        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                        let messageAttributes: [NSAttributedString.Key: Any] = [
+                            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                        ]
+                        let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                        let attributedMessage = NSAttributedString(
+                            string: "You have limited access till verification is complete. We thank you for your patience.",
+                            attributes: messageAttributes
+                        )
+                        alert.setValue(attributedTitle, forKey: "attributedTitle")
+                        alert.setValue(attributedMessage, forKey: "attributedMessage")
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                            alert.dismiss(animated: true, completion: nil)
+                        }))
+                        self.present(alert, animated: true, completion: nil)
+                        return
+                    }
+                    
+                    // Action not allowed if already liked
+                    if cell.likeStatus == 1 {
+                        print("❌ Already Liked. Bokay is not allowed.")
+                        return
+                    }
+                    
+                    // Bokay action UI/logic
+                    let currentBokayCount = Int(cell.btnFlower.title(for: .normal) ?? "0") ?? 0
+                    cell.btnFlower.setTitle("\(currentBokayCount + 1)", for: .normal)
+                    cell.bokayStatus = 1
+                    
+                    self.callHomebookayWebService(welUserID: welUserID) {
+                        // Optionally reload UI if needed
+                    }
+                }
+                
+                
+                
+                
+            }
             return cell
+            
         case "Sponsor":
             print("🟢 Calling Sponsor Cell")
             let dataSource = isSearching ? filteredData : HomeNewData
@@ -1367,24 +1683,17 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 // Configure the cell using businessData
                 cell.lblCompany.text = sponsorData.company
                 cell.lblSponsor.text = sponsorData.type
-                cell.lblAction.text = sponsorData.action
-                cell.lblAction.text = sponsorData.companylink
-                if traitCollection.userInterfaceStyle == .dark {
-                    // separator.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
-                    cell.backgroundColor =  #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
-                } else {
-                    //  separator.isHidden = true
-                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-                }
-                cell.SponsCallback = { [weak self] value in
+                
+                cell.lblAction.text = "Action"
+                cell.actionTappedCallback = { [weak self] in
                     if let urlString = sponsorData.companylink, let url = URL(string: urlString) {
                         UIApplication.shared.open(url, options: [:], completionHandler: nil)
                     } else {
-                        // Optionally handle invalid URL here
                         print("Invalid URL")
                     }
                 }
                 
+                // cell.lblAction.text = sponsorData.companylink
                 let url = URL(string: (sponsorData.companylogo ?? ""))
                 cell.LogoImg.kf.indicatorType = .activity
                 cell.LogoImg.kf.setImage(with: url, placeholder: UIImage(named: "NewBusiness"))
@@ -1411,10 +1720,18 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblEventTitle.text = eventData.eventName
                 cell.lblStartDate.text = eventData.eventStartDate
                 cell.lblEndDate.text = eventData.eventEndDate
+                //                cell.lblCreateOn.font = UIFont(name: "Montserrat-Regular", size: 12)
+                //                cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 12)
+                //                cell.lblEventTitle.font = UIFont(name: "Montserrat-Regular", size: 14)
+                //                cell.lblStartDate.font = UIFont(name: "Montserrat-Regular", size: 14)
+                //                cell.lblEndDate.font = UIFont(name: "Montserrat-Regular", size: 14)
                 cell.lblCreateOn.font = UIFont(name: "Montserrat-Regular", size: 12)
                 cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 12)
                 cell.lblEventTitle.font = UIFont(name: "Montserrat-Regular", size: 14)
                 cell.lblStartDate.font = UIFont(name: "Montserrat-Regular", size: 14)
+                cell.lblStartDate.font = UIFont(name: "Montserrat-Regular", size: 14) // lblEndEvent
+                cell.lblStartEvent.font = UIFont(name: "Montserrat-SemiBold", size: 14) // lblEndEvent
+                cell.lblEndEvent.font = UIFont(name: "Montserrat-SemiBold", size: 14) // lblEndEvent
                 cell.lblEndDate.font = UIFont(name: "Montserrat-Regular", size: 14)
                 let url = URL(string: (eventData.eventCoverImage ?? ""))
                 cell.BannerImgView.kf.indicatorType = .activity
@@ -1435,9 +1752,15 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.eventCallAction = { [weak self] value in
                     guard let self = self else { return }
                     guard let postListData = self.HomeNewData?.listdata, indexPath.row < postListData.count else { return }
+                    if !NetworkMonitor.shared.isConnected {
+                        // Show your own alert or prevent API call
+                        showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
                     if HomeNewData?.verfiedMsg == "User Verification is completed!" {
                         // Safely unwrap PostDotViewController
                         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController") as? EventsDetailViewController else { return }
+                        vc.createdBy = eventData.createdby ?? ""
                         vc.eventid = eventData.eventid ?? ""
                         self.navigationController?.pushViewController(vc, animated: true)
                     } else {
@@ -1461,11 +1784,16 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                     }
                     
                 }
-                 //MARK: -             EventThreeDotViewController
+                //MARK: -             EventThreeDotViewController
                 cell.DotCallback = { [weak self] value in
                     guard let self = self else { return }
+                    if !NetworkMonitor.shared.isConnected {
+                        // Show your own alert or prevent API call
+                        showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+                    
                     if profileData?.verfiedMsg == "User Verification is completed!" {
-                        
                         // Ensure PostListData and listdata are non-nil and indexPath.row is valid
                         guard let postListData = self.HomeNewData?.listdata, indexPath.row < postListData.count else { return }
                         
@@ -1488,13 +1816,13 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                             // Handle the status (status should be an Int, not Range<Int>)
                             print("Callback received with status: \(status)")
                         }
-                         // Present PostDotViewController
+                        // Present PostDotViewController
                         self.present(vc, animated: true, completion: nil)
                     }
                     else {
                         // Create the alert controller
                         let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-                         // Define font and color attributes
+                        // Define font and color attributes
                         let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
                         let messageAttributes: [NSAttributedString.Key: Any] = [
                             .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
@@ -1552,68 +1880,191 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblEnddate.font = UIFont(name: "Montserrat-Regular", size: 14)
                 cell.lblVote.font = UIFont(name: "Montserrat-Regular", size: 14)
                 
-//                if traitCollection.userInterfaceStyle == .dark {
-//                    // separator.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
-//                    cell.backgroundColor = #colorLiteral(red: 0.1294117647, green: 0.1529411765, blue: 0.1333333333, alpha: 1)
-//                } else {
-//                    // separator.isHidden = true
-//                    cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                if pollData.isvoted == "1" {
+                                    cell.VoteBtn.setTitle("Voted", for: .normal)
+                                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+                                }
+                                if pollData.isvoted == "0" {
+                                    cell.VoteBtn.setTitle("Vote", for: .normal)
+                                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                                }
+                                
+                                if pollData.ispollrunning == "0" {
+                                    cell.VoteBtn.backgroundColor =  #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
+                                    cell.VoteBtn.setTitle("Vote", for: .normal)
+                                }
+                                
+                                if pollData.ispollrunning == "2" {
+                                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+                                    cell.VoteBtn.setTitle("Closed", for: .normal)
+                                }
+                
+//                if pollData.isvoted == "1" {
+//                    cell.VoteBtn.setTitle("Voted", for: .normal)
+//                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+//                }
+//                if pollData.isvoted == "0" {
+//                    cell.VoteBtn.setTitle("Vote", for: .normal)
+//                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
 //                }
 //                
-//                if pollData.isvoted == "0" {
-//                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
+//                if pollData.ispollrunning == "0" {
+//                    cell.VoteBtn.backgroundColor =  #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
 //                    cell.VoteBtn.setTitle("Vote", for: .normal)
-//                } else {
-//                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.3333333433, green: 0.3333333433, blue: 0.3333333433, alpha: 1) //
+//                }
+//                
+//                if pollData.ispollrunning == "2" {
+//                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
 //                    cell.VoteBtn.setTitle("Voted", for: .normal)
 //                }
                 
-                //                Button call
+                
+                //                cell.DetailsCallback = { [weak self] value in
+                //                    guard let strongSelf = self else { return }
+                //                    if !NetworkMonitor.shared.isConnected {
+                //                        strongSelf.showAlert(message: "Internet not available. Please check your connection.")
+                //                        return
+                //                    }
+                //                    if strongSelf.profileData?.verfiedMsg == "User Verification is completed!" {
+                //                        guard let userID = UserDefaults.standard.string(forKey: "userid") else { return }
+                //
+                //                        if userID == pollData.createdby { // Creator can navigate even if poll is closed
+                //                            if pollData.ispollrunning == "2" {
+                //                                let vc = strongSelf.storyboard?.instantiateViewController(withIdentifier: "PollsDetailViewController") as! PollsDetailViewController
+                //                                vc.pollid = pollData.pollid ?? ""
+                //                                vc.id = pollData.hID ?? ""
+                //                                strongSelf.navigationController?.pushViewController(vc, animated: true)
+                //                            }
+                //                        } else {
+                //                            if pollData.ispollrunning == "2" {
+                //                                let messageText = "Voting is closed."
+                //                                let alert = UIAlertController(title: "", message: messageText, preferredStyle: .alert)
+                //                                let messageAttributes: [NSAttributedString.Key: Any] = [
+                //                                    .font: UIFont(name: "Montserrat-Regular", size: 15) ?? UIFont.systemFont(ofSize: 15),
+                //                                    .foregroundColor: UIColor.darkGray
+                //                                ]
+                //                                let attributedMessage = NSAttributedString(string: messageText, attributes: messageAttributes)
+                //                                alert.setValue(attributedMessage, forKey: "attributedMessage")
+                //                                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                //                                okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+                //                                alert.addAction(okAction)
+                //                                self?.present(alert, animated: true, completion: nil)
+                //                            } else {
+                //                                let vc = strongSelf.storyboard?.instantiateViewController(withIdentifier: "PollsDetailViewController") as! PollsDetailViewController
+                //                                vc.pollid = pollData.pollid ?? ""
+                //                                vc.id = pollData.hID ?? ""
+                //                                strongSelf.navigationController?.pushViewController(vc, animated: true)
+                //                            }
+                //                        }
+                //                    } else {
+                //                        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                //                        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                //                        let messageAttributes: [NSAttributedString.Key: Any] = [
+                //                            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                //                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                //                        ]
+                //                        let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                //                        let attributedMessage = NSAttributedString(
+                //                            string: "You have limited access till verification is complete. We thank you for your patience.",
+                //                            attributes: messageAttributes
+                //                        )
+                //                        alert.setValue(attributedTitle, forKey: "attributedTitle")
+                //                        alert.setValue(attributedMessage, forKey: "attributedMessage")
+                //                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                //                            alert.dismiss(animated: true, completion: nil)
+                //                        }))
+                //                        self?.present(alert, animated: true, completion: nil)
+                //                    }
+                //                }
+                
                 cell.DetailsCallback = { [weak self] value in
                     guard let strongSelf = self else { return }
+                    if !NetworkMonitor.shared.isConnected {
+                        strongSelf.showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
                     if strongSelf.profileData?.verfiedMsg == "User Verification is completed!" {
-                        let vc = strongSelf.storyboard?.instantiateViewController(withIdentifier: "PollsDetailViewController") as! PollsDetailViewController
-                        vc.pollid = pollData.pollid ?? ""
-                        vc.id = pollData.hID ?? ""
-                        strongSelf.navigationController?.pushViewController(vc, animated: true)
+                        guard let userID = UserDefaults.standard.string(forKey: "userid") else { return }
+                        
+                        if userID == pollData.createdby { // Creator can navigate even if poll is closed
+                            if pollData.ispollrunning == "2" || pollData.ispollrunning == "1" {
+                                let vc = strongSelf.storyboard?.instantiateViewController(withIdentifier: "PollsDetailViewController") as! PollsDetailViewController
+                                vc.pollid = pollData.pollid ?? ""
+                                vc.id = pollData.hID ?? ""
+                                strongSelf.navigationController?.pushViewController(vc, animated: true)
+                            }
+                        } else {
+                            if pollData.ispollrunning == "2" {
+                                let messageText = "Voting is closed."
+                                let alert = UIAlertController(title: "", message: messageText, preferredStyle: .alert)
+                                let messageAttributes: [NSAttributedString.Key: Any] = [
+                                    .font: UIFont(name: "Montserrat-Regular", size: 15) ?? UIFont.systemFont(ofSize: 15),
+                                    .foregroundColor: UIColor.darkGray
+                                ]
+                                let attributedMessage = NSAttributedString(string: messageText, attributes: messageAttributes)
+                                alert.setValue(attributedMessage, forKey: "attributedMessage")
+                                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                                okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+                                alert.addAction(okAction)
+                                self?.present(alert, animated: true, completion: nil)
+                            } else {
+                                let vc = strongSelf.storyboard?.instantiateViewController(withIdentifier: "PollsDetailViewController") as! PollsDetailViewController
+                                vc.pollid = pollData.pollid ?? ""
+                                vc.id = pollData.hID ?? ""
+                                strongSelf.navigationController?.pushViewController(vc, animated: true)
+                            }
+                        }
                     } else {
                         let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-                        // Define font and color attributes
                         let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
                         let messageAttributes: [NSAttributedString.Key: Any] = [
                             .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
                             .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
                         ]
-                        // Create attributed strings
                         let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
                         let attributedMessage = NSAttributedString(
                             string: "You have limited access till verification is complete. We thank you for your patience.",
                             attributes: messageAttributes
                         )
-                        // Set the title and message of the alert
                         alert.setValue(attributedTitle, forKey: "attributedTitle")
                         alert.setValue(attributedMessage, forKey: "attributedMessage")
-                        // Add an action to the alert
                         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
                             alert.dismiss(animated: true, completion: nil)
                         }))
-                        // Present the alert
                         self?.present(alert, animated: true, completion: nil)
                     }
                 }
-                 cell.DotCallback = { [self] value in
+                cell.DotCallback = { [self] value in
+                    
+                    if !NetworkMonitor.shared.isConnected {
+                        // Show your own alert or prevent API call
+                        showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+                    
+                    
                     if profileData?.verfiedMsg == "User Verification is completed!" {
-                         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "PollDotViewController") as? PollDotViewController else {return}
-                        // vc.business_id = business_id
-                        //   vc.business_id = postListData[indexPath.row].postid
+                        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "PollDotViewController") as? PollDotViewController else {return}
                         vc.business_id = pollData.pollid ?? ""
-                        vc.height = 150
+                        vc.height = 180
                         vc.topCornerRadius = 10.0
                         vc.presentDuration = 0.5
                         vc.dismissDuration = 0.5
+                        //                        vc.createdBy = cell.userId
+                        vc.createdBy = pollData.createdby // abdul
                         vc.view.backgroundColor = .white
-                         vc.callback = { range in
-                         }
+                        print("Sending poll cfready by ID is : \(cell.userId ?? "")")
+                        
+                        vc.onUpdateForBlock = { [weak self] in
+                            self?.refreshPage()
+                        }
+                        vc.onUpdateForFav = { [weak self] in
+                            self?.refreshPage()
+                        }
+                        
+                        vc.callback = { range in
+                        }
+                        
                         
                         self.present(vc, animated: true, completion: nil)
                     }
@@ -1647,8 +2098,8 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                         // Present the alert
                         self.present(alert, animated: true, completion: nil)
                     }
-                 }
-                 let url = URL(string: (pollData.userpic ?? ""))
+                }
+                let url = URL(string: (pollData.userpic ?? ""))
                 cell.ProfileImgView.kf.indicatorType = .activity
                 cell.ProfileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "NewEvents"))
                 
@@ -1685,11 +2136,18 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 let urlBan = URL(string: (businessData.userpic ?? ""))
                 cell.profileImgView.kf.indicatorType = .activity
                 cell.profileImgView.kf.setImage(with:urlBan ,placeholder: UIImage(named: "defaultImage"))
-                cell.lblUserName.font = UIFont(name: "Montserrat-Regular", size: 16)
                 cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 12)
                 cell.lblProduct.font = UIFont(name: "Montserrat-SemiBold", size: 15)
                 cell.lblHealth.font = UIFont(name: "Montserrat-Regular", size: 13)
                 cell.DetailsCallback = { [self] value in
+                    
+                    if !NetworkMonitor.shared.isConnected {
+                        // Show your own alert or prevent API call
+                        showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+                    
+                    
                     if HomeNewData?.verfiedMsg == "User Verification is completed!" {
                         let vc = self.storyboard?.instantiateViewController(withIdentifier: "BusinessDetailsViewController")as! BusinessDetailsViewController
                         // vc.groupid = GroupListData?.listdata![IndexPath.row].groupid
@@ -1729,18 +2187,44 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 
                 
                 cell.DotCallback = { [self] value in
+                    
+                    if !NetworkMonitor.shared.isConnected {
+                        // Show your own alert or prevent API call
+                        showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+                    
+                    
                     if profileData?.verfiedMsg == "User Verification is completed!" {
                         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "BusinessDotViewController") as? BusinessDotViewController else {return}
-                        // vc.business_id = business_id
-                        //   vc.business_id = postListData[indexPath.row].postid
                         vc.business_id = businessData.bID ?? ""
-                        vc.height = 150
+                        vc.height = 180
                         vc.topCornerRadius = 10.0
                         vc.presentDuration = 0.5
                         vc.dismissDuration = 0.5
+                        vc.createdBy = businessData.createdby
+                        //                        vc.view.backgroundColor = .white
+                        //                        vc.onUpdateForBlock = { [weak self] in
+                        //                            self?.refreshPage()
+                        //                        }
+                        
+                        vc.dismissDuration = 0.5
+                        vc.createdBy = businessData.createdby
+                        vc.userID = businessData.createdby
                         vc.view.backgroundColor = .white
+                        
+                        vc.onUpdateForBlock = { [weak self] in
+                            self?.refreshPage()
+                        }
+                        
+                        
                         vc.callback = { range in
                         }
+                        
+                        vc.onUpdateForFav = { [weak self] in
+                            self?.refreshPage()
+                        }
+                        
                         self.present(vc, animated: true, completion: nil)
                     }
                     else{
@@ -1796,7 +2280,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                     //  separator.isHidden = true
                     cell.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
                 }
-                cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 16)
                 cell.lblGroupName.font = UIFont(name: "Montserrat-Regular", size: 16)
                 cell.lblPrivate.font = UIFont(name: "Montserrat-Regular", size: 15)
                 cell.lblSec.font = UIFont(name: "Montserrat-Regular", size: 13)
@@ -1815,11 +2298,18 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 }
                 
                 cell.DetailsCallback = { [self] value in
+                    if !NetworkMonitor.shared.isConnected {
+                        // Show your own alert or prevent API call
+                        showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
                     if HomeNewData?.verfiedMsg == "User Verification is completed!" {
                         let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupsViewController")as! GroupsViewController
                         // vc.groupid = GroupListData?.listdata![IndexPath.row].groupid
                         //     vc.selectedNeighborhoodId = GroupsData?.bID ?? ""
                         //            vc.userid = GroupListData?.listdata![indexPath.row].userid ?? ""
+                        vc.groupid = groupsData.createdby ?? ""
+                        vc.sourceViewController = "Menu"
                         self.navigationController?.pushViewController(vc, animated: true)
                     }
                     else{
@@ -1861,6 +2351,13 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 
                 cell.DotCallback = { [weak self] value in
                     guard let self = self else { return }
+                    if !NetworkMonitor.shared.isConnected {
+                        // Show your own alert or prevent API call
+                        showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+                    
+                    
                     if profileData?.verfiedMsg == "User Verification is completed!" {
                         // Ensure PostListData and listdata are non-nil and indexPath.row is valid
                         guard let postListData = self.HomeNewData?.listdata, indexPath.row < postListData.count else { return }
@@ -1871,12 +2368,30 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                         vc.poststs = postListData[indexPath.row].favouritstatus // Make sure 'favouritstatus' is an Int
                         print(groupsData.groupid)
                         // Configure PostDotViewController appearance and presentation
-                        vc.height = 150
+                        //                        vc.height = 180
+                        //                        vc.createdby = groupsData.createdby
+                        //                        vc.topCornerRadius = 10.0
+                        //                        vc.presentDuration = 0.2
+                        //                        vc.dismissDuration = 0.2
+                        //                        vc.view.backgroundColor = .white
+                        //                        vc.onUpdateForBlock = { [weak self] in
+                        //                            self?.refreshPage()
+                        //                        }
+                        
+                        vc.height = 180
+                        vc.createdby = groupsData.createdby
                         vc.topCornerRadius = 10.0
                         vc.presentDuration = 0.2
                         vc.dismissDuration = 0.2
                         vc.view.backgroundColor = .white
-                        // Modify the callback to accept an 'Int' instead of 'Range<Int>' (if required)
+                        vc.onUpdateForBlock = { [weak self] in
+                            self?.refreshPage()
+                        }
+                        vc.isComingFromMenuBussinessVC = false
+                        vc.onUpdateForFav = { [weak self] in
+                            self?.refreshPage()
+                        }
+                        
                         vc.callback = { status in
                             // Handle the status (status should be an Int, not Range<Int>)
                             print("Callback received with status: \(status)")
@@ -1924,7 +2439,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         }
     }
     
-    
     // MARK: - MemberTableViewCellDelegate
     func didTapCommentsButton(cell: MemberTableViewCell) {
         DispatchQueue.main.async { [self] in
@@ -1936,6 +2450,13 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             
             print("✅ IndexPath found: \(indexPath.section) - \(indexPath.row)")
             
+            if !NetworkMonitor.shared.isConnected {
+                // Show your own alert or prevent API call
+                showAlert(message: "Internet not available. Please check your connection.")
+                return
+            }
+            
+            
             // Profile verification check karo
             if self.profileData?.verfiedMsg == "User Verification is completed!" {
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -1943,27 +2464,32 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                     
                     ////                    // ✅ Correct way to fetch post data
                     let sectionData = sortedSections[indexPath.section]
+                    //                    if let postData = sectionData.1[indexPath.row] as? HomeNewData {
+                    //                        postDetailsVC.postid = postData.postid ?? ""
+                    
                     if let postData = sectionData.1[indexPath.row] as? HomeNewData {
                         postDetailsVC.postid = postData.postid ?? ""
                         print("✅ Post ID: \(postData.postid ?? "No Post ID")")
+                        
+                        
+                        
+                        
+                        
                     } else {
                         print("❌ Post Data Not Found")
                         postDetailsVC.postid = ""
                     }
-                    
                     self.navigationController?.pushViewController(postDetailsVC, animated: true)
                 }
             } else {
                 // Create the alert controller
                 let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-                
                 // Define font and color attributes
                 let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
                 let messageAttributes: [NSAttributedString.Key: Any] = [
                     .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
                     .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
                 ]
-                
                 // Create attributed strings
                 let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
                 let attributedMessage = NSAttributedString(
@@ -1985,7 +2511,8 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             }
         }
     }
-     func didTapOnCollectionViewItem(data: ImageBussi, businessData: BusinessListData) {
+    
+    func didTapOnCollectionViewItem(data: ImageBussi, businessData: BusinessListData) {
         if let videoUrl = data.video, let url = URL(string: videoUrl) {
             let player = AVPlayer(url: url)
             let playerViewController = AVPlayerViewController()
@@ -2024,6 +2551,13 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
     //    }
     
     
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
     
     
     // MARK: - didSelect for post
@@ -2038,6 +2572,14 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 player.pause()
             }
         } else {
+            
+            if !NetworkMonitor.shared.isConnected {
+                // Show your own alert or prevent API call
+                showAlert(message: "Internet not available. Please check your connection.")
+                return
+            }
+            
+            
             if HomeNewData?.verfiedMsg == "User Verification is completed!" {
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 let destinationVC = storyboard.instantiateViewController(withIdentifier: "PostViewShowImgVideosDataVC") as! PostViewShowImgVideosDataVC
@@ -2071,8 +2613,18 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
     func didTapProfile(for userId: String) {
         if HomeNewData?.verfiedMsg == "User Verification is completed!" {
             let vc = storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as! MyProfileViewController
-            vc.Oid = userId
-            print(userId)
+            
+            let loginUserId = UserDefaults.standard.string(forKey: "userid") ?? ""
+            
+            // Always pass selected userId
+            vc.Oid = userId // Profile to show
+            
+            // Mark source
+            vc.sourceViewController = (loginUserId == userId) ? "MyProfile" : "OtherProfile"
+            
+            // For matching later
+            UserDefaults.standard.set(userId, forKey: "idOther")
+            
             navigationController?.pushViewController(vc, animated: true)
         } else {
             let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
@@ -2102,11 +2654,11 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         print("🔠 Current Text: \(currentText)")
         print("➕ New Input: \(string)")
         print("🔍 Updated Text: \(updatedText)")
-
+        
         filterData(with: updatedText)
         return true
     }
-
+    
 }
 extension String {
     var decodeEmojiHome: String{
@@ -2120,6 +2672,7 @@ extension String {
 }
 @available(iOS 16.0, *)
 extension HomeViewController: UIScrollViewDelegate {
+    
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         // Remove emoji selection view when user starts scrolling
         removeEmojiSelectionView()
@@ -2135,6 +2688,9 @@ extension HomeViewController: UIScrollViewDelegate {
         let contentHeight = scrollView.contentSize.height
         let scrollViewHeight = scrollView.frame.size.height
         
+        // Prevent multiple calls when already loading or no more pages
+        guard !isLoading, !isLastPage else { return }
+        
         // Detect scrolling to the bottom for next page
         if offsetY > contentHeight - scrollViewHeight - 100 {
             currentPage += 1
@@ -2145,7 +2701,7 @@ extension HomeViewController: UIScrollViewDelegate {
             }
         }
         
-        // Detect scrolling to the top for previous page
+        // Detect scrolling to the top for previous page (optional)
         if offsetY < 0 && currentPage > 1 {
             currentPage -= 1
             callHomeAllWebService {
@@ -2167,6 +2723,7 @@ extension HomeViewController: UIScrollViewDelegate {
 
 @available(iOS 16.0, *)
 extension HomeViewController {
+    
     func callFavouriteBussinessWebService(postId: String, _ completionClosure: @escaping (String) -> Void) {
         let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
         let neighborhoodId = UserDefaults.standard.string(forKey: "neighbrshood") ?? ""
@@ -2203,25 +2760,136 @@ extension HomeViewController {
             }
         }
     }
+    
+    
+    // MARK: - Call api firebaseToken dev.
+    func callUpdateFirebaseTokenPostWebServiceDirect(userId: String, firebaseToken: String, _ completion: @escaping () -> ()) {
+        
+        // 🔗 Step 1: Create the full URL directly
+        guard let url = URL(string: "http://dev.neighbrsnook.com/admin/api/update-token") else {
+            print("❌ Invalid URL")
+            return
+        }
+        
+        // 📦 Step 2: Prepare the request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // 🧾 Step 3: Prepare the parameters
+        let params: [String: Any] = [
+            "userid": userId,
+            "firebase_token": firebaseToken
+        ]
+        
+        // ✅ Step 4: Encode parameters to JSON
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: params, options: [])
+            request.httpBody = jsonData
+        } catch {
+            print("❌ JSON encode error: \(error)")
+            return
+        }
+        
+        // 🚀 Step 5: Call the API
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ API error: \(error)")
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 Response Code: \(httpResponse.statusCode)")
+            }
+            
+            if let data = data {
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("📥 Response: \(responseString)")
+                }
+            }
+            
+            // Callback
+            DispatchQueue.main.async {
+                completion()
+            }
+        }.resume()
+    }
+    
+    
+    
+    
 }
+
+
 
 @available(iOS 16.0, *)
 extension HomeViewController: EventHomeTableViewCellDelegate,ProfileTapDelegate {
     func didTapProfile(userId: String) {
         print("🔵 Profile Tapped for UserID: \(userId)")
-        
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        if let profileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
-            profileVC.Oid = userId  // 🟢 Pass UserID
-            profileVC.headingTitle = userId
-            
-            self.navigationController?.pushViewController(profileVC, animated: true)
+        if !NetworkMonitor.shared.isConnected {
+            // Show your own alert or prevent API call
+            showAlert(message: "Internet not available. Please check your connection.")
+            return
         }
+        
+        if HomeNewData?.verfiedMsg == "User Verification is completed!"{
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if let profileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
+                profileVC.Oid = userId
+                profileVC.headingTitle = userId
+                profileVC.isFromMessage = true
+                if id == userId {
+                    profileVC.sourceViewController = "MyProfile"
+                    profileVC.Newid = userId
+                } else {
+                    profileVC.sourceViewController = "OtherProfile"
+                    profileVC.Oid = userId
+                    
+                }
+                
+                
+                self.navigationController?.pushViewController(profileVC, animated: true)
+            }
+        }
+        else{
+            let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+            ]
+            let attributedMessage = NSAttributedString(
+                string: "You have limited access till verification is complete. We thank you for your patience.",
+                attributes: messageAttributes
+            )
+            alert.setValue(attributedMessage, forKey: "attributedMessage")
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
+        
+        //        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        //        if let profileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
+        //            profileVC.Oid = userId  // 🟢 Pass UserID
+        //            // profileVC.headingTitle = userId
+        //            // profileVC.sourceViewController = "MessageViewController"
+        //            // vc.Newid = otherid // Pass the other user ID
+        //            profileVC.headingTitle = "Profile" // Always set "Profile"
+        //            profileVC.isFromMessage = true // 👈 Add this line
+        //            self.navigationController?.pushViewController(profileVC, animated: true)
+        //        }
     }
 }
+
 @available(iOS 16.0, *)
 extension HomeViewController: HomeBusinessCellDelegate {
     func didTapBusinessItem(_ businessID: String) {
+        
+        if !NetworkMonitor.shared.isConnected {
+            // Show your own alert or prevent API call
+            showAlert(message: "Internet not available. Please check your connection.")
+            return
+        }
+        
+        
         if HomeNewData?.verfiedMsg == "User Verification is completed!" {
             let vc = storyboard?.instantiateViewController(withIdentifier: "BusinessDetailsViewController") as! BusinessDetailsViewController
             vc.business_id = businessID
@@ -2241,4 +2909,126 @@ extension HomeViewController: HomeBusinessCellDelegate {
             present(alert, animated: true)
         }
     }
+}
+
+
+
+extension HomeAllModel {
+    func copy(with listdata: [HomeNewData]?) -> HomeAllModel {
+        return HomeAllModel(
+            status: self.status,
+            message: self.message,
+            announcement: self.announcement,
+            myNeighborhoodID: self.myNeighborhoodID,
+            myNeighborhood: self.myNeighborhood,
+            verfiedMsg: self.verfiedMsg,
+            missmatchRemarks: self.missmatchRemarks,
+            awaitStatus: self.awaitStatus,
+            memberCount: self.memberCount,
+            verifiedStatus: self.verifiedStatus,
+            popupVerifiedStatus: self.popupVerifiedStatus,
+            missmatchStatus: self.missmatchStatus,
+            listdata: listdata
+        )
+    }
+}
+
+//MARK: - like unlike
+
+extension HomeViewController: MemberTableViewLikeUnlikeCellDelegate {
+    
+    func didTapLike(postId: String, isLiked: Bool, emoji: String?) {
+        if isLiked {
+            callPostLikeWebService(postId: postId, emoji: emoji) { success in
+                if success {
+                    print("✅ Liked Post ID: \(postId)")
+                    if let index = self.HomeNewData?.listdata?.firstIndex(where: { $0.postid == postId }) {
+                        self.HomeNewData?.listdata?[index].postlike = "1"
+                        self.HomeNewData?.listdata?[index].userEmoji = emoji
+                        let currentLike = Int(self.HomeNewData?.listdata?[index].totallike ?? "0") ?? 0
+                        self.HomeNewData?.listdata?[index].totallike = "\(currentLike + 1)"
+                    }
+                    DispatchQueue.main.async {
+                        self.tableviewMember.reloadData()
+                    }
+                } else {
+                    print("❌ Failed to like post — API error")
+                }
+            }
+        } else {
+            callPostUnLikeWebService(postId: postId) { success in
+                if success {
+                    print("🛑 Unliked Post ID: \(postId)")
+                    if let index = self.HomeNewData?.listdata?.firstIndex(where: { $0.postid == postId }) {
+                        self.HomeNewData?.listdata?[index].postlike = "0"
+                        self.HomeNewData?.listdata?[index].userEmoji = nil
+                        let currentLike = Int(self.HomeNewData?.listdata?[index].totallike ?? "0") ?? 1
+                        self.HomeNewData?.listdata?[index].totallike = "\(max(0, currentLike - 1))"
+                    }
+                    DispatchQueue.main.async {
+                        self.tableviewMember.reloadData()
+                    }
+                } else {
+                    print("❌ Failed to unlike post — API error")
+                }
+            }
+        }
+    }
+    
+    
+    
+    
+    func callPostLikeWebService(postId: String, emoji: String?, completion: @escaping (Bool) -> Void) {
+        let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
+        let params: [String: Any] = [
+            "userid": userId,
+            "postid": postId,
+            "likestatus": "1",
+            "emojiunicode": emoji ?? ""
+        ]
+        
+        WebService.sharedInstance.callPostLikeWebService(withParams: params) { data in
+            let success = (Int(data.status ?? "0") == 1)
+            completion(success)
+        }
+        
+    }
+    
+    func callPostUnLikeWebService(postId: String, completion: @escaping (Bool) -> Void) {
+        let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
+        let params: [String: Any] = [
+            "userid": userId,
+            "postid": postId,
+            "likestatus": "0",
+            "emojiunicode": ""
+        ]
+        
+        WebService.sharedInstance.callPostUnLikeWebService(withParams: params) { data in
+            let success = (Int(data.status ?? "0") == 1)
+            completion(success)
+        }
+    }
+    
+    
+    func callPostLikelistWebService(postId: String, completion: @escaping () -> Void) {
+        let params: [String: Any] = [
+            "postid": postId
+        ]
+        
+        WebService.sharedInstance.callLikeListPostWebService(withParams: params) { data in
+            // ✅ Replace dictionary subscript with property access
+            if let likeCountFromServer = data.totalEmojis,
+               let index = self.HomeNewData?.listdata?.firstIndex(where: { $0.postid == postId }) {
+                self.HomeNewData?.listdata?[index].totallike = String(likeCountFromServer)
+            }
+            
+            completion()
+        }
+    }
+    
+    
+    
+    
+    
+    
 }

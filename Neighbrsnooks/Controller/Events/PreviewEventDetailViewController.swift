@@ -15,18 +15,22 @@ class PreviewEventDetailViewController: UIViewController, UICollectionViewDelega
     weak var delegate: PreviewEventDetailDelegate?
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        print("PreviewEventDetailViewController - Images Count: \(images.count)") // Debugging
-        self.title = "Selected Images"
-        collectionView.delegate = self
-           collectionView.dataSource = self
-           collectionView.reloadData()
-           collectionView.collectionViewLayout.invalidateLayout()
-        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            super.viewDidLoad()
+            print("PreviewEventDetailViewController - Images Count: \(images.count)") // Debugging
+            self.title = "Selected Images"
+            collectionView.clipsToBounds = true
+            view.clipsToBounds = true
+            self.view.backgroundColor = .black
+            collectionView.backgroundColor = .clear
+            collectionView.delegate = self
+            collectionView.dataSource = self
+            collectionView.reloadData()
+            collectionView.collectionViewLayout.invalidateLayout()
+            if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
                 layout.estimatedItemSize = .zero
             }
-        loadSelectedImages()
-    }
+            loadSelectedImages()
+        }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)

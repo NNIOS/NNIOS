@@ -2,7 +2,7 @@
 //  ResetPasswordVC.swift
 //  Neighbrsnooks
 //
-//   
+//
 //
 
 import UIKit
@@ -27,12 +27,12 @@ class ResetPasswordVC: UIViewController {
         self.passwordView.layer.cornerRadius = 10
         self.confirmPasswordView.layer.cornerRadius = 10
         passwordTF.addTarget(self, action: #selector(passwordDidChange(_:)), for: .editingChanged)
-
+        
     }
     
     
     
-     
+    
     
     
     // MARK: - Button's Action
@@ -61,8 +61,8 @@ class ResetPasswordVC: UIViewController {
         
         lblStrongPass.text = checkPasswordStrength(password)
     }
-
-
+    
+    
     func checkPasswordStrength(_ password: String) -> String {
         let length = password.count
         let hasUpperCase = NSPredicate(format: "SELF MATCHES %@", ".*[A-Z]+.*").evaluate(with: password)
@@ -76,7 +76,7 @@ class ResetPasswordVC: UIViewController {
         if hasLowerCase { strength += 1 }
         if hasNumber { strength += 1 }
         if hasSpecial { strength += 1 }
-
+        
         switch strength {
         case 0...2:
             lblStrongPass.textColor = .red
@@ -92,7 +92,7 @@ class ResetPasswordVC: UIViewController {
             return ""
         }
     }
-
+    
 }
 
 // MARK: - Extension for ResetPasswordVC
@@ -105,15 +105,13 @@ extension ResetPasswordVC {
             "phoneno":phoneno ?? "",
             "password":passwordTF.text ?? "",
             "confirm_password":confirmPasswordTF.text ?? "",
-            
         ]
         WebService.sharedInstance.callForGotPasswordWebService(withParams: dictParams) { data in
             self.objReset = data
             if self.objReset?.message == "New password changed successfully" {
-                
-                if let loginVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "") as? LoginViewController {
-                    let navController = UINavigationController(rootViewController: loginVC)
-                    self.setRootViewController(navController)
+                if let viewControllers = self.navigationController?.viewControllers {
+                    let targetViewController = viewControllers[viewControllers.count - 3]
+                    self.navigationController?.popToViewController(targetViewController, animated: true)
                 }
             } else {
                 self.showAlert(message: self.objReset?.message ?? "")
@@ -141,17 +139,17 @@ extension ResetPasswordVC {
     
     // MARK : function for Hide Show secure text entry in textfield
     func toggleSecurity(sender: UIButton, passwordTextField: UITextField, confirmPasswordTextField: UITextField?) {
-            sender.isSelected.toggle()
-            let isSecure = sender.isSelected
-            let eyeImageName = isSecure ? "eye.slash.fill" : "eye.fill"
-            sender.setImage(UIImage(systemName: eyeImageName), for: .normal)
-
-            if sender.tag == 0 {
-                passwordTextField.isSecureTextEntry = isSecure
-            } else if sender.tag == 1, let confirmPasswordTextField = confirmPasswordTextField {
-                confirmPasswordTextField.isSecureTextEntry = isSecure
-            }
+        sender.isSelected.toggle()
+        let isSecure = sender.isSelected
+        let eyeImageName = isSecure ? "eye.slash.fill" : "eye.fill"
+        sender.setImage(UIImage(systemName: eyeImageName), for: .normal)
+        
+        if sender.tag == 0 {
+            passwordTextField.isSecureTextEntry = isSecure
+        } else if sender.tag == 1, let confirmPasswordTextField = confirmPasswordTextField {
+            confirmPasswordTextField.isSecureTextEntry = isSecure
         }
+    }
     
     func setRootViewController(_ viewController: UIViewController, animated: Bool = true) {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -170,4 +168,4 @@ extension ResetPasswordVC {
     }
     
 }
- 
+

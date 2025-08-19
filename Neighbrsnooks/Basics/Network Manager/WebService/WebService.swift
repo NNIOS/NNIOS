@@ -94,7 +94,7 @@ class WebService {
     }
     
     func callRegisterWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: RegisterModel) -> ()) {
-          RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kRegister, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+          RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kRegisterNew, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
           {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
             let dictResponse = FunctionsConstants.kShared.getDictionary(result)
             switch statusCode {
@@ -370,7 +370,59 @@ class WebService {
           }
     }
     
+    func callRegisterWebServiceFirst(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: RegisterModel) -> ()) {
+     
+            RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kRegisterNew, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+              {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+                switch statusCode {
+                case .SUCCESS:
+                  do {
+                    let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                      FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+
+                    let data = try JSONDecoder().decode(RegisterModel.self, from: result!)
+                    completionClosure(data)
+                  } catch {
+                    print(error.localizedDescription)
+                  }
+
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                  print("")
+                  self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                case .UNAUTHORIZED:
+                    print(error)
+               //   self.showLogoutAlert()
+                default:
+                  break
+                }
+              }
+        }
     
+    func callVerifyEmailServices(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: VerifyEmailModel) -> ()) {
+            RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kVerifyEmail, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+                switch statusCode {
+                case .SUCCESS:
+                    do {
+                        let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                        FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+                        let data = try JSONDecoder().decode(VerifyEmailModel.self, from: result!)
+                        completionClosure(data)
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                    print("")
+                    self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                case .UNAUTHORIZED:
+                    print(error)
+                default:
+                    break
+                }
+            }
+        }
     
     func callCountryWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: CountryModel) -> ()) {
           RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kCountry, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
@@ -1729,7 +1781,7 @@ class WebService {
     }
     
     func callPostUnLikeWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: LikePostModel) -> ()) {
-          RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kLikePost, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+          RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kUnlikeLikePost, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
           {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
             let dictResponse = FunctionsConstants.kShared.getDictionary(result)
             switch statusCode {
@@ -3285,6 +3337,100 @@ class WebService {
     
     
     
+    
+    func callAwaitStatusWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: AwaitStatusModel) -> ()) {
+              RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.KAwaitStatus, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+              {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+                switch statusCode {
+                case .SUCCESS:
+                  do {
+                    let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                      FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+
+                    let data = try JSONDecoder().decode(AwaitStatusModel.self, from: result!)
+                    completionClosure(data)
+                  } catch {
+                    print(error.localizedDescription)
+                  }
+
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                  print("")
+                  self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                case .UNAUTHORIZED:
+                    print(error)
+               //   self.showLogoutAlert()
+                default:
+                  break
+                }
+              }
+        }
+    
+    
+    func callLikeCommentWebService(withParams dictParams: [String: Any], _ completionClosure: @escaping (_ response: LikeResponseModel) -> ()) {
+        RSNetworkManager.shared.newRequestApi(
+            withServiceName: WebServiceName.kCommentPostLike,
+            requestMethod: .POST,
+            requestParameters: dictParams,
+            withProgressHUD: true
+        ) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+            
+            let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+            
+            switch statusCode {
+            case .SUCCESS:
+                do {
+                    // 👇 Decode response to LikeResponseModel
+                    let data = try JSONDecoder().decode(LikeResponseModel.self, from: result!)
+                    completionClosure(data)
+                } catch {
+                    print("❌ JSON decode error:", error.localizedDescription)
+                }
+
+            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                
+            case .UNAUTHORIZED:
+                print(error)
+                // self.showLogoutAlert() // Uncomment if needed
+                
+            default:
+                break
+            }
+        }
+    }
+
+    func callDeleteMeassaAPI(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: DeactivateModel) -> ()) {
+                  RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kDeleteMsg, requestMethod: .DELETE, requestParameters: dictParams, withProgressHUD: true)
+                  {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                    let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+                    switch statusCode {
+                    case .SUCCESS:
+                      do {
+                        let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                          FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+
+                        let data = try JSONDecoder().decode(DeactivateModel.self, from: result!)
+                        completionClosure(data)
+                      } catch {
+                        print(error.localizedDescription)
+                      }
+
+                    case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                      print("")
+                      self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                    case .UNAUTHORIZED:
+                        print(error)
+                   //   self.showLogoutAlert()
+                    default:
+                      break
+                    }
+                  }
+            }
+    
+    
+    
+    
 //    func callAddressProofWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: AdressProofModel) -> ()) {
 //          RSNetworkManager.shared.requestMultipartApi(withServiceName: WebServiceName.kAddressProof, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
 //          {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
@@ -3367,4 +3513,4 @@ class WebService {
       }
     }
 }
-//dev.neighbrsnook.com/admin/api/posting?flag=createpost
+ 
