@@ -48,7 +48,8 @@ struct WebServiceName {
     static let kProffesion = "master?flag=profession"
     static let kintrset = "master?flag=interest"
     static let kReason = "master?flag=reason"
-    static let kMoreYou = "master?flag=moreaboutyou"
+    static let kMoreYou = "master?flag=reg-step-III" // master?flag=reg-step-III old new url master?flag=moreaboutyou
+    static let kNewMoreYou = "master?flag=moreaboutyou"
     static let kCountry = "master?flag=country"
     static let kstate = "master?flag=state"
     static let kCity = "master?flag=city"
@@ -135,7 +136,7 @@ struct WebServiceName {
     static let kpollVoted = "poll?flag=pollvoted"
     static let kRegSec = "master?flag=reg-step-II"
     static let kDeviceInfo = "master?flag=deviceinfo"
-    static let kNeighborhoodStatusByState = "master?flag=neighborhoodstatus"
+    static let kNeighborhoodStatusByState = "master?flag=neighborhoodstatus" 
     static let kFAQ = "master?flag=faq"
     static let kpollCreate = "poll?flag=createpoll"
     static var kNotificationCounta: String {

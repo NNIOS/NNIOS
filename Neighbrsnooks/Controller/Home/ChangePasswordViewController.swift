@@ -15,17 +15,15 @@ class ChangePasswordViewController: BaseViewController {
     @IBOutlet weak var tfConfirmPassword: UITextField!
     @IBOutlet weak var tfOldPassword: UITextField!
     @IBOutlet weak var btnOldEye: UIButton!
-    
     @IBOutlet weak var btnNewEye: UIButton!
     @IBOutlet weak var btnConfirmEye: UIButton!
-    
     @IBOutlet weak var weaklblNewPassword: CustomLabel!
     @IBOutlet weak var weaklblConfirmPassword: CustomLabel!
-    
-    var ChangePasswordData : ChangePasswordModel?
+
     var show = false
     var showNew = false
     var showConfirm = false
+    var ChangePasswordData : ChangePasswordModel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,51 +63,19 @@ class ChangePasswordViewController: BaseViewController {
     }
     
     @IBAction func btnConfirmEye(_ sender: UIButton) {
-        if showConfirm {
-            showConfirm = false
-            btnConfirmEye.setImage(UIImage(systemName: "eye.fill"), for: .normal)
-            tfConfirmPassword.isSecureTextEntry = !tfConfirmPassword.isSecureTextEntry
-        } else {
-            showConfirm = true
-            btnConfirmEye.setImage(UIImage(systemName: "eye.slash.fill"), for: .normal)
-            tfConfirmPassword.isSecureTextEntry = !tfConfirmPassword.isSecureTextEntry
-        }
+        showConfirm.toggle()
+        tfConfirmPassword.isSecureTextEntry.toggle()
+        let imageName = showConfirm ? "eye.slash.fill" : "eye.fill"
+        btnConfirmEye.setImage(UIImage(systemName: imageName), for: .normal)
     }
     
     @IBAction func SaveBtn(_ sender: UIButton) {
-        
-        if tfOldPassword.text == "" {
-            let alert = UIAlertController(title: "", message: "Please enter old password", preferredStyle: UIAlertController.Style.alert)
-            let closeAction = UIAlertAction(title: "Close", style: UIAlertAction.Style.default, handler: nil)
-            closeAction.setValue(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1), forKey: "titleTextColor")
-            alert.addAction(closeAction)
-            self.present(alert, animated: true, completion: nil)
-            
-        } else if tfNewPassword.text == "" {
-            let alert = UIAlertController(title: "", message: "Please enter new password", preferredStyle: UIAlertController.Style.alert)
-            let closeAction = UIAlertAction(title: "Close", style: UIAlertAction.Style.default, handler: nil)
-            closeAction.setValue(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1), forKey: "titleTextColor")
-            alert.addAction(closeAction)
-            self.present(alert, animated: true, completion: nil)
-        }
-        else if tfConfirmPassword.text == "" {
-            let alert = UIAlertController(title: "", message: "Please confirm password", preferredStyle: UIAlertController.Style.alert)
-            let closeAction = UIAlertAction(title: "Close", style: UIAlertAction.Style.default, handler: nil)
-            closeAction.setValue(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1), forKey: "titleTextColor")
-            alert.addAction(closeAction)
-            self.present(alert, animated: true, completion: nil)
-        }
-        
-        else if tfNewPassword.text != tfConfirmPassword.text {
-            let alert = UIAlertController(title: "", message: "The passwords don't match", preferredStyle: UIAlertController.Style.alert)
-            let closeAction = UIAlertAction(title: "Close", style: UIAlertAction.Style.default, handler: nil)
-            closeAction.setValue(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1), forKey: "titleTextColor")
-            alert.addAction(closeAction)
-            self.present(alert, animated: true, completion: nil)
-        }
-        else {
-            callChangePasswordWebService {
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController")as! NeigbrnookViewController
+        guard let old = tfOldPassword.text, !old.isEmpty else { return alertToast(Message: "Please enter old password") }
+        guard let new = tfNewPassword.text, !new.isEmpty, new.count >= 5 else { return alertToast(Message: "Password must be at least 5 characters long.") }
+        guard let confirm = tfConfirmPassword.text, !confirm.isEmpty else { return alertToast(Message: "Please confirm password") }
+        guard new == confirm else { return alertToast(Message: "The passwords don't match") }
+        callChangePasswordWebService {
+            if let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController {
                 self.navigationController?.pushViewController(vc, animated: false)
             }
         }
@@ -117,10 +83,8 @@ class ChangePasswordViewController: BaseViewController {
     
     @objc func passwordDidChangeForNewPass(_ textField: UITextField) {
         guard let password = textField.text else { return }
-        
         if password.isEmpty {
-            weaklblNewPassword.text = ""
-            return
+            weaklblNewPassword.text = ""; return
         }
         weaklblNewPassword.text = checkPasswordStrengthForNewPassord(password)
     }
@@ -128,8 +92,7 @@ class ChangePasswordViewController: BaseViewController {
     @objc func passwordDidChangeForConfirm(_ textField: UITextField) {
         guard let password = textField.text else { return }
         if password.isEmpty {
-            weaklblConfirmPassword.text = ""
-            return
+            weaklblConfirmPassword.text = ""; return
         }
         weaklblConfirmPassword.text = checkPasswordStrengthForConfirmPassord(password)
     }
@@ -202,14 +165,14 @@ class ChangePasswordViewController: BaseViewController {
             "newpassword":self.tfNewPassword.text ?? "",
             "confirm_password":self.tfConfirmPassword.text ?? ""
         ]
+        print("Param is : \(dictParams)")
         WebService.sharedInstance.callChangePasswordWebService(withParams: dictParams) { data in
             self.ChangePasswordData = data
-            if self.ChangePasswordData?.status == "success"{
+            if self.ChangePasswordData?.status == "success" {
                 completionClosure()
             }else{
-                self.showAlert(Message: self.ChangePasswordData?.message ?? "")
+                self.alertToast(Message: self.ChangePasswordData?.message ?? "")
             }
         }
     }
-    
 }

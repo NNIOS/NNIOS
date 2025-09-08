@@ -31,7 +31,6 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
     @IBOutlet weak var lblDo: UILabel!
     @IBOutlet weak var tfIntrest: UILabel!
     @IBOutlet weak var tfNeighbour: UILabel!
-    @IBOutlet weak var tfDob: UITextField!
     @IBOutlet weak var tfEmergency: UITextField!
     @IBOutlet weak var profilePic: UIImageView!
     
@@ -373,12 +372,8 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
             tfIntrest.textColor = .darkGray
             self.tfNeighbour.font = UIFont(name: "Montserrat-Regular", size: 14)
             tfNeighbour.textColor =  .darkGray
-            let dateFormatter = Date.createPassiveFormatter(format: DateFormat.utc)
-            datePicker.minimumDate = dateFormatter.date(from: "1980-04-01T00:00:00Z")
-            datePicker.maximumDate = dateFormatter.date(from: "2011-04-01T00:00:00Z")
-            datePicker.preferredDatePickerStyle = .inline
+            
     //        self.GenderDropdownData.dataSource = self.genderList
-            showStartDatePicker()
             CallProffesoinWebService()
             CallIntrestWebService()
             CallNeighbourWebService()
@@ -546,89 +541,27 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
      }
     
     
-    func showStartDatePicker(){
-        
-        //Formate Date
-        datePicker.datePickerMode = .date
-        datePicker.locale = .current
-        if #available(iOS 14, *) {
-            datePicker.preferredDatePickerStyle = .wheels
-            datePicker.sizeToFit()
-        }
-        
-        //ToolBar
-        let toolbar = UIToolbar();
-        toolbar.sizeToFit()
-        let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneDatePicker));
-        let spaceButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace, target: nil, action: nil)
-        let cancelButton = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelDatePicker));
-        
-        toolbar.setItems([cancelButton,spaceButton,doneButton], animated: false)
-        
-        datePickerMethod()
-        
-    }
-    
-    private func datePickerMethod() {
-        
-        let currentDate: Date = Date()
-        
-        if #available(iOS 13.4, *) {
-            datePicker.preferredDatePickerStyle = .wheels
-        } else {
-            // Fallback on earlier versions
-        }
-        
-        var calendar: Calendar = Calendar(identifier: Calendar.Identifier.gregorian)
-        calendar.timeZone = TimeZone(identifier: "UTC")!
-        var components: DateComponents = DateComponents()
-        
-        components.year = -100
-        // let minDate: Date = calendar.date(byAdding: components, to: currentDate)!
-        
-        //datePicker.minimumDate = Date()
-        datePicker.maximumDate = Date()
-        datePicker.maximumDate = datePicker.maximumDate
-    }
-    
-    @objc func doneDatePicker(){
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd-MM-yyyy"
-        //        tfDob.text = formatter.string(from: datePicker.date)
-        self.view.endEditing(true)
-    }
     
     
     
-    @objc func cancelDatePicker(){
-        self.view.endEditing(true)
-    }
+   
     
     
-    @IBAction func nextBtn(_ sender: UIButton){
-        //        adjustLabelHeight()
-        // Pehle API call hogi
-        callMoreYouWebService { [weak self] in
+    @IBAction func nextBtn(_ sender: UIButton) {
+            callMoreYouWebService { [weak self] in
                 guard let self = self else { return }
-
                 if let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
-
-                    // Pass required info
                     vc.sourceViewController = "HomeViewController"
-                    vc.Oid = UserDefaults.standard.string(forKey: "userid") // if needed in else condition
-                    // or set vc.Newid = ... if you're simulating MessageViewController
-
+                    vc.Oid = UserDefaults.standard.string(forKey: "userid")
                     self.navigationController?.popViewController(animated: true)
                 }
             }
-    }
+        }
+
     
     
     
     @IBAction func actionSkip(_ sender: Any) {
-        
-        
         // callMoreYouWebService{ [self] in
         let vc  = self.storyboard?.instantiateViewController(withIdentifier: "HomeViewController") as! HomeViewController
         //     viewThankYou.isHidden = false
@@ -687,11 +620,15 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
 //    }
 
     func updateProfileUI() {
-            lblDo.text = profileData?.nbrsType?.isEmpty == false ? profileData?.nbrsType: "Select"
-            tfNeighbour.text = profileData?.reason?.isEmpty == false ? profileData?.reason: "Select"
-            tfIntrest.text = profileData?.intersttype?.isEmpty == false ? profileData?.intersttype: "Select"
-            tfEmergency.text = profileData?.emerPhone
-            
+            lblEmergencyContact.text = "Emergency contact"
+            lblneighbourhood.text = "Neighbourhood Attributes"
+            lblAlittleMoreAbout.text = "A little more about me!"
+            lblAlittleMoreAbout.font = UIFont(name: "Montserrat-Regular", size: 18)
+            lblDo.text = profileData?.nbrsType?.isEmpty == false ? profileData?.nbrsType: "What do you do?"
+            tfIntrest.text = profileData?.intersttype?.isEmpty == false ? profileData?.intersttype: "Choose interest"
+            tfEmergency.placeholder = profileData?.emerPhone?.isEmpty == false ? profileData?.emerPhone : "Emergency contact no"
+            tfNeighbour.text = profileData?.reason?.isEmpty == false ? profileData?.reason: "I love my neighbourhood because"
+            tfEmergency.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
             if let imageUrl = profileData?.userpic, let url = URL(string: imageUrl) {
                 profilePic.kf.setImage(with: url, placeholder: UIImage(named: "placeholder"))
             } else {
@@ -739,29 +676,27 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
     }
     
     func callMoreYouWebService(_ completionClosure: @escaping () -> ()) {
-        let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
-        let professionId = UserDefaults.standard.string(forKey: "professionId") ?? ""
-        let interestIds = UserDefaults.standard.string(forKey: "interestIds") ?? ""
-        
-        let dictParams: [String: Any] = [
-            "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
-            "profession": professionId,
-            "interest": interestIds,
-//            "reason": self.tfNeighbour.text ?? "",
-            "reason": (self.tfNeighbour.text == "I love my neighbourhood because") ? "" : (self.tfNeighbour.text ?? ""),
-
-            "emerphoneno": self.tfEmergency.text ?? "",
-            "userid": userId,
-            "userpic": ""
-        ]
-        
-        WebService.sharedInstance.callMoreYouWebService(withParams: dictParams) { data in
-            self.MoreDataF = data
-            completionClosure()
+            let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
+            let professionId = UserDefaults.standard.string(forKey: "professionId") ?? ""
+            let interestIds = UserDefaults.standard.string(forKey: "interestIds") ?? ""
+            
+            let dictParams: [String: Any] = [
+                "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
+                "profession": professionId,
+                "interest": interestIds,
+                "reason": (self.tfNeighbour.text == "I love my neighbourhood because") ? "" : (self.tfNeighbour.text ?? ""),
+                "emerphoneno": self.tfEmergency.text ?? "",
+                "userid": userId,
+                "userpic": ""
+            ]
+            print("Param is : \(dictParams)")
+            WebService.sharedInstance.callMoreYouWebService(withParams: dictParams) { data in
+                self.MoreDataF = data
+                completionClosure()
+            }
         }
-    }
-
     
+
 }
 
 

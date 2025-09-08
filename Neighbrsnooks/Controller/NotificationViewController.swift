@@ -2,7 +2,7 @@
 //  NotificationViewController.swift
 //  NeighbrsNook Latest
 //
-//  Created by Rajat Rao on 02/03/24.
+//  Created by  on 02/03/24.
 //
 
 import UIKit
@@ -32,7 +32,7 @@ class NotificationViewController: BaseViewController {
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         NetworkMonitor.shared.startMonitoring()
         tableviewMembers.separatorStyle = .none
-        tableviewMembers.rowHeight = UITableView.automaticDimension
+//        tableviewMembers.rowHeight = UITableView.automaticDimension
         
         // 🌀 Add refresh control
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
@@ -47,7 +47,6 @@ class NotificationViewController: BaseViewController {
             }
         }
     }
-    
     
     
     
@@ -189,142 +188,10 @@ class NotificationViewController: BaseViewController {
         }
     }
     
-    
-    
-    
-    @IBAction func btnProfile(_ : UIButton){
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-    }
-    
-    @IBAction func btnNeighbrood(_ : UIButton){
-        
-        
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeighbourhoodViewController") as? NeighbourhoodViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-        
-    }
-    
-    @IBAction func btnBussiness(_ : UIButton){
-        
-        
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "BussinesViewController") as? BussinesViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-        
-        
-    }
-    
-    @IBAction func btnContactUs(_ : UIButton){
-        
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "ContactUsViewController") as? ContactUsViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-        
-        
-    }
-    
-    @IBAction func btnPost(_ : UIButton){
-        
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MennuPostViewController") as? MennuPostViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-        
-    }
-    
-    @IBAction func btnEvent(_ : UIButton){
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsViewController") as? EventsViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-    }
-    
-    
-    @IBAction func btnGroups(_ : UIButton) {
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupsViewController") as? GroupsViewController else { return }
-        if let id = UserDefaults.standard.string(forKey: "userid"),
-           let userId = NotificationData?.nbdata.compactMap({ $0.userid }).first {
-            
-            if id == userId {
-                vc.sourceViewController = "MyProfile"
-                vc.userid = userId
-            } else {
-                vc.sourceViewController = "OtherProfile"
-                vc.userid = userId
-            }
-        } else {
-            print("One or both user IDs are nil")
-        }
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-    }
-    
-    @IBAction func btnPolls(_ : UIButton){
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "PollsViewController") as? PollsViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-    }
-    
-    @IBAction func btnSettings(_ : UIButton){
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "SettingsViewController") as? SettingsViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-    }
-    
-    @IBAction func btnTerms$Condition(_ sender: UIButton) {
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "WebViewControllerViewController") as? WebViewControllerViewController else {return}
-        vc.heading = "Privacy Policy"
-        vc.urlString = "http://neighbrsnook.com/privacy-policy/"
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-        
-        
-    }
-    
-    @IBAction func shareTapped(sender: UIButton)
-    {
-        let shareText = "Neighbrsnook is a hyperlocal social networking service connecting neighbours... https://itunes.apple.com/in/app/helperinfo/id1212105977?mt=8"
-        let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-        activityViewController.popoverPresentationController?.sourceView = self.view
-        present(activityViewController, animated: true, completion: nil)
-    }
-    
-    @IBAction func btnDm(_ : UIButton){
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "DirectMessageViewController") as? DirectMessageViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-    }
-    
-    
-    @objc func presentSideMenu() {
-        guard let sideMenuVC = self.storyboard?.instantiateViewController(withIdentifier: "MenuViewController") as? MenuViewController else {return}
-        sideMenuVC.modalPresentationStyle = .custom
-        sideMenuVC.transitioningDelegate = transitionManager
-        present(sideMenuVC, animated: true, completion: nil)
-    }
-    
-    
+  
+ 
 }
+
 @available(iOS 16.0, *)
 extension NotificationViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

@@ -33,6 +33,8 @@ class MennuPostViewController: BaseViewController, MemberCellDelegate,UITextFiel
     var GeneralName = ""
     var DescriptionlName = ""
     var deletePost : DeletePostModel?
+   
+
     
     let items = [
         (id: "1", name: "Item 1"),
@@ -42,37 +44,30 @@ class MennuPostViewController: BaseViewController, MemberCellDelegate,UITextFiel
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //        updateColors()
-        self.searchView.isHidden = true
+         self.searchView.isHidden = true
         tfSearch.delegate = self
-        
-        if let selectedIndex = selectedTabIndex {
+         if let selectedIndex = selectedTabIndex {
             bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
         }
-        
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
+         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         // Do any additional setup after loading the view.
         callUserProfileWebService{}
+        let refreshControl = UIRefreshControl()
+            refreshControl.addTarget(self, action: #selector(refreshPageData), for: .valueChanged)
+            tableviewPost.refreshControl = refreshControl
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        // SVProgressHUD.show()
-        
-        
         callPostListWebService(searchQuery: "") {
             SVProgressHUD.dismiss()
             self.tableviewPost.reloadData()
-            
-            
-            // Do any additional setup after loading the view.
         }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-//        updateColors()
+
     }
     
     
@@ -102,7 +97,14 @@ class MennuPostViewController: BaseViewController, MemberCellDelegate,UITextFiel
     @objc func refreshData() {
         fetchPostListData()
     }
-    
+    @objc func refreshPageData() {
+        // Call all web services you want to refresh
+        callPostListWebService(searchQuery: "") {
+            self.tableviewPost.reloadData()
+            self.tableviewPost.refreshControl?.endRefreshing()
+        }
+    }
+
     
     @IBAction func btnSearch(_ : UIButton){
         
@@ -150,49 +152,7 @@ class MennuPostViewController: BaseViewController, MemberCellDelegate,UITextFiel
         return true
     }
     
-//    @IBAction func btnCreatePost(_ : UIButton){
-//        if !NetworkMonitor.shared.isConnected {
-//            // Show your own alert or prevent API call
-//            showAlert(message: "Internet not available. Please check your connection.")
-//            return
-//        }
-//        
-//        if profileData?.verfiedMsg == "User Verification is completed!" {
-//            
-//            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "CreatePostViewController") as? CreatePostViewController else {return}
-//            
-//            self.navigationController?.pushViewController(vc, animated: true)
-//        }else {
-//            // Create the alert controller
-//            let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-//            
-//            // Define font and color attributes
-//            let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-//            let messageAttributes: [NSAttributedString.Key: Any] = [
-//                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-//                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-//            ]
-//            
-//            // Create attributed strings
-//            let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-//            let attributedMessage = NSAttributedString(
-//                string: "You have limited access till verification is complete. We thank you for your patience.",
-//                attributes: messageAttributes
-//            )
-//            
-//            // Set the title and message of the alert
-//            alert.setValue(attributedTitle, forKey: "attributedTitle")
-//            alert.setValue(attributedMessage, forKey: "attributedMessage")
-//            
-//            // Add an action to the alert
-//            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-//                alert.dismiss(animated: true, completion: nil)
-//            }))
-//            
-//            // Present the alert
-//            self.present(alert, animated: true, completion: nil)
-//        }
-//    }
+ 
     
     
     @IBAction func btnCreatePost(_ : UIButton){

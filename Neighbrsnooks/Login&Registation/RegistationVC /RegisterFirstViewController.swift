@@ -78,7 +78,7 @@ class RegisterFirstViewController: BaseViewController,PopupSelectionDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        UserDefaults.standard.set("step2", forKey: "registrationStep")
+        UserDefaults.standard.set("step2", forKey: "registrationStep")
 
         self.navigationItem.hidesBackButton = true
           let firstName = UserDefaults.standard.string(forKey: "userFirstName") ?? ""

@@ -43,6 +43,7 @@ class PublicAgencyViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 //        updateColors()
+        lblHeading.text = "Public Agency Directory"
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.lblHospital.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.lblAmbu.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -352,327 +353,340 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let data = filteredData[indexPath.row]
-        let cellHeight: CGFloat = (expandedIndexPath == indexPath) ? 290 : 70
-        let configureButtonAction: (UIButton, String) -> Void = { button, number in
-               button.setTitle(number, for: .normal)
-               button.addTarget(self, action: #selector(self.dialNumber(_:)), for: .touchUpInside)
-               button.tag = Int(number) ?? 0 // Optionally store the number as a tag or use another method to store it
-           }
-        
-        func dialNumber(_ sender: UIButton) {
-            guard let number = sender.titleLabel?.text, !number.isEmpty else { return }
-
-            if let phoneCallURL = URL(string: "tel://\(number)"), UIApplication.shared.canOpenURL(phoneCallURL) {
-                UIApplication.shared.open(phoneCallURL, options: [:], completionHandler: nil)
-            } else {
-                // Handle the case where the device cannot make a call
-                print("Unable to make a call on this device.")
-            }
-        }
-        
-       
-
-
-        switch selection {
-        case 1: // Hospital section
-            let cell = tableView.dequeueReusableCell(withIdentifier: "PublicDirectoryTableViewCell", for: indexPath) as! PublicDirectoryTableViewCell
-            cell.EventLbl.text = data.name
-            cell.AddLbl.text = data.address
-            cell.Number1Lbl.text = data.number1 ?? "Not Available"
-            cell.Number2Lbl.text = data.number2 ?? "Not Available"
-            cell.viewLine.isHidden = expandedIndexPath != indexPath
-            if let number2 = data.number2, !number2.isEmpty {
-                   cell.Number2View.isHidden = false
-               } else {
-                   cell.Number2View.isHidden = true
-                   cell.Number2Lbl.isHidden = true
+            let data = filteredData[indexPath.row]
+            let cellHeight: CGFloat = (expandedIndexPath == indexPath) ? 290 : 70
+            let configureButtonAction: (UIButton, String) -> Void = { button, number in
+                   button.setTitle(number, for: .normal)
+                   button.addTarget(self, action: #selector(self.dialNumber(_:)), for: .touchUpInside)
+                   button.tag = Int(number) ?? 0 // Optionally store the number as a tag or use another method to store it
                }
-            cell.WebLbl.text = data.website
-            configureButtonAction(cell.Number1Btn, data.number1 ?? "")
-            configureButtonAction(cell.Number2Btn, data.number2 ?? "")
-            cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
             
-            // Safely unwrap and convert lat and long to Double
-            if let latString = data.lat, let longString = data.long,
-               let latitude = Double(latString), let longitude = Double(longString) {
-                configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
-            } else {
-                print("Invalid latitude or longitude for data: \(data)")
+            func dialNumber(_ sender: UIButton) {
+                guard let number = sender.titleLabel?.text, !number.isEmpty else { return }
+
+                if let phoneCallURL = URL(string: "tel://\(number)"), UIApplication.shared.canOpenURL(phoneCallURL) {
+                    UIApplication.shared.open(phoneCallURL, options: [:], completionHandler: nil)
+                } else {
+                    // Handle the case where the device cannot make a call
+                    print("Unable to make a call on this device.")
+                }
             }
             
-            cell.ShareCallback = { [self] value in
-                
-                let appName = "NeighboursNook"
-                let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
-                let appLink = "https://testflight.apple.com/join/1G74jNEC"
-                
-                let shareText = "\(appDescription) \nDownload now: \(appLink)"
-                
-                // Step 2: Show share popup
-                let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-                
-                // Step 3: Present the share popup
-                present(activityViewController, animated: true, completion: nil)
-                
-            }
-            
-            // Add tap gesture to WebLbl to open the website
-//                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
-//                cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
-//                cell.WebLbl.addGestureRecognizer(tapGesture)
-//                cell.WebLbl.tag = indexPath.row // Set tag
-            
-            // Add tap gesture to WebLbl to open the website
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
-            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
-            cell.WebLbl.addGestureRecognizer(tapGesture)
-
-            // Store the website URL in gesture recognizer's `accessibilityLabel`
-            cell.WebLbl.accessibilityLabel = data.website
-            cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
-            cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
-
-
-            
-            let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
-                cell.addGestureRecognizer(tapNewGesture)
-                cell.tag = indexPath.row // Store indexPath in the cell's tag
-            
-            if expandedIndexPath == indexPath {
-                  cell.arrowImageView.image = UIImage(named: "upward-arrow") // Show expanded arrow
-              } else {
-                  cell.arrowImageView.image = UIImage(named: "downward-arrow") // Show collapsed arrow
-              }
-
-            return cell
            
 
 
-        case 2: // Ambulance section
-            let cell = tableView.dequeueReusableCell(withIdentifier: "AmbulanceTableViewCell", for: indexPath) as! AmbulanceTableViewCell
-            cell.EventLbl.text = data.name
-            cell.AddLbl.text = data.address
-            cell.Number1Lbl.text = data.number1
-            cell.Number2Lbl.text = data.number2
-            cell.viewLine.isHidden = expandedIndexPath != indexPath
-            cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
-            cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
-            
-            if let number2 = data.number2, !number2.isEmpty {
-                   cell.Number2View.isHidden = false
-               } else {
-                   cell.Number2View.isHidden = true
-                   cell.Number2Lbl.isHidden = true
-               }
-            
-            cell.WebLbl.text = data.website
-            configureButtonAction(cell.Number1Btn, data.number1 ?? "")
-            configureButtonAction(cell.Number2Btn, data.number2 ?? "")
-            cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
-            if let latString = data.lat, let longString = data.long,
-               let latitude = Double(latString), let longitude = Double(longString) {
-                configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
-            } else {
-                print("Invalid latitude or longitude for data: \(data)")
-            }
-            
-            cell.ShareCallback = { [self] value in
+            switch selection {
+            case 1: // Hospital section
+                let cell = tableView.dequeueReusableCell(withIdentifier: "PublicDirectoryTableViewCell", for: indexPath) as! PublicDirectoryTableViewCell
+                cell.EventLbl.text = data.name
+                cell.AddLbl.text = data.address
+                cell.Number1Lbl.text = data.number1 ?? "Not Available"
+                cell.Number2Lbl.text = data.number2 ?? "Not Available"
+                cell.viewLine.isHidden = expandedIndexPath != indexPath
+                if let number2 = data.number2, !number2.isEmpty {
+                       cell.Number2View.isHidden = false
+                   } else {
+                       cell.Number2View.isHidden = true
+                       cell.Number2Lbl.isHidden = true
+                   }
+                cell.WebLbl.text = data.website
+                configureButtonAction(cell.Number1Btn, data.number1 ?? "")
+                configureButtonAction(cell.Number2Btn, data.number2 ?? "")
+                cell.Number1Btn.setTitleColor(.clear, for: .normal)
+                cell.Number2Btn.setTitleColor(.clear, for: .normal)
+                cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
                 
-                let appName = "NeighboursNook"
-                let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
-                let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                // Safely unwrap and convert lat and long to Double
+                if let latString = data.lat, let longString = data.long,
+                   let latitude = Double(latString), let longitude = Double(longString) {
+                    configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
+                } else {
+                    print("Invalid latitude or longitude for data: \(data)")
+                }
                 
-                let shareText = "\(appDescription) \nDownload now: \(appLink)"
+                cell.ShareCallback = { [self] value in
+                    
+                    let appName = "NeighboursNook"
+                    let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
+                    let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                    
+                    let shareText = "\(appDescription) \nDownload now: \(appLink)"
+                    
+                    // Step 2: Show share popup
+                    let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                    
+                    // Step 3: Present the share popup
+                    present(activityViewController, animated: true, completion: nil)
+                    
+                }
                 
-                // Step 2: Show share popup
-                let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                // Add tap gesture to WebLbl to open the website
+    //                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
+    //                cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
+    //                cell.WebLbl.addGestureRecognizer(tapGesture)
+    //                cell.WebLbl.tag = indexPath.row // Set tag
                 
-                // Step 3: Present the share popup
-                present(activityViewController, animated: true, completion: nil)
-                
-            }
-            
-//            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
-//            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
-//            cell.WebLbl.addGestureRecognizer(tapGesture)
-//            cell.WebLbl.tag = indexPath.row // Set tag
-            
-            // Add tap gesture to WebLbl to open the website
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
-            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
-            cell.WebLbl.addGestureRecognizer(tapGesture)
+                // Add tap gesture to WebLbl to open the website
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
+                cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
+                cell.WebLbl.addGestureRecognizer(tapGesture)
 
-            // Store the website URL in gesture recognizer's `accessibilityLabel`
-            cell.WebLbl.accessibilityLabel = data.website
+                // Store the website URL in gesture recognizer's `accessibilityLabel`
+                cell.WebLbl.accessibilityLabel = data.website
+                cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
+                cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
 
-            
-            let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
-                cell.addGestureRecognizer(tapNewGesture)
-                cell.tag = indexPath.row // Store indexPath in the cell's tag
-            
-            // Set arrow image based on expansion state
-               if expandedIndexPath == indexPath {
-                   cell.arrowImageView.image = UIImage(named: "upward-arrow") // Show expanded arrow
-               } else {
-                   cell.arrowImageView.image = UIImage(named: "downward-arrow") // Show collapsed arrow
-               }
-            
-            return cell
-        case 3: // Police Station section
-            let cell = tableView.dequeueReusableCell(withIdentifier: "PoliceTableViewCell", for: indexPath) as! PoliceTableViewCell
-            cell.EventLbl.text = data.name
-            cell.AddLbl.text = data.address
-            cell.Number1Lbl.text = data.number1
-            cell.Number2Lbl.text = data.number2
-            cell.viewLine.isHidden = expandedIndexPath != indexPath
-            cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
-            cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
-            
-            if let number2 = data.number2, !number2.isEmpty {
-                   cell.Number2View.isHidden = false
-               } else {
-                   cell.Number2View.isHidden = true
-                   cell.Number2Lbl.isHidden = true
-               }
-            
-            cell.WebLbl.text = data.website
-            configureButtonAction(cell.Number1Btn, data.number1 ?? "")
-            configureButtonAction(cell.Number2Btn, data.number2 ?? "")
-            cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
-            if let latString = data.lat, let longString = data.long,
-               let latitude = Double(latString), let longitude = Double(longString) {
-                configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
-            } else {
-                print("Invalid latitude or longitude for data: \(data)")
+
+                
+                let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
+                    cell.addGestureRecognizer(tapNewGesture)
+                    cell.tag = indexPath.row // Store indexPath in the cell's tag
+                
+                if expandedIndexPath == indexPath {
+                      cell.arrowImageView.image = UIImage(named: "upward-arrow") // Show expanded arrow
+                  } else {
+                      cell.arrowImageView.image = UIImage(named: "downward-arrow") // Show collapsed arrow
+                  }
+
+                return cell
+               
+
+
+            case 2: // Ambulance section
+                let cell = tableView.dequeueReusableCell(withIdentifier: "AmbulanceTableViewCell", for: indexPath) as! AmbulanceTableViewCell
+                cell.EventLbl.text = data.name
+                cell.AddLbl.text = data.address
+                cell.Number1Lbl.text = data.number1
+                cell.Number2Lbl.text = data.number2
+                cell.viewLine.isHidden = expandedIndexPath != indexPath
+                cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
+                cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
+                
+                if let number2 = data.number2, !number2.isEmpty {
+                       cell.Number2View.isHidden = false
+                   } else {
+                       cell.Number2View.isHidden = true
+                       cell.Number2Lbl.isHidden = true
+                   }
+                
+                cell.WebLbl.text = data.website
+                configureButtonAction(cell.Number1Btn, data.number1 ?? "")
+                configureButtonAction(cell.Number2Btn, data.number2 ?? "")
+                cell.Number1Btn.setTitleColor(.clear, for: .normal)
+                cell.Number2Btn.setTitleColor(.clear, for: .normal)
+                cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
+                if let latString = data.lat, let longString = data.long,
+                   let latitude = Double(latString), let longitude = Double(longString) {
+                    configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
+                } else {
+                    print("Invalid latitude or longitude for data: \(data)")
+                }
+                
+                cell.ShareCallback = { [self] value in
+                    
+                    let appName = "NeighboursNook"
+                    let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
+                    let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                    
+                    let shareText = "\(appDescription) \nDownload now: \(appLink)"
+                    
+                    // Step 2: Show share popup
+                    let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                    
+                    // Step 3: Present the share popup
+                    present(activityViewController, animated: true, completion: nil)
+                    
+                }
+                
+    //            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
+    //            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
+    //            cell.WebLbl.addGestureRecognizer(tapGesture)
+    //            cell.WebLbl.tag = indexPath.row // Set tag
+                
+                // Add tap gesture to WebLbl to open the website
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
+                cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
+                cell.WebLbl.addGestureRecognizer(tapGesture)
+
+                // Store the website URL in gesture recognizer's `accessibilityLabel`
+                cell.WebLbl.accessibilityLabel = data.website
+
+                
+                let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
+                    cell.addGestureRecognizer(tapNewGesture)
+                    cell.tag = indexPath.row // Store indexPath in the cell's tag
+                
+                // Set arrow image based on expansion state
+                   if expandedIndexPath == indexPath {
+                       cell.arrowImageView.image = UIImage(named: "upward-arrow") // Show expanded arrow
+                   } else {
+                       cell.arrowImageView.image = UIImage(named: "downward-arrow") // Show collapsed arrow
+                   }
+                
+                return cell
+            case 3: // Police Station section
+                let cell = tableView.dequeueReusableCell(withIdentifier: "PoliceTableViewCell", for: indexPath) as! PoliceTableViewCell
+                cell.EventLbl.text = data.name
+                cell.AddLbl.text = data.address
+                cell.Number1Lbl.text = data.number1
+                cell.Number2Lbl.text = data.number2
+                cell.viewLine.isHidden = expandedIndexPath != indexPath
+                cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
+                cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
+                
+                if let number2 = data.number2, !number2.isEmpty {
+                       cell.Number2View.isHidden = false
+                   } else {
+                       cell.Number2View.isHidden = true
+                       cell.Number2Lbl.isHidden = true
+                   }
+                
+                cell.WebLbl.text = data.website
+                configureButtonAction(cell.Number1Btn, data.number1 ?? "")
+                configureButtonAction(cell.Number2Btn, data.number2 ?? "")
+                cell.Number1Btn.setTitleColor(.clear, for: .normal)
+                cell.Number2Btn.setTitleColor(.clear, for: .normal)
+                cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
+                if let latString = data.lat, let longString = data.long,
+                   let latitude = Double(latString), let longitude = Double(longString) {
+                    configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
+                } else {
+                    print("Invalid latitude or longitude for data: \(data)")
+                }
+                
+    //            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
+    //            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
+    //            cell.WebLbl.addGestureRecognizer(tapGesture)
+    //            cell.WebLbl.tag = indexPath.row // Set tag
+                
+                // Add tap gesture to WebLbl to open the website
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
+                cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
+                cell.WebLbl.addGestureRecognizer(tapGesture)
+
+                // Store the website URL in gesture recognizer's `accessibilityLabel`
+                cell.WebLbl.accessibilityLabel = data.website
+                
+                cell.ShareCallback = { [self] value in
+                    
+                    let appName = "NeighboursNook"
+                    let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
+                    let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                    
+                    let shareText = "\(appDescription) \nDownload now: \(appLink)"
+                    
+                    // Step 2: Show share popup
+                    let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                    
+                    // Step 3: Present the share popup
+                    present(activityViewController, animated: true, completion: nil)
+                    
+                }
+
+                
+                let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
+                    cell.addGestureRecognizer(tapNewGesture)
+                    cell.tag = indexPath.row // Store indexPath in the cell's tag
+                
+                // Set arrow image based on expansion state
+                   if expandedIndexPath == indexPath {
+                       cell.arrowImageView.image = UIImage(named: "upward-arrow") // Show expanded arrow
+                   } else {
+                       cell.arrowImageView.image = UIImage(named: "downward-arrow") // Show collapsed arrow
+                   }
+                
+                return cell
+            case 4: // Fire Brigade section
+                let cell = tableView.dequeueReusableCell(withIdentifier: "FireTableViewCell", for: indexPath) as! FireTableViewCell
+                cell.EventLbl.text = data.name
+                cell.AddLbl.text = data.address
+                cell.Number1Lbl.text = data.number1
+                cell.Number2Lbl.text = data.number2
+                cell.viewLine.isHidden = expandedIndexPath != indexPath
+                cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
+                cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
+                
+                if let number2 = data.number2, !number2.isEmpty {
+                       cell.Number2View.isHidden = false
+                   } else {
+                       cell.Number2View.isHidden = true
+                       cell.Number2Lbl.isHidden = true
+                   }
+                
+                cell.WebLbl.text = data.website
+                configureButtonAction(cell.Number1Btn, data.number1 ?? "")
+                configureButtonAction(cell.Number2Btn, data.number2 ?? "")
+                cell.Number1Btn.setTitleColor(.clear, for: .normal)
+                cell.Number2Btn.setTitleColor(.clear, for: .normal)
+                cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
+                if let latString = data.lat, let longString = data.long,
+                   let latitude = Double(latString), let longitude = Double(longString) {
+                    configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
+                } else {
+                    print("Invalid latitude or longitude for data: \(data)")
+                }
+                
+                cell.ShareCallback = { [self] value in
+                    let appName = "NeighboursNook"
+                    let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
+                    let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                    let shareText = "\(appDescription) \nDownload now: \(appLink)"
+                    // Step 2: Show share popup
+                    let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+                    // Step 3: Present the share popup
+                    present(activityViewController, animated: true, completion: nil)
+                    
+                }
+                
+    //            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
+    //            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
+    //            cell.WebLbl.addGestureRecognizer(tapGesture)
+    //            cell.WebLbl.tag = indexPath.row // Set tag
+                
+                // Add tap gesture to WebLbl to open the website
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
+                cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
+                cell.WebLbl.addGestureRecognizer(tapGesture)
+
+                // Store the website URL in gesture recognizer's `accessibilityLabel`
+                cell.WebLbl.accessibilityLabel = data.website
+
+                
+                // Set arrow image based on expansion state
+                   if expandedIndexPath == indexPath {
+                       cell.arrowImageView.image = UIImage(named: "upward-arrow") // Show expanded arrow
+                   } else {
+                       cell.arrowImageView.image = UIImage(named: "downward-arrow") // Show collapsed arrow
+                   }
+                
+                let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
+                    cell.addGestureRecognizer(tapNewGesture)
+                    cell.tag = indexPath.row // Store indexPath in the cell's tag
+                return cell
+            default:
+                return UITableViewCell()
             }
-            
-//            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
-//            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
-//            cell.WebLbl.addGestureRecognizer(tapGesture)
-//            cell.WebLbl.tag = indexPath.row // Set tag
-            
-            // Add tap gesture to WebLbl to open the website
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
-            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
-            cell.WebLbl.addGestureRecognizer(tapGesture)
-
-            // Store the website URL in gesture recognizer's `accessibilityLabel`
-            cell.WebLbl.accessibilityLabel = data.website
-            
-            cell.ShareCallback = { [self] value in
-                
-                let appName = "NeighboursNook"
-                let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
-                let appLink = "https://testflight.apple.com/join/1G74jNEC"
-                
-                let shareText = "\(appDescription) \nDownload now: \(appLink)"
-                
-                // Step 2: Show share popup
-                let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-                
-                // Step 3: Present the share popup
-                present(activityViewController, animated: true, completion: nil)
-                
-            }
-
-            
-            let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
-                cell.addGestureRecognizer(tapNewGesture)
-                cell.tag = indexPath.row // Store indexPath in the cell's tag
-            
-            // Set arrow image based on expansion state
-               if expandedIndexPath == indexPath {
-                   cell.arrowImageView.image = UIImage(named: "upward-arrow") // Show expanded arrow
-               } else {
-                   cell.arrowImageView.image = UIImage(named: "downward-arrow") // Show collapsed arrow
-               }
-            
-            return cell
-        case 4: // Fire Brigade section
-            let cell = tableView.dequeueReusableCell(withIdentifier: "FireTableViewCell", for: indexPath) as! FireTableViewCell
-            cell.EventLbl.text = data.name
-            cell.AddLbl.text = data.address
-            cell.Number1Lbl.text = data.number1
-            cell.Number2Lbl.text = data.number2
-            cell.viewLine.isHidden = expandedIndexPath != indexPath
-            cell.arrowImageView.image = UIImage(named: "upward-arrow")?.withRenderingMode(.alwaysTemplate)
-            cell.arrowImageView.image = UIImage(named: "downward-arrow")?.withRenderingMode(.alwaysTemplate)
-            
-            if let number2 = data.number2, !number2.isEmpty {
-                   cell.Number2View.isHidden = false
-               } else {
-                   cell.Number2View.isHidden = true
-                   cell.Number2Lbl.isHidden = true
-               }
-            
-            cell.WebLbl.text = data.website
-            configureButtonAction(cell.Number1Btn, data.number1 ?? "")
-            configureButtonAction(cell.Number2Btn, data.number2 ?? "")
-            cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
-            if let latString = data.lat, let longString = data.long,
-               let latitude = Double(latString), let longitude = Double(longString) {
-                configureMapButtonAction(cell.MapButton, lat: latitude, long: longitude)
-            } else {
-                print("Invalid latitude or longitude for data: \(data)")
-            }
-            
-            cell.ShareCallback = { [self] value in
-                let appName = "NeighboursNook"
-                let appDescription = "NeighbrsNook is a hyperlocal social networking service . Connecting with your neighborhood today!"
-                let appLink = "https://testflight.apple.com/join/1G74jNEC"
-                let shareText = "\(appDescription) \nDownload now: \(appLink)"
-                // Step 2: Show share popup
-                let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-                // Step 3: Present the share popup
-                present(activityViewController, animated: true, completion: nil)
-                
-            }
-            
-//            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
-//            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
-//            cell.WebLbl.addGestureRecognizer(tapGesture)
-//            cell.WebLbl.tag = indexPath.row // Set tag
-            
-            // Add tap gesture to WebLbl to open the website
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(openWebsite(_:)))
-            cell.WebLbl.isUserInteractionEnabled = true // Enable user interaction for the label
-            cell.WebLbl.addGestureRecognizer(tapGesture)
-
-            // Store the website URL in gesture recognizer's `accessibilityLabel`
-            cell.WebLbl.accessibilityLabel = data.website
-
-            
-            // Set arrow image based on expansion state
-               if expandedIndexPath == indexPath {
-                   cell.arrowImageView.image = UIImage(named: "upward-arrow") // Show expanded arrow
-               } else {
-                   cell.arrowImageView.image = UIImage(named: "downward-arrow") // Show collapsed arrow
-               }
-            
-            let tapNewGesture = UITapGestureRecognizer(target: self, action: #selector(cellTapped(_:)))
-                cell.addGestureRecognizer(tapNewGesture)
-                cell.tag = indexPath.row // Store indexPath in the cell's tag
-            return cell
-        default:
-            return UITableViewCell()
         }
-    }
     
     @objc func cellTapped(_ sender: UITapGestureRecognizer) {
-        guard let cell = sender.view as? UITableViewCell else { return } // Handle all cell types
-        
-        let indexPath = IndexPath(row: cell.tag, section: 0)
-        
-        if expandedIndexPath == indexPath {
-            expandedIndexPath = nil // Collapse the row
-        } else {
-            expandedIndexPath = indexPath // Expand the row
+            guard let cell = sender.view as? UITableViewCell else { return } // Handle all cell types
+            
+            let indexPath = IndexPath(row: cell.tag, section: 0)
+            
+            if expandedIndexPath == indexPath {
+                expandedIndexPath = nil // Collapse the row
+                
+                
+            } else {
+                expandedIndexPath = indexPath // Expand the row
+            }
+            
+            // Reload the row to apply the height change
+            calldirectoryWebService {
+                self.tableviewMembers.reloadRows(at: [indexPath], with: .automatic)
+            }
+    //        tableviewMembers.reloadRows(at: [indexPath], with: .automatic)
         }
-        
-        // Reload the row to apply the height change
-        tableviewMembers.reloadRows(at: [indexPath], with: .automatic)
-    }
 
 
 
@@ -705,7 +719,7 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
             if self.PublicDirecData?.status == "success"{
                 completionClosure()
             }else{
-                self.showAlert(Message: self.PublicDirecData?.message ?? "")
+                self.alertToast(Message: self.PublicDirecData?.message ?? "")
             }
         }
     }

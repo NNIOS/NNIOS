@@ -15,6 +15,7 @@ class MyItemCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var rsLbl: UILabel!
     @IBOutlet weak var secttLbl: UILabel!
     @IBOutlet weak var DayLbl: UILabel!
+    @IBOutlet weak var lblSellDonate: CustomLabelHeadingUseranme!
     
     var DetailCallback : ((UIButton) -> Void)?
     

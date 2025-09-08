@@ -16,6 +16,8 @@ class AllListingCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var DayLbl: UILabel!
     
     @IBOutlet weak var SoldImgView : UIImageView!
+    @IBOutlet weak var imgWishlist: UIImageView!
+    @IBOutlet weak var lblSellDonate: CustomLabelHeadingUseranme!
     
     var DetailCallback : ((UIButton) -> Void)?
     

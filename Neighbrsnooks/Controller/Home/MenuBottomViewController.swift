@@ -387,7 +387,7 @@ class MenuBottomViewController: UIViewController {
 
        }
     
-    @IBAction func btnTerms$Condition(_ sender: UIButton) {
+    @IBAction func btnTerms$Condition(_ sender: UIButton) { //dev.
      
         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "WebViewControllerViewController") as? WebViewControllerViewController else {return}
         vc.heading = "Privacy Policy"

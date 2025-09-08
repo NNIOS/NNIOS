@@ -7,14 +7,14 @@
 
 import UIKit
 @available(iOS 16.0, *)
-class ForgotViewController: UIViewController {
+class ForgotViewController: BaseViewController {
     
-    @IBOutlet weak var tfOtp1: UITextField!
-    @IBOutlet weak var tfOtp2: UITextField!
-    @IBOutlet weak var tfOtp3: UITextField!
-    @IBOutlet weak var tfOtp4: UITextField!
-    @IBOutlet weak var tfOtp5: UITextField!
-    @IBOutlet weak var tfOtp6: UITextField!
+    @IBOutlet weak var tfOtp1: CustomLabelFirstName!
+    @IBOutlet weak var tfOtp2: CustomLabelFirstName!
+    @IBOutlet weak var tfOtp3: CustomLabelFirstName!
+    @IBOutlet weak var tfOtp4: CustomLabelFirstName!
+    @IBOutlet weak var tfOtp5: CustomLabelFirstName!
+    @IBOutlet weak var tfOtp6: CustomLabelFirstName!
     @IBOutlet weak var tfMobile: UITextField!
     @IBOutlet weak var btnGetOTP: UIButton!
     @IBOutlet weak var lblTimer: UILabel!
@@ -22,7 +22,7 @@ class ForgotViewController: UIViewController {
     
     var forgetOTPData : ForgetOTPModel?
     var verifyOTPData : VerifyOTPModel?
-    
+    var otpFields: [CustomLabelFirstName] = []
     // var verifyOTPData : VerifyOTPModel?
     var otp : String?
     var otpTimer: Timer?
@@ -65,9 +65,7 @@ class ForgotViewController: UIViewController {
     
     @IBAction func SendOTPBtn(_ sender: UIButton){
         if tfMobile.text == "" {
-            let alert = UIAlertController(title: "Alert", message: "Please Enter Your Number", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "Close", style: UIAlertAction.Style.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
+            self.alertToast(Message: "Please enter your number")
         } else {
             if !isOTPSent {
                 // Disable the text field and button on first OTP request
@@ -107,7 +105,7 @@ class ForgotViewController: UIViewController {
                 self.tfOtp1.becomeFirstResponder()
                 // Display the success message from the backend
                 if let message = self.forgetOTPData?.message {
-//                    self.showAutoDismissAlert(message: message)
+                    self.showAutoDismissAlert(message: message)
                 }
             }
         }
@@ -121,40 +119,15 @@ class ForgotViewController: UIViewController {
     }
     
     @IBAction func NewVerifyOTPBtn(_ sender: UIButton){
-        
-        if tfOtp1.text == "" {
-            let alert = UIAlertController(title: "", message: "Please Enter Your otp", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            
-        } else if tfOtp2.text == ""{
-            let alert = UIAlertController(title: "", message: "Please Enter otp", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        }else if tfOtp3.text == ""{
-            let alert = UIAlertController(title: "", message: "Please Enter otp", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        }else if tfOtp4.text == ""{
-            let alert = UIAlertController(title: "", message: "Please Enter otp", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        }
-        else if tfOtp5.text == ""{
-            let alert = UIAlertController(title: "", message: "Please Enter otp", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        }
-        else if tfOtp6.text == ""{
-            let alert = UIAlertController(title: "", message: "Please Enter otp", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "close", style: UIAlertAction.Style.default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-        }
-        
-        else{
-            callVerifyOTPWebService{
-                
+        otpFields = [tfOtp1, tfOtp2, tfOtp3, tfOtp4, tfOtp5, tfOtp6]
+        for field in otpFields {
+            if field.text?.isEmpty ?? true {
+                self.alertToast(Message: "Please Enter OTP")
             }
+        }
+        
+        callVerifyOTPWebService {
+            // Completion block
         }
     }
     
@@ -185,7 +158,7 @@ class ForgotViewController: UIViewController {
                 vc.phoneno = self.tfMobile.text ?? ""
                 self.navigationController?.pushViewController(vc, animated: true)
             } else {
-                self.showAlert(message: "Code does not match.")
+                self.alertToast(Message: "Code does not match.")
             }
             completionClosure()
         }
@@ -206,7 +179,7 @@ class ForgotViewController: UIViewController {
             self.remainingSeconds -= 1
 
             DispatchQueue.main.async {
-                self.lblTimer.text = "\(self.remainingSeconds)"
+                self.lblTimer.text = String(format: "00:%02d sec", self.remainingSeconds)
             }
 
             if self.remainingSeconds <= 0 {

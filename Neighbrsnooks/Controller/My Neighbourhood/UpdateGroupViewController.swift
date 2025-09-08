@@ -199,93 +199,86 @@ class UpdateGroupViewController: BaseViewController,CropViewControllerDelegate {
           }
         }
     
-    func callsendImageAPI(param:[String: Any],arrImage:UIImage,imageKey:String,URlName:String, withblock:@escaping ()->Void){
-
-        let headers: HTTPHeaders
-        headers = ["Content-type": "multipart/form-data"]
-        
-        AF.upload(multipartFormData: { (multipartFormData) in
+    func callsendImageAPI(param:[String: Any],arrImage:[UIImage],imageKey:String,URlName:String, withblock:@escaping ()->Void){
             
-            for (key, value) in param {
-                multipartFormData.append((value as! String).data(using: String.Encoding.utf8)!, withName: key)
-            }
+            let headers: HTTPHeaders
+            headers = ["Content-type": "multipart/form-data"]
             
-        //    for img in arrImage {
-                guard let imgData = arrImage.jpegData(compressionQuality: 1) else { return }
-            multipartFormData.append(imgData, withName: imageKey, fileName: "\(NSDate().timeIntervalSince1970.rounded())" + ".jpeg", mimeType: "image/jpeg")
-            guard let imgData2 = self.profileImgView.image?.jpegData(compressionQuality: 1) else { return }
-            multipartFormData.append(imgData, withName: "aadharBack", fileName: "\(NSDate().timeIntervalSince1970.rounded())" + ".jpeg", mimeType: "image/jpeg")
-            
-           // }
-            
-            
-        },to: URL.init(string: URlName)!, usingThreshold: UInt64.init(),
-          method: .post,
-          headers: headers).response{ response in
-            
-            if((response.error == nil)){
-                do{
-                    if let jsonData = response.data{
-                        let parsedData = try JSONSerialization.jsonObject(with: jsonData) as! Dictionary<String, AnyObject>
-                        print(parsedData)
-                        withblock()
-                     //   withblock(parsedData)
-//                        let status = parsedData[Message.Status] as? NSInteger ?? 0
-//
-//                        if (status == 1){
-                            if let jsonArray = parsedData["data"] as? [[String: Any]] {
-                               
-                            }
-//
-//                        }else if (status == 2){
-//                            print("error message")
-//                        }else{
-//                            print("error message")
-//                        }
-                    }
-                }catch{
-                    print("error message")
+            AF.upload(multipartFormData: { (multipartFormData) in
+                
+                for (key, value) in param {
+                    multipartFormData.append((value as! String).data(using: String.Encoding.utf8)!, withName: key)
                 }
-            }else{
-                print(response.error?.localizedDescription ?? "hgh")
+                
+                for img in arrImage {
+                    guard let imgData = img.jpegData(compressionQuality:0.1) else { return }
+                    multipartFormData.append(imgData, withName: imageKey, fileName: "\(NSDate().timeIntervalSince1970.rounded())" + ".jpeg", mimeType: "image/jpeg")
+                    
+                }
+                
+                
+            },to: URL.init(string: URlName)!, usingThreshold: UInt64.init(),
+                      method: .post,
+                      headers: headers).response{ response in
+                
+                if((response.error == nil)){
+                    do{
+                        if let jsonData = response.data{
+                            let parsedData = try JSONSerialization.jsonObject(with: jsonData) as! Dictionary<String, AnyObject>
+                            print(parsedData)
+                            withblock()
+                            
+                            if let jsonArray = parsedData["data"] as? [[String: Any]] {
+                                
+                            }
+                            
+                        }
+                    }catch{
+                        print("error message")
+                    }
+                }else{
+                    print(response.error?.localizedDescription ?? "hgh")
+                }
             }
         }
-    }
 
-    
-    
-    
-    func callUpdateGroupWebService(_ completionClosure: @escaping (Bool) -> Void) {
+        
+        
+        
+        func callUpdateGroupWebService(_ completionClosure: @escaping (Bool) -> Void) {
 
-        let id = UserDefaults.standard.string(forKey: "userid")
-          let dictParams: Dictionary<String, Any> = [
-                                                    "userid":id ?? "",
-                                                    "groupname":self.tfGroupName.text ?? "",
-                                                    "description":self.tvaboutGroup.text ?? "",
-                                                    "groupid":groupid ?? "",
-                                                    "visibility": "1",
-                                                    "join_type": account
-                                                  //  "groupimage":  "\(NSDate().timeIntervalSince1970.rounded())"
-                                                    
-                                                   
-                                                                        ]
-        print("param is :\(dictParams)")
-        WebService.sharedInstance.callUpdateGroupWebService(withParams: dictParams) { [self] data in
-              
-              self.GrouUpdatesData = data
-            //  UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-              
-              callsendImageAPI(param: dictParams, arrImage: profileImgView.image!, imageKey: "groupimage", URlName: kBASEURL + WebServiceName.kUpdateGroup, withblock: {})
-             
-              
-            if self.GrouUpdatesData?.status == "success" {
-                completionClosure(true)
-            } else {
-                self.showAlert(Message: self.GrouUpdatesData?.message ?? "")
-                completionClosure(false)
+            let id = UserDefaults.standard.string(forKey: "userid")
+            let dictParams: Dictionary<String, Any> = [
+                "userid": id ?? "",
+                "groupname": self.tfGroupName.text ?? "",
+                "description": self.tvaboutGroup.text ?? "",
+                "groupid": groupid ?? "",
+                "visibility": "1",
+                "join_type": account,
+                "groupimage": "\(NSDate().timeIntervalSince1970.rounded())"
+            ]
+            print("param is :\(dictParams)")
+            
+            WebService.sharedInstance.callUpdateGroupWebService(withParams: dictParams) { [self] data in
+                self.GrouUpdatesData = data
+                
+                if let selectedImage = profileImgView.image {
+                    callsendImageAPI(
+                        param: dictParams,
+                        arrImage: [selectedImage],   // ✅ wrap in array
+                        imageKey: "groupimage",
+                        URlName: kBASEURL + WebServiceName.kUpdateGroup,
+                        withblock: {}
+                    )
+                }
+                
+                if self.GrouUpdatesData?.status == "success" {
+                    completionClosure(true)
+                } else {
+                    self.showAlert(Message: self.GrouUpdatesData?.message ?? "")
+                    completionClosure(false)
+                }
             }
-
-          }
         }
 
 }

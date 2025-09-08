@@ -172,8 +172,8 @@ extension MarketChatListViewController: UITableViewDataSource, UITableViewDelega
     
     
     
-    func callMarketReadStatus2(completion: @escaping () -> Void) {
-        let url = "https://neighbrsnook.com/admin/api/chat_read_status"
+    func callMarketReadStatus2(completion: @escaping () -> Void) { //dev.
+        let url = "https://dev.neighbrsnook.com/admin/api/chat_read_status"
         
         let senderID = UserDefaults.standard.string(forKey: "SenderidN") ?? ""
         let receiverID = UserDefaults.standard.string(forKey: "userid") ?? ""

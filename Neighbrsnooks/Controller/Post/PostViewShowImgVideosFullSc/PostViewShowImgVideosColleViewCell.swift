@@ -87,6 +87,7 @@ class PostViewShowImgVideosColleViewCell: UICollectionViewCell {
     }
 
     
+    
     func configure(with postImage: postImagesN) {
         if let imageUrl = postImage.img {
             profileImgVdoView.isHidden = false

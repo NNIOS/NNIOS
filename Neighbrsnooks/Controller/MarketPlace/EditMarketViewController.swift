@@ -132,7 +132,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
 //            self.tfItemPrice.text = self.MarketWDetailData?.productdetail?.first?.salePrice ?? ""
             if let priceString = MarketWDetailData?.productdetail?.first?.salePrice,
                let price = Double(priceString) {
-                tfItemPrice.text = "Rs. \(Int(price))"
+                tfItemPrice.text = "\(Int(price))"
             } else {
                 tfItemPrice.text = "Rs. 0"
             }
@@ -221,90 +221,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     }
         
         
-    
-    
-    private func updateColors() {
-        if traitCollection.userInterfaceStyle == .dark {
-            // Dark mode colors
-            ItemNameView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            CategoryView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-//            sellView.layer.borderColor = UIColor.lightGray.cgColor
-//
-//            DonateView.layer.borderColor = UIColor.lightGray.cgColor
-            PriceView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            DescriptionView.layer.borderColor =  #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            UploadImageView.layer.borderColor =  #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            btnSell.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            btnDonate.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-           
-//            Add1View.layer.borderColor = UIColor.lightGray.cgColor
-//            Add2.layer.borderColor = UIColor.lightGray.cgColor
-            
-            ItemNameView.layer.borderWidth = 1.0 // Enable border in dark mode
-            CategoryView.layer.borderWidth = 1.0
-            btnSell.layer.borderWidth = 1.0 // Enable border in dark mode
-            btnDonate.layer.borderWidth = 1.0
-//            sellView.layer.borderWidth = 1.0
-//            DonateView.layer.borderWidth = 1.0
-            PriceView.layer.borderWidth = 1.0 // Enable border in dark mode
-            
-            DescriptionView.layer.borderWidth = 1.0
-            UploadImageView.layer.borderWidth = 1.0
-                        FullMarketView.backgroundColor = .black
-            
-            UploadImageView.backgroundColor = .black
-            UploadImageView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            UploadImageView.layer.borderWidth = 1.0
-            ItemNameView.backgroundColor = .black
-            CategoryView.backgroundColor = .black
-            PriceView.backgroundColor = .black
-            collectionViewEvent.backgroundColor = .black
-            btnSell.backgroundColor = .black
-            btnDonate.backgroundColor = .black
-            
-        } else {
-            // Light mode mein storyboard ke original colors preserve karna
-          //  questionView.textColor = UIColor.secondaryLabel
-            ItemNameView.backgroundColor = .white
-            ItemNameView.isUserInteractionEnabled = true // Disable in light mode
-            CategoryView.isUserInteractionEnabled = true
-//            sellView.isUserInteractionEnabled = true
-//
-//            DonateView.isUserInteractionEnabled = true // Disable in light mode
-            PriceView.isUserInteractionEnabled = true
-            DescriptionView.isUserInteractionEnabled = true
-            UploadImageView.isUserInteractionEnabled = true
-            
-            UploadImageView.isUserInteractionEnabled = true
-            
-            
-            ItemNameView.layer.borderWidth = 0 // Remove border in light mode
-//            DonateView.layer.borderWidth = 0
-//            sellView.layer.borderWidth = 0
-            PriceView.layer.borderWidth = 0
-            CategoryView.layer.borderWidth = 0
-            DescriptionView.layer.borderWidth = 0
-            btnSell.layer.borderWidth = 0
-            btnDonate.layer.borderWidth = 0
-           
-            UploadImageView.backgroundColor = .white
-            CategoryView.backgroundColor = .white
-            PriceView.backgroundColor = .white
-            collectionViewEvent.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-            
-            UploadImageView.layer.borderWidth = 0 // Remove border in light mode
-            
-           // option4.layer.borderWidth = 0
-            UploadImageView.layer.borderWidth = 0
-            FullMarketView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-            
-            btnSell.backgroundColor = .white
-            btnDonate.backgroundColor = .white
-            
-        }
-      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
-    }
+
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
@@ -322,39 +239,49 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     }
 
 
-       func updatePreviewLabel() {
-           let imageCount = MarketWDetailData?.productdetail?.first?.pImages?.count ?? 0
-           lblPerviewImgVidCount.text = "Preview (\(imageCount))"
-       }
+    func updatePreviewLabel() {
+        let imageCount = MarketWDetailData?.productdetail?.first?.pImages?.count ?? 0
+        let totalCount = imageCount + imageArray.count + images.count
+        lblPerviewImgVidCount.text = "Preview (\(totalCount))"
+    }
 
-       @objc func labelTapped() {
-           let storyboard = UIStoryboard(name: "Main", bundle: nil)
-           if let enlargeVC = storyboard.instantiateViewController(withIdentifier: "BeforePostEnlargeViewController") as? BeforePostEnlargeViewController {
-               
-               var imageArray = [UIImage]()
-               var videoArray = [URL]()
-               
-               if let mediaArray = MarketWDetailData?.productdetail?.first?.pImages {
-                   for media in mediaArray {
-                       if let videoURL = media.video, !videoURL.isEmpty, let url = URL(string: videoURL) {
-                           videoArray.append(url)
-                       } else if let imageURL = media.img, !imageURL.isEmpty, let url = URL(string: imageURL),
-                                 let imageData = try? Data(contentsOf: url),
-                                 let image = UIImage(data: imageData) {
-                           imageArray.append(image)
-                       }
-                   }
-               }
 
-               enlargeVC.imageArray = imageArray
-               enlargeVC.videoArray = videoArray
-               
-               // ✅ Set the delegate here
-               enlargeVC.countDelegate = self
-               
-               self.navigationController?.pushViewController(enlargeVC, animated: true)
-           }
-       }
+    @objc func labelTapped() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let enlargeVC = storyboard.instantiateViewController(withIdentifier: "BeforePostEnlargeViewController") as? BeforePostEnlargeViewController {
+            
+            var imageArray = [UIImage]()
+            var videoArray = [URL]()
+            
+            // 1️⃣ Add images from MarketWDetailData
+            if let mediaArray = MarketWDetailData?.productdetail?.first?.pImages {
+                for media in mediaArray {
+                    if let videoURL = media.video, !videoURL.isEmpty, let url = URL(string: videoURL) {
+                        videoArray.append(url)
+                    } else if let imageURL = media.img, !imageURL.isEmpty, let url = URL(string: imageURL),
+                              let imageData = try? Data(contentsOf: url),
+                              let image = UIImage(data: imageData) {
+                        imageArray.append(image)
+                    }
+                }
+            }
+            
+            // 2️⃣ Add newly selected images from gallery
+            imageArray.append(contentsOf: self.imageArray)
+            
+            // 3️⃣ Add newly selected images from camera
+            imageArray.append(contentsOf: self.images)
+            
+            enlargeVC.imageArray = imageArray
+            enlargeVC.videoArray = videoArray
+            
+            // ✅ Set the delegate here
+            enlargeVC.countDelegate = self
+            
+            self.navigationController?.pushViewController(enlargeVC, animated: true)
+        }
+    }
+
     
     
     
@@ -590,10 +517,11 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
             DispatchQueue.main.async {
                 self.presentCropViewController(image: image)
                 self.images.append(image)
-                // self.selectedImge = image
-                //  self.presentCropViewController(image: image)
-               
+                self.selectedImge = image
+                self.collectionViewEvent.reloadData()
+                self.updatePreviewLabel() // ✅ Add this line
             }
+
         }
         picker.dismiss(animated: true, completion: nil)
     }
@@ -612,6 +540,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
                     DispatchQueue.main.async {
                         self.presentCropViewController(image: imageNew)
                         self.collectionViewEvent.reloadData()
+                        self.updatePreviewLabel()
                         // Handle the selected image (e.g., add to an array or display in the UI)
                         print(imageNew)
                     }
@@ -619,331 +548,50 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
             }
         }
     }
-    
-   
+
+
+
     // dev.
-    func callMarketDeactiveWebService(completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/product_inactive_status?"
-        
-        // let dictParams: Dictionary<String, Any> = ["":""]
-        
-        let idName = UserDefaults.standard.string(forKey: "name")
-        let idEvent = UserDefaults.standard.string(forKey: "eventid")
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let dictParams: Dictionary<String, Any> = [
-            "user_id":id ?? "",
-            "product_id":idD ?? "",
+        func callMarketDeactiveWebService(completion: @escaping () -> Void) {
+            let url = "https://dev.neighbrsnook.com/admin/api/product_inactive_status?"
             
+            // let dictParams: Dictionary<String, Any> = ["":""]
             
-        ]
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
+            let idName = UserDefaults.standard.string(forKey: "name")
+            let idEvent = UserDefaults.standard.string(forKey: "eventid")
+            let id = UserDefaults.standard.string(forKey: "userid")
+            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+            let idPr = UserDefaults.standard.string(forKey: "producttId")
+            let dictParams: Dictionary<String, Any> = [
+                "user_id":id ?? "",
+                "product_id":idD ?? "",
                 
-                do {
-                    let data = try JSONDecoder().decode(InactivemarketModel.self, from: result!)
-                    self.SoldDataNew = data
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                    self.collectionViewEvent.reloadData()
-                    
-                    
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.SoldDataNew = data // Your actual data fetching logic
-                        
-                        DispatchQueue.main.async {
-                            completion() // Call completion handler
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(InactivemarketModel.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
-            }
-        }
-    }
-    //dev.
-    
-    func callMarketActiveWebService(completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/product_active_status"
-        
-        // let dictParams: Dictionary<String, Any> = ["":""]
-        
-        let idName = UserDefaults.standard.string(forKey: "name")
-        let idEvent = UserDefaults.standard.string(forKey: "eventid")
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let dictParams: Dictionary<String, Any> = [
-            "user_id":id ?? "",
-            "product_id":idD ?? "",
-            
-            
-        ]
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
                 
-                do {
-                    let data = try JSONDecoder().decode(ActiveStatusModel.self, from: result!)
-                    self.ActiveData = data
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                    self.collectionViewEvent.reloadData()
-                    
-                    
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.ActiveData = data // Your actual data fetching logic
-                        
-                        DispatchQueue.main.async {
-                            completion() // Call completion handler
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(ActiveStatusModel.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
-            }
-        }
-    }
-    
-    //dev.
-    
-    func callMarketSoldWebService(completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/product_sold_status"
-        
-        // let dictParams: Dictionary<String, Any> = ["":""]
-        
-        let idName = UserDefaults.standard.string(forKey: "name")
-        let idEvent = UserDefaults.standard.string(forKey: "eventid")
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let dictParams: Dictionary<String, Any> = [
-            "user_id":id ?? "",
-            "product_id":idD ?? "",
+            ]
             
-            
-        ]
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                
-                do {
-                    let data = try JSONDecoder().decode(SoldModel.self, from: result!)
-                    self.soldData = data
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                    self.collectionViewEvent.reloadData()
-                    
-                    
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.soldData = data // Your actual data fetching logic
-                        
-                        DispatchQueue.main.async {
-                            self.hideLoader() // Ensure loader is hidden in both cases
-                            completion() // Call completion handler
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(SoldModel.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
-            }
-        }
-        
-        
-    }
-    //dev.
-    func callMarketDetailWebService(completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
-        
-        // let dictParams: Dictionary<String, Any> = ["":""]
-        
-        let idName = UserDefaults.standard.string(forKey: "name")
-        let idEvent = UserDefaults.standard.string(forKey: "eventid")
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let dictParams: Dictionary<String, Any> = [
-            "user_id":id ?? "",
-            "product_id":idD ?? "",
-            
-            
-        ]
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                
-                do {
-                    let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-                    self.MarketWDetailData = data
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                    self.collectionViewEvent.reloadData()
-                   
-                    
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.MarketWDetailData = data // Your actual data fetching logic
-                        
-                        DispatchQueue.main.async {
-                            completion() // Call completion handler
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
-            }
-        }
-    }
-    
-    //dev.
-    func callMarketCreateWebService(completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add?"
-       
-        
-        let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        
-        let dictParams: Dictionary<String, Any> = [
-            "created_by": id ?? "",
-            "p_title": self.tfItemName.text ?? "",
-            "p_description": self.tfDesc.text ?? "",
-            "sale_type": docType,
-            "sale_price": self.tfItemPrice.text ?? "",
-            "total_price": "0",
-            "brand_name":  "",
-            "seller_name": self.tfDesc.text ?? "",
-            "cat_id": selectedCategoryId ?? "",
-            "p_status": "1",
-            "neighborhood_id": idNeighbour ?? "",
-            "id": idD ?? "",
-            
-        ]
-        print("Param is: \(dictParams)")
-        
-        // Determine if image upload is required based on `self.from`
-        if self.from == 1 {
-            // Log the images from gallery
-            print("Images from gallery: \(imageArray)")
-            
-            // Ensure there are no duplicates
-            let uniqueImageArray = Array(Set(imageArray))
-            
-            // Upload from gallery
-            callsendImageAPI(param: dictParams, arrImage: uniqueImageArray, imageKey: "p_images[]", URlName: url, withblock: {
-//                self.navigationController?.popViewController(animated: true)
-                DispatchQueue.main.async {
-                    self.onUpdateForBlock!()
-                    self.navigationController?.popViewController(animated: false)
-                }
-                completion()
-            })
-        } else if self.from == 2 {
-            // Log the images from camera
-            print("Images from camera: \(images)")
-            
-            // Ensure there are no duplicates
-            let uniqueImages = Array(Set(images))
-            
-            // Upload from camera
-            callsendImageAPI(param: dictParams, arrImage: uniqueImages, imageKey: "p_images[]", URlName: url, withblock: {
-                self.navigationController?.popViewController(animated: true)
-                completion()
-            })
-        } else {
-            // If no image needs to be uploaded, make a separate data post request
-            RSNetworkManager.shared.newRequestApi(withServiceName: url, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
+            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
                 switch statusCode {
-                case .SUCCESS, .CREATED:
+                case .SUCCESS ,.CREATED:
+                    
                     do {
-                        let data = try JSONDecoder().decode(MarketUpdateModel.self, from: result!)
-                        self.MarketEditDataNew = data
+                        let data = try JSONDecoder().decode(InactivemarketModel.self, from: result!)
+                        self.SoldDataNew = data
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
                         self.collectionViewEvent.reloadData()
                         
                         
-                        
                         DispatchQueue.global().async {
+                            // Simulate network delay
                             sleep(2)
-                            self.MarketEditDataNew = data
+                            
+                            // Update MarketWDetailData with fetched data
+                            // Example data assignment
+                            self.SoldDataNew = data // Your actual data fetching logic
+                            
                             DispatchQueue.main.async {
-                                completion()
+                                completion() // Call completion handler
                             }
                         }
                     } catch {
@@ -951,178 +599,460 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
                     }
                 case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
                     do {
-                        let data = try JSONDecoder().decode(MarketUpdateModel.self, from: result!)
-                        // Handle any necessary error messages
+                        let data = try JSONDecoder().decode(InactivemarketModel.self, from: result!)
+                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
                     } catch {
                         print(error.localizedDescription)
                     }
                 case .UNAUTHORIZED:
                     print(error?.localizedDescription)
+                    //   self.showLogoutAlert()
                 default:
                     break
                 }
             }
         }
-    }
-    
-    
-    func callsendImageAPI(param: [String: Any], arrImage: [UIImage], imageKey: String, URlName: String, withblock: @escaping () -> Void) {
+        //dev.
         
-        let headers: HTTPHeaders = ["Content-type": "multipart/form-data"]
-        
-        // Ensure there are no duplicate images
-        let uniqueImages = Array(Set(arrImage))
-        
-        AF.upload(multipartFormData: { (multipartFormData) in
+        func callMarketActiveWebService(completion: @escaping () -> Void) {
+            let url = "https://dev.neighbrsnook.com/admin/api/product_active_status"
             
-            // Append parameters to the multipart form data
-            for (key, value) in param {
-                if let stringValue = value as? String {
-                    multipartFormData.append(stringValue.data(using: .utf8)!, withName: key)
-                }
-            }
+            // let dictParams: Dictionary<String, Any> = ["":""]
             
-            // Append images to the multipart form data
-            for (index, img) in uniqueImages.enumerated() {
-                guard let imgData = img.jpegData(compressionQuality: 0.1) else { return }
-                let fileName = "\(NSDate().timeIntervalSince1970.rounded())_image_\(index).jpeg"
-                multipartFormData.append(imgData, withName: imageKey, fileName: fileName, mimeType: "image/jpeg")
+            let idName = UserDefaults.standard.string(forKey: "name")
+            let idEvent = UserDefaults.standard.string(forKey: "eventid")
+            let id = UserDefaults.standard.string(forKey: "userid")
+            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+            let idPr = UserDefaults.standard.string(forKey: "producttId")
+            let dictParams: Dictionary<String, Any> = [
+                "user_id":id ?? "",
+                "product_id":idD ?? "",
                 
-                // Log each image to ensure it's uploaded once
-                print("Uploading image with file name: \(fileName)")
-            }
-            
-        }, to: URL(string: URlName)!, method: .post, headers: headers).response { response in
-            
-            if response.error == nil {
-                do {
-                    if let jsonData = response.data {
-                        let parsedData = try JSONSerialization.jsonObject(with: jsonData) as? [String: AnyObject]
-                        print(parsedData ?? "No data")
-                        withblock()
-                    }
-                } catch {
-                    print("Error in JSON parsing: \(error.localizedDescription)")
-                }
-            } else {
-                print("Upload error: \(response.error?.localizedDescription ?? "Unknown error")")
-            }
-        }
-    }
-    
-//    @IBAction func serviceNewBtnAction(_ sender: UIButton) {
-//        self.view.endEditing(true)
-//        self.showDropdownData(showOn: tfCategory, DropdownName: serviceDropdownData)
-//        serviceDropdownData.cellHeight = 35
-//
-//        serviceDropdownData.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
-//        //  serviceDropdownData.bottomOffset = CGPoint(x: 50, y: 24)
-//        // self.ServiceDescriptionLabel.text = self.ServiceTypeData?.data.seri
-//    }
-//
-//    private func showDropdownData(showOn textField: UITextField, DropdownName dropdown: DropDown) {
-//
-//        // Set the anchor and dropdown position
-//        dropdown.anchorView = textField
-//        dropdown.bottomOffset = CGPoint(x: 30, y: (dropdown.anchorView?.plainView.bounds.height)!)
-//
-//        // Set up the appearance for the dropdown
-//        dropdown.backgroundColor = UIColor.white
-//        dropdown.cellHeight = 35
-//        dropdown.direction = .bottom
-//        dropdown.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
-//        DropDown.appearance().setupCornerRadius(10)
-//        dropdown.width = 200
-//
-//        // Apply the font settings for the first item
-//        dropdown.customCellConfiguration = { (index: Index, item: String, cell: DropDownCell) in
-//            if index == 0 {
-//                cell.optionLabel.font = UIFont.boldSystemFont(ofSize: 16) // Bold font for the first item
-//            } else {
-//                cell.optionLabel.font = UIFont.systemFont(ofSize: 16) // Regular font for other items
-//            }
-//        }
-//
-//        // Set the selection action after the dropdown is shown
-//        dropdown.selectionAction = { [unowned self] (index: Int, item: String) in
-//            if index != 0 {
-//                self.tfCategory.text = self.serviceName[index]
-//            } else {
-//                self.tfCategory.text = ""
-//            }
-//
-//            UserDefaults.standard.set(self.serviceName[index], forKey: "id")
-//            if index != 0 {
-//                UserDefaults.standard.set(self.MarketCatDataNew?.category?[index - 1].id, forKey: "idCategoryMarket")
-//            }
-//        }
-//
-//        // Show the dropdown
-//        dropdown.show()
-//    }
-    
-    
-    
-    //dev.
-    
-    func callMarketCatWebService(completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/category"
-        
-        let dictParams: Dictionary<String, Any> = ["":""]
-        
-        
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
                 
-                do {
-                    let data = try JSONDecoder().decode(MarketCategoryModel.self, from: result!)
-                    self.MarketCatDataNew = data
-                    //  UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                    //                    for value in self.MarketCatDataNew?.category ?? [] {
-                    //                        self.serviceName.append(value.catTitle ?? "")
-                    //                    }
-                    //                    self.serviceDropdownData.dataSource = self.serviceName
+            ]
+            
+            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
+            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                switch statusCode {
+                case .SUCCESS ,.CREATED:
                     
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
+                    do {
+                        let data = try JSONDecoder().decode(ActiveStatusModel.self, from: result!)
+                        self.ActiveData = data
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
+                        self.collectionViewEvent.reloadData()
                         
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.MarketCatDataNew = data // Your actual data fetching logic
-                        for value in self.MarketCatDataNew?.category ?? [] {
-                            self.serviceName.append(value.catTitle ?? "")
+                        
+                        DispatchQueue.global().async {
+                            // Simulate network delay
+                            sleep(2)
+                            
+                            // Update MarketWDetailData with fetched data
+                            // Example data assignment
+                            self.ActiveData = data // Your actual data fetching logic
+                            
+                            DispatchQueue.main.async {
+                                completion() // Call completion handler
+                            }
                         }
-                       // self.serviceDropdownData.dataSource = self.serviceName
-                        DispatchQueue.main.async {
-                            completion() // Call completion handler
-                        }
+                    } catch {
+                        print(error.localizedDescription)
                     }
-                } catch {
-                    print(error.localizedDescription)
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                    do {
+                        let data = try JSONDecoder().decode(ActiveStatusModel.self, from: result!)
+                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .UNAUTHORIZED:
+                    print(error?.localizedDescription)
+                    //   self.showLogoutAlert()
+                default:
+                    break
                 }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(MarketCategoryModel.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                    //                    for value in self.MarketCatDataNew?.category ?? [] {
-                    //                        self.serviceName.append(value.catTitle ?? "")
-                    //                    }
-                    //                    self.serviceDropdownData.dataSource = self.serviceName
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
             }
         }
+        
+        //dev.
+        
+        func callMarketSoldWebService(completion: @escaping () -> Void) {
+            let url = "https://dev.neighbrsnook.com/admin/api/product_sold_status"
+            
+            // let dictParams: Dictionary<String, Any> = ["":""]
+            
+            let idName = UserDefaults.standard.string(forKey: "name")
+            let idEvent = UserDefaults.standard.string(forKey: "eventid")
+            let id = UserDefaults.standard.string(forKey: "userid")
+            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+            let idPr = UserDefaults.standard.string(forKey: "producttId")
+            let dictParams: Dictionary<String, Any> = [
+                "user_id":id ?? "",
+                "product_id":idD ?? "",
+                
+                
+            ]
+            
+            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
+            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                switch statusCode {
+                case .SUCCESS ,.CREATED:
+                    
+                    do {
+                        let data = try JSONDecoder().decode(SoldModel.self, from: result!)
+                        self.soldData = data
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
+                        self.collectionViewEvent.reloadData()
+                        
+                        
+                        DispatchQueue.global().async {
+                            // Simulate network delay
+                            sleep(2)
+                            
+                            // Update MarketWDetailData with fetched data
+                            // Example data assignment
+                            self.soldData = data // Your actual data fetching logic
+                            
+                            DispatchQueue.main.async {
+                                self.hideLoader() // Ensure loader is hidden in both cases
+                                completion() // Call completion handler
+                            }
+                        }
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                    do {
+                        let data = try JSONDecoder().decode(SoldModel.self, from: result!)
+                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .UNAUTHORIZED:
+                    print(error?.localizedDescription)
+                    //   self.showLogoutAlert()
+                default:
+                    break
+                }
+            }
+            
+            
+        }
+        //dev.
+        func callMarketDetailWebService(completion: @escaping () -> Void) {
+            let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
+            
+            // let dictParams: Dictionary<String, Any> = ["":""]
+            
+            let idName = UserDefaults.standard.string(forKey: "name")
+            let idEvent = UserDefaults.standard.string(forKey: "eventid")
+            let id = UserDefaults.standard.string(forKey: "userid")
+            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+            let idPr = UserDefaults.standard.string(forKey: "producttId")
+            let dictParams: Dictionary<String, Any> = [
+                "user_id":id ?? "",
+                "product_id":idD ?? "",
+                
+                
+            ]
+            
+            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
+            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                switch statusCode {
+                case .SUCCESS ,.CREATED:
+                    
+                    do {
+                        let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
+                        self.MarketWDetailData = data
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
+                        self.collectionViewEvent.reloadData()
+                       
+                        
+                        DispatchQueue.global().async {
+                            // Simulate network delay
+                            sleep(2)
+                            
+                            // Update MarketWDetailData with fetched data
+                            // Example data assignment
+                            self.MarketWDetailData = data // Your actual data fetching logic
+                            
+                            DispatchQueue.main.async {
+                                completion() // Call completion handler
+                            }
+                        }
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                    do {
+                        let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
+                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .UNAUTHORIZED:
+                    print(error?.localizedDescription)
+                    //   self.showLogoutAlert()
+                default:
+                    break
+                }
+            }
+        }
+        
+        //dev.
+        func callMarketCreateWebService(completion: @escaping () -> Void) {
+            let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add?"
+           
+            
+            let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
+            let id = UserDefaults.standard.string(forKey: "userid")
+            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+            
+            let dictParams: Dictionary<String, Any> = [
+                "created_by": id ?? "",
+                "p_title": self.tfItemName.text ?? "",
+                "p_description": self.tfDesc.text ?? "",
+                "sale_type": docType,
+                "sale_price": self.tfItemPrice.text ?? "",
+                "total_price": "0",
+                "brand_name":  "",
+                "seller_name": self.tfDesc.text ?? "",
+                "cat_id": selectedCategoryId ?? "",
+                "p_status": "1",
+                "neighborhood_id": idNeighbour ?? "",
+                "id": idD ?? "",
+                
+            ]
+            print("Param is: \(dictParams)")
+            
+            // Determine if image upload is required based on `self.from`
+            if self.from == 1 {
+                // Log the images from gallery
+                print("Images from gallery: \(imageArray)")
+                
+                // Ensure there are no duplicates
+                let uniqueImageArray = Array(Set(imageArray))
+                
+                // Upload from gallery
+                callsendImageAPI(param: dictParams, arrImage: uniqueImageArray, imageKey: "p_images[]", URlName: url, withblock: {
+    //                self.navigationController?.popViewController(animated: true)
+                    DispatchQueue.main.async {
+                        self.onUpdateForBlock!()
+                        self.navigationController?.popViewController(animated: false)
+                    }
+                    completion()
+                })
+            } else if self.from == 2 {
+                // Log the images from camera
+                print("Images from camera: \(images)")
+                
+                // Ensure there are no duplicates
+                let uniqueImages = Array(Set(images))
+                
+                // Upload from camera
+                callsendImageAPI(param: dictParams, arrImage: uniqueImages, imageKey: "p_images[]", URlName: url, withblock: {
+                    self.navigationController?.popViewController(animated: true)
+                    completion()
+                })
+            } else {
+                // If no image needs to be uploaded, make a separate data post request
+                RSNetworkManager.shared.newRequestApi(withServiceName: url, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                    switch statusCode {
+                    case .SUCCESS, .CREATED:
+                        do {
+                            let data = try JSONDecoder().decode(MarketUpdateModel.self, from: result!)
+                            self.MarketEditDataNew = data
+                            self.collectionViewEvent.reloadData()
+                            
+                            
+                            
+                            DispatchQueue.global().async {
+                                sleep(2)
+                                self.MarketEditDataNew = data
+                                DispatchQueue.main.async {
+                                    completion()
+                                }
+                            }
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                    case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                        do {
+                            let data = try JSONDecoder().decode(MarketUpdateModel.self, from: result!)
+                            // Handle any necessary error messages
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                    case .UNAUTHORIZED:
+                        print(error?.localizedDescription)
+                    default:
+                        break
+                    }
+                }
+            }
+        }
+        
+        
+        func callsendImageAPI(param: [String: Any], arrImage: [UIImage], imageKey: String, URlName: String, withblock: @escaping () -> Void) {
+            
+            let headers: HTTPHeaders = ["Content-type": "multipart/form-data"]
+            
+            // Ensure there are no duplicate images
+            let uniqueImages = Array(Set(arrImage))
+            
+            AF.upload(multipartFormData: { (multipartFormData) in
+                
+                // Append parameters to the multipart form data
+                for (key, value) in param {
+                    if let stringValue = value as? String {
+                        multipartFormData.append(stringValue.data(using: .utf8)!, withName: key)
+                    }
+                }
+                
+                // Append images to the multipart form data
+                for (index, img) in uniqueImages.enumerated() {
+                    guard let imgData = img.jpegData(compressionQuality: 0.1) else { return }
+                    let fileName = "\(NSDate().timeIntervalSince1970.rounded())_image_\(index).jpeg"
+                    multipartFormData.append(imgData, withName: imageKey, fileName: fileName, mimeType: "image/jpeg")
+                    
+                    // Log each image to ensure it's uploaded once
+                    print("Uploading image with file name: \(fileName)")
+                }
+                
+            }, to: URL(string: URlName)!, method: .post, headers: headers).response { response in
+                
+                if response.error == nil {
+                    do {
+                        if let jsonData = response.data {
+                            let parsedData = try JSONSerialization.jsonObject(with: jsonData) as? [String: AnyObject]
+                            print(parsedData ?? "No data")
+                            withblock()
+                        }
+                    } catch {
+                        print("Error in JSON parsing: \(error.localizedDescription)")
+                    }
+                } else {
+                    print("Upload error: \(response.error?.localizedDescription ?? "Unknown error")")
+                }
+            }
+        }
+        
+    //    @IBAction func serviceNewBtnAction(_ sender: UIButton) {
+    //        self.view.endEditing(true)
+    //        self.showDropdownData(showOn: tfCategory, DropdownName: serviceDropdownData)
+    //        serviceDropdownData.cellHeight = 35
+    //
+    //        serviceDropdownData.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
+    //        //  serviceDropdownData.bottomOffset = CGPoint(x: 50, y: 24)
+    //        // self.ServiceDescriptionLabel.text = self.ServiceTypeData?.data.seri
+    //    }
+    //
+    //    private func showDropdownData(showOn textField: UITextField, DropdownName dropdown: DropDown) {
+    //
+    //        // Set the anchor and dropdown position
+    //        dropdown.anchorView = textField
+    //        dropdown.bottomOffset = CGPoint(x: 30, y: (dropdown.anchorView?.plainView.bounds.height)!)
+    //
+    //        // Set up the appearance for the dropdown
+    //        dropdown.backgroundColor = UIColor.white
+    //        dropdown.cellHeight = 35
+    //        dropdown.direction = .bottom
+    //        dropdown.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
+    //        DropDown.appearance().setupCornerRadius(10)
+    //        dropdown.width = 200
+    //
+    //        // Apply the font settings for the first item
+    //        dropdown.customCellConfiguration = { (index: Index, item: String, cell: DropDownCell) in
+    //            if index == 0 {
+    //                cell.optionLabel.font = UIFont.boldSystemFont(ofSize: 16) // Bold font for the first item
+    //            } else {
+    //                cell.optionLabel.font = UIFont.systemFont(ofSize: 16) // Regular font for other items
+    //            }
+    //        }
+    //
+    //        // Set the selection action after the dropdown is shown
+    //        dropdown.selectionAction = { [unowned self] (index: Int, item: String) in
+    //            if index != 0 {
+    //                self.tfCategory.text = self.serviceName[index]
+    //            } else {
+    //                self.tfCategory.text = ""
+    //            }
+    //
+    //            UserDefaults.standard.set(self.serviceName[index], forKey: "id")
+    //            if index != 0 {
+    //                UserDefaults.standard.set(self.MarketCatDataNew?.category?[index - 1].id, forKey: "idCategoryMarket")
+    //            }
+    //        }
+    //
+    //        // Show the dropdown
+    //        dropdown.show()
+    //    }
+        
+        
+        
+        //dev.
+        
+        func callMarketCatWebService(completion: @escaping () -> Void) {
+            let url = "https://dev.neighbrsnook.com/admin/api/category"
+            
+            let dictParams: Dictionary<String, Any> = ["":""]
+            
+            
+            
+            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
+            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                switch statusCode {
+                case .SUCCESS ,.CREATED:
+                    
+                    do {
+                        let data = try JSONDecoder().decode(MarketCategoryModel.self, from: result!)
+                        self.MarketCatDataNew = data
+                        //  UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+                        //                    for value in self.MarketCatDataNew?.category ?? [] {
+                        //                        self.serviceName.append(value.catTitle ?? "")
+                        //                    }
+                        //                    self.serviceDropdownData.dataSource = self.serviceName
+                        
+                        DispatchQueue.global().async {
+                            // Simulate network delay
+                            sleep(2)
+                            
+                            // Update MarketWDetailData with fetched data
+                            // Example data assignment
+                            self.MarketCatDataNew = data // Your actual data fetching logic
+                            for value in self.MarketCatDataNew?.category ?? [] {
+                                self.serviceName.append(value.catTitle ?? "")
+                            }
+                           // self.serviceDropdownData.dataSource = self.serviceName
+                            DispatchQueue.main.async {
+                                completion() // Call completion handler
+                            }
+                        }
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+                    do {
+                        let data = try JSONDecoder().decode(MarketCategoryModel.self, from: result!)
+                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+                        //                    for value in self.MarketCatDataNew?.category ?? [] {
+                        //                        self.serviceName.append(value.catTitle ?? "")
+                        //                    }
+                        //                    self.serviceDropdownData.dataSource = self.serviceName
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                case .UNAUTHORIZED:
+                    print(error?.localizedDescription)
+                    //   self.showLogoutAlert()
+                default:
+                    break
+                }
+            }
+        }
+        
     }
-    
-}
-//pin Sell
+    //pin Sell

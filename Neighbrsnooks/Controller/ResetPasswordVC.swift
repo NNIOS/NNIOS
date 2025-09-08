@@ -27,13 +27,7 @@ class ResetPasswordVC: UIViewController {
         self.passwordView.layer.cornerRadius = 10
         self.confirmPasswordView.layer.cornerRadius = 10
         passwordTF.addTarget(self, action: #selector(passwordDidChange(_:)), for: .editingChanged)
-        
     }
-    
-    
-    
-    
-    
     
     // MARK: - Button's Action
     @IBAction func btnBackAction(_ sender: UIButton) {
@@ -48,8 +42,6 @@ class ResetPasswordVC: UIViewController {
         validatePasswordsAndReset()
     }
     
-    
-    
     // MARK: - passwordDidChange pass week medm and strong
     @objc func passwordDidChange(_ textField: UITextField) {
         guard let password = textField.text else { return }
@@ -58,7 +50,6 @@ class ResetPasswordVC: UIViewController {
             lblStrongPass.text = ""
             return
         }
-        
         lblStrongPass.text = checkPasswordStrength(password)
     }
     
@@ -122,19 +113,25 @@ extension ResetPasswordVC {
     
     // MARK : function for Validate Password
     func validatePasswordsAndReset() {
-        guard let password = passwordTF.text, !password.isEmpty,
-              let confirmPassword = confirmPasswordTF.text, !confirmPassword.isEmpty else {
-            showAlert(message: "Please fill in both password fields.")
+        guard let password = passwordTF.text, !password.isEmpty else {
+            alertToast(Message: "Password enter password")
+            return
+        }
+        if password.count < 5 {
+                alertToast(Message: "Password must be at least 5 characters long")
+                return
+            }
+        
+        guard  let confirmPassword = confirmPasswordTF.text, !confirmPassword.isEmpty else {
+            alertToast(Message: "Please confirm password")
             return
         }
         
         guard password == confirmPassword else {
-            showAlert(message: "Passwords don't match.")
+            alertToast(Message: "Passwords don't match")
             return
         }
-        
-        resetPassowrdAPI {
-        }
+        resetPassowrdAPI { }
     }
     
     // MARK : function for Hide Show secure text entry in textfield
@@ -168,4 +165,3 @@ extension ResetPasswordVC {
     }
     
 }
-

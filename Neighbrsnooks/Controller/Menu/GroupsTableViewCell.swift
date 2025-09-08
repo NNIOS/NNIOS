@@ -27,6 +27,7 @@ class GroupsTableViewCell: UITableViewCell {
     @IBOutlet weak var btnReqPending: UIButton!
     @IBOutlet weak var btnDetails: UIButton!
     @IBOutlet weak var DotPollBtn: UIButton!
+    @IBOutlet weak var btnDetails2: UIButton!
     
     var ExitCallback : ((UIButton) -> Void)?
     var JoinCallback : ((UIButton) -> Void)?
@@ -46,7 +47,7 @@ class GroupsTableViewCell: UITableViewCell {
             addTapGestureToProfile()
         }
         defaultTextColor = lblGroupName.textColor
-//        updateColors()
+        //        updateColors()
     }
     
     private func updateColors() {
@@ -54,35 +55,35 @@ class GroupsTableViewCell: UITableViewCell {
             // Dark mode colors
             lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
             lblGroupName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblPrivate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            DotPollBtn.tintColor = .white
-           // lblMember.textColor = .white
-          //  lblMemberText.textColor = .white
+            //            lblPrivate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            //            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
+            //            DotPollBtn.tintColor = .white
+            // lblMember.textColor = .white
+            //  lblMemberText.textColor = .white
             
         } else {
             // Light mode mein storyboard ke original colors preserve karna
-//            lblName.textColor = UIColor.secondaryLabel
-           // lblGroupName.textColor = defaultTextColor
+            //            lblName.textColor = UIColor.secondaryLabel
+            // lblGroupName.textColor = defaultTextColor
             lblGroupName.textColor = defaultTextColor
-//            lblPrivate.textColor = UIColor.secondaryLabel
-//            lblSec.textColor = UIColor.secondaryLabel
-//            DotPollBtn.tintColor = .black
-//            lblMember.textColor = .white
-//            lblMemberText.textColor = UIColor.secondaryLabel
+            //            lblPrivate.textColor = UIColor.secondaryLabel
+            //            lblSec.textColor = UIColor.secondaryLabel
+            //            DotPollBtn.tintColor = .black
+            //            lblMember.textColor = .white
+            //            lblMemberText.textColor = UIColor.secondaryLabel
             
         }
-      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+        //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-//            updateColors()
+            //            updateColors()
         }
     }
-
+    
     
     private func addTapGestureToProfile() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(profileTapped))
@@ -105,10 +106,10 @@ class GroupsTableViewCell: UITableViewCell {
             delegateFav?.didTapProfile(userId: userId)
         }
     }
-
+    
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
+        
         // Configure the view for the selected state
     }
     
@@ -130,6 +131,10 @@ class GroupsTableViewCell: UITableViewCell {
     
     @IBAction func actionDot(_ sender: Any) {
         DotCallback?(sender as! UIButton)
+    }
+    
+    @IBAction func btnDetails2(_ sender: UIButton) {
+        DetailsCallback?(sender)
     }
     
 }

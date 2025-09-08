@@ -49,14 +49,26 @@ class NetworkMonitor {
     // Show alert when there is no internet connection
     private func showNoConnectionAlert() {
         guard let rootVC = UIApplication.shared.windows.first?.rootViewController else { return }
-        
-        // Avoid showing alert multiple times if already shown
-        if rootVC.presentedViewController is UIAlertController { return }
-        
-        let alert = UIAlertController(title: "No Internet Connection",
-                                      message: "Please check your Wi-Fi or mobile data.",
-                                      preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        rootVC.present(alert, animated: true, completion: nil)
+                if rootVC.presentedViewController is UIAlertController { return }
+                
+                let alert = UIAlertController(
+                    title: "No Internet Connection",
+                    message: "Please check your Wi-Fi or mobile data.",
+                    preferredStyle: .alert
+                )
+                let attributedMessage = NSAttributedString(
+                    string: "Please check your Wi-Fi or mobile data.",
+                    attributes: [
+                        .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                        .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                    ]
+                )
+                alert.setValue(attributedMessage, forKey: "attributedMessage")
+                
+                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+                alert.addAction(okAction)
+                
+                rootVC.present(alert, animated: true, completion: nil) 
     }
 }

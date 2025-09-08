@@ -138,12 +138,8 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
                     let isVideoValid = !(item.video?.isEmpty ?? true)
                     return isImageValid || isVideoValid
                 }
-                
-                
                 self.collectionViewHeightConstraint.constant = hasValidData ? 500 : 0
                 self.collectionViewEvent.layoutIfNeeded()
-                
-                
                 // 🔹 Web
                 let webText = self.BussinessDetailData?.web ?? ""
                 let isWebEmpty = webText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -151,7 +147,6 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
                 self.WebLbl.isHidden = isWebEmpty
                 self.webDataHideShow.isHidden = isWebEmpty
                 self.webContainerHeight.constant = isWebEmpty ? 0 : 40
-
                 // 🔹 Gmail
                 let emailText = self.BussinessDetailData?.email ?? ""
                 let isEmailEmpty = emailText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -159,7 +154,6 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
                 self.GmailLbl.isHidden = isEmailEmpty
                 self.gmailHideShow.isHidden = isEmailEmpty
                 self.gmailContainerHeight.constant = isEmailEmpty ? 0 : 40
-
                 // 🔹 Mobile
                 let phoneText = self.BussinessDetailData?.mobile ?? ""
                 let isPhoneEmpty = phoneText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty

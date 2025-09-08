@@ -27,6 +27,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     private let bottomPanelView = BottomPanelView()
     var BusinessListData : BussinessListModel?
     var sourceViewController: String?
+    var backAction : String?
     var selectedNeighborhoodId: String?
     var businessListData: [BusinessListData] = []
     var sourceViewControlleraddbuss : String?
@@ -67,8 +68,22 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
             SVProgressHUD.dismiss()
         }
         tableviewBussiness.separatorStyle = .none
+        
+        let refreshControl = UIRefreshControl()
+           refreshControl.addTarget(self, action: #selector(refreshPageData), for: .valueChanged)
+        tableviewBussiness.refreshControl = refreshControl
+        
     }
     
+    
+    @objc func refreshPageData() {
+        callUserProfileWebService {
+            self.tableviewBussiness.reloadData()
+            self.tableviewBussiness.refreshControl?.endRefreshing()
+        }
+    }
+
+
     
     private func setupBottomPanel() {
         bottomPanelView.delegate = self
@@ -271,16 +286,21 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     }
     
     
-    @IBAction func BackButtionAction(_ : UIButton) {
+    @IBAction func BackButtionAction(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {
-            return
+        if backAction == "homeBack" {
+            guard let homeVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else {
+                return
+            }
+            self.navigationController?.setViewControllers([homeVC], animated: true)
+        } else {
+            guard let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {
+                return
+            }
+            myProfileVC.fromScreen = "AddBussiness"
+            myProfileVC.Newid = self.Newid
+            self.navigationController?.setViewControllers([myProfileVC], animated: true)
         }
-        
-        myProfileVC.fromScreen = "AddBussiness"
-        myProfileVC.Newid = self.Newid  // ✅ Pass the same Newid you used earlier
-
-        self.navigationController?.setViewControllers([myProfileVC], animated: true)
     }
 
     
@@ -303,13 +323,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
         }
     }
     
-    //    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-    //        super.traitCollectionDidChange(previousTraitCollection)
-    //
-    //        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-    //            updateColors()
-    //        }
-    //    }
+    
     
     @IBAction func serviceBtnAction(_ sender: UIButton) {
         self.view.endEditing(true)
@@ -341,29 +355,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     }
     
     
-    //    private func showDropdownData(showOn textField: UITextField, DropdownName dropdown : DropDown) {
-    //        dropdown.show()
-    //        dropdown.anchorView = textField
-    //        dropdown.bottomOffset = CGPoint(x: 30, y: (dropdown.anchorView?.plainView.bounds.height)!)
-    //        dropdown.selectionAction = { [unowned self] (index: Int, item: String) in
-    //            if index != 0{
-    //                self.tfCategory.text = self.serviceName[index]
-    //            }else{
-    //                self.tfCategory.text = ""
-    //            }
-    //
-    //            UserDefaults.standard.set(self.serviceName[index], forKey: "id")
-    //            if index != 0{
-    //                UserDefaults.standard.set(self.BussinessCategoryData?.nbdata?[index - 1].id, forKey: "idCategory")
-    //            }
-    //            dropdown.backgroundColor = UIColor.white
-    //            dropdown.cellHeight = 35
-    //            dropdown.direction = .bottom
-    //            dropdown.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
-    //            DropDown.appearance().setupCornerRadius(10)
-    //            dropdown.width = 200
-    //        }
-    //    }
+    
     
     
     @IBAction func btnAddBussiness(_ : UIButton){

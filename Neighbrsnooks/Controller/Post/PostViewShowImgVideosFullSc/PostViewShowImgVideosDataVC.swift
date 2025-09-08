@@ -26,13 +26,8 @@ class PostViewShowImgVideosDataVC: UIViewController {
     var imageUrls: [ImageBd] = []
     var allMediaData: [PostImageD] = []  // Pura array yahan store hoga
     var selectedIndex: Int = 0  // Ye batayega ki kaunsa item select hua hai
-
-    
     var selectedMediaDetailsUrl: String?
     var mediaArrayMarketDetails: [String] = []
-    
-    
-    
     var thisWidth: CGFloat = 0
     var UserName = ""
     
@@ -69,36 +64,17 @@ class PostViewShowImgVideosDataVC: UIViewController {
                 return postImagesN(img: urlString, video: nil) // Image mila
             }
         })
-        
-        
-        
-        
-        
-        
-        
         colleviewShowImgVideos.reloadData()
-        
-        
-        
-         // CollectionView ke visible cells le lo
+        // CollectionView ke visible cells le lo
         for cell in colleviewShowImgVideos.visibleCells {
             if let videoCell = cell as? PostViewShowImgVideosColleViewCell {
                 videoCell.stopVideo() // 🎯 Stop Video Function Call Karein
             }
         }
-        
-        
     }
-    
-   
-    
-    
-    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.tabBarController?.tabBar.isHidden = false
-        
-      
         
         // CollectionView ke visible cells le lo
         for cell in colleviewShowImgVideos.visibleCells {
@@ -118,7 +94,6 @@ class PostViewShowImgVideosDataVC: UIViewController {
 
 @available(iOS 16.0, *)
 extension PostViewShowImgVideosDataVC: UICollectionViewDelegateFlowLayout, UICollectionViewDelegate, UICollectionViewDataSource {
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return imgDataAll.count
     }
@@ -131,8 +106,6 @@ extension PostViewShowImgVideosDataVC: UICollectionViewDelegateFlowLayout, UICol
         return cell
     }
     
-    
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let screenWidth = UIScreen.main.bounds.width
         let screenHeight = UIScreen.main.bounds.height
@@ -140,14 +113,20 @@ extension PostViewShowImgVideosDataVC: UICollectionViewDelegateFlowLayout, UICol
     }
     
     
+    
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if let videoCell = cell as? PostViewShowImgVideosColleViewCell {
+            videoCell.stopVideo() // 🎯 Video ko pause aur reset karo
+        }
+    }
+
+    
     // Snapping effect to stop at the nearest item
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         let layout = colleviewShowImgVideos.collectionViewLayout as! UICollectionViewFlowLayout
         let cellWidthIncludingSpacing = colleviewShowImgVideos.frame.width // Full screen width
-        
         let estimatedIndex = scrollView.contentOffset.x / cellWidthIncludingSpacing
         let index: CGFloat
-        
         if velocity.x > 0 {
             index = ceil(estimatedIndex)
         } else if velocity.x < 0 {
@@ -155,10 +134,6 @@ extension PostViewShowImgVideosDataVC: UICollectionViewDelegateFlowLayout, UICol
         } else {
             index = round(estimatedIndex)
         }
-        
         targetContentOffset.pointee = CGPoint(x: index * cellWidthIncludingSpacing, y: 0)
     }
-    
-    
-    
 }

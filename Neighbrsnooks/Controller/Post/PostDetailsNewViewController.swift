@@ -12,10 +12,10 @@ import IQKeyboardManager
 @available(iOS 16.0, *)
 
 class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource,UITextViewDelegate {
+    
     @IBOutlet weak var tableviewHeightMess: NSLayoutConstraint!
     @IBOutlet weak var collectionViewBanner: UICollectionView!
     @IBOutlet weak var collectionViewBannerHeight: NSLayoutConstraint!
-    
     @IBOutlet weak var viewMessageHeight: NSLayoutConstraint!
     @IBOutlet weak var tvmessageHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var tableviewPost: UITableView!
@@ -45,9 +45,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     @IBOutlet weak var btnFav: UIButton!
     @IBOutlet weak var lblShare: UILabel!
     @IBOutlet weak var bottomConstraint: NSLayoutConstraint!
-
- 
-    
+   
     var createdBy: String?
     var selectedCommentIndexPath: IndexPath?
     var fullText: String = "" // Full text from backend
@@ -112,12 +110,10 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         
         tvmessage.delegate = self
         tvmessage.isScrollEnabled = false
-        
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow),
-                                                 name: UIResponder.keyboardWillShowNotification, object: nil)
-          NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide),
-                                                 name: UIResponder.keyboardWillHideNotification, object: nil)
-        
+                                               name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide),
+                                               name: UIResponder.keyboardWillHideNotification, object: nil)
         setupContainerView()
         containerView.frame = self.view .frame
         self.view.addSubview(self.containerView)
@@ -145,7 +141,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         }
         setupLabel()
         tableviewPost.rowHeight = UITableView.automaticDimension
-        tableviewPost.estimatedRowHeight = 80 // Approximate height
+//        tableviewPost.estimatedRowHeight = 80 // Approximate height
         fullText = self.PostDetailData?.listdata?.first?.postMessage ?? ""
         // Ensure selection is enabled
         collectionViewBanner.isUserInteractionEnabled = true
@@ -170,14 +166,14 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshTableView), userInfo: nil, repeats: true)
         btnComment.isHidden = false
         btnCommentReply.isHidden = true
-//        btnLike.setImage(UIImage(named: "Unlike"), for: .normal)
+        //        btnLike.setImage(UIImage(named: "Unlike"), for: .normal)
         btnLike.setImage(UIImage(systemName: "hand.thumbsup.circle"), for: .normal)
         btnLike.tintColor =  #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
         lblLike.text = "\(likeCount)"
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(showEmojis(_:)))
         longPressGesture.minimumPressDuration = 2.0 // Only trigger after 2 seconds
         btnLike.addGestureRecognizer(longPressGesture)
-
+        
         // Initialize all sections as hidden by default
         if let postDataCount = CommentPostListData?.postlistdata.count {
             for section in 0..<postDataCount {
@@ -189,17 +185,17 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.MembersLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
-
+        
         // ✅ Call your post detail API
         callpostDetailWebService(postid: self.postid) {
             self.collectionViewBanner.reloadData()
-
+            
             // ✅ Safely unwrap the first item from listdata
             guard let data = self.PostDetailData?.listdata?.first else {
                 print("🚫 No post data available.")
                 return
             }
-
+            
             // ✅ Set your labels
             self.lblName.text = data.username
             self.lblSector.text = data.neighborhood
@@ -207,7 +203,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             self.lblDescription.text = data.postMessage
             self.lblmonth.text = data.createdOn
             self.lblComment.text = "\(data.totcomment ?? 0)"
-
+            
             // ✅ Load user profile image
             if let imageUrlString = data.userpic,
                let imageUrl = URL(string: imageUrlString) {
@@ -230,7 +226,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
                 print("🚫 No image URL found.")
             }
         }
-
+        
         SVProgressHUD.show()
         DispatchQueue.main.async {
             self.callPostCommenteWebService {
@@ -239,7 +235,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             }
         }
     }
-
+    
     
     
     
@@ -247,23 +243,23 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     @objc func keyboardWillShow(_ notification: Notification) {
         guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
         let keyboardHeight = keyboardFrame.height
-
+        
         self.bottomConstraint.constant = -keyboardHeight
-
+        
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
     }
-
+    
     @objc func keyboardWillHide(_ notification: Notification) {
         self.bottomConstraint.constant = 0
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
     }
-
     
- 
+    
+    
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
@@ -444,13 +440,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         return truncated
     }
     
-    
-    
-    
-    
-    
-    
-    
+   
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -492,12 +482,12 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             likeCount += isLikedByUser ? 1 : -1
             likeCount = max(0, likeCount)
             lblLike.text = "\(likeCount)"
-
+            
             // Button style
             btnLike.setTitle("", for: .normal)
             btnLike.setImage(UIImage(systemName: isLikedByUser ? "hand.thumbsup.circle.fill" : "hand.thumbsup.circle"), for: .normal)
             btnLike.tintColor = isLikedByUser ? #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1) : #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
-
+            
             // 🔁 Call Like/Unlike API
             if isLikedByUser {
                 callPostLikeWebService(postId: postId, emoji: nil) {
@@ -512,9 +502,9 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             updateLikeWithEmoji() // Emoji already selected
         }
     }
-
-
-
+    
+    
+    
     // Show emoji selection view
     func showEmojiSelectionView(button: UIButton) {
         // Remove previous emoji view if it exists
@@ -574,24 +564,24 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     // Update like button with selected emoji
     func updateLikeWithEmoji() {
         guard let emoji = selectedEmoji else { return }
-
+        
         if !isLikedByUser {
             likeCount += 1
             isLikedByUser = true
         }
-
+        
         lblLike.text = "\(likeCount)"
         btnLike.setTitle(emoji, for: .normal)
         btnLike.setImage(nil, for: .normal)
         btnLike.setNeedsLayout()
         btnLike.layoutIfNeeded()
-
+        
         // 🔁 Call like API with emoji
         callPostLikeWebService(postId: postId, emoji: emoji) {
             print("✅ Emoji like API called with emoji: \(emoji)")
         }
     }
-
+    
     
     // Long press gesture to show emoji selection
     @objc func showEmojis(_ gesture: UILongPressGestureRecognizer) {
@@ -601,27 +591,27 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             }
         }
     }
-
+    
     
     @IBAction func actionShare(_ sender: Any) {
     }
     
     
     //MARK: - favtk post
-
+    
     @IBAction func actionFavt(_ sender: Any) {
         if postid.isEmpty {
             self.showAlert(Message: "Post ID not found.")
             return
         }
-
+        
         if favouritstatus == 1 {
             // Currently favourite → remove it
             self.callFavouriteRemoveBussinessWebService(postId: postid) { [weak self] newStatus, message in
                 guard let self = self else { return }
                 self.favouritstatus = newStatus
                 self.updateFavIcon()
-//                self.showAlert(Message: message)
+                //                self.showAlert(Message: message)
             }
         } else {
             // Currently not favourite → add it
@@ -629,18 +619,18 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
                 guard let self = self else { return }
                 self.favouritstatus = newStatus
                 self.updateFavIcon()
-//                self.showAlert(Message: message)
+                //                self.showAlert(Message: message)
             }
         }
     }
-
+    
     // MARK: - Update Favourite Icon
     func updateFavIcon() {
         let imageName = favouritstatus == 1 ? "favorites" : "Un favorites" // Image names from Assets
         let image = UIImage(named: imageName)
         btnFav.setImage(image, for: .normal)
     }
-
+    
     
     
     @IBAction func actionReplyPopup(_ sender: Any) {
@@ -715,34 +705,34 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         }
     }
     
-//    func textViewDidChange(_ textView: UITextView) {
-//        // Show or hide placeholder label based on text view content
-//        placeholderLabel.isHidden = !textView.text.isEmpty
-//    }
+    //    func textViewDidChange(_ textView: UITextView) {
+    //        // Show or hide placeholder label based on text view content
+    //        placeholderLabel.isHidden = !textView.text.isEmpty
+    //    }
     
     func textViewDidChange(_ textView: UITextView) {
         let size = CGSize(width: textView.frame.width, height: .infinity)
         let estimatedSize = textView.sizeThatFits(size)
         
         placeholderLabel.isHidden = !textView.text.isEmpty
-
+        
         // ✅ Limit max height to 150
         let finalHeight = min(estimatedSize.height, 150)
-
+        
         // ✅ Update constraints
         tvmessageHeightConstraint.constant = finalHeight
         viewMessageHeight.constant = finalHeight
-
+        
         // ✅ Enable scrolling if content > 150
         textView.isScrollEnabled = estimatedSize.height >= 150
-
+        
         UIView.animate(withDuration: 0.2) {
             self.view.layoutIfNeeded()
         }
     }
-
-
-
+    
+    
+    
     
     
     
@@ -768,7 +758,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             }
         }
     }
-
+    
     
     
     @IBAction func actionCommentReply(_ sender: UIButton){
@@ -792,7 +782,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             }
         }
     }
-
+    
     
     
     func loadPostData() {
@@ -838,8 +828,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         // Make sure both heights are calculated before calling this
         let bannerHeight = collectionViewBannerHeight.constant
         let tableHeight = tableviewHeightMess.constant
-        
-        mainHeight.constant = 250 + bannerHeight + tableHeight
+        mainHeight.constant = 210 + bannerHeight + tableHeight
     }
     
     
@@ -928,11 +917,9 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         tableviewPost.layoutIfNeeded()
         
         let contentHeight = tableviewPost.contentSize.height
-        print("Content Height: \(contentHeight)")
-        
+//        print("Content Height: \(contentHeight)")
         let dataCount = CommentPostListData?.postlistdata.count ?? 0
         tableviewHeightMess.constant = dataCount == 0 ? 0 : contentHeight
-        
         updateMainHeight()
     }
     
@@ -943,7 +930,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         
         var dictParams: [String: Any] = [
             "userid": id ?? "",
-//            "postid": idPost ?? "",
+            //            "postid": idPost ?? "",
             "postid": self.postid,
             "commenttext": self.tvmessage.text ?? "",
             "parent_id": parentID ?? "",
@@ -976,7 +963,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             completionClosure()
         }
     }
-   
+    
     
     func callCommLikePostWebService(postId: String, userId: String, commentId: String, _ completionClosure: @escaping () -> ()) {
         let dictParams: [String: Any] = [
@@ -991,7 +978,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             completionClosure()
         }
     }
-
+    
     
     
     
@@ -1072,23 +1059,35 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
             }
             
             
+            cell.configureCell(for: indexPath.section)
+            cell.profileTapHandler = { [weak self] section in
+                guard let self = self else { return }
+                guard let postData = self.CommentPostListData?.postlistdata[section] else { return }
+                let userID = postData.userid
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let vc = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
+                    vc.Oid = userID
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+            }
+            
             cell.likeButtonTapped = { [weak self] newState in
                 guard let self = self else { return }
                 
                 let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
                 let postId = postData.postid
                 let commentId = postData.pcID
-
+                
                 // ✅ First, update your model
                 self.CommentPostListData?.postlistdata[indexPath.section].isLiked = newState
-
+                
                 // ✅ Then, call API (don't care about API response for now)
                 self.callCommLikePostWebService(postId: postId, userId: userId, commentId: commentId) {
                     // Optional: handle response
                     print("API called successfully")
                 }
             }
-
+            
             
             // Handle hide/show button action
             cell.toggleReplyCellAction = { [weak self] in
@@ -1147,12 +1146,26 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
                     self.isReplyCellSelected = true
                     self.postid = reply.postid
                 }
+                
+                cell.configureCell(for: indexPath.section, reply: reply)
+                cell.profileTapHandler = { [weak self] replyObj, section in
+                    guard let self = self else { return }
+                    let userID = replyObj.userid // Reply user id!
+                    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                    if let vc = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
+                        vc.Oid = userID
+                        self.navigationController?.pushViewController(vc, animated: true)
+                    }
+                }
+                
+                
+                
             }
             return cell
         }
     }
     
- 
+    
     
 }
 
@@ -1296,8 +1309,8 @@ extension PostDetailsNewViewController {
             completion()
         }
     }
-
-
+    
+    
     
     
 }

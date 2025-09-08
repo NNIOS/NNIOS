@@ -15,9 +15,9 @@ class LatestListingCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var rsLbl: UILabel!
     @IBOutlet weak var secttLbl: UILabel!
     @IBOutlet weak var DayLbl: UILabel!
-    
+    @IBOutlet weak var imgWishlist: UIImageView!
     @IBOutlet weak var SoldImgView : UIImageView!
-    
+    @IBOutlet weak var lblSellDonate: CustomLabelHeadingUseranme!
     var DetailCallback : ((UIButton) -> Void)?
     
     override func awakeFromNib() {

@@ -173,65 +173,77 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
     
     
     @IBAction func CreateBtn(_ sender: UIButton) {
-        sender.isEnabled = false
+            sender.isEnabled = false
 
-        // Save original title
-        let originalTitle = sender.title(for: .normal)
-        sender.setTitle("", for: .normal)
+            // Save original title
+            let originalTitle = sender.title(for: .normal)
+            sender.setTitle("", for: .normal)
 
-        // Add activity indicator in center of button
-        let loader = UIActivityIndicatorView(style: .medium)
-        loader.translatesAutoresizingMaskIntoConstraints = false
-        loader.color = .white
-        sender.addSubview(loader)
+            // Add activity indicator in center of button
+            let loader = UIActivityIndicatorView(style: .medium)
+            loader.translatesAutoresizingMaskIntoConstraints = false
+            loader.color = .white
+            sender.addSubview(loader)
 
-        NSLayoutConstraint.activate([
-            loader.centerXAnchor.constraint(equalTo: sender.centerXAnchor),
-            loader.centerYAnchor.constraint(equalTo: sender.centerYAnchor)
-        ])
-        loader.startAnimating()
+            NSLayoutConstraint.activate([
+                loader.centerXAnchor.constraint(equalTo: sender.centerXAnchor),
+                loader.centerYAnchor.constraint(equalTo: sender.centerYAnchor)
+            ])
+            loader.startAnimating()
 
-        // 📋 Text values
-        let groupName = tfGroupName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let groupDescription = tvaboutGroup.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            // 📋 Text values
+            let groupName = tfGroupName.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let groupDescription = tvaboutGroup.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
-        // 🔍 Validation Checks
-        if groupName.isEmpty {
-            showAlert(with: "Please enter group name", sender: sender, loader: loader, originalTitle: originalTitle)
-            return
-        }
+            // 🔍 Validation Checks
+            if groupName.isEmpty {
+    //            showAlert(with: "Please enter group name", sender: sender, loader: loader, originalTitle: originalTitle)
+                self.alertToast(Message: "Please enter group name")
+                return
+            }
 
-        if containsBadWords(groupName) {
-            showAlert(with: "Group name contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
-            return
-        }
+            if containsBadWords(groupName) {
+    //            showAlert(with: "Group name contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
+                self.alertToast(Message: "Group name contains inappropriate words")
+                return
+            }
 
-        if groupDescription.isEmpty {
-            showAlert(with: "Please enter group description", sender: sender, loader: loader, originalTitle: originalTitle)
-            return
-        }
+            if groupDescription.isEmpty {
+    //            showAlert(with: "Please enter group description", sender: sender, loader: loader, originalTitle: originalTitle)
+                self.alertToast(Message: "Please enter group description")
+                return
+            }
+            
+            if profilePic.image == nil || profilePic.image == UIImage(named: "placeholder") {
+    //            showAlert(with: "Please upload a image", sender: sender, loader: loader, originalTitle: originalTitle)
+                self.alertToast(Message: "Please upload a image")
+                return
+            }
 
-        if containsBadWords(groupDescription) {
-            showAlert(with: "Group description contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
-            return
-        }
 
-        if account == "" {
-            showAlert(with: "Please select who can join", sender: sender, loader: loader, originalTitle: originalTitle)
-            return
-        }
+            if containsBadWords(groupDescription) {
+    //            showAlert(with: "Group description contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
+                self.alertToast(Message: "Group description contains inappropriate words")
+                return
+            }
 
-        // ✅ All validations passed — Call API
-        callCreateGroupWebService {
-            DispatchQueue.main.async {
-                loader.stopAnimating()
-                loader.removeFromSuperview()
-                sender.setTitle(originalTitle, for: .normal)
-                sender.isEnabled = true
-                self.navigationController?.popViewController(animated: true)
+            if account == "" {
+    //            showAlert(with: "Please select who can join", sender: sender, loader: loader, originalTitle: originalTitle)
+                self.alertToast(Message: "Please select who can join")
+                return
+            }
+
+            // ✅ All validations passed — Call API
+            callCreateGroupWebService {
+                DispatchQueue.main.async {
+                    loader.stopAnimating()
+                    loader.removeFromSuperview()
+                    sender.setTitle(originalTitle, for: .normal)
+                    sender.isEnabled = true
+                    self.navigationController?.popViewController(animated: true)
+                }
             }
         }
-    }
 
 
     

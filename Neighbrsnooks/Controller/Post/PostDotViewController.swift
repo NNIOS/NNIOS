@@ -91,6 +91,7 @@ class PostDotViewController: BottomPopupViewController {
     var isComingFromMenuPostVC:Bool = true
     var onUpdateForFav: (() -> Void)?
      var callbackf: ((Int) -> Void)? // 👈 Yeh callback
+    var shareCallback: (() -> Void)?
 
     
     override var popupTopCornerRadius: CGFloat {
@@ -356,21 +357,15 @@ class PostDotViewController: BottomPopupViewController {
 
 
     
-    
-    @IBAction func shareTapped(sender: UIButton)
-    {
-        let appName = "Neighbrsnook"
-        let appDescription = "Neighbrsnook is a hyperlocal social networking service connecting neighbours."
-        let appLink = "https://testflight.apple.com/join/1G74jNEC"
-        
+    @IBAction func shareButtonTapped(_ sender: UIButton) {
+        let appName = "Neighboursnook"
+        let appDescription = "Neighboursnook is a hyperlocal social networking service. Connect with your neighborhood today!"
+        let appLink = "https://apps.apple.com/in/app/neighbrsnook/id6746369263"
         let shareText = "\(appDescription) \nDownload now: \(appLink)"
-        
-        // Step 2: Show share popup
         let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-        
-        // Step 3: Present the share popup
-        present(activityViewController, animated: true, completion: nil)
+        self.present(activityViewController, animated: true, completion: nil)
     }
+
     
     @IBAction func btnReport(_ : UIButton){
         navigateToReportCallback?()

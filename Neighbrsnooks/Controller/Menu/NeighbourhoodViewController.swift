@@ -20,7 +20,6 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
     @IBOutlet weak var MemberLbl: UILabel!
     @IBOutlet weak var PostLbl: UILabel!
     @IBOutlet weak var neighborhoodView: UIView!
-    
     @IBOutlet weak var NeighrhoodLbl: UILabel!
     @IBOutlet weak var LblMyNeighbrhoods: UILabel!
     @IBOutlet weak var PrimaryNeighrhoodLbl: UILabel!
@@ -36,14 +35,14 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
     @IBOutlet weak var MembersView: UIView!
     @IBOutlet weak var NearNeighbourhoddView: UIView!
     @IBOutlet weak var MyNeighbourhoddView: UIView!
-    
     @IBOutlet weak var LblMemberText: UILabel!
     @IBOutlet weak var LblGroupsText: UILabel!
     @IBOutlet weak var LblEventText: UILabel!
     @IBOutlet weak var LblPollText: UILabel!
     @IBOutlet weak var LblBussinessText: UILabel!
     @IBOutlet weak var LblPostText: UILabel!
-    
+    @IBOutlet weak var nearbyNeighbourhoodHeoght: NSLayoutConstraint!
+    @IBOutlet weak var nearbyNeighViewHeight: NSLayoutConstraint!
     private let spacing:CGFloat = 5.0
     var neighbrhoodData : MyNeighbhoodModel?
     var thisWidth:CGFloat = 0
@@ -54,7 +53,8 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
         //        updateColors()
-        
+        collectionViewDirectory.isScrollEnabled = false
+
         self.EventsLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.lblTotalMember.font = UIFont(name: "Montserrat-Regular", size: 13)
         self.PollLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
@@ -63,11 +63,9 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         self.MemberLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.BusinessLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.NeighrhoodLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
-        
         self.PrimaryNeighrhoodLbl.font = UIFont(name: "Montserrat-Regular", size: 13)
         //  self.TotalMemberLbl.font = UIFont(name: "Montserrat-Medium", size: 18)
         self.PostLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
-        
         self.MyNearByLbl.font  = UIFont(name: "Montserrat-Regular", size: 20)
         self.LblMyNeighbrhoods.font  = UIFont(name: "Montserrat-Regular", size: 20)
         defaultTextColor = lblMember.textColor
@@ -87,12 +85,15 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         self.lblMember.font = UIFont(name: "Montserrat-Regular", size: 17)
         SVProgressHUD.show()
         
-        
         //
         callMyNeighbrhoodWebService{ // All data
             SVProgressHUD.dismiss()
             self.collectionViewDirectory.reloadData()
-            
+              self.collectionViewDirectory.layoutIfNeeded()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { // Slight delay helps for async layout
+                self.updateCollectionViewHeight()
+            }
+
             self.EventsLbl.text = self.neighbrhoodData?.events
             self.PollLbl.text = self.neighbrhoodData?.polls
             self.BusinessLbl.text = self.neighbrhoodData?.business
@@ -115,17 +116,38 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
             
             self.PrimaryNeighrhoodLbl.text = "\(self.neighbrhoodData?.ownerNeighbrhood.first?.member ?? "") Members"
             self.PostLbl.text = self.neighbrhoodData?.post
-            //   self.lblMember.text = self.neighbrhoodData?.neighbrhood
-            
-            // self.lblTotalMember.text = self.neighbrhoodData?.totmember ?? "N/A"
-            
-            
-            
-            //  self.NeighrhoodLbl.text = self.neighbrhoodData?.nearestNeighbrhood.first?.name
+         
         }
         
-        // Do any additional setup after loading the view.
+        
+      
     }
+    
+    
+    func updateCollectionViewHeight() {
+        let itemCount = neighbrhoodData?.nearestNeighbrhood.count ?? 0
+        let itemsPerRow: CGFloat = 2
+        let cellHeight: CGFloat = 105
+        let spacingBetweenRows: CGFloat = 8
+        let topBottomInset: CGFloat = 16 // adjust as per design
+
+        if itemCount == 0 {
+            collectionViewHeightConstraint.constant = 0
+        } else {
+            let numberOfRows = ceil(CGFloat(itemCount) / itemsPerRow)
+            let collectionHeight = (numberOfRows * cellHeight) + ((numberOfRows - 1) * spacingBetweenRows) + topBottomInset
+            collectionViewHeightConstraint.constant = collectionHeight + 70  
+        }
+
+        self.view.layoutIfNeeded()
+    }
+
+
+
+   
+
+    
+    
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -153,20 +175,13 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
             LblMyNeighbrhoods.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
             lblMember.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
             PrimaryNeighrhoodLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-            
             MyNearByLbl.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
             lblTotalMember.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-            
             MembersView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            
             MembersView.layer.borderWidth = 1.0
-            
             neighborhoodView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            
             neighborhoodView.layer.borderWidth = 1.0
-            
             NearNeighbourhoddView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-            
             NearNeighbourhoddView.layer.borderWidth = 1.0
             
         } else {
@@ -175,10 +190,8 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
             
             MembersView.isUserInteractionEnabled = true
             MembersView.layer.borderWidth = 0
-            
             neighborhoodView.isUserInteractionEnabled = true
             neighborhoodView.layer.borderWidth = 0
-            
             NearNeighbourhoddView.isUserInteractionEnabled = true
             NearNeighbourhoddView.layer.borderWidth = 0
             NeighbourhoddView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
@@ -364,10 +377,8 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
             showAlert(message: "Internet not available. Please check your connection.")
             return
         }
-
         
         if neighbrhoodData?.verfiedMsg == "User Verification is completed!" {
-            
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "BussinesViewController")as! BussinesViewController
             vc.selectedNeighborhoodId = self.idNeighbour
             vc.sourceViewController = "Neighbourhood"
@@ -417,7 +428,6 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
 
         
         if neighbrhoodData?.verfiedMsg == "User Verification is completed!" {
-            
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "PollsViewController")as! PollsViewController
             vc.selectedNeighborhoodId = self.idNeighbour
             vc.sourceViewController = "Neighbourhood"
@@ -426,7 +436,6 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         else {
             // Create the alert controller
             let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-            
             // Define font and color attributes
             let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
             let messageAttributes: [NSAttributedString.Key: Any] = [
@@ -444,12 +453,10 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
             // Set the title and message of the alert
             alert.setValue(attributedTitle, forKey: "attributedTitle")
             alert.setValue(attributedMessage, forKey: "attributedMessage")
-            
             // Add an action to the alert
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
                 alert.dismiss(animated: true, completion: nil)
             }))
-            
             // Present the alert
             self.present(alert, animated: true, completion: nil)
         }
@@ -462,35 +469,27 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
             showAlert(message: "Internet not available. Please check your connection.")
             return
         }
-
         
         if neighbrhoodData?.verfiedMsg == "User Verification is completed!" {
-            
             // Save selectedNeighborhoodId to UserDefaults
             UserDefaults.standard.set(idNeighbour, forKey: "neighbrshood")
-            
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostViewController") as! PostViewController
             vc.selectedNeighborhoodId = self.idNeighbour
             self.navigationController?.pushViewController(vc, animated: true)
-            
         } else {
             let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-            
             let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
             let messageAttributes: [NSAttributedString.Key: Any] = [
                 .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
                 .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
             ]
-            
             let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
             let attributedMessage = NSAttributedString(
                 string: "You have limited access till verification is complete. We thank you for your patience.",
                 attributes: messageAttributes
             )
-            
             alert.setValue(attributedTitle, forKey: "attributedTitle")
             alert.setValue(attributedMessage, forKey: "attributedMessage")
-            
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
                 alert.dismiss(animated: true, completion: nil)
             }))
@@ -725,23 +724,34 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
     
     func callMyNeighbrhoodWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
-        
-        // Retrieve the updated neighborhood ID from UserDefaults
         let idNeighbour = UserDefaults.standard.string(forKey: "neighbrhood")
         
-        let dictParams: Dictionary<String, Any> = [
+        let dictParams: [String: Any] = [
             "userid": id ?? "",
             "neighbrhood": idNeighbour ?? ""
         ]
         
         WebService.sharedInstance.callMyNeighbrhoodWebService(withParams: dictParams) { data in
             self.neighbrhoodData = data
+            
             UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.name, forKey: "name")
             UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.status, forKey: "status")
+            
+            DispatchQueue.main.async {
+                self.collectionViewDirectory.reloadData()
+                
+                // Ensure height updates after reload
+                DispatchQueue.main.async {
+                    self.updateCollectionViewHeight()
+                }
+                
+                // Agar koi extra UI updates hai to yaha kar sakte ho
+            }
             
             completionClosure()
         }
     }
+
     
     func updateFollowButtonStatus(_ status: Int) {
         let followButton = UIButton()

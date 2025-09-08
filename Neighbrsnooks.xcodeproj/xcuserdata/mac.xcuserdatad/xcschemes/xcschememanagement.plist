@@ -12,12 +12,12 @@
 		<key>NeighbrsnookTests.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>15</integer>
+			<integer>16</integer>
 		</dict>
 		<key>NeighbrsnookUITests.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>16</integer>
+			<integer>15</integer>
 		</dict>
 		<key>Neighbrsnooks.xcscheme_^#shared#^_</key>
 		<dict>

@@ -36,7 +36,10 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
     var activityIndicator: UIActivityIndicatorView!
     var shouldNavigateAfterLocationFetch = false
     var fullAddress: String?
-    
+    var profileData: ProfileModel?
+    var sourceScreen: String? // profile or FirstSteep
+    var backsourceScreen: String?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.hidesBackButton = true
@@ -211,9 +214,15 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
 
     
     @IBAction func actionBack(_ sender: Any) {
-        let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as! NewRegistationSecondStepVC
+        // ✅ Find the existing previous VC in the navigation stack
+        if let previousVC = self.navigationController?.viewControllers.first(where: { $0 is NewRegistationSecondStepVC }) as? NewRegistationSecondStepVC {
+            previousVC.shouldUpdateUIOnAppear = false // ✅ Update the real instance
+        }
+        // ✅ Pop back
         self.navigationController?.popViewController(animated: true)
     }
+
+
     
     
     // Get current location and update the label
@@ -265,7 +274,13 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
     }
     
     
-    
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == .authorizedWhenInUse || status == .authorizedAlways {
+            // Now you can fetch location
+            manager.requestLocation()
+        }
+    }
+
     
     // CLLocationManagerDelegate methods
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -284,6 +299,33 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
             if let error = error {
                 print("Error in reverse geocoding: \(error.localizedDescription)")
                 return
+            }
+            
+            let cityNameMap: [String: String] = [
+                "bombay": "Mumbai",
+                "madras": "Chennai",
+                "calcutta": "Kolkata",
+                "bangalore": "Bengaluru",
+                "cochin": "Kochi",
+                "trivandrum": "Thiruvananthapuram",
+                "poona": "Pune",
+                "baroda": "Vadodara",
+                "mangalore": "Mangaluru",
+                "mysore": "Mysuru",
+                "cawnpore": "Kanpur",
+                "quilon": "Kollam",
+                "calicut": "Kozhikode",
+                "palghat": "Palakkad",
+                "trichur": "Thrissur",
+                "pondicherry": "Puducherry",
+                "gurgaon": "Gurugram",
+                "allahabad": "Prayagraj"
+                // ...aur bhi jitne chahe add kar lo
+            ]
+
+            func normalizeCityName(_ city: String) -> String {
+                let lower = city.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                return cityNameMap[lower] ?? city
             }
             
             if let placemark = placemarks?.first {
@@ -348,6 +390,30 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
             registerSecondVC.isFromProfile = true
             registerSecondVC.isComingFromSearchVC = true
             registerSecondVC.fullAddress = fullAddress
+            registerSecondVC.profileData = profileData
+            // ✅ Set sourceScreen based on previous screen
+//            if sourceScreen == "FirstSteep" {
+//                registerSecondVC.sourceScreen = "FirstSteep"
+//                
+//            } else {
+//                registerSecondVC.sourceScreen = "profile"
+//                registerSecondVC.sourceScreen = "home"
+//                registerSecondVC.isFromProfile = true
+//            }
+            
+            if sourceScreen == "FirstSteep" {
+                       registerSecondVC.sourceScreen = "FirstSteep"
+                   } else if sourceScreen == "profile" {
+                       registerSecondVC.sourceScreen = "profile"
+                       registerSecondVC.isFromProfile = true
+                   } else if sourceScreen == "home" {
+                       registerSecondVC.sourceScreen = "home"
+                   } else {
+                       registerSecondVC.sourceScreen = "home" // Default fallback
+                   }
+
+            
+            
             // Debugging to ensure the data being passed
             print("Passing latitude: \(registerSecondVC.latitudeS), longitude: \(registerSecondVC.longitudeS)")
             // Check kis tarah ka location data pass ho raha hai

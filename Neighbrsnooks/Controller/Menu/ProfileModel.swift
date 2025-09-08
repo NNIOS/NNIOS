@@ -54,7 +54,7 @@ struct ProfileModel: Codable {
     var state: String?
     var country: String?
     var pincode: String?
-    var address: String?
+    var addressone: String?
     var dob: String?
     var gender: String?
     var genderid: String?
@@ -79,7 +79,7 @@ struct ProfileModel: Codable {
         case status, message, id, userpic, firstname, lastname, username, verfiedMsg = "verfied_msg", nbdId = "nbd_id", neighborhood, posts, market, suggestions, events, polls, directmessage, business, favourites, groups
         case totposts, totmarket, totsuggestions, totevents, totpolls, totdirectmessage, totbusiness, totfavourites, totgroups
         case postper, marketper, suggestionper, eventper, pollper, directmsgper, businessper, favouriteper, groupper
-        case createddate, emailid, phoneno, emerPhone = "emer_phone", addlineone, addlinetwo, city, state, country, pincode, address, dob, gender, genderid, nbrsType = "nbrs_type", profid, intersttype, intid, reason, postuserlist, marketuserlist, polluserlist, groupuserlist, eventuserlist, businessuserlist, suggestionuserlist, favouruserlist, msguserlist, uploadedDoc = "uploaded_doc"
+        case createddate, emailid, phoneno, emerPhone = "emer_phone", addlineone, addlinetwo, city, state, country, pincode, addressone, dob, gender, genderid, nbrsType = "nbrs_type", profid, intersttype, intid, reason, postuserlist, marketuserlist, polluserlist, groupuserlist, eventuserlist, businessuserlist, suggestionuserlist, favouruserlist, msguserlist, uploadedDoc = "uploaded_doc"
         case uploadedDocImages = "uploaded_doc_img"
     }
 }

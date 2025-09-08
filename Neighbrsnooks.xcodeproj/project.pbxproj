@@ -115,7 +115,6 @@
 		0491B73B2DA7BDF800955502 /* PollTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B72F2DA7BDF800955502 /* PollTableViewCell.swift */; };
 		0491B73C2DA7BDF800955502 /* PostPictureEnlarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B7312DA7BDF800955502 /* PostPictureEnlarge.swift */; };
 		0491B73D2DA7BDF800955502 /* LikeListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B7262DA7BDF800955502 /* LikeListViewController.swift */; };
-		0491B73E2DA7BDF800955502 /* EventsDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B71D2DA7BDF800955502 /* EventsDetailViewController.swift */; };
 		0491B73F2DA7BDF800955502 /* ChatOtherProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B7142DA7BDF800955502 /* ChatOtherProfileViewController.swift */; };
 		0491B7402DA7BDF800955502 /* DeleteEventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B7162DA7BDF800955502 /* DeleteEventViewController.swift */; };
 		0491B7412DA7BDF800955502 /* DeletePollViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B7192DA7BDF800955502 /* DeletePollViewController.swift */; };
@@ -439,7 +438,6 @@
 		0491BA242DA7D22900955502 /* MatchOTPModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA232DA7D22900955502 /* MatchOTPModel.swift */; };
 		0491BA262DA7D2CE00955502 /* CreateEventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA252DA7D2CE00955502 /* CreateEventViewController.swift */; };
 		0491BA282DA7D47E00955502 /* WelcomeTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA272DA7D47E00955502 /* WelcomeTableViewCell.swift */; };
-		0491BA2A2DA7D4D500955502 /* PostDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA292DA7D4D500955502 /* PostDetailsViewController.swift */; };
 		0491BA2C2DA7D56900955502 /* CreateGroupModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA2B2DA7D56900955502 /* CreateGroupModel.swift */; };
 		0491BA2E2DA7D5BB00955502 /* CreatePostModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA2D2DA7D5BB00955502 /* CreatePostModel.swift */; };
 		0491BA302DA7D8F600955502 /* AddressModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491BA2F2DA7D8F600955502 /* AddressModel.swift */; };
@@ -454,6 +452,7 @@
 		04A67E4D2E2E6D60001326F6 /* ReceivedMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A67E4A2E2E6D60001326F6 /* ReceivedMessageCell.swift */; };
 		04A67E502E2E6D73001326F6 /* SentMessageCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04A67E4F2E2E6D73001326F6 /* SentMessageCell.xib */; };
 		04A67E512E2E6D73001326F6 /* SentMessageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A67E4E2E2E6D73001326F6 /* SentMessageCell.swift */; };
+		04A733C62E6C4FC7002D1F74 /* EventsDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A733C52E6C4FC7002D1F74 /* EventsDetailViewController.swift */; };
 		04A7B0A92DCCDAE500A9031D /* DeactivateModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A7B0A82DCCDAE500A9031D /* DeactivateModel.swift */; };
 		04A846CD2E0AD951003D5A03 /* ViewDocumentVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A846CC2E0AD951003D5A03 /* ViewDocumentVC.swift */; };
 		04A878702DF063A4001F5445 /* BottomVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A8786E2DF063A4001F5445 /* BottomVC.swift */; };
@@ -648,7 +647,6 @@
 		0491B71A2DA7BDF800955502 /* EventHomeTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventHomeTableViewCell.swift; sourceTree = "<group>"; };
 		0491B71B2DA7BDF800955502 /* EventNoJoin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventNoJoin.swift; sourceTree = "<group>"; };
 		0491B71C2DA7BDF800955502 /* EventsCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsCollectionViewCell.swift; sourceTree = "<group>"; };
-		0491B71D2DA7BDF800955502 /* EventsDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsDetailViewController.swift; sourceTree = "<group>"; };
 		0491B71E2DA7BDF800955502 /* FavouriteDetailsImageEnlargementViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouriteDetailsImageEnlargementViewController.swift; sourceTree = "<group>"; };
 		0491B71F2DA7BDF800955502 /* FavouriteDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouriteDetailViewController.swift; sourceTree = "<group>"; };
 		0491B7202DA7BDF800955502 /* FavouriteListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavouriteListModel.swift; sourceTree = "<group>"; };
@@ -969,7 +967,6 @@
 		0491BA232DA7D22900955502 /* MatchOTPModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchOTPModel.swift; sourceTree = "<group>"; };
 		0491BA252DA7D2CE00955502 /* CreateEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventViewController.swift; sourceTree = "<group>"; };
 		0491BA272DA7D47E00955502 /* WelcomeTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeTableViewCell.swift; sourceTree = "<group>"; };
-		0491BA292DA7D4D500955502 /* PostDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailsViewController.swift; sourceTree = "<group>"; };
 		0491BA2B2DA7D56900955502 /* CreateGroupModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateGroupModel.swift; sourceTree = "<group>"; };
 		0491BA2D2DA7D5BB00955502 /* CreatePostModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePostModel.swift; sourceTree = "<group>"; };
 		0491BA2F2DA7D8F600955502 /* AddressModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressModel.swift; sourceTree = "<group>"; };
@@ -984,6 +981,7 @@
 		04A67E4B2E2E6D60001326F6 /* ReceivedMessageCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ReceivedMessageCell.xib; sourceTree = "<group>"; };
 		04A67E4E2E2E6D73001326F6 /* SentMessageCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SentMessageCell.swift; sourceTree = "<group>"; };
 		04A67E4F2E2E6D73001326F6 /* SentMessageCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SentMessageCell.xib; sourceTree = "<group>"; };
+		04A733C52E6C4FC7002D1F74 /* EventsDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsDetailViewController.swift; sourceTree = "<group>"; };
 		04A7B0A82DCCDAE500A9031D /* DeactivateModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeactivateModel.swift; sourceTree = "<group>"; };
 		04A846CC2E0AD951003D5A03 /* ViewDocumentVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewDocumentVC.swift; sourceTree = "<group>"; };
 		04A8786B2DF063A4001F5445 /* BottomDataCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomDataCell.swift; sourceTree = "<group>"; };
@@ -1294,7 +1292,6 @@
 		0491B6BF2DA7BDD400955502 /* Post */ = {
 			isa = PBXGroup;
 			children = (
-				0491BA292DA7D4D500955502 /* PostDetailsViewController.swift */,
 				0491B6AF2DA7BDD400955502 /* PostViewShowImgVideosFullSc */,
 				0491B6B02DA7BDD400955502 /* BusinessDetailsCollectionViewCell.swift */,
 				0491B6B12DA7BDD400955502 /* CamPostCollectionViewCell.swift */,
@@ -1385,7 +1382,7 @@
 				0491B71A2DA7BDF800955502 /* EventHomeTableViewCell.swift */,
 				0491B71B2DA7BDF800955502 /* EventNoJoin.swift */,
 				0491B71C2DA7BDF800955502 /* EventsCollectionViewCell.swift */,
-				0491B71D2DA7BDF800955502 /* EventsDetailViewController.swift */,
+				04A733C52E6C4FC7002D1F74 /* EventsDetailViewController.swift */,
 				0491B71E2DA7BDF800955502 /* FavouriteDetailsImageEnlargementViewController.swift */,
 				0491B71F2DA7BDF800955502 /* FavouriteDetailViewController.swift */,
 				0491B7202DA7BDF800955502 /* FavouriteListModel.swift */,
@@ -2495,7 +2492,6 @@
 				0491B9FA2DA7BF1600955502 /* Terms&ConditionsViewController.swift in Sources */,
 				0491B9FB2DA7BF1600955502 /* CreateGroupViewController.swift in Sources */,
 				042565162E2FC2E9004D636A /* GroupMeTableViewCell.swift in Sources */,
-				0491BA2A2DA7D4D500955502 /* PostDetailsViewController.swift in Sources */,
 				0491B9FC2DA7BF1600955502 /* LoginViewController.swift in Sources */,
 				0491B9FD2DA7BF1600955502 /* PostViewController.swift in Sources */,
 				0491BA302DA7D8F600955502 /* AddressModel.swift in Sources */,
@@ -2584,7 +2580,6 @@
 				0491B73B2DA7BDF800955502 /* PollTableViewCell.swift in Sources */,
 				0491B73C2DA7BDF800955502 /* PostPictureEnlarge.swift in Sources */,
 				0491B73D2DA7BDF800955502 /* LikeListViewController.swift in Sources */,
-				0491B73E2DA7BDF800955502 /* EventsDetailViewController.swift in Sources */,
 				0491B73F2DA7BDF800955502 /* ChatOtherProfileViewController.swift in Sources */,
 				0491B7402DA7BDF800955502 /* DeleteEventViewController.swift in Sources */,
 				0491B7412DA7BDF800955502 /* DeletePollViewController.swift in Sources */,
@@ -2650,6 +2645,7 @@
 				0491B9842DA7BEDB00955502 /* Int.swift in Sources */,
 				0491B9852DA7BEDB00955502 /* MarketCateModel.swift in Sources */,
 				04AF63082DD22D4B00691395 /* SidebarViewController.swift in Sources */,
+				04A733C62E6C4FC7002D1F74 /* EventsDetailViewController.swift in Sources */,
 				0491B9862DA7BEDB00955502 /* UIViewBorderWidthAndColor.swift in Sources */,
 				0491B9872DA7BEDB00955502 /* RSTextView.swift in Sources */,
 				0491B9882DA7BEDB00955502 /* Double.swift in Sources */,
@@ -3064,7 +3060,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6;
+				MARKETING_VERSION = 6.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = NeighbrsnookMalik.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -3110,7 +3106,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6;
+				MARKETING_VERSION = 6.5.1;
 				PRODUCT_BUNDLE_IDENTIFIER = NeighbrsnookMalik.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

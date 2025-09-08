@@ -17,7 +17,7 @@ import FirebaseAnalytics
 
 
 
-class NewRegistationSecondStepVC: BaseViewController {
+class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITextViewDelegate {
     
     @IBOutlet weak var tblViewNeighbrhood: UITableView!
     @IBOutlet weak var tblViewHeightConstraint: NSLayoutConstraint!
@@ -28,13 +28,16 @@ class NewRegistationSecondStepVC: BaseViewController {
     @IBOutlet weak var lblCity: UILabel!
     @IBOutlet weak var lblState: UILabel!
     @IBOutlet weak var lblPincode: UILabel!
-    @IBOutlet weak var txtFieldFlatHouse: UITextField!
+    @IBOutlet weak var txtFieldFlatHouse: UITextView!
     @IBOutlet weak var lblYourNeighbiurhood: UILabel!
     @IBOutlet weak var btnNext: UIButton!
     @IBOutlet weak var lblYourNeighbourhood: UILabel!
     @IBOutlet weak var lblSelectYourResidence: UILabel!
     @IBOutlet weak var llblNeighboursConnect: UILabel!
-    
+    @IBOutlet weak var txtFielsAddheight: NSLayoutConstraint!
+    @IBOutlet weak var viewHeight: NSLayoutConstraint!
+    @IBOutlet weak var btnReachout: UIButton!
+    var shouldCallAPIOnAppear: Bool = false
     let locationManager = CLLocationManager()
     var selectedLocation: String?
     var city: String?
@@ -57,42 +60,66 @@ class NewRegistationSecondStepVC: BaseViewController {
     var name: String?
     var secname: String?
     var sourceScreen: String?
+    var backsourceScreen: String?
     var userId: String?
     var selectedIndexPath: IndexPath?
     var profileData: ProfileModel?
     var uploadedDocuments: UploadedDocumentsModel?
     var savedUploadedDocuments: UploadedDocumentsModel?
-
     var isComingFromImagePicker: Bool = false
     var shouldUpdateUIOnAppear = true
     var isComingrom:String?
-
+    let baseViewHeight: CGFloat = 60
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(profileData)
-        if sourceScreen != "secondStep" { //  Only run when NOT coming from "secondStep"
+        //        print(profileData)
+        print(name)
+        tblViewNeighbrhood.isScrollEnabled = false
+
+        txtFieldFlatHouse.autocapitalizationType = .words
+        tblViewNeighbrhood.isScrollEnabled = false
+        btnReachout.isHidden = true
+        if sourceScreen != "profile" && sourceScreen != "secondStep" && sourceScreen != "home" && sourceScreen != "profileback" && sourceScreen !=  "profilebackUn" && sourceScreen !=  "Malik" {
             UserDefaults.standard.set("step1", forKey: "registrationStep")
         }
         tblViewNeighbrhood.allowsSelection = true
-
         tblViewNeighbrhood.dataSource = self
         tblViewNeighbrhood.delegate = self
-        
         tblViewNeighbrhood.layer.cornerRadius = 10
         tblViewNeighbrhood.layer.masksToBounds = true
-        
         btnNext.layer.cornerRadius = 10
         btnNext.layer.masksToBounds = true
-        
+        btnReachout.layer.cornerRadius = 10
+        btnReachout.layer.masksToBounds = true
         // Corner radius set karna
         viewNeighbourhoodAddresh.layer.cornerRadius = 10
         viewNeighbourhoodAddresh.layer.masksToBounds = true
-        
         viewNeighbourhood.layer.cornerRadius = 10
         viewNeighbourhood.layer.masksToBounds = true
         
         // UI PAR DATA SHOW KARO:
+        //        if isComingFromSearchVC {
+        //            lblNeighbrhood.text = selectedLocation ?? ""
+        //            lblNeighbroodAddresh.text = fullAddress ?? ""
+        //            lblCity.text = city ?? ""
+        //            lblState.text = state ?? ""
+        //            lblPincode.text = zipcode ?? ""
+        //            print(city)
+        //            print(state)
+        //            self.selectedLatitude = latitudeS
+        //            self.selectedLongitude = longitudeS
+        //            //  User ne search kiya hua hai, ab API ko call karo using selectedLocation ke lat/long:
+        //            if let lat = latitudeS, let long = longitudeS {
+        //                callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: lat, longitude: long))
+        //            }
+        //        } else {
+        //            //  User ki current location se area fetch hote hi API ko call karo
+        //            locationManager.delegate = self
+        //            locationManager.requestWhenInUseAuthorization()
+        //            locationManager.startUpdatingLocation()
+        //        }
+        
         if isComingFromSearchVC {
             lblNeighbrhood.text = selectedLocation ?? ""
             lblNeighbroodAddresh.text = fullAddress ?? ""
@@ -103,24 +130,22 @@ class NewRegistationSecondStepVC: BaseViewController {
             print(state)
             self.selectedLatitude = latitudeS
             self.selectedLongitude = longitudeS
-            //  User ne search kiya hua hai, ab API ko call karo using selectedLocation ke lat/long:
+            // User ne search kiya hai, toh API call
             if let lat = latitudeS, let long = longitudeS {
                 callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: lat, longitude: long))
             }
-        } else {
-            //  User ki current location se area fetch hote hi API ko call karo
+        } else if sourceScreen != "profile" && sourceScreen != "secondStep" && sourceScreen != "home" && sourceScreen != "profileback" && sourceScreen != "profilebackUn" {
             locationManager.delegate = self
             locationManager.requestWhenInUseAuthorization()
             locationManager.startUpdatingLocation()
         }
         
         
-        
         let areaTapGesture = UITapGestureRecognizer(target: self, action: #selector(areaLabelTapped))
         viewNeighbourhood.isUserInteractionEnabled = true
         viewNeighbourhood.addGestureRecognizer(areaTapGesture)
         // Neighbours connect label (top)
-        llblNeighboursConnect.font = UIFont(name: "Montserrat-Regular", size: 14)
+        llblNeighboursConnect.font = UIFont(name: "Montserrat-Medium", size: 15)
         // Select your residence area
         lblSelectYourResidence.font = UIFont(name: "Montserrat-Regular", size: 16)
         // Your Neighbourhood (heading)
@@ -129,33 +154,123 @@ class NewRegistationSecondStepVC: BaseViewController {
         lblState.font = UIFont(name: "Montserrat-Regular", size: 14)
         lblPincode.font = UIFont(name: "Montserrat-Regular", size: 14)
         lblYourNeighbiurhood.font = UIFont(name: "Montserrat-Regular", size: 16)
-        lblNeighbroodAddresh.font = UIFont(name: "Montserrat-Regular", size: 16)
+        txtFieldFlatHouse.font = UIFont(name: "Montserrat-Regular", size: 16)
+        lblNeighbroodAddresh.font = UIFont(name: "Montserrat-Regular", size: 14)
         if let customFont = UIFont(name: "Montserrat-Regular", size: 20) {
             btnNext.titleLabel?.font = customFont
+        }
+        if let customFont = UIFont(name: "Montserrat-Regular", size: 20) {
+            btnReachout.titleLabel?.font = customFont
         }
         
         //MARK: - Device api call
         callDeviceInfoWebService()
+        self.txtFieldFlatHouse.text = profileData?.addressone ?? ""
+        placeholderLabel.isHidden = !(txtFieldFlatHouse.text?.isEmpty ?? true)
+        txtFieldFlatHouse.addSubview(placeholderLabel)
+        // Constraints set karo taaki label left-top par hi rahe
+        NSLayoutConstraint.activate([
+            placeholderLabel.topAnchor.constraint(equalTo: txtFieldFlatHouse.topAnchor, constant: 8),
+            placeholderLabel.leadingAnchor.constraint(equalTo: txtFieldFlatHouse.leadingAnchor, constant: 5)
+        ])
+        placeholderLabel.isHidden = !txtFieldFlatHouse.text.isEmpty
+        txtFieldFlatHouse.delegate = self
         
     }
+    
+    
+    // View Controller mein property create karo
+    private let placeholderLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Please enter your address..." // Apne placeholder yahan set karo
+        label.textColor = UIColor.lightGray
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
     
     
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.txtFieldFlatHouse.text = profileData?.address ?? ""
+        self.txtFieldFlatHouse.text = profileData?.addressone ?? ""
         // Agar flag false hai toh UI update skip karo
         guard shouldUpdateUIOnAppear else {
             shouldUpdateUIOnAppear = true // Reset karo for next time
             return
         }
         
+        
         // Normal UI update
-        self.txtFieldFlatHouse.text = profileData?.address ?? ""
+        self.txtFieldFlatHouse.text = profileData?.addressone ?? ""
         self.isComingFromImagePicker = true
         self.lblCity.text = profileData?.city ?? ""
         self.lblState.text = profileData?.state ?? ""
         self.lblPincode.text = profileData?.pincode ?? ""
+        self.lblNeighbrhood.text = profileData?.neighborhood
+        self.lblNeighbroodAddresh.text = profileData?.addressone
+        if shouldCallAPIOnAppear {
+            let lat = latitudeS ?? 0.0
+            let long = longitudeS ?? 0.0
+            let loc = CLLocationCoordinate2D(latitude: lat, longitude: long)
+            callSearchNeighbrWebService(location: loc)
+            shouldCallAPIOnAppear = false // Prevents repeat API calling
+        }
+        
+    }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        placeholderLabel.isHidden = !textView.text.isEmpty
+    }
+    func textViewDidEndEditing(_ textView: UITextView) {
+        placeholderLabel.isHidden = !textView.text.isEmpty
+    }
+    
+    
+    func textViewDidChange(_ textView: UITextView) {
+        let fixedWidth = textView.frame.size.width
+        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
+        txtFielsAddheight.constant = newSize.height
+        // Agar container view ki bhi height chahiye to:
+        let baseViewHeight: CGFloat = 120 // Apne base height ke hisab se set karein
+        viewHeight.constant = baseViewHeight + (newSize.height - textView.frame.height)
+        placeholderLabel.isHidden = !textView.text.isEmpty
+        UIView.animate(withDuration: 0.2) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if textView == txtFieldFlatHouse {
+            let currentText = textView.text ?? ""
+            guard let stringRange = Range(range, in: currentText) else { return false }
+            let updatedText = currentText.replacingCharacters(in: stringRange, with: text)
+            
+            // Capitalize only first letter
+            let first = String(updatedText.prefix(1)).uppercased()
+            let rest = String(updatedText.dropFirst())
+            let capitalizedText = first + rest
+
+            // Calculate new cursor position
+            let cursorOffset = range.location + text.count
+
+            textView.text = capitalizedText
+
+            // Calculate UITextPosition for cursor
+            if let newPosition = textView.position(from: textView.beginningOfDocument, offset: cursorOffset) {
+                textView.selectedTextRange = textView.textRange(from: newPosition, to: newPosition)
+            }
+
+            // Placeholder handling
+            placeholderLabel.isHidden = !capitalizedText.isEmpty
+
+            // Height update
+            textViewDidChange(textView)
+
+            return false
+        }
+        return true
     }
 
     
@@ -165,120 +280,258 @@ class NewRegistationSecondStepVC: BaseViewController {
     // MARK: - Tableview Height
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        adjustTableViewHeight()
+        //        adjustTableViewHeight()
+        updateTableViewHeight()
     }
-    func adjustTableViewHeight() {
-        tblViewHeightConstraint.constant = tblViewNeighbrhood.contentSize.height
+    //    func adjustTableViewHeight() {
+    //        tblViewHeightConstraint.constant = tblViewNeighbrhood.contentSize.height
+    //    }
+    
+    
+    func updateTableViewHeight() {
+        let numberOfItems = NeighbrhdData?.data?.count ?? 0
+        let contentHeight = tblViewNeighbrhood.contentSize.height
+        
+        if numberOfItems > 0 {
+            tblViewHeightConstraint.constant = contentHeight
+            tblViewHeightConstraint.constant = contentHeight // Set UIView height
+        } else {
+            tblViewHeightConstraint.constant = 0
+            tblViewHeightConstraint.constant = 0 // Hide both if no items
+        }
+        
+        // Call layoutIfNeeded to update the layout
+        UIView.animate(withDuration: 0.0) {
+            self.view.layoutIfNeeded() // Ensure layout update
+        }
     }
+    
+    
     
     
     // MARK: - Action
     
     @IBAction func action_Back(_ sender: Any) {
+        if sourceScreen == "profile" {
+            if let profileVC = self.navigationController?.viewControllers.first(where: { $0 is MyProfileViewController }) {
+                print(sourceScreen)
+                self.navigationController?.popToViewController(profileVC, animated: true)
+            } else {
+                print(sourceScreen)
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let profileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
+                    self.navigationController?.pushViewController(profileVC, animated: true)
+                }
+            }
+            return
+        }
+        if sourceScreen == "profilebackUn" {
+            if let profileVC = self.navigationController?.viewControllers.first(where: { $0 is MyProfileViewController }) {
+                print(sourceScreen)
+                self.navigationController?.popToViewController(profileVC, animated: true)
+            } else {
+                print(sourceScreen)
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let profileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
+                    profileVC.sourceViewController = "profilebackUn"
+                    profileVC.fromScreen = "profilebackUn"
+                    UserDefaults.standard.set("done", forKey: "registrationStep")
+                    UserDefaults.standard.set(true, forKey: "isRegistered")
+                    UserDefaults.standard.set("completed", forKey: "registrationStep")
+                    self.navigationController?.pushViewController(profileVC, animated: true)
+                }
+            }
+            return
+        }
+        else if sourceScreen == "home" {
+            if let homeVC = self.navigationController?.viewControllers.first(where: { $0 is HomeViewController }) {
+                print(sourceScreen)
+                self.navigationController?.popToViewController(homeVC, animated: true)
+            } else {
+                print(sourceScreen)
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                if let homeVC = storyboard.instantiateViewController(withIdentifier: "HomeViewController") as? HomeViewController {
+                    self.navigationController?.pushViewController(homeVC, animated: true)
+                }
+            }
+            return
+        }
+        // Baaki cases me logout confirmation alert dikhaye
         let alert = UIAlertController(title: "Heads up!", message: nil, preferredStyle: .alert)
-        
         let attributedMessage = NSAttributedString(
             string: "If you go back now, you'll be logged out and everything you've filled will be lost. Want to continue?",
             attributes: [
                 .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                .foregroundColor: #colorLiteral(red: 0.3764705882, green: 0.3725490196, blue: 0.3725490196, alpha: 1)
+                .foregroundColor: UIColor.gray
             ])
         alert.setValue(attributedMessage, forKey: "attributedMessage")
-        
         let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
-        
         let yesAction = UIAlertAction(title: "Yes", style: .destructive) { _ in
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let sceneDelegate = windowScene.delegate as? SceneDelegate {
-                
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController") as! LoginViewController
-                
                 let navController = UINavigationController(rootViewController: loginVC)
                 navController.navigationBar.isHidden = true
-                
                 sceneDelegate.window?.rootViewController = navController
                 sceneDelegate.window?.makeKeyAndVisible()
             }
         }
-        
-        yesAction.setValue(#colorLiteral(red: 1, green: 0, blue: 0, alpha: 1), forKey: "titleTextColor")
-        noAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
-        
+        yesAction.setValue(UIColor.red, forKey: "titleTextColor")
+        noAction.setValue(UIColor.green, forKey: "titleTextColor")
         alert.addAction(noAction)
         alert.addAction(yesAction)
-        
         self.present(alert, animated: true, completion: nil)
     }
-
+    
+    
+    
     
     
     @IBAction func action_NextRechout(_ sender: Any) {
+        // 1. Area selection check
+        let numberOfItems = self.NeighbrhdData?.data?.count ?? 0
+        if numberOfItems == 0 {
+            self.showAlert(title: "", message: "Please select your area") // First Alert
+            return
+        }
         
+        // 2. Neighbourhood selection check if multiple items
+        if numberOfItems > 1 && self.selectedIndexPath == nil {
+            self.showAlert(title: "", message: "Please select your neighbourhood") // Second Alert
+            return
+        }
+        
+        // 3. Address validation (Flat/House/Unit)
+        guard let flatHouse = self.txtFieldFlatHouse.text, !flatHouse.trimmingCharacters(in: .whitespaces).isEmpty else {
+            self.showAlert(title: "", message: "Please enter your address") // Third Alert
+            return
+        }
+        
+        if containsBadWords(flatHouse) {
+            showAlert(title: "", message: "Contains inappropriate words.")
+            return
+        }
+        // 2. Sab valid hai, abhi hi API call hogi!
         self.callNeighorhodStatusStateCity(shouldShowAlert: false) { message in
             if message == "Neighborhood found." {
-                // ✅ Neighborhood mil gaya
-                guard let flatHouse = self.txtFieldFlatHouse.text, !flatHouse.trimmingCharacters(in: .whitespaces).isEmpty else {
-                    self.showAlert(title: "", message: "Please enter flat/house/door #, tower/unit #")
-                    return
-                }
-                UserDefaults.standard.set("step2", forKey: "registrationStep")
                 UIHelper.showLoader(on: sender as! UIButton, show: true)
                 self.callRegSecWebService()
                 UIHelper.showLoader(on: sender as! UIButton, show: false)
-
+                UserDefaults.standard.set("step2", forKey: "registrationStep")
             } else {
-                // ❌ Neighborhood nahi mila
-//                self.callReachoutWebService()
-                let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
-                
-                let message = "Thank you for sharing your address details. We will get a Neighborhood created for you soon."
-                
-                let font = UIFont(name: "Montserrat-Regular", size: 18) ?? UIFont.systemFont(ofSize: 14)
-                let attributedMessage = NSAttributedString(string: message, attributes: [
-                    .font: font,
-                    .foregroundColor: UIColor.darkGray
-                ])
-                
-                alert.setValue(attributedMessage, forKey: "attributedMessage")
-                
-                let okAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
-                    guard let self = self else { return }
-                    
-                    self.callReachoutWebService()
-                    
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") as! LoginViewController
+                print("data not found") // Only debug print, no alert for user now
+            }
+        }
+    }
+    
+    
+    @IBAction func actionReachout(_ sender: Any) {
+        
+        self.callReachoutWebService { [weak self] apiMessage in
+            guard let self = self else { return }
+            let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+            let font = UIFont(name: "Montserrat-Regular", size: 18) ?? UIFont.systemFont(ofSize: 14)
+            let attributedMessage = NSAttributedString(string: apiMessage, attributes: [
+                .font: font,
+                .foregroundColor: UIColor.darkGray
+            ])
+            alert.setValue(attributedMessage, forKey: "attributedMessage")
+            let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+                // ✅ Push to LoginViewController
+                if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
-                
-                alert.addAction(okAction)
-                self.present(alert, animated: true, completion: nil)
             }
+            alert.addAction(okAction)
+            self.present(alert, animated: true)
         }
         
     }
-
+    
+    
+    //    @IBAction func action_NextRechout(_ sender: Any) {
+    //
+    //        self.callNeighorhodStatusStateCity(shouldShowAlert: false) { message in
+    //
+    //            if message == "Neighborhood found." {
+    //                // ✅ Neighborhood mil gaya
+    //                guard let flatHouse = self.txtFieldFlatHouse.text, !flatHouse.trimmingCharacters(in: .whitespaces).isEmpty else {
+    //                    self.showAlert(title: "", message: "Please enter flat/house/door #, tower/unit #")
+    //                    return
+    //                }
+    //
+    //                UserDefaults.standard.set("step2", forKey: "registrationStep")
+    //                UIHelper.showLoader(on: sender as! UIButton, show: true)
+    //                self.callRegSecWebService()
+    //                UIHelper.showLoader(on: sender as! UIButton, show: false)
+    //
+    //            } else {
+    //
+    //                // ✅ Check if Location Services are OFF or Denied
+    //                if CLLocationManager.locationServicesEnabled() == false ||
+    //                    CLLocationManager.authorizationStatus() == .denied ||
+    //                    CLLocationManager.authorizationStatus() == .restricted {
+    //
+    //                    // ❌ Location OFF → Stay on the same screen, no login navigation
+    //                    self.showAlert(title: "", message: "Please enable location services to proceed.")
+    //                    self.btnNext.setTitle("Next", for: .normal)
+    //                    print("⚠️ Location is OFF. Not navigating to Login.")
+    //                    return
+    //                }
+    //
+    //                // ✅ Check if neighborhood table is empty (search result not found)
+    //                if self.tblViewNeighbrhood.numberOfRows(inSection: 0) == 0 {
+    //                    self.showAlert(title: "", message: "No neighborhood found. Please try searching again.")
+    //                    print("⚠️ No data in table. Not calling Reachout API.")
+    //                    return
+    //                }
+    //
+    //                // ✅ If it's a Reachout case → call API and navigate to Login
+    //                self.callReachoutWebService { [weak self] apiMessage in
+    //                    guard let self = self else { return }
+    //
+    //                    let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+    //
+    //                    let font = UIFont(name: "Montserrat-Regular", size: 18) ?? UIFont.systemFont(ofSize: 14)
+    //                    let attributedMessage = NSAttributedString(string: apiMessage, attributes: [
+    //                        .font: font,
+    //                        .foregroundColor: UIColor.darkGray
+    //                    ])
+    //
+    //                    alert.setValue(attributedMessage, forKey: "attributedMessage")
+    //
+    //                    let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+    //                        // ✅ Push to LoginViewController only for Reachout case
+    //                        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
+    //                            self.navigationController?.pushViewController(vc, animated: true)
+    //                        }
+    //                    }
+    //
+    //                    alert.addAction(okAction)
+    //                    self.present(alert, animated: true)
+    //                }
+    //            }
+    //        }
+    //    }
+    //
+    
+    
     func showAlert(title: String = "", message: String) {
         let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
-        
         let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
-        
         let titleAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: UIColor.black
         ]
-        
         let messageAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: UIColor.darkGray
         ]
-        
         let attributedTitle = NSAttributedString(string: title, attributes: titleAttributes)
         let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
-        
         alertController.setValue(attributedTitle, forKey: "attributedTitle")
         alertController.setValue(attributedMessage, forKey: "attributedMessage")
-        
         alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         present(alertController, animated: true, completion: nil)
     }
@@ -286,11 +539,14 @@ class NewRegistationSecondStepVC: BaseViewController {
     
     @objc func areaLabelTapped() {
         openLocationSearchScreen(for: "Area")
-     }
+    }
     
     func openLocationSearchScreen(for type: String) {
         // Initialize the SearchNeighouhoodViewController
         if let searchNeighouhoodVC = self.storyboard?.instantiateViewController(withIdentifier: "SearchNewNeighouhoodViewController") as? SearchNewNeighouhoodViewController {
+            searchNeighouhoodVC.backsourceScreen = "back"
+            searchNeighouhoodVC.profileData = profileData
+            searchNeighouhoodVC.sourceScreen = self.sourceScreen
             
             self.navigationController?.pushViewController(searchNeighouhoodVC, animated: true)
         }
@@ -298,7 +554,7 @@ class NewRegistationSecondStepVC: BaseViewController {
     
     
     
-//    MARK: - API Call
+    //    MARK: - API Call
     
     func callSearchNeighbrWebService(location: CLLocationCoordinate2D) {
         let dictParams: [String: Any] = [
@@ -306,23 +562,17 @@ class NewRegistationSecondStepVC: BaseViewController {
             "longi": longitudeS ?? 0.0,
             "areas": lblNeighbrhood.text ?? ""
         ]
-        
         print("📤 [callSearchNeighbrWebService] Params:", dictParams)
-        
         WebService.sharedInstance.callSearchNeighbrWebService(withParams: dictParams) { [weak self] data in
             guard let self = self else {
                 print("⚠️ Self is nil")
                 return
             }
-            
             DispatchQueue.main.async {
                 let status = data.status?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
                 print("📥 Status: \(status ?? "nil")")
-                
                 self.NeighbrhdData?.data?.removeAll()
-                
                 var shouldShowMessage = false
-                
                 if status == "success", let validData = data.data, !validData.isEmpty {
                     self.NeighbrhdData = data
                     shouldShowMessage = false
@@ -334,20 +584,83 @@ class NewRegistationSecondStepVC: BaseViewController {
                     // Tabhi dusre API call karo jab data nahi mila
                 }
                 self.tblViewNeighbrhood.reloadData()
-                self.adjustTableViewHeight()
+                //                self.adjustTableViewHeight()
+                self.updateTableViewHeight()
                 self.callNeighorhodStatusStateCity(shouldShowAlert: shouldShowMessage)
-
-
+                
+                // ============ Analytics Event ================
+                // Relevant variables
+                let areaToSend = self.lblNeighbrhood.text ?? ""
+                let userID = UserDefaults.standard.string(forKey: "userID") ?? ""
+                let message = data.message ?? ""
+                let fetchedStatus = data.status ?? ""
+                
+                Analytics.logEvent("neighborhood_search_fetched_iOS", parameters: [
+                    "status": fetchedStatus,
+                    "message": message,
+                    "area": areaToSend,
+                    "userid": userID,
+                    "platform": "iOS"
+                ])
+                // =============================================
+                
             }
         }
     }
-
+    
+    
+    
+    //    func callNeighorhodStatusStateCity(shouldShowAlert: Bool = true, completion: ((String) -> Void)? = nil) {
+    //        let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
+    //        let dictParams: [String: Any] = [
+    //            "area": self.NeighbrhdData?.data?.first?.nbdName ?? "",
+    //            "countryid": "100",
+    //            "lati": selectedLatitude ?? 0.0,
+    //            "longi": selectedLongitude ?? 0.0,
+    //            "stateid": self.lblState.text ?? "",
+    //            "cityid": self.lblCity.text ?? "",
+    //            "userid": userID
+    //        ]
+    //
+    //        print("Calling API with parameters:", dictParams)
+    //
+    //        WebService.sharedInstance.callNeighborhoodStatusByState(withParams: dictParams) { [weak self] (responseModel: NeighborhoodStatusByStateModel) in
+    //            guard let self = self else { return }
+    //            print("API Response - Status: \(responseModel.status), Message: \(responseModel.message)")
+    //
+    //            DispatchQueue.main.async {
+    //                if responseModel.message != "Neighborhood found." {
+    //                    self.btnNext.setTitle("Reach Out", for: .normal)
+    //                    if shouldShowAlert {
+    //                        self.showNeighborhoodAlert(withMessage: responseModel.message)
+    //                    }
+    //                } else {
+    //                    self.btnNext.setTitle("Next", for: .normal)
+    //                }
+    //
+    //                // ✅ Fire event
+    //                Analytics.logEvent("neighborhood_status_fetched_iOS", parameters: [
+    //                    "status": responseModel.status,
+    //                    "message": responseModel.message,
+    //                    "area": self.lblNeighbrhood.text ?? "",
+    //                    "userid": userID,
+    //                    "platform": "iOS"
+    //                ])
+    //
+    //                 completion?(responseModel.message)
+    //            }
+    //        }
+    //    }
     
     
     func callNeighorhodStatusStateCity(shouldShowAlert: Bool = true, completion: ((String) -> Void)? = nil) {
         let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
+        let areaToSend = self.NeighbrhdData?.data?.first?.nbdName?.isEmpty == false
+        ? self.NeighbrhdData?.data?.first?.nbdName
+        : lblNeighbrhood.text
+        
         let dictParams: [String: Any] = [
-            "area": lblNeighbrhood.text ?? "",
+            "area": areaToSend ?? "",
             "countryid": "100",
             "lati": selectedLatitude ?? 0.0,
             "longi": selectedLongitude ?? 0.0,
@@ -355,37 +668,32 @@ class NewRegistationSecondStepVC: BaseViewController {
             "cityid": self.lblCity.text ?? "",
             "userid": userID
         ]
-        
         print("Calling API with parameters:", dictParams)
-        
         WebService.sharedInstance.callNeighborhoodStatusByState(withParams: dictParams) { [weak self] (responseModel: NeighborhoodStatusByStateModel) in
             guard let self = self else { return }
             print("API Response - Status: \(responseModel.status), Message: \(responseModel.message)")
-            
             DispatchQueue.main.async {
                 if responseModel.message != "Neighborhood found." {
-                    self.btnNext.setTitle("Reach Out", for: .normal)
+                    self.btnNext.isHidden = true
+                    self.btnReachout.isHidden = false
                     if shouldShowAlert {
                         self.showNeighborhoodAlert(withMessage: responseModel.message)
                     }
                 } else {
                     self.btnNext.setTitle("Next", for: .normal)
+                    self.btnReachout.isHidden = true
                 }
-                
-                // ✅ Fire event
                 Analytics.logEvent("neighborhood_status_fetched_iOS", parameters: [
                     "status": responseModel.status,
                     "message": responseModel.message,
-                    "area": self.lblNeighbrhood.text ?? "",
+                    "area": areaToSend ?? "",
                     "userid": userID,
                     "platform": "iOS"
                 ])
-                
-                 completion?(responseModel.message)
+                completion?(responseModel.message)
             }
         }
     }
-
     
     
     
@@ -400,31 +708,29 @@ class NewRegistationSecondStepVC: BaseViewController {
             "longi": long ?? 0.0
         ]
         print(dictParams)
-
+        
         WebService.sharedInstance.callCurrentSearchNeighbrWebService(withParams: dictParams) { [weak self] data in
             guard let self = self else { return }
             self.NeighbrhdData?.data?.removeAll()
-
             DispatchQueue.main.async {
                 self.NeighbrhdData = data
-
                 if let neighbourhoods = self.NeighbrhdData?.data, !neighbourhoods.isEmpty {
-                    Analytics.logEvent("neighborhood_search_success_iOS", parameters: [
+                    Analytics.logEvent("neighborhood_Current_success_iOS", parameters: [
                         "area": self.lblNeighbrhood.text ?? "",
                         "count": neighbourhoods.count,
                         "platform": "iOS"
                     ])
                 }
-
                 self.tblViewNeighbrhood.reloadData()
                 self.callUserLocationWebService()
-                self.adjustTableViewHeight()
-
+                //                self.adjustTableViewHeight()
+                self.updateTableViewHeight()
+                
                 
             }
         }
     }
-
+    
     
     
     // MARK: - Registation Api
@@ -440,9 +746,7 @@ class NewRegistationSecondStepVC: BaseViewController {
             "longi": selectedLongitude ?? 0.0,
             "userid": userID
         ]
-        
         print("📤 [callRegSecWebService] Params:", dictParams)
-        
         WebService.sharedInstance.callRegSecWebService(withParams: dictParams) { [weak self] data in
             guard let self = self else {
                 print("⚠️ Self is nil")
@@ -455,7 +759,7 @@ class NewRegistationSecondStepVC: BaseViewController {
                 self.RegistrationSec = data
                 
                 if status == "success" {
-                   
+                    
                     print("✅ Registration Step 2 successful — pushing to RegistationAdressProofVC")
                     self.pushToRegistrationProofVC()
                 } else {
@@ -464,50 +768,105 @@ class NewRegistationSecondStepVC: BaseViewController {
             }
         }
     }
-
+    
     func pushToRegistrationProofVC() {
         if self.sourceScreen == "home" {
             if let homeVC = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
                 homeVC.uploadedDocuments = self.savedUploadedDocuments
-                homeVC.profileData = self.profileData // will be nil but okay if VC handles it
+                homeVC.profileData = self.profileData
+                homeVC.bntNameUpdate = "Update"
+                homeVC.sourceScreen = "home"
+                homeVC.selectedLocation = self.selectedLocation
+                print(selectedLocation ?? "")
                 self.navigationController?.setViewControllers([homeVC], animated: true)
             }
-        } else {
+        } else if self.sourceScreen == "profile" {
+            if let homeVC = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
+                homeVC.uploadedDocuments = self.savedUploadedDocuments
+                homeVC.profileData = self.profileData
+                homeVC.bntNameUpdate = "Update"
+                homeVC.sourceScreen = "profileback"
+                homeVC.selectedLocation = self.selectedLocation
+                print(selectedLocation ?? "")
+                self.navigationController?.setViewControllers([homeVC], animated: true)
+            }
+        } else if self.sourceScreen == "FirstSteep" {
             if let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
                 vc.selectedLocation = self.selectedLocation
+                print(selectedLocation ?? "")
+                vc.name = self.name ?? ""
+                vc.secname = self.secname ?? ""
+                vc.profileData = self.profileData
+                vc.uploadedDocuments = self.savedUploadedDocuments
+                
+                Analytics.logEvent("registration_step2_completed_iOS", parameters: [
+                    "name": self.name ?? "",
+                    "secname": self.secname ?? "",
+                    "neighbourhood": (self.selectedIndexPath != nil) ? (self.NeighbrhdData?.data?[self.selectedIndexPath!.row].nbdName ?? "") : "",
+                    "timestamp": Date().timeIntervalSince1970,
+                    "platform": "iOS"
+                ])
+                
+                
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+        } else if self.sourceScreen == "secondStep" {
+            if let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
+                vc.selectedLocation = self.selectedLocation
+                print(selectedLocation ?? "")
                 vc.name = self.name ?? ""
                 vc.secname = self.secname ?? ""
                 vc.profileData = self.profileData
                 vc.uploadedDocuments = self.savedUploadedDocuments
                 self.navigationController?.pushViewController(vc, animated: true)
             }
+            
+        }
+       else {
+            if let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
+                vc.selectedLocation = self.selectedLocation
+                print(selectedLocation ?? "")
+                vc.name = self.name ?? ""
+                vc.secname = self.secname ?? ""
+                
+                // Firebase Analytics event yahan log karein
+                Analytics.logEvent("registration_step2_completed_iOS", parameters: [
+                    "name": self.name ?? "",
+                    "secname": self.secname ?? "",
+                    "neighbourhood": (self.selectedIndexPath != nil) ? (self.NeighbrhdData?.data?[self.selectedIndexPath!.row].nbdName ?? "") : "",
+                    "timestamp": Date().timeIntervalSince1970,
+                    "platform": "iOS"
+                ])
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
         }
     }
-
-
-        
-        
-//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//        if let vc = storyboard.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
-//            vc.selectedLocation = self.selectedLocation
-//            vc.name = self.name ?? ""
-//            vc.secname = self.secname ?? ""
-////            vc.sourceScreen = "registration"
-//
-//            print(name)
-//
-//            self.navigationController?.pushViewController(vc, animated: true)
-//        } else {
-//            print("❌ Could not instantiate RegistationAdressProofVC — check storyboard ID")
-//        }
-//    }
-
     
     
     
-    // MARK: -  CALL API FOR USER LOCATION   UserLocation current dev.
     
-    func callUserLocationWebService() {
+    
+    //        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+    //        if let vc = storyboard.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
+    //            vc.selectedLocation = self.selectedLocation
+    //            vc.name = self.name ?? ""
+    //            vc.secname = self.secname ?? ""
+    ////            vc.sourceScreen = "registration"
+    //
+    //            print(name)
+    //
+    //            self.navigationController?.pushViewController(vc, animated: true)
+    //        } else {
+    //            print("❌ Could not instantiate RegistationAdressProofVC — check storyboard ID")
+    //        }
+    //    }
+    
+    
+    
+    
+    // MARK: -  CALL API FOR USER LOCATION   UserLocation current //dev.
+    
+    func callUserLocationWebService() { // dev.
         let id = UserDefaults.standard.string(forKey: "userid")
         print("✅ User ID after login: \(id ?? "Not Found")")
         let url = "https://dev.neighbrsnook.com/admin/api/user-location"
@@ -540,10 +899,8 @@ class NewRegistationSecondStepVC: BaseViewController {
     
     func callDeviceInfoWebService() {
         let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
-        
         // Get device information
         let deviceInfo = getDeviceInfo()
-        
         // Set up parameters for API
         let dictParams: [String: Any] = [
             "device_model": deviceInfo.deviceModel,
@@ -552,7 +909,6 @@ class NewRegistationSecondStepVC: BaseViewController {
             "device_id": deviceInfo.deviceID,
             "user_id": userId
         ]
-        
         // Call the Web Service
         WebService.sharedInstance.callDeviceInfo(withParams: dictParams) { data in
             // Handle the response here
@@ -563,47 +919,48 @@ class NewRegistationSecondStepVC: BaseViewController {
     
     //MARK: - Reachout
     
-//    func callReachoutWebService() {
-//        // Define the parameters for the API call
-//        let id = UserDefaults.standard.string(forKey: "userid")
-//        let dictParams: Dictionary<String, Any> = [
-//            "userid": id,
-//            "area": self.lblNeighbrhood.text ?? "",
-//            "address": self.txtFieldFlatHouse.text ?? "",
-//            "pincode": self.lblPincode.text ?? "",
-//            "countryid": "100",
-//            "stateid": self.lblState.text ?? "",
-//            "cityid": self.lblCity.text ?? "",
-//            "lati": selectedLatitude ?? 0.0,
-//            "longi": selectedLongitude ?? 0.0,
-//        ]
-//        print(dictParams)
-//        // Call the Reachout API
-//        WebService.sharedInstance.CallReachoutWebService(withParams: dictParams) { [weak self] data in
-//            guard let self = self else { return }
-//            
-//            // Handle the API response
-//            self.ReachoutNeighborhoodData = data
-//            
-//            // For example, print the status and message
-//            print(self.ReachoutNeighborhoodData?.status ?? "")
-//            print(self.ReachoutNeighborhoodData?.message ?? "")
-// 
-//            
-////            // Event log for Reachout Call
-////            Analytics.logEvent("reachout_api_called_iOS", parameters: [
-////                "status": self.ReachoutNeighborhoodData?.status ?? "",
-////                "message": self.ReachoutNeighborhoodData?.message ?? "",
-////                "area": self.NeighbrhdData?.data?.first?.nbdID ?? "",
-////                "platform": "iOS"
-////            ])
-//            
-//        }
-//    }
+    //    func callReachoutWebService() {
+    //        // Define the parameters for the API call
+    //        let id = UserDefaults.standard.string(forKey: "userid")
+    //        let dictParams: Dictionary<String, Any> = [
+    //            "userid": id,
+    //            "area": self.lblNeighbrhood.text ?? "",
+    //            "address": self.txtFieldFlatHouse.text ?? "",
+    //            "pincode": self.lblPincode.text ?? "",
+    //            "countryid": "100",
+    //            "stateid": self.lblState.text ?? "",
+    //            "cityid": self.lblCity.text ?? "",
+    //            "lati": selectedLatitude ?? 0.0,
+    //            "longi": selectedLongitude ?? 0.0,
+    //        ]
+    //        print(dictParams)
+    //        // Call the Reachout API
+    //        WebService.sharedInstance.CallReachoutWebService(withParams: dictParams) { [weak self] data in
+    //            guard let self = self else { return }
+    //
+    //            // Handle the API response
+    //            self.ReachoutNeighborhoodData = data
+    //
+    //            // For example, print the status and message
+    //            print(self.ReachoutNeighborhoodData?.status ?? "")
+    //            print(self.ReachoutNeighborhoodData?.message ?? "")
+    //
+    //
+    ////            // Event log for Reachout Call
+    ////            Analytics.logEvent("reachout_api_called_iOS", parameters: [
+    ////                "status": self.ReachoutNeighborhoodData?.status ?? "",
+    ////                "message": self.ReachoutNeighborhoodData?.message ?? "",
+    ////                "area": self.NeighbrhdData?.data?.first?.nbdID ?? "",
+    ////                "platform": "iOS"
+    ////            ])
+    //
+    //        }
+    //    }
     
-    func callReachoutWebService() {
+    
+    func callReachoutWebService(completion: @escaping (String) -> Void) {
         guard let id = UserDefaults.standard.string(forKey: "userid") else { return }
-
+        
         let params: [String: String] = [
             "userid": id,
             "area": lblNeighbrhood.text ?? "",
@@ -616,15 +973,15 @@ class NewRegistationSecondStepVC: BaseViewController {
             "longi": String(selectedLongitude ?? 0.0)
         ]
         print(params)
-
-        let boundary = "Boundary-\(UUID().uuidString)"
+        
+        let boundary = "Boundary-\(UUID().uuidString)" //dev.
         var request = URLRequest(url: URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=requestneighborhood")!)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         if let token = UserDefaults.standard.string(forKey: "token") {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-
+        
         var body = Data()
         for (key, value) in params {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -633,22 +990,43 @@ class NewRegistationSecondStepVC: BaseViewController {
         }
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
-
+        
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("❌ Error:", error)
+                DispatchQueue.main.async {
+                    completion("Something went wrong. Please try again.")
+                }
                 return
             }
+            
             if let data = data {
                 print(String(data: data, encoding: .utf8) ?? "")
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                       let message = json["message"] as? String {
+                        DispatchQueue.main.async {
+                            completion(message) // ✅ Pass the message from API
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            completion("Thank you for sharing your address details.") // ✅ Default message
+                        }
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        completion("Something went wrong. Please try again.")
+                    }
+                }
             }
         }.resume()
     }
-
     
- 
     
-   
+    
+    
+    
+    
     
     //MARK: - Function to show alert
     func showNeighborhoodAlert(withMessage message: String) {
@@ -656,7 +1034,7 @@ class NewRegistationSecondStepVC: BaseViewController {
         
         // Message attributed
         let messageFont = [
-            NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 14)!,
+            NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 16)!,
             NSAttributedString.Key.foregroundColor: UIColor.darkGray
         ]
         let attributedMessage = NSAttributedString(string: message, attributes: messageFont)
@@ -675,7 +1053,7 @@ class NewRegistationSecondStepVC: BaseViewController {
             print("Failed to find a view controller to present the alert.")
         }
     }
-   
+    
     
 }
 
@@ -687,7 +1065,7 @@ class NewRegistationSecondStepVC: BaseViewController {
 
 extension NewRegistationSecondStepVC : UITableViewDelegate, UITableViewDataSource,NeighbourhoodNewDataShowTableViewCellDelegate {
     
-   
+    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let numberOfItems = NeighbrhdData?.data?.count ?? 0
@@ -703,6 +1081,11 @@ extension NewRegistationSecondStepVC : UITableViewDelegate, UITableViewDataSourc
             selectedIndexPath = nil
         }
         
+        DispatchQueue.main.async {
+            self.updateTableViewHeight()
+        }
+        
+        
         return numberOfItems
     }
     
@@ -710,7 +1093,7 @@ extension NewRegistationSecondStepVC : UITableViewDelegate, UITableViewDataSourc
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tblViewNeighbrhood.dequeueReusableCell(withIdentifier: "NeighbrhoodTblViewCell", for: indexPath) as! NeighbrhoodTblViewCell
         let data = NeighbrhdData?.data?[indexPath.row]
-        cell.selectionStyle = .none 
+        cell.selectionStyle = .none
         cell.lblNeighbrhood.text = data?.nbdName
         cell.lblNeighbrhood.textColor = (selectedIndexPath == indexPath)
         ? UIColor(red: 0.0, green: 128/255.0, blue: 0.0, alpha: 1.0)
@@ -748,7 +1131,7 @@ extension NewRegistationSecondStepVC : UITableViewDelegate, UITableViewDataSourc
         
         selectedIndexPath = indexPath // Update the selected row
         tableView.reloadData() // Refresh the table view
-      
+        
         
     }
     
@@ -761,7 +1144,7 @@ extension NewRegistationSecondStepVC : UITableViewDelegate, UITableViewDataSourc
         }
         tblViewNeighbrhood.reloadData()
     }
-
+    
     
 }
 
@@ -772,20 +1155,20 @@ extension NewRegistationSecondStepVC: CLLocationManagerDelegate {
     
     // Ye function location update hone par chalega
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-           if let currentLocation = locations.last {
-               self.lat = currentLocation.coordinate.latitude
-               self.long = currentLocation.coordinate.longitude
-               self.selectedLatitude = self.lat
-                self.selectedLongitude = self.long
-               fetchAddress(from: currentLocation)
-               manager.stopUpdatingLocation()
-               
-               // ⭐️ Area pata chal gaya, ab API call karo:
-               if let area = self.lblNeighbrhood.text, !area.isEmpty {
-                   self.callCurrentLocationNeighbrWebService(withArea: area)
-               }
-           }
-       }
+        if let currentLocation = locations.last {
+            self.lat = currentLocation.coordinate.latitude
+            self.long = currentLocation.coordinate.longitude
+            self.selectedLatitude = self.lat
+            self.selectedLongitude = self.long
+            fetchAddress(from: currentLocation)
+            manager.stopUpdatingLocation()
+            
+            //            // ⭐️ Area pata chal gaya, ab API call karo:
+            //            if let area = self.lblNeighbrhood.text, !area.isEmpty {
+            //                self.callCurrentLocationNeighbrWebService(withArea: area)
+            //            }
+        }
+    }
     
     // Jab location fetch fail ho
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -820,6 +1203,9 @@ extension NewRegistationSecondStepVC: CLLocationManagerDelegate {
                     self.lblPincode.text = postalCode
                 }
                 self.lblNeighbroodAddresh.text = addressString
+                if let area = self.lblNeighbrhood.text, !area.isEmpty {
+                    self.callCurrentLocationNeighbrWebService(withArea: area)
+                }
             }
         }
     }

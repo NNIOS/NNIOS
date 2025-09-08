@@ -14,7 +14,7 @@ import SVProgressHUD
 
 
 @available(iOS 16.0, *)
-class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource, ConfirmDeletemarket {
+class MarketDetailViewController: BaseViewController,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource, ConfirmDeletemarket {
     func tapConfirm() {
         
     }
@@ -45,6 +45,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     @IBOutlet weak var MarketFullView: UIView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var countView: UIView!
+    @IBOutlet weak var lblSellDonate: CustomLabelHeadingUseranme!
     
     var MarketWDetailData : ProductResponse?
     var MarketWDeleteData : DelMarketProductModel?
@@ -63,6 +64,8 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     var isFromChatList: Bool = false
     var objChatRead: ChatReadModel?
     var productUserID = ""
+    var loadingAlert: UIAlertController?
+    
     
     
     override func viewDidLoad() {
@@ -82,6 +85,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         self.CreatorLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         self.SimilarProductLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         self.timeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+        self.btnChat.titleLabel?.font = UIFont(name: "Montserrat-SemiBold", size: 16)
         defaultTextColor = CreatorLbl.textColor
         
         callMarketDetailWebService { [weak self] in
@@ -89,9 +93,9 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 guard let self = self else { return }
                 self.updateUI()
                 if self.MarketWDetailData?.similarproducts?.count == 0 {
-                    self.scrollView.isScrollEnabled = false
+//                    self.scrollView.isScrollEnabled = false
                 } else {
-                    self.scrollView.isScrollEnabled = true
+//                    self.scrollView.isScrollEnabled = true
                 }
                 SVProgressHUD.dismiss()
             }
@@ -99,52 +103,77 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     }
     
     func updateUI() {
-        self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
-        self.UserLbl.numberOfLines = 0
-        if let priceString = MarketWDetailData?.productdetail?.first?.salePrice,
-           let price = Double(priceString) {
-            rsLbl.text = "Rs. \(Int(price))"
-        } else {
-            rsLbl.text = "Rs. 0"
-        }
-        self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.catName
-        self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
-        self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
-        self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
-        self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.pTitle
-        
-        if let readCount = self.MarketWDetailData?.productdetail?.first?.readCount {
-            if readCount > 0 {
-                self.LblCount.text = "\(readCount)"
-                self.LblCount.isHidden = false
-                self.countView.isHidden = false
+            self.UserLbl.numberOfLines = 0
+            self.UserLbl.text = self.MarketWDetailData?.productdetail?.first?.pDescription
+            if let priceString = MarketWDetailData?.productdetail?.first?.salePrice,
+               let price = Double(priceString) {
+                rsLbl.text = "Rs. \(Int(price))"
+                if price == 0.0 {
+                    rsLbl.text = "Free"
+                    lblSellDonate.text = "Given"
+                } else {
+    //                rsLbl.text = "Rs. \(Int(price))"
+                    lblSellDonate.text = "SOLD"
+                }
+                
+            } else {
+                rsLbl.text = "Rs. 0"
+            }
+            
+            if MarketWDetailData?.productdetail?.first?.pStatus == 2 /*|| MarketWDetailData?.productdetail?.first?.saleType == "Donate"*/ {
+                lblSellDonate.isHidden = false
+            } else {
+                lblSellDonate.isHidden = true
+            }
+            self.DescLbl.text = self.MarketWDetailData?.productdetail?.first?.catName
+            self.timeLbl.text = self.MarketWDetailData?.productdetail?.first?.createdTime
+            self.CreatorLbl.text = self.MarketWDetailData?.productdetail?.first?.sellerName
+            self.secLbl.text = self.MarketWDetailData?.productdetail?.first?.neighborhoodName
+            self.LblCat.text = self.MarketWDetailData?.productdetail?.first?.pTitle
+            
+            if let readCount = self.MarketWDetailData?.productdetail?.first?.readCount {
+                if readCount > 0 {
+                    self.LblCount.text = "\(readCount)"
+                    self.LblCount.isHidden = false
+                    self.countView.isHidden = false
+                } else {
+                    self.LblCount.isHidden = true
+                    self.countView.isHidden = true
+                }
             } else {
                 self.LblCount.isHidden = true
                 self.countView.isHidden = true
             }
-        } else {
-            self.LblCount.isHidden = true
-            self.countView.isHidden = true
+            
+            let isInWishlist = self.MarketWDetailData?.productdetail?.first?.wishlistStatus == 1 // Abdul
+            
+            self.RemoveWishList.isHidden = !isInWishlist
+            self.AddWishList.isHidden = isInWishlist
+            
+            self.AddWishList.backgroundColor = isInWishlist ? .clear : UIColor(hex: "#F0F7F0")
+            self.AddWishList.tintColor = isInWishlist ? .clear : UIColor(hex: "#008000")
+            self.AddWishList.setImage(UIImage(named: "Un favorites"), for: .normal)
+            
+            self.RemoveWishList.backgroundColor = isInWishlist ? .clear : .clear
+            self.RemoveWishList.setImage(UIImage(named: "favorites"), for: .normal)  // Abdul
+            
+            let url = URL(string: self.MarketWDetailData?.productdetail?.first?.userpic ?? "")
+            self.profileImgView.kf.indicatorType = .activity
+            self.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
+            
+            self.SimilarCollectionView.reloadData()
+            self.updateSimilarProductsVisibility()
+            
+            let idCr = UserDefaults.standard.string(forKey: "CreatorId")
+            let id = UserDefaults.standard.string(forKey: "userid")
+            self.btnChat.setTitle("Chat", for: .normal)
+            self.btnDel.isHidden = id != idCr
+            self.btnEdit.isHidden = id != idCr
+            self.AddWishList.isHidden = id == idCr
+            
+            self.RemoveWishList.isHidden = self.MarketWDetailData?.productdetail?.first?.wishlistStatus != 1
+            //        self.SoldImgView.isHidden = self.MarketWDetailData?.productdetail?.first?.pStatus != 2
         }
-
-        
-        let url = URL(string: self.MarketWDetailData?.productdetail?.first?.userpic ?? "")
-        self.profileImgView.kf.indicatorType = .activity
-        self.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
-        
-        self.SimilarCollectionView.reloadData()
-        self.updateSimilarProductsVisibility()
-        
-        let idCr = UserDefaults.standard.string(forKey: "CreatorId")
-        let id = UserDefaults.standard.string(forKey: "userid")
-        self.btnChat.setTitle(id == idCr ? "Chat" : "Chat with seller", for: .normal)
-        self.btnDel.isHidden = id != idCr
-        self.btnEdit.isHidden = id != idCr
-        self.AddWishList.isHidden = id == idCr
-        
-        self.RemoveWishList.isHidden = self.MarketWDetailData?.productdetail?.first?.wishlistStatus != 1
-        self.SoldImgView.isHidden = self.MarketWDetailData?.productdetail?.first?.pStatus != 2
-    }
     
     
     override func viewWillAppear(_ animated: Bool) {
@@ -216,7 +245,7 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
         } else {
             SimilarProductLbl.isHidden = true
             SimilarCollectionView.isHidden = true
-            simillarCollectionViewHightConst.constant = 0
+            simillarCollectionViewHightConst.constant = -50
         }
     }
     
@@ -325,24 +354,30 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     }
     
     @IBAction func AddWishlistBtnAction(_ sender: UIButton) {
-            SVProgressHUD.show()
-            callWishListWebService { [weak self] in
-                DispatchQueue.main.async {
-                    guard let strongSelf = self else { return }
-                    self?.navigationController?.popViewController(animated: true)
+    //            SVProgressHUD.show()
+                callWishListWebService { [weak self] in
+                    DispatchQueue.main.async {
+                        guard let strongSelf = self else { return }
+    //                    self?.navigationController?.popViewController(animated: true)
+                        strongSelf.callMarketDetailWebService {
+                            strongSelf.updateUI()
+                        }
+                    }
                 }
             }
-        }
-        
-        @IBAction func DelWishlistBtnAction(_ sender: UIButton) {
-            SVProgressHUD.show()
-            callWishlistDeleteWebService{ [weak self] in
-                DispatchQueue.main.async {
-                    guard let strongSelf = self else { return }
-                    self?.navigationController?.popViewController(animated: true)
+            
+            @IBAction func DelWishlistBtnAction(_ sender: UIButton) {
+    //            SVProgressHUD.show()
+                callWishlistDeleteWebService{ [weak self] in
+                    DispatchQueue.main.async {
+                        guard let strongSelf = self else { return }
+    //                    self?.navigationController?.popViewController(animated: true)
+                        strongSelf.callMarketDetailWebService {
+                            strongSelf.updateUI()
+                        }
+                    }
                 }
             }
-        }
     
     func callMarketDelWebService(completion: @escaping () -> Void) {
         guard let idPr = UserDefaults.standard.string(forKey: "producttId"), !idPr.isEmpty else {
@@ -525,38 +560,41 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     
     //dev.
     
-    func callWishListWebService(completion: @escaping () -> Void) {
+    func callWishListWebService(completion: @escaping () -> Void) { //dev.
             let url = "https://dev.neighbrsnook.com/admin/api/wishlist"
             let id = UserDefaults.standard.string(forKey: "userid")
             let dictParams: Dictionary<String, Any> = [
                 "user_id":id ?? "",
                 "product_id":idD,
             ]
-            
+            print("Param is : \(dictParams)")
+            self.loadingAlert = self.showLoadingAlert(on: self)
             RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true)
             {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
                 switch statusCode {
                 case .SUCCESS ,.CREATED:
-                    do {
-                        let data = try JSONDecoder().decode(WishListModel.self, from: result!)
-                        self.WishlistdataData = data
-                        SVProgressHUD.dismiss()
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "Senderid")
-                        self.collectionViewEvent.reloadData()
-                        self.SimilarCollectionView.reloadData()
-                        DispatchQueue.global().async {
-    //                        sleep(2)
+                    self.loadingAlert?.dismiss(animated: true, completion: {
+                        do {
+                            let data = try JSONDecoder().decode(WishListModel.self, from: result!)
                             self.WishlistdataData = data
-                            DispatchQueue.main.async {
-                                SVProgressHUD.dismiss()
-                                completion()
+                            //                        SVProgressHUD.dismiss()
+                            UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+                            UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
+                            UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "Senderid")
+                            self.collectionViewEvent.reloadData()
+                            self.SimilarCollectionView.reloadData()
+                            DispatchQueue.global().async {
+                                //                        sleep(2)
+                                self.WishlistdataData = data
+                                DispatchQueue.main.async {
+                                    completion()
+                                }
                             }
+                        } catch {
+                            print(error.localizedDescription)
                         }
-                    } catch {
-                        print(error.localizedDescription)
-                    }
+                    })
+                    
                 case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
                     do {
                         let data = try JSONDecoder().decode(WishListModel.self, from: result!)
@@ -571,32 +609,34 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
                 }
             }
         }
-    
-    //dev.
-    func callWishlistDeleteWebService(completion: @escaping () -> Void) {
+        
+        //dev.
+        func callWishlistDeleteWebService(completion: @escaping () -> Void) { // dev.
             let url = "https://dev.neighbrsnook.com/admin/api/wishlist/\(idD)"
             let dictParams: Dictionary<String, Any> = ["":""]
-            
+            print("Param is : \(dictParams)")
+            self.loadingAlert = self.showLoadingAlert(on: self)
             RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.DELETE,requestParameters: dictParams, withProgressHUD: true)
             {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
                 switch statusCode {
                 case .SUCCESS ,.CREATED:
-                    do {
-                        SVProgressHUD.dismiss()
-                        let data = try JSONDecoder().decode(WishListRemoveModel.self, from: result!)
-                        self.WishlistdeleteData = data
-                        SVProgressHUD.dismiss()
-                        DispatchQueue.global().async {
-    //                        sleep(2)
+                    self.loadingAlert?.dismiss(animated: true, completion: {
+                        do {
+                            let data = try JSONDecoder().decode(WishListRemoveModel.self, from: result!)
                             self.WishlistdeleteData = data
                             SVProgressHUD.dismiss()
-                            DispatchQueue.main.async {
-                                completion()
+                            DispatchQueue.global().async {
+                                //                        sleep(2)
+                                self.WishlistdeleteData = data
+                                DispatchQueue.main.async {
+                                    completion()
+                                }
                             }
+                        } catch {
+                            print(error.localizedDescription)
                         }
-                    } catch {
-                        print(error.localizedDescription)
-                    }
+                    })
+                    
                 case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
                     do {
                         let data = try JSONDecoder().decode(WishListRemoveModel.self, from: result!)
@@ -623,68 +663,68 @@ class MarketDetailViewController: UIViewController,UICollectionViewDelegateFlowL
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if collectionView == collectionViewEvent {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MarketDetailCollectionViewCell", for: indexPath) as! MarketDetailCollectionViewCell
-            if let postImage = MarketWDetailData?.productdetail?.first?.pImages?[indexPath.row] {
-                cell.configure(with: postImage)
-            }
-            
-            cell.numberLabel.text = "\(indexPath.item + 1)"
-            let totalNumberOfImages =  MarketWDetailData?.productdetail?.first?.pImages?.count ?? 0
-            cell.totalImagesLabel.text =  "/ \(totalNumberOfImages)"
-            cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-            cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-            return cell
-        }
-        else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SimilarProductCollectionViewCell", for: indexPath) as! SimilarProductCollectionViewCell
-            cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-            cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-            cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-            cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
-            if let similarProducts = MarketWDetailData?.similarproducts, !similarProducts.isEmpty {
-                cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
-                cell.viewItems.layer.shadowOpacity = 0.5
-                cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
-                cell.viewItems.layer.shadowRadius = 5
-                cell.viewItems.layer.masksToBounds = false
-                cell.ViewSimilar.isHidden = false
-                cell.EventLbl.isEnabled = true
-                cell.rsLbl.isEnabled = true
-                cell.secttLbl.isEnabled = true
-                cell.DayLbl.isEnabled = true
-                cell.profileImgView.isHidden = false
+            if collectionView == collectionViewEvent {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MarketDetailCollectionViewCell", for: indexPath) as! MarketDetailCollectionViewCell
+                if let postImage = MarketWDetailData?.productdetail?.first?.pImages?[indexPath.row] {
+                    cell.configure(with: postImage)
+                }
                 
-                cell.EventLbl.text = similarProducts[indexPath.row].pTitle
-                cell.rsLbl.text = "Rs." + (similarProducts[indexPath.row].salePrice ?? "")
+                cell.numberLabel.text = "\(indexPath.item + 1)"
+                let totalNumberOfImages =  MarketWDetailData?.productdetail?.first?.pImages?.count ?? 0
+                cell.totalImagesLabel.text =  "/ \(totalNumberOfImages)"
+                cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
+                cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
+                return cell
+            }
+            else {
+                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SimilarProductCollectionViewCell", for: indexPath) as! SimilarProductCollectionViewCell
+                cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+                cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+                cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
+                cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
+                if let similarProducts = MarketWDetailData?.similarproducts, !similarProducts.isEmpty {
+                    cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
+                    cell.viewItems.layer.shadowOpacity = 0.5
+                    cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
+                    cell.viewItems.layer.shadowRadius = 5
+                    cell.viewItems.layer.masksToBounds = false
+                    cell.ViewSimilar.isHidden = false
+                    cell.EventLbl.isEnabled = true
+                    cell.rsLbl.isEnabled = true
+                    cell.secttLbl.isEnabled = true
+                    cell.DayLbl.isEnabled = true
+                    cell.profileImgView.isHidden = false
+                    
+                    cell.EventLbl.text = similarProducts[indexPath.row].pTitle
+                    cell.rsLbl.text = "Rs." + (similarProducts[indexPath.row].salePrice ?? "")
 
-                cell.secttLbl.text = similarProducts[indexPath.row].salePrice
-                cell.DayLbl.text = similarProducts[indexPath.row].createdTime
-                
-                let url = URL(string: similarProducts[indexPath.row].pImages ?? "")
-                cell.profileImgView.kf.indicatorType = .activity
-                cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
-            } else {
-                cell.EventLbl.isEnabled = false
-                cell.rsLbl.isEnabled = false
-                cell.ViewSimilar.isHidden = true
-                cell.secttLbl.isEnabled = false
-                cell.DayLbl.isEnabled = false
-                cell.profileImgView.isHidden = true
-                cell.EventLbl.text = ""
-                cell.rsLbl.text = ""
-                cell.secttLbl.text = ""
-                cell.DayLbl.text = ""
-                cell.profileImgView.image = nil
+                    cell.secttLbl.text = similarProducts[indexPath.row].salePrice
+                    cell.DayLbl.text = similarProducts[indexPath.row].createdTime
+                    
+                    let url = URL(string: similarProducts[indexPath.row].pImages ?? "")
+                    cell.profileImgView.kf.indicatorType = .activity
+                    cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
+                } else {
+                    cell.EventLbl.isEnabled = false
+                    cell.rsLbl.isEnabled = false
+                    cell.ViewSimilar.isHidden = true
+                    cell.secttLbl.isEnabled = false
+                    cell.DayLbl.isEnabled = false
+                    cell.profileImgView.isHidden = true
+                    cell.EventLbl.text = ""
+                    cell.rsLbl.text = ""
+                    cell.secttLbl.text = ""
+                    cell.DayLbl.text = ""
+                    cell.profileImgView.image = nil
+                }
+                cell.DetailCallback = { [self] value in
+                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
+                    vc.idD = String(MarketWDetailData?.similarproducts?[indexPath.row].id ?? 0)
+                    self.navigationController?.pushViewController(vc, animated: true)
+                }
+                return cell
             }
-            cell.DetailCallback = { [self] value in
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
-                vc.idD = String(MarketWDetailData?.similarproducts?[indexPath.row].id ?? 0)
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
-            return cell
         }
-    }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if collectionView == collectionViewEvent

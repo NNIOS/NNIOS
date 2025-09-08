@@ -13,20 +13,17 @@ class RegisterFirstPopupTblViewCell: UITableViewCell {
     
     @IBOutlet weak var checkboxButton: UIButton!
     
-     func updateButtonAppearance() {
-        // SF Symbols configuration for circle size
-        let config = UIImage.SymbolConfiguration(pointSize: 25) // Circle size
-        let selectedImage = UIImage(systemName: "largecircle.fill.circle", withConfiguration: config) // Filled circle
-        let unselectedImage = UIImage(systemName: "circle", withConfiguration: config) // Empty circle
-        
-        // Update image and tint color based on state
-        checkboxButton.setImage(isChecked ? selectedImage : unselectedImage, for: .normal)
-        
-        // Set the border color and tint based on the state
-        checkboxButton.tintColor = isChecked
-            ? UIColor(red: 0, green: 100/255.0, blue: 0, alpha: 1) // Dark green for selected
-            : .black // Black for unselected
-    }
+    func updateButtonAppearance() {
+            let config = UIImage.SymbolConfiguration(pointSize: 25)
+            let selectedImage = UIImage(systemName: "circle.fill", withConfiguration: config)
+            let unselectedImage = UIImage(systemName: "circle", withConfiguration: config)
+            checkboxButton.setImage(isChecked ? selectedImage : unselectedImage, for: .normal)
+            
+            // Set the border color and tint based on the state
+            checkboxButton.tintColor = isChecked
+                ? UIColor(red: 0, green: 100/255.0, blue: 0, alpha: 1) // Dark green for selected
+                : .black // Black for unselected
+        }
 
     
 

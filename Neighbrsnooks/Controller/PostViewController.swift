@@ -54,25 +54,29 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.searchView.isHidden = true
         tfSearch.delegate = self
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshPageData), for: .valueChanged)
+        tableviewPost.refreshControl = refreshControl
     }
     
     
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        // SVProgressHUD.show()
-//        updateColors()
-        
         callPostListWebService(searchQuery: "") {
             SVProgressHUD.dismiss()
             self.tableviewPost.reloadData()
-            
-            
-            // Do any additional setup after loading the view.
         }
     }
     
+    @objc func refreshPageData() {
+        callPostListWebService(searchQuery: "") {
+            self.tableviewPost.reloadData()
+            self.tableviewPost.refreshControl?.endRefreshing()
+        }
+    }
+
     
     
     @IBAction func BackButtionAction(_ : UIButton){

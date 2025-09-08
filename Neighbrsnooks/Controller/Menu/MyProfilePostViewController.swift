@@ -40,14 +40,13 @@ class MyProfilePostViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //        setupBottomPanel()
-        //        if let selectedIndex = selectedTabIndex {
-        //                       bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
-        //                   }
-        //
-        
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 20)
-        // Do any additional setup after loading the view.
+       
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
+        self.lblHeading.text = "Posts"
+
+        let refreshControl = UIRefreshControl()
+            refreshControl.addTarget(self, action: #selector(refreshPageData), for: .valueChanged)
+            tableviewPost.refreshControl = refreshControl
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -59,9 +58,18 @@ class MyProfilePostViewController: BaseViewController {
         callPostListWebService{
             SVProgressHUD.dismiss()
             self.tableviewPost.reloadData()
-            // Do any additional setup after loading the view.
+         }
+    }
+    
+    @objc func refreshPageData() {
+        callPostListWebService {
+            self.tableviewPost.reloadData()
+            self.tableviewPost.refreshControl?.endRefreshing()
         }
     }
+
+
+    
     
     @IBAction func BackButtionAction(_ : UIButton){
         

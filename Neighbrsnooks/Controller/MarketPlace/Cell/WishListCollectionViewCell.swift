@@ -17,6 +17,8 @@ class WishListCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var btnWishlist: UIImageView!
     
     @IBOutlet weak var SoldImgView : UIImageView!
+    @IBOutlet weak var imgWishlist: UIImageView!
+    @IBOutlet weak var lblSellDonate: CustomLabelHeadingUseranme!
     
     override func prepareForReuse() {
            super.prepareForReuse()

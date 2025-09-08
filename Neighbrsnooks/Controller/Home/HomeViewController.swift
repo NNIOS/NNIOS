@@ -73,8 +73,6 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     var userGivenLike = Set<String>()      // createdBy userID
     var userGivenBookay = Set<String>()    // createdBy userID
     
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableviewMember.showsVerticalScrollIndicator = false
@@ -87,12 +85,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         veriyfiedView.isHidden = true
         //        callUserProfileWebService{}
         self.additionalSafeAreaInsets.top = -view.safeAreaInsets.top
-        
-        //        NotificationCenter.default.addObserver(self, selector: #selector(showVerificationPopup), name: Notification.Name("ShowVerificationPopup"), object: nil)
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(handleHomeRefreshNotification), name: NSNotification.Name("RefreshHomePageNotification"), object: nil)
-        
-        //        updateColors()
+        NotificationCenter.default.addObserver(self, selector: #selector(handleRefreshNotification), name: NSNotification.Name("RefreshHomePageNotification"), object: nil)
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(appWillEnterForeground),
@@ -106,27 +99,20 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         // setupBottomPanel()
         tfSearch.delegate = self
         tfSearch.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        
-        
         self.SectorLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-        self.lblWelcomeVeriyfied.font = UIFont(name: "Montserrat-Medium", size: 18)
+        self.lblWelcomeVeriyfied.font = UIFont(name: "Montserrat-Medium", size: 25)
         lblVeriyfied.textColor = #colorLiteral(red: 0.3764705882, green: 0.3725490196, blue: 0.3725490196, alpha: 1)
-        
         callDeviceInfoWebService()
         callHomeAllWebService{
             SVProgressHUD.dismiss()
             self.SectorLbl.text = self.HomeNewData?.myNeighborhood
             self.tableviewMember.reloadData()
         }
-        
         // Initialize the refresh control page
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshPageAction), for: .valueChanged)
-        
         // Add the refresh control to your UITableView or UICollectionView
         tableviewMember.refreshControl = refreshControl
-        
-        
         // Listen for refresh notification
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(handleRefreshNotification),
@@ -160,35 +146,10 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         }
     }
     
-    //    @objc func showVerificationPopup() {
-    //        let titleAttributes: [NSAttributedString.Key: Any] = [
-    //            .font: UIFont(name: "Montserrat-SemiBold", size: 22) ?? UIFont.systemFont(ofSize: 18),
-    //            .foregroundColor: UIColor.black
-    //        ]
-    //        let attributedTitle = NSAttributedString(string: "Welcome!", attributes: titleAttributes)
-    //        let messageAttributes: [NSAttributedString.Key: Any] = [
-    //            .font: UIFont(name: "Montserrat-Bold", size: 18) ?? UIFont.systemFont(ofSize: 20),
-    //            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-    //        ]
-    //        let attributedMessage = NSAttributedString(string: "You are now a verified member. Happy Neighbrsnooking!!!", attributes: messageAttributes)
-    //        let alert = UIAlertController(title: "", message: "", preferredStyle: .alert)
-    //        alert.setValue(attributedTitle, forKey: "attributedTitle")
-    //        alert.setValue(attributedMessage, forKey: "attributedMessage")
-    //        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-    //            print("OK tapped")
-    //            self.callpopupVerificationWebService {} // ✅ Optional: call backend after OK
-    //            self.refreshPage()
-    //        }
-    //        alert.addAction(okAction)
-    //        self.present(alert, animated: true, completion: nil)
-    //    }
-    //
-    
     @objc func handleRefreshNotification() {
         print("🔄 Refresh notification received in HomeViewController")
         refreshPage()
     }
-    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         refreshPage()
@@ -214,8 +175,6 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         textField.resignFirstResponder() // Keyboard hide karega
         return true
     }
-    
-    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -349,18 +308,19 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
     
     @IBAction func actionVerifiedOK(_ sender: Any) {
         
-        UIView.animate(withDuration: 0.1, animations: {
-            self.veriyfiedView.alpha = 0
-        }) { _ in
-            self.veriyfiedView.isHidden = true
-            
-            // Remove dimmed background view
-            if let dimmedView = self.view.viewWithTag(999) {
-                dimmedView.removeFromSuperview()
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 0.1, animations: {
+                self.veriyfiedView.alpha = 0
+            }) { _ in
+                self.veriyfiedView.isHidden = true
+                
+                // Remove all dimmed background views (tag == 999)
+                self.view.subviews
+                    .filter { $0.tag == 999 }
+                    .forEach { $0.removeFromSuperview() }
+                
+                self.view.backgroundColor = .white
             }
-            
-            self.view.backgroundColor = .white
-
         }
         
         // Call APIs after animation
@@ -598,22 +558,32 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         // MARK: - OK Button
         let okAction = UIAlertAction(title: "OK", style: .default) { _ in
             let missmatchStatus = self.HomeNewData?.missmatchStatus
-
             if missmatchStatus == "name" {
-                // ⭐️ MyProfileViewController push
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 if let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
                     myProfileVC.sourceViewController = "HomeViewController"
+                    myProfileVC.Oid = self.id
                     self.navigationController?.pushViewController(myProfileVC, animated: true)
                 }
-            } else if missmatchStatus == "address" {
+            }
+            
+            
+            //            if missmatchStatus == "name" {
+            //                // ⭐️ MyProfileViewController push
+            //                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            //                if let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
+            //                    myProfileVC.sourceViewController = "HomeViewController"
+            //                    self.navigationController?.pushViewController(myProfileVC, animated: true)
+            //                }
+            else if missmatchStatus == "address" {
                 // ⭐️ RegistationAdressProofVC push (direct)
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 if let registerVC = storyboard.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
                     // set data if needed
                     registerVC.uploadedDocuments = self.savedUploadedDocuments
                     registerVC.profileData = self.profileData
-                    registerVC.sourceScreen = "secondStep"
+                    registerVC.sourceScreen = "home"
+                    registerVC.shouldCallAPIOnAppear = true
                     self.navigationController?.pushViewController(registerVC, animated: true)
                 }
             } else if missmatchStatus == "address_proof" {
@@ -624,6 +594,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
                     secondStepVC.uploadedDocuments = self.savedUploadedDocuments
                     secondStepVC.profileData = self.profileData
                     secondStepVC.sourceScreen = "home"
+                    secondStepVC.bntNameUpdate = "Update"
                     self.navigationController?.pushViewController(secondStepVC, animated: true)
                 }
             } else {
@@ -643,7 +614,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
                     }
                 }
             }
-
+            
         }
         
         okAction.setValue(UIColor(hex: "#008000"), forKey: "titleTextColor")
@@ -829,10 +800,10 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
                             dimmedView.tag = 999  // So we can remove it later
                             self.view.addSubview(dimmedView)
                             dimmedView.isUserInteractionEnabled = false
-                            //                            self.lblVeriyfied.text = "You are now a verified member.Happy Neighbrsnooking!!!"
+                            self.lblVeriyfied.text = "You are now a verified member.\nHappy Neighbrsnooking!!!"
                             // 🔲 2. Setup popup view (centered)
-                            let popupWidth: CGFloat = self.view.frame.width - 50
-                            let popupHeight: CGFloat = 230
+                            let popupWidth: CGFloat = self.view.frame.width - 90
+                            let popupHeight: CGFloat = 220
                             let x = (self.view.frame.width - popupWidth) / 2
                             let y = (self.view.frame.height - popupHeight) / 2
                             self.veriyfiedView.frame = CGRect(x: x, y: y, width: popupWidth, height: popupHeight)
@@ -1284,6 +1255,72 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                     }
                 }
                 
+                
+                cell.shareAppCallback = { [weak self] in
+                    guard let self = self else { return }
+                    
+                    if !NetworkMonitor.shared.isConnected {
+                        self.showAlert(message: "Internet not available. Please check your connection.")
+                        return
+                    }
+                    
+                    // ✅ Check verification
+                    guard profileData?.verfiedMsg == "User Verification is completed!" else {
+                        let alert = UIAlertController(
+                            title: "",
+                            message: "You have limited access till verification is complete.",
+                            preferredStyle: .alert
+                        )
+                        alert.addAction(UIAlertAction(title: "OK", style: .default))
+                        self.present(alert, animated: true)
+                        return
+                    }
+                    
+                    // ✅ Post details
+                    let postMessage = postData.postMessage ?? "No message"
+                    let weather = postData.postType ?? "Weather info not available"
+                    let neighborhood = postData.neighborhood ?? "Unknown Neighborhood"
+                    let imageURLString = postData.postImagesN?.first?.img ?? ""
+                    
+                    // ✅ Links
+                    let appStoreLink = "https://apps.apple.com/in/app/neighbrsnook/id6746369263"
+                    let playStoreLink = "https://play.google.com/store/apps/details?id=com.app_neighbrsnook"
+                    let companyLink = "https://neighbrsnook.com/"
+                    
+                    // ✅ Share text (ORDER: Post → Weather → Neighborhood → Links)
+                    let shareText = """
+                    \(postMessage)
+                    Weather: \(weather)
+                    Neighborhood: \(neighborhood)
+                    
+                    iPhone: \(appStoreLink)
+                    Android: \(playStoreLink)
+                    Website: \(companyLink)
+                    """
+                    
+                    var shareItems: [Any] = [shareText]
+                    
+                    // ✅ Add image if available
+                    if let imageURL = URL(string: imageURLString), !imageURLString.isEmpty {
+                        if let imageData = try? Data(contentsOf: imageURL),
+                           let image = UIImage(data: imageData) {
+                            shareItems.append(image)
+                        } else {
+                            shareItems.append(imageURL)
+                        }
+                    }
+                    
+                    // ✅ Present Share Sheet
+                    let activityVC = UIActivityViewController(activityItems: shareItems, applicationActivities: nil)
+                    self.present(activityVC, animated: true)
+                }
+                
+                
+                
+                
+                
+                
+                
                 cell.FullImgCallback = { [self] value in
                     let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostEnlargeImageViewController")as! PostEnlargeImageViewController
                     vc.UserName = PostListData?.listdata?[indexPath.row].username ?? ""
@@ -1323,6 +1360,10 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                             vc.dismissDuration = 0.2
                             let selectedPostData = homeData[indexPath.row] // ✅ Correct row ka data lo
                             vc.poststs = selectedPost.favouritstatus
+                            
+                            
+                            
+                            
                             
                             vc.callbackf = { [weak self] status in
                                 guard let self = self else { return }
@@ -1510,73 +1551,23 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             
             let dataSource = isSearching ? filteredData : HomeNewData
             let cell = tableView.dequeueReusableCell(withIdentifier: "WelcomeTableViewCell", for: indexPath) as! WelcomeTableViewCell
-            
             if let wlcmData = item as? HomeNewData {
-                
                 print("Welcome Data: \(wlcmData)")
                 let createdBy = wlcmData.createdby ?? ""
-                cell.lblWelcmMsg.text = wlcmData.welcomeMsg
-                cell.lblName.text = "Let's welcome \(wlcmData.username ?? "")"
+                cell.lblWelcmMsg.text = (wlcmData.welcomeMsg ?? "") + "."
+                cell.lblName.text = "Let's welcome \(wlcmData.username ?? "")!"
                 cell.btnLike?.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: 17)
                 cell.btnFlower?.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: 17)
                 cell.btnLike.setTitle("\(wlcmData.total_like ?? 0)", for: .normal)
                 cell.btnFlower.setTitle("\(wlcmData.total_bokay ?? 0)", for: .normal)
                 cell.selectionStyle = .none
-                
                 cell.likeStatus = Int(wlcmData.like_status ?? "0") ?? 0
                 cell.bokayStatus = Int(wlcmData.user_bokay ?? "0") ?? 0
                 cell.welUserID = wlcmData.createdby ?? ""
                 print(wlcmData.like_status)
                 print(wlcmData.user_bokay)
-                
-                //                cell.onLikeTapped = { [weak self] welUserID in
-                //                    guard let self = self else { return }
-                //
-                //                    if cell.bokayStatus == 1 {
-                //                        print("❌ Already Bokayed. Like is not allowed.")
-                //                        return
-                //                    }
-                //
-                //                    // 👉 Immediately +1 in UI
-                //                    let currentLikeCount = Int(cell.btnLike.title(for: .normal) ?? "0") ?? 0
-                //                    cell.btnLike.setTitle("\(currentLikeCount + 1)", for: .normal)
-                //
-                //                    // 👉 Update local status so double tap doesn't happen
-                //                    cell.likeStatus = 1
-                //
-                //                    // 👉 Call API
-                //                    self.callHomeLikeWelWebService(welUserID: welUserID) {
-                //                        // ✅ If needed, reload or sync with real data here
-                //                        // tableView.reloadRows(at: [indexPath], with: .none)
-                //                    }
-                //                }
-                //
-                //                cell.onBokayTapped = { [weak self] welUserID in
-                //                    guard let self = self else { return }
-                //
-                //                    if cell.likeStatus == 1 {
-                //                        print("❌ Already Liked. Bokay is not allowed.")
-                //                        return
-                //                    }
-                //
-                //                    // 👉 Immediately +1 in UI
-                //                    let currentBokayCount = Int(cell.btnFlower.title(for: .normal) ?? "0") ?? 0
-                //                    cell.btnFlower.setTitle("\(currentBokayCount + 1)", for: .normal)
-                //
-                //                    // 👉 Update local status so double tap doesn't happen
-                //                    cell.bokayStatus = 1
-                //
-                //                    // 👉 Call API
-                //                    self.callHomebookayWebService(welUserID: welUserID) {
-                //                        // ✅ If needed, reload or sync with real data here
-                //                        // tableView.reloadRows(at: [indexPath], with: .none)
-                //                    }
-                //                }
-                
-                
                 cell.onLikeTapped = { [weak self] welUserID in
                     guard let self = self else { return }
-                    
                     // 1. Network check
                     if !NetworkMonitor.shared.isConnected {
                         self.showAlert(message: "Internet not available. Please check your connection.")
@@ -1870,7 +1861,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblAddress.text = pollData.pollQuestion
                 cell.lblstartdate.text = pollData.pollStartDate
                 cell.lblEnddate.text = pollData.pollEndDate
-                cell.lblVote.text = pollData.totalvote
+                cell.lblVote.text = (pollData.totalvote == "0") ? "" : (pollData.totalvote ?? "")
                 cell.userId = pollData.createdby
                 cell.delegate = self
                 cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -1881,101 +1872,23 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 cell.lblVote.font = UIFont(name: "Montserrat-Regular", size: 14)
                 
                 if pollData.isvoted == "1" {
-                                    cell.VoteBtn.setTitle("Voted", for: .normal)
-                                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
-                                }
-                                if pollData.isvoted == "0" {
-                                    cell.VoteBtn.setTitle("Vote", for: .normal)
-                                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-                                }
-                                
-                                if pollData.ispollrunning == "0" {
-                                    cell.VoteBtn.backgroundColor =  #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
-                                    cell.VoteBtn.setTitle("Vote", for: .normal)
-                                }
-                                
-                                if pollData.ispollrunning == "2" {
-                                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
-                                    cell.VoteBtn.setTitle("Closed", for: .normal)
-                                }
+                    cell.VoteBtn.setTitle("Voted", for: .normal)
+                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+                }
+                if pollData.isvoted == "0" {
+                    cell.VoteBtn.setTitle("Vote", for: .normal)
+                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                }
                 
-//                if pollData.isvoted == "1" {
-//                    cell.VoteBtn.setTitle("Voted", for: .normal)
-//                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
-//                }
-//                if pollData.isvoted == "0" {
-//                    cell.VoteBtn.setTitle("Vote", for: .normal)
-//                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-//                }
-//                
-//                if pollData.ispollrunning == "0" {
-//                    cell.VoteBtn.backgroundColor =  #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
-//                    cell.VoteBtn.setTitle("Vote", for: .normal)
-//                }
-//                
-//                if pollData.ispollrunning == "2" {
-//                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
-//                    cell.VoteBtn.setTitle("Voted", for: .normal)
-//                }
+                if pollData.ispollrunning == "0" {
+                    cell.VoteBtn.backgroundColor =  #colorLiteral(red: 0.8549019608, green: 0, blue: 0, alpha: 1)
+                    cell.VoteBtn.setTitle("Vote", for: .normal)
+                }
                 
-                
-                //                cell.DetailsCallback = { [weak self] value in
-                //                    guard let strongSelf = self else { return }
-                //                    if !NetworkMonitor.shared.isConnected {
-                //                        strongSelf.showAlert(message: "Internet not available. Please check your connection.")
-                //                        return
-                //                    }
-                //                    if strongSelf.profileData?.verfiedMsg == "User Verification is completed!" {
-                //                        guard let userID = UserDefaults.standard.string(forKey: "userid") else { return }
-                //
-                //                        if userID == pollData.createdby { // Creator can navigate even if poll is closed
-                //                            if pollData.ispollrunning == "2" {
-                //                                let vc = strongSelf.storyboard?.instantiateViewController(withIdentifier: "PollsDetailViewController") as! PollsDetailViewController
-                //                                vc.pollid = pollData.pollid ?? ""
-                //                                vc.id = pollData.hID ?? ""
-                //                                strongSelf.navigationController?.pushViewController(vc, animated: true)
-                //                            }
-                //                        } else {
-                //                            if pollData.ispollrunning == "2" {
-                //                                let messageText = "Voting is closed."
-                //                                let alert = UIAlertController(title: "", message: messageText, preferredStyle: .alert)
-                //                                let messageAttributes: [NSAttributedString.Key: Any] = [
-                //                                    .font: UIFont(name: "Montserrat-Regular", size: 15) ?? UIFont.systemFont(ofSize: 15),
-                //                                    .foregroundColor: UIColor.darkGray
-                //                                ]
-                //                                let attributedMessage = NSAttributedString(string: messageText, attributes: messageAttributes)
-                //                                alert.setValue(attributedMessage, forKey: "attributedMessage")
-                //                                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-                //                                okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
-                //                                alert.addAction(okAction)
-                //                                self?.present(alert, animated: true, completion: nil)
-                //                            } else {
-                //                                let vc = strongSelf.storyboard?.instantiateViewController(withIdentifier: "PollsDetailViewController") as! PollsDetailViewController
-                //                                vc.pollid = pollData.pollid ?? ""
-                //                                vc.id = pollData.hID ?? ""
-                //                                strongSelf.navigationController?.pushViewController(vc, animated: true)
-                //                            }
-                //                        }
-                //                    } else {
-                //                        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-                //                        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-                //                        let messageAttributes: [NSAttributedString.Key: Any] = [
-                //                            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                //                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-                //                        ]
-                //                        let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-                //                        let attributedMessage = NSAttributedString(
-                //                            string: "You have limited access till verification is complete. We thank you for your patience.",
-                //                            attributes: messageAttributes
-                //                        )
-                //                        alert.setValue(attributedTitle, forKey: "attributedTitle")
-                //                        alert.setValue(attributedMessage, forKey: "attributedMessage")
-                //                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-                //                            alert.dismiss(animated: true, completion: nil)
-                //                        }))
-                //                        self?.present(alert, animated: true, completion: nil)
-                //                    }
-                //                }
+                if pollData.ispollrunning == "2" {
+                    cell.VoteBtn.backgroundColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+                    cell.VoteBtn.setTitle("Closed", for: .normal)
+                }
                 
                 cell.DetailsCallback = { [weak self] value in
                     guard let strongSelf = self else { return }
@@ -2529,28 +2442,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             }
         }
     }
-    
-    
-    // Set cell height to 0 when there's no data
-    //    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-    //
-    //
-    //        switch indexPath.section {
-    //        case 0:  // Announcement Section
-    //            if let announcement = HomeNewData?.announcement, !announcement.isEmpty {
-    //                return UITableView.automaticDimension // Regular height if data is available
-    //            } else {
-    //                return 0 // Height 0 when there's no announcement
-    //            }
-    //
-    //
-    //
-    //        default:
-    //            return UITableView.automaticDimension // Default height for other sections
-    //        }
-    //    }
-    
-    
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
     }
@@ -2613,18 +2504,13 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
     func didTapProfile(for userId: String) {
         if HomeNewData?.verfiedMsg == "User Verification is completed!" {
             let vc = storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as! MyProfileViewController
-            
             let loginUserId = UserDefaults.standard.string(forKey: "userid") ?? ""
-            
             // Always pass selected userId
             vc.Oid = userId // Profile to show
-            
             // Mark source
             vc.sourceViewController = (loginUserId == userId) ? "MyProfile" : "OtherProfile"
-            
             // For matching later
             UserDefaults.standard.set(userId, forKey: "idOther")
-            
             navigationController?.pushViewController(vc, animated: true)
         } else {
             let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
@@ -2650,11 +2536,9 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentText = textField.text ?? ""
         let updatedText = (currentText as NSString).replacingCharacters(in: range, with: string)
-        
         print("🔠 Current Text: \(currentText)")
         print("➕ New Input: \(string)")
         print("🔍 Updated Text: \(updatedText)")
-        
         filterData(with: updatedText)
         return true
     }
@@ -2766,7 +2650,7 @@ extension HomeViewController {
     func callUpdateFirebaseTokenPostWebServiceDirect(userId: String, firebaseToken: String, _ completion: @escaping () -> ()) {
         
         // 🔗 Step 1: Create the full URL directly
-        guard let url = URL(string: "http://dev.neighbrsnook.com/admin/api/update-token") else {
+        guard let url = URL(string: "http://neighbrsnook.com/admin/api/update-token") else {
             print("❌ Invalid URL")
             return
         }
@@ -2865,17 +2749,7 @@ extension HomeViewController: EventHomeTableViewCellDelegate,ProfileTapDelegate 
             alert.addAction(UIAlertAction(title: "OK", style: .default))
             present(alert, animated: true)
         }
-        
-        //        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        //        if let profileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
-        //            profileVC.Oid = userId  // 🟢 Pass UserID
-        //            // profileVC.headingTitle = userId
-        //            // profileVC.sourceViewController = "MessageViewController"
-        //            // vc.Newid = otherid // Pass the other user ID
-        //            profileVC.headingTitle = "Profile" // Always set "Profile"
-        //            profileVC.isFromMessage = true // 👈 Add this line
-        //            self.navigationController?.pushViewController(profileVC, animated: true)
-        //        }
+       
     }
 }
 
@@ -2974,10 +2848,7 @@ extension HomeViewController: MemberTableViewLikeUnlikeCellDelegate {
             }
         }
     }
-    
-    
-    
-    
+        
     func callPostLikeWebService(postId: String, emoji: String?, completion: @escaping (Bool) -> Void) {
         let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
         let params: [String: Any] = [
@@ -3027,8 +2898,14 @@ extension HomeViewController: MemberTableViewLikeUnlikeCellDelegate {
     }
     
     
-    
-    
-    
-    
+    func getParentViewController() -> UIViewController? {
+        var parentResponder: UIResponder? = self
+        while parentResponder != nil {
+            parentResponder = parentResponder!.next
+            if let viewController = parentResponder as? UIViewController {
+                return viewController
+            }
+        }
+        return nil
+    }
 }

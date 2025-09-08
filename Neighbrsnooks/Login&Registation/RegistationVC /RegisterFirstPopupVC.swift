@@ -55,7 +55,7 @@ class RegisterFirstPopupVC: UIViewController, UITableViewDelegate, UITableViewDa
         tableView.separatorStyle = .none
         
         
-        self.headingLabel.font  = UIFont(name: "Montserrat-Regular", size: 16)
+        self.headingLabel.font  = UIFont(name: "Montserrat-SemiBold", size: 16)
         self.headingLabel.tintColor = .darkGray
         if let headingLabel = headingLabel {
             switch labelTag {

@@ -57,7 +57,7 @@ struct AllProductsList: Codable {
     let id: Int?
     let pTitle, pDescription: String?
     let pQuantity: Int?
-    let saleType: SaleType?
+    let saleType: String?
     let salePrice: String?
     let brandName: String?
     let sellerName: String?

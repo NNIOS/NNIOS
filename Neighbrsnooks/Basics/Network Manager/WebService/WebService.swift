@@ -313,7 +313,7 @@ class WebService {
     
     
     func callMoreYouWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: Welcome) -> ()) {
-          RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kMoreYou, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+          RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kNewMoreYou, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
           {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
             let dictResponse = FunctionsConstants.kShared.getDictionary(result)
             switch statusCode {

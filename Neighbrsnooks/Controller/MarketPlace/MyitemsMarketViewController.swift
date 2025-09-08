@@ -15,15 +15,16 @@ class MyitemsMarketViewController: UIViewController {
     var AllListMarketData: AlllistMarketModel?
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        collectionViewMyEvent.delegate = self
-        collectionViewMyEvent.dataSource = self
-        collectionViewMyEvent.reloadData()
-        collectionViewMyEvent.tag = 1
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
-        self.searchView.isHidden = true
-        tfSearch.delegate = self
-    }
+            super.viewDidLoad()
+            collectionViewMyEvent.delegate = self
+            collectionViewMyEvent.dataSource = self
+            collectionViewMyEvent.reloadData()
+            collectionViewMyEvent.tag = 1
+            lblHeading.text = "My Items"
+            self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
+            self.searchView.isHidden = true
+            tfSearch.delegate = self
+        }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -43,47 +44,75 @@ class MyitemsMarketViewController: UIViewController {
     @IBAction func BackButtionAction(_ : UIButton){
         self.navigationController?.popViewController(animated: true)
     }
+    
+    @IBAction func btnCreateBtnAction(_ sender: UIButton) {
+            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "CreateMarketViewController") as? CreateMarketViewController else {return}
+            self.navigationController?.pushViewController(vc, animated: true)
+            print("Abdul Aleem Usmani")
+        }
 }
 
 extension MyitemsMarketViewController: UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    //                return MyitemsData?.myProductList?.count ?? 0
-            
-            if sourceViewController == "MyProfile" {
-                return MyitemsData?.myProductList?.count ?? 0
-            } else {
-                return AllListMarketData?.producthomelist?.count ?? 0
+    //        return MyitemsData?.myProductList?.count ?? 0
+                
+                if sourceViewController == "OtherProfile" {
+                    return MyitemsData?.myProductList?.count ?? 0
+                } else if sourceViewController == "MyProfile" {
+                    return MyitemsData?.myProductList?.count ?? 0
+                } else {
+                    return AllListMarketData?.producthomelist?.count ?? 0
+                }
             }
-        }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyItemCollectionViewCell", for: indexPath) as! MyItemCollectionViewCell
-        
-        cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
-        cell.viewItems.layer.shadowOpacity = 0.5
-        cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
-        cell.viewItems.layer.shadowRadius = 5
-        cell.viewItems.layer.masksToBounds = false
-        cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-        cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-        cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-        cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
-        
-        cell.EventLbl.text = AllListMarketData?.producthomelist?[indexPath.row].pTitle
-        cell.rsLbl.text = "Rs." + (AllListMarketData?.producthomelist?[indexPath.row].salePrice ?? "")
-        cell.DayLbl.text = AllListMarketData?.producthomelist?[indexPath.row].createdTime
-        let url = URL(string: (AllListMarketData?.producthomelist?[indexPath.row].pImages ?? ""))
-        cell.profileImgView.kf.indicatorType = .activity
-        cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-        cell.secttLbl.text = AllListMarketData?.producthomelist?[indexPath.row].neighborhoodName
-        cell.DetailCallback = { [self] value in
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
-            vc.idD = String(AllListMarketData?.producthomelist?[indexPath.row].id ?? 0)
-            self.navigationController?.pushViewController(vc, animated: true)
+            
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyItemCollectionViewCell", for: indexPath) as! MyItemCollectionViewCell
+            
+            cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
+            cell.viewItems.layer.shadowOpacity = 0.5
+            cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
+            cell.viewItems.layer.shadowRadius = 5
+            cell.viewItems.layer.masksToBounds = false
+            cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
+            cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
+            
+            cell.EventLbl.text = AllListMarketData?.producthomelist?[indexPath.row].pTitle
+    //        cell.rsLbl.text = "Rs." + (AllListMarketData?.producthomelist?[indexPath.row].salePrice ?? "")
+            if let priceString = AllListMarketData?.producthomelist?[indexPath.row].salePrice,
+               let price = Double(priceString) {
+                if price == 0.0 {
+                    cell.rsLbl.text = "Free"
+                    cell.lblSellDonate.text = "GIVEN"
+                } else {
+                    cell.rsLbl.text = "Rs. \(Int(price))"
+                    cell.lblSellDonate.text = "SOLD"
+                }
+                
+            } else {
+                cell.rsLbl.text = "Rs. 0"
+            }
+            
+            if AllListMarketData?.producthomelist?[indexPath.row].pStatus == 2 /*|| AllListMarketData?.producthomelist?[indexPath.row].saleType == "Donate"*/ {
+                cell.lblSellDonate.isHidden = false
+            } else {
+                cell.lblSellDonate.isHidden = true
+            }
+            
+            cell.DayLbl.text = AllListMarketData?.producthomelist?[indexPath.row].createdTime
+            let url = URL(string: (AllListMarketData?.producthomelist?[indexPath.row].pImages ?? ""))
+            cell.profileImgView.kf.indicatorType = .activity
+            cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
+            cell.secttLbl.text = AllListMarketData?.producthomelist?[indexPath.row].neighborhoodName
+            cell.DetailCallback = { [self] value in
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
+                vc.idD = String(AllListMarketData?.producthomelist?[indexPath.row].id ?? 0)
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            return cell
         }
-        return cell
-    }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = collectionViewMyEvent.frame.width / 2 - 5
         let height = width - 20
@@ -105,7 +134,7 @@ extension MyitemsMarketViewController {
             dictParams = [ "user_id": Newid ?? "" ]
         }
         
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
+        RSNetworkManager.shared.newMarketRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
         {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
             switch statusCode {
             case .SUCCESS ,.CREATED:

@@ -21,7 +21,7 @@ class PrivacyPolicyViewController: UIViewController {
         webView.navigationDelegate = self
         viewWeb.addSubview(webView)
         
-        // Load the URL
+        // Load the URL //dev.
         if let url = URL(string: "https://neighbrsnook.com/privacy-policy/") {
             let request = URLRequest(url: url)
             webView.load(request)

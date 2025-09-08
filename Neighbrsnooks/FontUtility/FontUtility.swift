@@ -71,7 +71,10 @@ class CustomTextView: UITextView {
 
 
 @IBDesignable
+
 class CustomLabelFirstName: UITextField {
+    var previousTextField: UITextField?
+    var nextTextFiled: UITextField?
     @IBInspectable var customFontSize: CGFloat = 16 {
         didSet {
             self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
@@ -86,6 +89,14 @@ class CustomLabelFirstName: UITextField {
         self.textColor = UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
         
     }
+    
+    override func deleteBackward() {
+           if let text = self.text, text.isEmpty {
+               previousTextField?.becomeFirstResponder()
+           } else {
+               self.text = ""
+           }
+       }
 }
 
 

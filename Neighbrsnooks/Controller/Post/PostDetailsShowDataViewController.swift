@@ -33,10 +33,10 @@ class PostDetailsShowDataViewController: UIViewController {
     }
     
 
-    @IBAction func backAction(_ sender: Any) {
-        let vc  = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailsViewController") as! PostDetailsViewController
-        self.navigationController?.popViewController(animated: true)
-    }
+//    @IBAction func backAction(_ sender: Any) {
+//        let vc  = self.storyboard?.instantiateViewController(withIdentifier: "PostDetailsViewController") as! PostDetailsViewController
+//        self.navigationController?.popViewController(animated: true)
+//    }
     
 
 }

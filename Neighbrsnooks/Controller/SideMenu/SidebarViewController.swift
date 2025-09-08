@@ -226,6 +226,7 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
 //                vc.sourceViewController = "MyProfile"
                 vc.selectedNeighborhoodId = self.selectedNeighborhoodId
                 vc.sourceViewController = "Neighbourhood"
+                vc.backAction = "homeBack"
                 
                 self.pushTo(vc)
                 
@@ -271,7 +272,7 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
             case "Share App":
                 let appName = "NeighboursNook"
                 let appDescription = "NeighbrsNook is a hyperlocal social networking service. Connect with your neighborhood today!"
-                let appLink = "https://testflight.apple.com/join/1G74jNEC"
+                let appLink = "https://apps.apple.com/in/app/neighbrsnook/id6746369263"
                 let shareText = "\(appDescription) \nDownload now: \(appLink)"
                 let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
                 self.present(activityViewController, animated: true, completion: nil)

@@ -38,6 +38,12 @@ class latestListMarketViewController: UIViewController,UICollectionViewDelegate,
         
     }
     
+    @IBAction func btnCreateMarketAction(_ sender: UIButton) {
+            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "CreateMarketViewController") as? CreateMarketViewController else {return}
+            self.navigationController?.pushViewController(vc, animated: true)
+            print("Abdul Aleem Usmani")
+        }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return LatestListData?.productTodayList?.count ?? 0
        
@@ -46,42 +52,52 @@ class latestListMarketViewController: UIViewController,UICollectionViewDelegate,
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyItemCollectionViewCell", for: indexPath) as! MyItemCollectionViewCell
-        
-        cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
-        cell.viewItems.layer.shadowOpacity = 0.5
-        cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
-        cell.viewItems.layer.shadowRadius = 5
-        cell.viewItems.layer.masksToBounds = false
-        cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-        cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-        cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-        cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
-      //  cell.LargeImgView.image = imageArray[indexPath.row]
-        
-        cell.EventLbl.text = LatestListData?.productTodayList?[indexPath.row].pTitle
-    //    self.lblImgLimit.text = "Max Images: " + (self.EventDetauilData?.eventImgRemainLimit ?? "")
-        cell.rsLbl.text = "Rs." + (LatestListData?.productTodayList?[indexPath.row].salePrice ?? "")
-        cell.DayLbl.text = LatestListData?.productTodayList?[indexPath.row].createdTime
-        let url = URL(string: (LatestListData?.productTodayList?[indexPath.row].pImages ?? ""))
-        cell.profileImgView.kf.indicatorType = .activity
-        cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "NewEvents"))
-        
-        cell.DetailCallback = { [self] value in
             
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
-           // vc.idD = (MarketWallData?.yourItems?[indexPath.row].id)!
-            vc.idD = String(LatestListData?.productTodayList?[indexPath.row].id ?? 0)
-         
-            self.navigationController?.pushViewController(vc, animated: true)
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyItemCollectionViewCell", for: indexPath) as! MyItemCollectionViewCell
             
+            cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
+            cell.viewItems.layer.shadowOpacity = 0.5
+            cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
+            cell.viewItems.layer.shadowRadius = 5
+            cell.viewItems.layer.masksToBounds = false
+            cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
+            cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
+            cell.EventLbl.text = LatestListData?.productTodayList?[indexPath.row].pTitle
+            if let priceString = LatestListData?.productTodayList?[indexPath.row].salePrice,
+               let price = Double(priceString) {
+                if price == 0.0 {
+                    cell.rsLbl.text = "Free"
+                    cell.lblSellDonate.text = "GIVEN"
+                } else {
+                    cell.rsLbl.text = "Rs. \(Int(price))"
+                    cell.lblSellDonate.text = "SOLD"
+                }
+                
+            } else {
+                cell.rsLbl.text = "Rs. 0"
+            }
             
-
+            if LatestListData?.productTodayList?[indexPath.row].pStatus == 2 /*|| LatestListData?.productTodayList?[indexPath.row].saleType == "Donate"*/ {
+                cell.lblSellDonate.isHidden = false
+            } else {
+                cell.lblSellDonate.isHidden = true
+            }
+            
+            cell.DayLbl.text = LatestListData?.productTodayList?[indexPath.row].createdTime
+            let url = URL(string: (LatestListData?.productTodayList?[indexPath.row].pImages ?? ""))
+            cell.profileImgView.kf.indicatorType = .activity
+            cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "NewEvents"))
+            cell.secttLbl.text = LatestListData?.productTodayList?[indexPath.row].neighborhoodName
+            cell.DetailCallback = { [self] value in
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
+                vc.idD = String(LatestListData?.productTodayList?[indexPath.row].id ?? 0)
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            return cell
         }
-//
-        return cell
-    }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
     let width = collectionViewMyEvent.frame.width / 2 - 5
        let height = width - 20

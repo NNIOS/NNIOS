@@ -674,8 +674,8 @@ class BusinessDotViewController: BottomPopupViewController {
         }
     }
     
-    func handleBlockUnblockAPI(completion: @escaping () -> Void) {
-        let url = "https://neighbrsnook.com/admin/api/toggle-block-user"
+    func handleBlockUnblockAPI(completion: @escaping () -> Void) { //dev.
+        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
         guard let blockerId = UserDefaults.standard.string(forKey: "userid") else {
             print("Error: Missing blocker ID")
             return

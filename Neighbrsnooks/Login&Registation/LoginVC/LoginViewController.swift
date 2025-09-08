@@ -100,6 +100,7 @@ class LoginViewController: BaseViewController {
         }
         
     }
+    // old registation   RegisterViewController new  RegistationFirstStepVC
     
     @IBAction func btnRegister(_ : UIButton){
         
@@ -121,14 +122,15 @@ class LoginViewController: BaseViewController {
         
         // Mobile and Password Check
         if tfMobile.text == "" {
-            showCustomAlert(message: "Please enter your mobile number")
+//            showCustomAlert(message: "Please enter your mobile number")
+            alertToast(Message: "Please enter your mobile number")
 
 //            let alert = UIAlertController(title: "", message: "Please enter your mobile number", preferredStyle: .alert)
 //            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
 //            self.present(alert, animated: true, completion: nil)
             
         } else if tfPassword.text == "" {
-            showCustomAlert(message: "Please enter password")
+            alertToast(Message: "Please enter password")
 
 //            let alert = UIAlertController(title: "", message: "Please enter password", preferredStyle: .alert)
 //            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
@@ -180,7 +182,9 @@ class LoginViewController: BaseViewController {
                     
                     default:
                         print("Showing alert for message: \(message)")
-                        self.showCustomAlert(message: message)
+//                        self.showCustomAlert(message: message)
+                        alertToast(Message: message)
+                        
                     }
                 } else {
                     print("No message received in response.")
@@ -225,7 +229,8 @@ class LoginViewController: BaseViewController {
             
             guard let loginData = self.loginData else {
                 print("Login data is nil.")
-                self.showAlert(Message: "Unable to process response.")
+//                self.showAlert(Message: "Unable to process response.")
+                self.alertToast(Message: "Unable to process response.")
                 return
             }
             
@@ -275,8 +280,8 @@ class LoginViewController: BaseViewController {
                            self.navigateToViewController(identifier: "NewRegistationSecondStepVC", type: NewRegistationSecondStepVC.self, userId: userId)
                           
                     default:
-                        self.showCustomAlert(message: message)
-                    }
+//                        self.showCustomAlert(message: message)
+                        self.alertToast(Message: message)                    }
                 }
             }
         }

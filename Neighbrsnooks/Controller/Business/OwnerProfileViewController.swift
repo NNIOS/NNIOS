@@ -72,7 +72,7 @@ class OwnerProfileViewController: UIViewController {
             
             self.GenderLbl.text = self.profileData?.gender
             self.ProfessioLbl.text = self.profileData?.nbrsType
-            self.AddressCityLbl.text = self.profileData?.address
+            self.AddressCityLbl.text = self.profileData?.addressone
             self.ReasonLbl.text = self.profileData?.reason
             self.AddOneLbl.text = self.profileData?.addlineone
             self.AddTwoLbl.text = self.profileData?.addlinetwo

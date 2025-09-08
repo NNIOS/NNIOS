@@ -10,14 +10,15 @@ import Kingfisher
 import SVProgressHUD
 import FirebaseMessaging
 import Alamofire
+import FirebaseAnalytics
 import CoreLocation
 
 class RegistationFirstStepVC: BaseViewController {
     
     // MARK: - Outlets
     @IBOutlet weak var scrollView: UIScrollView!
-    @IBOutlet weak var fullNameTF: CustomLabelFirstName!
-    @IBOutlet weak var phoneNumberTF: CustomLabelFirstName!
+    @IBOutlet weak var fullNameTF: CustomTextField!
+    @IBOutlet weak var phoneNumberTF: CustomTextField!
     @IBOutlet weak var lblTimer: UILabel!
     @IBOutlet weak var firstOtpTF: CustomLabelFirstName!
     @IBOutlet weak var secondOtpTF: CustomLabelFirstName!
@@ -25,8 +26,8 @@ class RegistationFirstStepVC: BaseViewController {
     @IBOutlet weak var fourthOtpTF: CustomLabelFirstName!
     @IBOutlet weak var fifthOtpTF: CustomLabelFirstName!
     @IBOutlet weak var sixthOtpTF: CustomLabelFirstName!
-    @IBOutlet weak var emailTF: CustomLabelFirstName!
-    @IBOutlet weak var passwordTF: CustomLabelFirstName!
+    @IBOutlet weak var emailTF: CustomTextField!
+    @IBOutlet weak var passwordTF: CustomTextField!
     @IBOutlet weak var btnCheck: UIButton!
     @IBOutlet weak var lblTerms: CustomLabelHeadingname!
     @IBOutlet weak var checkImage: UIImageView!
@@ -54,7 +55,10 @@ class RegistationFirstStepVC: BaseViewController {
     let locationManager = CLLocationManager()
     var otpFields: [CustomLabelFirstName] = []
     var isVerifyingOTP = false
-
+    var numberOfOTPdigit = 6
+    var objVerifyModel:VerifyOTPModel?
+    var textFieldArray = [CustomLabelFirstName]()
+    
     
     // MARK: - Lifecycle methods
     override func viewDidLoad() {
@@ -67,7 +71,7 @@ class RegistationFirstStepVC: BaseViewController {
             field.keyboardType = .numberPad
             field.isSecureTextEntry = false
         }
-
+        
         
     }
     
@@ -135,43 +139,30 @@ class RegistationFirstStepVC: BaseViewController {
 // MARK: - extension for UITextFieldDelegate
 
 extension RegistationFirstStepVC : UITextFieldDelegate {
+
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let isDeleting = string.isEmpty
-
-        // ✅ Handle AutoFill or Paste
-        if string.count > 1 {
-            DispatchQueue.main.async {
-                self.fillOTPFields(with: string)
-            }
-            return false
-        }
-
-        // ✅ Normal typing logic
-        if let index = otpFields.firstIndex(of: textField as! CustomLabelFirstName) {
+            guard let currentField = textField as? CustomLabelFirstName else { return true }
+            let isDeleting = string.isEmpty
             if isDeleting {
-                textField.text = ""
-                if index > 0 {
-                    otpFields[index - 1].becomeFirstResponder()
-                }
-            } else {
-                textField.text = string
-                if index < otpFields.count - 1 {
-                    otpFields[index + 1].becomeFirstResponder()
+                if currentField.text?.isEmpty ?? true {
+                    currentField.previousTextField?.becomeFirstResponder()
                 } else {
-                    textField.resignFirstResponder()
+                    currentField.text = ""
                 }
+                return false
+            } else {
+                currentField.text = string
+                if let next = currentField.nextTextFiled {
+                    next.becomeFirstResponder()
+                } else {
+                    currentField.resignFirstResponder()
+                    checkOTPCompletion()
+                }
+                return false
             }
         }
-
-        // ✅ Check OTP completion
-        DispatchQueue.main.async {
-            self.checkOTPCompletion()
-        }
-
-        return false
-    }
-
+    
     private func fillOTPFields(with otp: String) {
         otpFields.forEach { $0.text = "" } // Clear all first
         for (i, char) in otp.enumerated() where i < otpFields.count {
@@ -180,7 +171,7 @@ extension RegistationFirstStepVC : UITextFieldDelegate {
         otpFields.last?.resignFirstResponder()
         checkOTPCompletion()
     }
-
+    
     private func checkOTPCompletion() {
         let enteredOTP = otpFields.compactMap { $0.text }.joined()
         if enteredOTP.count == otpFields.count && !isVerifyingOTP {
@@ -188,66 +179,66 @@ extension RegistationFirstStepVC : UITextFieldDelegate {
             verifyOTP(enteredOTP)
         }
     }
-
-
+    
+    
     private func verifyOTP(_ otp: String) {
         self.callVerifyOTPWebService(userOTP: otp) { success, message in
             DispatchQueue.main.async {
                 self.isVerifyingOTP = false // ✅ Reset flag after response
                 self.checkImage.isHidden = false
                 self.checkImage.image = UIImage(named: success ? "check" : "CrossOtp")
-                self.showAutoDismissAlert(message: success ? "Code Matched successfully." : "Code does not match.")
+//                self.showAutoDismissAlert(message: success ? "Code Matched successfully." : "Code does not match.")
             }
         }
     }
-
-
     
     
     
-//    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-//        guard let currentText = textField.text else { return false }
-//        let isDeleting = string.isEmpty
-//        
-//        if !isDeleting && currentText.count >= 1 {
-//            return false
-//        }
-//        if let typedField = textField as? CustomLabelFirstName,
-//           let index = otpFields.firstIndex(of: typedField) {
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-//                if isDeleting {
-//                    if index > 0 {
-//                        self.otpFields[index - 1].becomeFirstResponder()
-//                    }
-//                } else {
-//                    if index < self.otpFields.count - 1 {
-//                        self.otpFields[index + 1].becomeFirstResponder()
-//                    } else {
-//                        self.otpFields[index].resignFirstResponder()
-//                        let enteredOTP = self.otpFields.compactMap { $0.text }.joined()
-//                        if enteredOTP.count == 6 {
-//                            self.callVerifyOTPWebService(userOTP: enteredOTP) { success, message in
-//                                DispatchQueue.main.async {
-//                                    if success {
-//                                        print("✅ OTP matched")
-//                                        self.checkImage.isHidden = false
-//                                        self.checkImage.image = UIImage(named: "check")
-//                                        self.showAutoDismissAlert(message: "Code Matched successfully.")
-//                                    } else {
-//                                        print("✅ OTP did not match")
-//                                        self.checkImage.isHidden = false
-//                                        self.checkImage.image = UIImage(named: "CrossOtp")
-//                                        self.showAutoDismissAlert(message: "Code does not match.")
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        return true
-//    }
+    
+    
+    //    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+    //        guard let currentText = textField.text else { return false }
+    //        let isDeleting = string.isEmpty
+    //
+    //        if !isDeleting && currentText.count >= 1 {
+    //            return false
+    //        }
+    //        if let typedField = textField as? CustomLabelFirstName,
+    //           let index = otpFields.firstIndex(of: typedField) {
+    //            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+    //                if isDeleting {
+    //                    if index > 0 {
+    //                        self.otpFields[index - 1].becomeFirstResponder()
+    //                    }
+    //                } else {
+    //                    if index < self.otpFields.count - 1 {
+    //                        self.otpFields[index + 1].becomeFirstResponder()
+    //                    } else {
+    //                        self.otpFields[index].resignFirstResponder()
+    //                        let enteredOTP = self.otpFields.compactMap { $0.text }.joined()
+    //                        if enteredOTP.count == 6 {
+    //                            self.callVerifyOTPWebService(userOTP: enteredOTP) { success, message in
+    //                                DispatchQueue.main.async {
+    //                                    if success {
+    //                                        print("✅ OTP matched")
+    //                                        self.checkImage.isHidden = false
+    //                                        self.checkImage.image = UIImage(named: "check")
+    //                                        self.showAutoDismissAlert(message: "Code Matched successfully.")
+    //                                    } else {
+    //                                        print("✅ OTP did not match")
+    //                                        self.checkImage.isHidden = false
+    //                                        self.checkImage.image = UIImage(named: "CrossOtp")
+    //                                        self.showAutoDismissAlert(message: "Code does not match.")
+    //                                    }
+    //                                }
+    //                            }
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        return true
+    //    }
 }
 
 // MARK: - extension for Controller
@@ -256,97 +247,116 @@ extension RegistationFirstStepVC {
     
     // MARK: function for setup UI
     func setupUI() {
-            lblTimer.isHidden = true
-            checkImage.isHidden = true
-            btnCheck.setImage(UIImage(systemName: "square"), for: .normal)
-            lblTerms.text = "I agree to your Terms & Conditions  and Privacy Policy"
-            handlelLblTerms()
-            lblStrong.isHidden = true
-            passwordTF.addTarget(self, action: #selector(passwordDidChange(_:)), for: .editingChanged)
-            phoneNumberTF.addTarget(self, action: #selector(handleCountForPhone(_:)), for: .editingChanged)
-            otpView.isHidden = true
-            NetworkMonitor.shared.startMonitoring()
-            otpViewHeightConst.constant = 0
-            self.otpTopHeightConst.constant = 5
-            self.otpBottomHeightConst.constant = 5
-            scrollView.isScrollEnabled = false
-        }
-        
-        // MARK: function for setup delegates for otp fields
-    func setDelegate() {
-        otpFields = [firstOtpTF, secondOtpTF, thirdOtpTF, fourthOtpTF, fifthOtpTF, sixthOtpTF]
-
-        otpFields.forEach {
-            $0.delegate = self
-            $0.keyboardType = .numberPad
-            $0.textContentType = .oneTimeCode // ✅ Sabhi fields par enable
-        }
+        fullNameTF.autocapitalizationType = .words
+        lblTimer.isHidden = true
+        checkImage.isHidden = true
+        btnCheck.setImage(UIImage(systemName: "square"), for: .normal)
+        lblTerms.text = "I agree to your Terms & Conditions  and Privacy Policy"
+        handlelLblTerms()
+        lblStrong.isHidden = true
+        passwordTF.addTarget(self, action: #selector(passwordDidChange(_:)), for: .editingChanged)
+        phoneNumberTF.addTarget(self, action: #selector(handleCountForPhone(_:)), for: .editingChanged)
+        otpView.isHidden = true
+        NetworkMonitor.shared.startMonitoring()
+        otpViewHeightConst.constant = 0
+        self.otpTopHeightConst.constant = 5
+        self.otpBottomHeightConst.constant = 5
+//        scrollView.isScrollEnabled = false
     }
+    
+    // MARK: function for setup delegates for otp fields
+        func setDelegate() {
+            otpFields = [firstOtpTF, secondOtpTF, thirdOtpTF, fourthOtpTF, fifthOtpTF, sixthOtpTF]
 
-    
-    
-    // MARK: function for setup Notification Permission
-        func setupNotificationPermission() {
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-                if granted {
-                    DispatchQueue.main.async {
-                        UIApplication.shared.registerForRemoteNotifications()
-                    }
-                } else {
-                    print("❌ Notification permission denied")
+            for (index, field) in otpFields.enumerated() {
+                field.delegate = self
+                field.keyboardType = .numberPad
+                field.textContentType = .oneTimeCode
+
+                if index > 0 {
+                    field.previousTextField = otpFields[index - 1]
+                }
+                if index < otpFields.count - 1 {
+                    field.nextTextFiled = otpFields[index + 1]
                 }
             }
         }
     
-    // MARK -  function for handle validation for all fields
-    func validation() {
-        guard let fullName = fullNameTF.text, !fullName.isEmpty else {
-            showAlert(title: "", message: "Please enter full name"); return
+    
+    
+    // MARK: function for setup Notification Permission
+    func setupNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+            if granted {
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            } else {
+                print("❌ Notification permission denied")
+            }
         }
-        if containsBadWords(fullName) {
-            showAlert(title: "", message: "Contains inappropriate words"); return
-        }
-        
-        guard let phone = phoneNumberTF.text, !phone.isEmpty else {
-            showAlert(title: "", message: "Please enter phone"); return
-        }
-        
-        otpFields = [firstOtpTF, secondOtpTF, thirdOtpTF, fourthOtpTF, fifthOtpTF, sixthOtpTF]
-        if otpFields.contains(where: { ($0.text ?? "").isEmpty }) {
-            showAlert(title: "", message: "OTP fields can not be empty"); return
-        }
-        
-        guard let email = emailTF.text, !email.isEmpty else {
-            showAlert(title: "", message: "Please enter email"); return
-        }
-        if containsBadWords(email) {
-            showAlert(title: "", message: "Contains inappropriate words"); return
-        }
-        guard email.isValidEmail() else {
-            showAlert(title: "", message: "Please enter a valid email address"); return
-        }
-        
-        guard let password = passwordTF.text, !password.isEmpty else {
-            showAlert(title: "", message: "Please enter password"); return
-        }
-        if containsBadWords(password) {
-            showAlert(title: "", message: "Contains inappropriate words"); return
-        }
-        
-        //        let passwordRegex = "^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$"
-        //        let passwordTest = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
-        //        if !passwordTest.evaluate(with: password) {
-        //            showAlert(title: "", message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."); return
-        //        }
-        
-        if isTerm != "1" {
-            showAlert(title: "", message: "Please read and accept Terms & Conditions and Privacy Policy."); return
-        }
-        handleBtnNextAction()
     }
     
+    // MARK -  function for handle validation for all fields
+        func validation() {
+            guard let fullName = fullNameTF.text, !fullName.isEmpty else {
+                alertToast(Message: "Please enter full name"); return
+            }
+            
+            if containsBadWords(fullName) {
+                alertToast(Message: "Contains inappropriate words"); return
+            }
+            
+            guard let phone = phoneNumberTF.text, !phone.isEmpty else {
+                alertToast(Message: "Please enter phone"); return
+            }
+            
+            if otpFields.contains(where: { ($0.text ?? "").isEmpty }) {
+                alertToast(Message: otpView.isHidden ? "Please verify your phone number with OTP" : "Please enter OTP"); return
+            }
+            
+            guard let email = emailTF.text, !email.isEmpty else {
+                alertToast(Message: "Please enter email"); return
+            }
+            if containsBadWords(email) {
+                alertToast(Message: "Contains inappropriate words"); return
+                
+            }
+            
+            if self.objVerifyModel?.description.desc == "Code does not match." {
+                            alertToast(Message: self.objVerifyModel?.description.desc ?? ""); return
+                        }
+            
+            guard email.isValidEmail() else {
+                alertToast(Message: "Please enter a valid email address"); return
+            }
+            
+            guard let password = passwordTF.text, !password.isEmpty else {
+                alertToast(Message: "Please enter password"); return
+            }
+            
+            guard password.count >= 5 else {
+                return alertToast(Message: "Password must be at least 5 characters long.")
+            }
+            
+            if containsBadWords(password) {
+                alertToast(Message: "Contains inappropriate words"); return
+            }
+            
+            //        let passwordRegex = "^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{8,}$"
+            //        let passwordTest = NSPredicate(format: "SELF MATCHES %@", passwordRegex)
+            //        if !passwordTest.evaluate(with: password) {
+            //            showAlert(title: "", message: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."); return
+            //        }
+            
+            if isTerm != "1" {
+                alertToast(Message: "Please read and accept Terms & Conditions and Privacy Policy."); return
+            }
+            
+            handleBtnNextAction()
+        }
     
-    // MARK -  function for perform Regiser Api after validation
+    
     func handleBtnNextAction() {
         Messaging.messaging().token { token, error in
             if let error = error {
@@ -354,22 +364,32 @@ extension RegistationFirstStepVC {
             } else if let token = token {
                 print("FCM Token fetched: \(token)")
                 
+                // Get the full name from text field
+                let fullName = self.fullNameTF.text ?? ""
+                
                 self.callRegisterWebService(firebaseToken: token, completionClosure: {
                     DispatchQueue.main.async {
-                        self.setupLocationManager()
+                        //MARK: - Firebase Analytics event log
+                        UserDefaults.standard.set(fullName, forKey: "userFullName")
+                        Analytics.logEvent("registration_firstStep_complete_iOS", parameters: [
+                            "Full_name": fullName,
+                            "method": "firstStep_app_registration_iOS",
+                            "platform": "iOS"
+                        ])
                     }
                 })
-
             }
         }
     }
 
-
+    
     func pushToNewRegistationSecondStepVC() {
         print("➡️ Pushing to NewRegistationSecondStepVC...")
-
+        
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let nextVC = storyboard.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
+            nextVC.sourceScreen = "FirstSteep"
+            nextVC.name = self.fullNameTF.text ?? ""
             if let nav = self.navigationController {
                 nav.pushViewController(nextVC, animated: true)
             } else {
@@ -380,7 +400,7 @@ extension RegistationFirstStepVC {
             print("❌ nextVC not found. Check storyboard ID.")
         }
     }
-
+    
     
     
     // MARK -  function for set lable for password field after passowrd strength
@@ -462,54 +482,54 @@ extension RegistationFirstStepVC {
     
     // MARK:  Send OTP Api method
     func callOTPWebService(_ completionClosure: @escaping () -> ()) {
-            let dictParams: [String: Any] = [
-                "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
-                "reqestmobileno": self.phoneNumberTF.text ?? ""
-            ]
-            print("Param isn : \(dictParams)")
-            WebService.sharedInstance.callOTPWebService(withParams: dictParams) { data in
-                self.loadingAlert = self.showLoadingAlert(on: self)
-                print("Send OTP Model: \(data)")
-                self.SendOTPData = data
-                self.loadingAlert?.dismiss(animated: true, completion: {
-                    if self.SendOTPData?.status == "success" {
-                        self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "OTP Sent Successfully")
-                        self.otpView.isHidden = false
-                        self.otpViewHeightConst.constant = 50
-                        self.otpTopHeightConst.constant = 15
-                        self.otpBottomHeightConst.constant = 15
-                        completionClosure()
+        let dictParams: [String: Any] = [
+            "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
+            "reqestmobileno": self.phoneNumberTF.text ?? ""
+        ]
+        print("Param isn : \(dictParams)")
+        WebService.sharedInstance.callOTPWebService(withParams: dictParams) { data in
+            self.loadingAlert = self.showLoadingAlert(on: self)
+            print("Send OTP Model: \(data)")
+            self.SendOTPData = data
+            self.loadingAlert?.dismiss(animated: true, completion: {
+                if self.SendOTPData?.status == "success" {
+                    self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "OTP Sent Successfully")
+                    self.otpView.isHidden = false
+                    self.otpViewHeightConst.constant = 50
+                    self.otpTopHeightConst.constant = 15
+                    self.otpBottomHeightConst.constant = 15
+                    completionClosure()
+                    
+                    // ✅ Auto-fill OTP from API if available
+                    if let otp = self.SendOTPData?.otp, otp.count == 6 {
+                        let otpChars = Array(otp)
+                        self.otpFields = [self.firstOtpTF, self.secondOtpTF, self.thirdOtpTF, self.fourthOtpTF, self.fifthOtpTF, self.sixthOtpTF]
                         
-                        // ✅ Auto-fill OTP from API if available
-                        if let otp = self.SendOTPData?.otp, otp.count == 6 {
-                            let otpChars = Array(otp)
-                            self.otpFields = [self.firstOtpTF, self.secondOtpTF, self.thirdOtpTF, self.fourthOtpTF, self.fifthOtpTF, self.sixthOtpTF]
-                            
-                            for (i, tf) in self.otpFields.enumerated() {
-                                tf.text = String(otpChars[i])
-                            }
-                            let enteredOTP = self.otpFields.compactMap { $0.text }.joined()
-                            self.callVerifyOTPWebService(userOTP: enteredOTP) { success, message in
-                                DispatchQueue.main.async {
-                                    if success {
-                                        print("✅ OTP matched (Auto-filled)")
-                                        self.checkImage.isHidden = false
-                                        self.checkImage.image = UIImage(named: "check")
-                                        self.showAutoDismissAlert(message: "Code Matched successfully.")
-                                    } else {
-                                        self.checkImage.isHidden = false
-                                        self.checkImage.image = UIImage(named: "CrossOtp")
-                                        self.showAutoDismissAlert(message: "Code does not match.")
-                                    }
+                        for (i, tf) in self.otpFields.enumerated() {
+                            tf.text = String(otpChars[i])
+                        }
+                        let enteredOTP = self.otpFields.compactMap { $0.text }.joined()
+                        self.callVerifyOTPWebService(userOTP: enteredOTP) { success, message in
+                            DispatchQueue.main.async {
+                                if success {
+                                    print("✅ OTP matched (Auto-filled)")
+                                    self.checkImage.isHidden = false
+                                    self.checkImage.image = UIImage(named: "check")
+//                                    self.showAutoDismissAlert(message: "")
+                                } else {
+                                    self.checkImage.isHidden = false
+                                    self.checkImage.image = UIImage(named: "CrossOtp")
+//                                    self.showAutoDismissAlert(message: nil)
                                 }
                             }
                         }
-                    } else if self.SendOTPData?.status == "failed" {
-                        self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "Something went wrong")
                     }
-                })
-            }
+                } else if self.SendOTPData?.status == "failed" {
+                    self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "Something went wrong")
+                }
+            })
         }
+    }
     
     // MARK:  Verify OTP Api method
     func callVerifyOTPWebService(userOTP: String, completion: @escaping (Bool, String) -> Void) {
@@ -521,24 +541,51 @@ extension RegistationFirstStepVC {
             print("Verify OTP Param is : \(dictParams)")
             self.loadingAlert = self.showLoadingAlert(on: self)
             WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { response in
-                let responseModel = response
+                self.objVerifyModel = response
                 print("Parsed Model: \(String(describing: response))")
                 self.loadingAlert?.dismiss(animated: true, completion: {
-                    if responseModel.status == "success",
-                       let message = responseModel.description.desc,
+                    if self.objVerifyModel?.status == "success",
+                       let message = self.objVerifyModel?.description.desc,
                        message != "Code does not match." {
                         self.isOTPVerified = true
                         self.emailTF.becomeFirstResponder()
-                        completion(true, responseModel.description.desc ?? "OTP Verified.")
+                        completion(true, self.objVerifyModel?.description.desc ?? "OTP Verified.")
                         //                    completion(true, message)
                     } else {
                         self.isOTPVerified = false
-                        completion(false, responseModel.description.desc ?? "Invalid OTP.")
+                        completion(false, self.objVerifyModel?.description.desc ?? "Invalid OTP.")
                         
                     }
                 })
             }
         }
+//    func callVerifyOTPWebService(userOTP: String, completion: @escaping (Bool, String) -> Void) {
+//        guard let mobileNumber = phoneNumberTF.text, !mobileNumber.isEmpty else {
+//            completion(false, "Mobile number is missing.")
+//            return
+//        }
+//        let dictParams: [String: Any] = ["otpvarify": userOTP, "reqestmobileno": mobileNumber]
+//        print("Verify OTP Param is : \(dictParams)")
+//        self.loadingAlert = self.showLoadingAlert(on: self)
+//        WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { response in
+//            let responseModel = response
+//            print("Parsed Model: \(String(describing: response))")
+//            self.loadingAlert?.dismiss(animated: true, completion: {
+//                if responseModel.status == "success",
+//                   let message = responseModel.description.desc,
+//                   message != "Code does not match." {
+//                    self.isOTPVerified = true
+//                    self.emailTF.becomeFirstResponder()
+//                    completion(true, responseModel.description.desc ?? "OTP Verified.")
+//                    //                    completion(true, message)
+//                } else {
+//                    self.isOTPVerified = false
+//                    completion(false, responseModel.description.desc ?? "Invalid OTP.")
+//                    
+//                }
+//            })
+//        }
+//    }
     
     // MARK:  Verify Email Api method
     func callVerifyEmailAPI(_ completionClosure: @escaping () -> ()) {
@@ -558,42 +605,42 @@ extension RegistationFirstStepVC {
     
     // MARK:  Register Web Service Api method
     
-//    func callRegisterWebService(firebaseToken: String,_ completionClosure: @escaping () -> ()) {
-//        let dictParams: [String: Any] = [
-//            "name": self.fullNameTF.text ?? "",
-//            "emailid": self.emailTF.text ?? "",
-//            "phoneno": self.phoneNumberTF.text ?? "",
-//            "password": self.passwordTF.text ?? "",
-//            "term": isTerm ?? "",
-//            "firebase_token": firebaseToken
-//        ]
-//        print("param is :\(dictParams)")
-//        self.loadingAlert = self.showLoadingAlert(on: self)
-//        WebService.sharedInstance.callRegisterWebServiceFirst(withParams: dictParams) { responseData in
-//            self.registerData = responseData
-//            self.registerData = responseData
-//            if let userID = self.registerData?.userid {
-//                UserDefaults.standard.set(userID, forKey: "userid")
-//                print("✅ Saved userID: \(userID)")
-//                // ✅ Location API ko yahan call karo
-//                self.callUserLocationWebService()
-//            }
-//            print("Api data response is model is : \(String(describing: self.registerData))")
-//            self.loadingAlert?.dismiss(animated: true, completion: {
-//                if self.registerData?.status == "success" {
-//                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as! NewRegistationSecondStepVC
-//                    self.showToast(message: self.registerData?.message ?? "Something went wrong")
-//                    UserDefaults.standard.set(self.fullNameTF.text ?? "", forKey: "userFirstName")
-//                    print("User created successfully. Please proceed with registration.")
-//                    self.navigationController?.pushViewController(vc, animated: false)
-//                    completionClosure()
-//                } else {
-//                    self.showAlert(message: self.registerData?.message ?? "")
-//                }
-//            })
-//            
-//        }
-//    }
+    //    func callRegisterWebService(firebaseToken: String,_ completionClosure: @escaping () -> ()) {
+    //        let dictParams: [String: Any] = [
+    //            "name": self.fullNameTF.text ?? "",
+    //            "emailid": self.emailTF.text ?? "",
+    //            "phoneno": self.phoneNumberTF.text ?? "",
+    //            "password": self.passwordTF.text ?? "",
+    //            "term": isTerm ?? "",
+    //            "firebase_token": firebaseToken
+    //        ]
+    //        print("param is :\(dictParams)")
+    //        self.loadingAlert = self.showLoadingAlert(on: self)
+    //        WebService.sharedInstance.callRegisterWebServiceFirst(withParams: dictParams) { responseData in
+    //            self.registerData = responseData
+    //            self.registerData = responseData
+    //            if let userID = self.registerData?.userid {
+    //                UserDefaults.standard.set(userID, forKey: "userid")
+    //                print("✅ Saved userID: \(userID)")
+    //                // ✅ Location API ko yahan call karo
+    //                self.callUserLocationWebService()
+    //            }
+    //            print("Api data response is model is : \(String(describing: self.registerData))")
+    //            self.loadingAlert?.dismiss(animated: true, completion: {
+    //                if self.registerData?.status == "success" {
+    //                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as! NewRegistationSecondStepVC
+    //                    self.showToast(message: self.registerData?.message ?? "Something went wrong")
+    //                    UserDefaults.standard.set(self.fullNameTF.text ?? "", forKey: "userFirstName")
+    //                    print("User created successfully. Please proceed with registration.")
+    //                    self.navigationController?.pushViewController(vc, animated: false)
+    //                    completionClosure()
+    //                } else {
+    //                    self.showAlert(message: self.registerData?.message ?? "")
+    //                }
+    //            })
+    //
+    //        }
+    //    }
     
     
     func callRegisterWebService(firebaseToken: String, completionClosure: @escaping () -> ()) {
@@ -609,7 +656,7 @@ extension RegistationFirstStepVC {
             // Want: can handle error or return
             return
         }
-
+        
         let dictParams: [String: Any] = [
             "name": fullName,
             "emailid": self.emailTF.text ?? "",
@@ -618,15 +665,15 @@ extension RegistationFirstStepVC {
             "term": isTerm ?? "",
             "firebase_token": firebaseToken
         ]
-
+        
         print("param is :\(dictParams)")
         self.loadingAlert = self.showLoadingAlert(on: self)
-
+        
         callsendImageAPI(param: dictParams, arrImage: imageArray, imageKey: "userpic", URlName: kBASEURL + WebServiceName.kRegisterNew) {
             completionClosure()
         }
     }
-
+    
     func generateInitialsImage(initials: String, backgroundColor: UIColor, size: CGSize = CGSize(width: 100, height: 100)) -> UIImage? {
         let renderer = UIGraphicsImageRenderer(size: size)
         let img = renderer.image { ctx in
@@ -644,7 +691,7 @@ extension RegistationFirstStepVC {
         }
         return img
     }
-
+    
     
     
     func callsendImageAPI(param: [String: Any], arrImage: [UIImage], imageKey: String, URlName: String, withblock: @escaping () -> Void) {
@@ -679,7 +726,7 @@ extension RegistationFirstStepVC {
             do {
                 let decoder = JSONDecoder()
                 self.registerData = try decoder.decode(RegisterModel.self, from: jsonData)
-
+                
                 print("✅ Parsed Response: \(String(describing: self.registerData))")
                 
                 DispatchQueue.main.async {
@@ -698,6 +745,7 @@ extension RegistationFirstStepVC {
                             
                             // ✅ Navigate to next VC
                             if let nextVC = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
+                                nextVC.sourceScreen = "FirstSteep"
                                 self.showToast(message: self.registerData?.message ?? "Registration successful")
                                 self.navigationController?.pushViewController(nextVC, animated: true)
                             }
@@ -709,42 +757,42 @@ extension RegistationFirstStepVC {
                     
                     withblock() // ✅ Call completion
                 }
-
+                
                 withblock() // ✅ Call completion
             } catch {
                 print("❌ Error parsing response: \(error.localizedDescription)")
             }
         }
     }
-
+    
     
     
     
     
     func showToast(message: String) {
-            let toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2 - 150, y: self.view.frame.size.height-100, width: 300, height: 40))
-            toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
-            toastLabel.textColor = UIColor.white
-            toastLabel.textAlignment = .center
-            toastLabel.font = UIFont.systemFont(ofSize: 14)
-            toastLabel.text = message
-            toastLabel.alpha = 1.0
-            toastLabel.layer.cornerRadius = 10
-            toastLabel.clipsToBounds = true
-            self.view.addSubview(toastLabel)
-            
-            UIView.animate(withDuration: 2.0, delay: 2.0, options: .curveEaseOut, animations: {
-                toastLabel.alpha = 0.0
-            }) { (isCompleted) in
-                toastLabel.removeFromSuperview()
-            }
+        let toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2 - 150, y: self.view.frame.size.height-100, width: 300, height: 40))
+        toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+        toastLabel.textColor = UIColor.white
+        toastLabel.textAlignment = .center
+        toastLabel.font = UIFont.systemFont(ofSize: 14)
+        toastLabel.text = message
+        toastLabel.alpha = 1.0
+        toastLabel.layer.cornerRadius = 10
+        toastLabel.clipsToBounds = true
+        self.view.addSubview(toastLabel)
+        
+        UIView.animate(withDuration: 2.0, delay: 2.0, options: .curveEaseOut, animations: {
+            toastLabel.alpha = 0.0
+        }) { (isCompleted) in
+            toastLabel.removeFromSuperview()
         }
+    }
     
     
-    // MARK:  USER LOCATION Api method
+    // MARK:  USER LOCATION Api method  //dev.
     func callUserLocationWebService() {
         let id = UserDefaults.standard.string(forKey: "userid")
-        let url = "https://neighbrsnook.com/admin/api/user-location"
+        let url = "https://dev.neighbrsnook.com/admin/api/user-location"
         let params: [String: Any] = [
             "userid": id ?? "",
             "latitude": currentLatitude ?? 0.0,
@@ -769,29 +817,29 @@ extension RegistationFirstStepVC {
     }
     
     func requestNotificationPermissionIfNeeded() {
-            UNUserNotificationCenter.current().getNotificationSettings { settings in
-                switch settings.authorizationStatus {
-                case .notDetermined:
-                    // Permission not asked yet, request it
-                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-                        if granted {
-                            print("✅ Notification permission granted")
-                            DispatchQueue.main.async {
-                                UIApplication.shared.registerForRemoteNotifications()
-                            }
-                        } else {
-                            print("❌ Notification permission denied: \(error?.localizedDescription ?? "No error")")
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            switch settings.authorizationStatus {
+            case .notDetermined:
+                // Permission not asked yet, request it
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                    if granted {
+                        print("✅ Notification permission granted")
+                        DispatchQueue.main.async {
+                            UIApplication.shared.registerForRemoteNotifications()
                         }
+                    } else {
+                        print("❌ Notification permission denied: \(error?.localizedDescription ?? "No error")")
                     }
-                case .denied:
-                    print("❌ User has denied notification permission before.")
-                case .authorized, .provisional, .ephemeral:
-                    print("✅ Notification already authorized.")
-                @unknown default:
-                    break
                 }
+            case .denied:
+                print("❌ User has denied notification permission before.")
+            case .authorized, .provisional, .ephemeral:
+                print("✅ Notification already authorized.")
+            @unknown default:
+                break
             }
         }
+    }
     
     func handlelLblTerms() {
         let fullText = "I agree to your Terms & Conditions \n and Privacy Policy"
@@ -837,25 +885,15 @@ extension RegistationFirstStepVC {
     }
     
     func updateScrollViewScrollability() {
-        scrollView.isScrollEnabled = scrollView.contentSize.height > UIScreen.main.bounds.height
-    }
-    
-    func setupLocationManager() {
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        let status = locationManager.authorizationStatus
-        switch status {
-        case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
-        case .authorizedWhenInUse, .authorizedAlways:
-            locationManager.startUpdatingLocation()
-        case .denied, .restricted:
-            print("❗️Location permission denied or restricted.")
-            //            showLocationPermissionAlert()
-        @unknown default:
-            break
+            let screenHeight = UIScreen.main.bounds.height
+            if screenHeight <= 667 {
+                scrollView.isScrollEnabled = true
+            } else {
+                scrollView.isScrollEnabled = scrollView.contentSize.height > screenHeight
+            }
         }
-    }
+    
+    
 }
 
 // MARK: - extension for CLLocationManagerDelegate

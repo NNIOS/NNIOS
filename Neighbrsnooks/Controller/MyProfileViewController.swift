@@ -10,9 +10,9 @@ import Alamofire
 class MyProfileViewController: BaseViewController {
     
     @IBOutlet weak var lblAddressDetail: UILabel!
-        
-        @IBOutlet weak var LblAddressText: UILabel!
-        @IBOutlet weak var AddressCityLbl: UILabel!
+    
+    @IBOutlet weak var LblAddressText: UILabel!
+    @IBOutlet weak var AddressCityLbl: UILabel!
     
     @IBOutlet weak var btnCamera: UIButton!
     @IBOutlet weak var lblViewDocument: UILabel!
@@ -28,7 +28,7 @@ class MyProfileViewController: BaseViewController {
     @IBOutlet weak var ProfessioLbl: UILabel!
     @IBOutlet weak var IntrstLbl: UILabel!
     @IBOutlet weak var MemberLbl: UILabel!
-//    @IBOutlet weak var AddressCityLbl: UILabel!
+    //    @IBOutlet weak var AddressCityLbl: UILabel!
     @IBOutlet weak var ReasonLbl: UILabel!
     @IBOutlet weak var profileImgView : UIImageView!
     @IBOutlet weak var AddProofLbl: UILabel!
@@ -86,7 +86,7 @@ class MyProfileViewController: BaseViewController {
     @IBOutlet weak var LblMobileText: UILabel!
     @IBOutlet weak var LblDobText: UILabel!
     @IBOutlet weak var LblGenderText: UILabel!
-//    @IBOutlet weak var LblAddressText: UILabel!
+    //    @IBOutlet weak var LblAddressText: UILabel!
     @IBOutlet weak var LblIDText: UILabel!
     @IBOutlet weak var LblProffesioalText: UILabel!
     @IBOutlet weak var LblIntrsrtText: UILabel!
@@ -114,11 +114,11 @@ class MyProfileViewController: BaseViewController {
     
     @IBOutlet weak var viewMemberSinceHeight: NSLayoutConstraint!
     @IBOutlet weak var dobView: UIView!
-        
-        
-        @IBOutlet weak var btnAddressDetails: UIButton!
     
-//    var profileData : ProfileModel? old model
+    
+    @IBOutlet weak var btnAddressDetails: UIButton!
+    
+    //    var profileData : ProfileModel? old model
     var profileData : ProfileModel?
     
     var profileUploadData : UploadProfileModel?
@@ -175,6 +175,7 @@ class MyProfileViewController: BaseViewController {
         
         //        NameLbl.textColor = #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1)
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
+        self.NameLbl.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.EventprcntgLbl.text =  self.profileData?.eventper
         viewMarket.layer.cornerRadius = 15 // Adjust the radius as needed
         // viewMarket.layer.masksToBounds = true // Ensures t
@@ -197,10 +198,8 @@ class MyProfileViewController: BaseViewController {
         self.TotalBusinessLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.TotalGroupsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.TotalPostLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-        
         self.TotMarket.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.MarketPrcntg.font = UIFont(name: "Montserrat-Regular", size: 12)
-        
         self.EventPollsPrcntggLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.EventprcntgLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.EventBusinessPrncntgLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -214,8 +213,7 @@ class MyProfileViewController: BaseViewController {
         self.EventPostPrcntg.font = UIFont(name: "Montserrat-Regular", size: 12)
         self.IntrstLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
         self.ReasonLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-        self.AddressCityLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-//        self.AddressCityLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+        self.AddressCityLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
         self.MyNameLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
         self.FirstNameLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
         self.AddProofLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
@@ -255,14 +253,14 @@ class MyProfileViewController: BaseViewController {
             // Buttons & Document Section
             self.viewMemberSinceHeight.constant = isOwnProfile ? self.viewMemberSinceHeight.constant : 50
             self.viewMemberSinceHeight.constant = min(self.viewMemberSinceHeight.constant, 50)
-
+            
             self.viewEmailHeight.constant = isOwnProfile ? 50 : 0
-            self.viewMobileHeight.constant = isOwnProfile ? 50 : 0
+            //            self.viewMobileHeight.constant = isOwnProfile ? 50 : 0
             self.viewDateOfBirthHeight.constant = isOwnProfile ? 50 : 0
             self.LblEmailText.isHidden = !isOwnProfile
             self.EmailLbl.isHidden = !isOwnProfile
-            self.MobileLbl.isHidden = !isOwnProfile
-            self.LblMobileText.isHidden = !isOwnProfile // Optional: if exists
+            //            self.MobileLbl.isHidden = !isOwnProfile
+            //            self.LblMobileText.isHidden = !isOwnProfile // Optional: if exists
             self.LblDobText.isHidden = !isOwnProfile
             self.DobLbl.isHidden = !isOwnProfile
             self.btnInfo.isHidden = !isOwnProfile
@@ -278,32 +276,35 @@ class MyProfileViewController: BaseViewController {
             self.AddProofLbl.isHidden = !isOwnProfile
             self.LblDobText.isHidden = !isOwnProfile
             self.DobLbl.isHidden = !isOwnProfile
+            
+            
             // Height of overall profile container
             self.addViewHeightConst.constant = isOwnProfile ? 235 : 50
-            self.LblAddrss.text = isOwnProfile ? "Key Details" : "Key Details"
-            //            self.LblOther.text = isOwnProfile ? "A little more about you!" : "A little more about \(self.profileData?.username ?? "")"
+            self.LblAddrss.text = "Key Details"
+            self.LblOther.text = "A little more about me!"
+            self.lblAddressDetail.text = "Address"
             
             self.view.layoutIfNeeded()
             self.NameLbl.text = self.profileData?.username
-                let userName = self.profileData?.username ?? ""
-                let firstLetter = String(userName.prefix(1)).uppercased()
+            let userName = self.profileData?.username ?? ""
+            let firstLetter = String(userName.prefix(1)).uppercased()
+            
+            if let imageUrlString = self.profileData?.userpic,
+               let url = URL(string: imageUrlString),
+               !imageUrlString.trimmingCharacters(in: .whitespaces).isEmpty {
                 
-                if let imageUrlString = self.profileData?.userpic,
-                   let url = URL(string: imageUrlString),
-                   !imageUrlString.trimmingCharacters(in: .whitespaces).isEmpty {
-                    
-                    self.profileImgView.kf.indicatorType = .activity
-                    self.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "profile 1")) { result in
-                        switch result {
-                        case .success(_):
-                            self.profileImgView.backgroundColor = .clear // Image load ho gaya toh color reset
-                        case .failure(_):
-                            self.setInitialLetterProfile(firstLetter)
-                        }
+                self.profileImgView.kf.indicatorType = .activity
+                self.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "profile 1")) { result in
+                    switch result {
+                    case .success(_):
+                        self.profileImgView.backgroundColor = .clear // Image load ho gaya toh color reset
+                    case .failure(_):
+                        self.setInitialLetterProfile(firstLetter)
                     }
-                } else {
-                    self.setInitialLetterProfile(firstLetter)
                 }
+            } else {
+                self.setInitialLetterProfile(firstLetter)
+            }
             
             
             print("\n\n\nAbdul profile Model is :\(String(describing: self.profileData))\n\n\n")
@@ -321,6 +322,32 @@ class MyProfileViewController: BaseViewController {
             }
             self.MemberLbl.text = self.profileData?.createddate
             self.EmailLbl.text = self.profileData?.emailid
+            //            if let phone = profileData?.phoneno, !phone.isEmpty {
+            //                self.MobileLbl.text = phone
+            //            } else {
+            //                self.MobileLbl.text = "NA"
+            //            }
+            //            if let profeesion = self.profileData?.nbrsType, !profeesion.isEmpty {
+            //                self.ProfessioLbl.text = profeesion
+            //            } else {
+            //                self.ProfessioLbl.text = "NA"
+            //            }
+            //
+            //            if let emergNumber = self.profileData?.emerPhone, !emergNumber.isEmpty {
+            //                self.EmergencyLbl.text = emergNumber
+            //            } else {
+            //                self.EmergencyLbl.text = "NA"
+            //            }
+            //            if let addressone = self.profileData?.addressone, !addressone.isEmpty {
+            //                self.AddressCityLbl.text = addressone
+            //            } else {
+            //                self.AddressCityLbl.text = "NA"
+            //            }
+            //            if let addressone = self.profileData?.phoneno, !addressone.isEmpty {
+            //                self.MobileLbl.text = addressone
+            //            } else {
+            //                self.MobileLbl.text = "NA"
+            //            }
             if let phone = profileData?.phoneno, !phone.isEmpty {
                 self.MobileLbl.text = phone
             } else {
@@ -337,6 +364,33 @@ class MyProfileViewController: BaseViewController {
             } else {
                 self.EmergencyLbl.text = "NA"
             }
+            
+            if let addressone = self.profileData?.addressone, !addressone.isEmpty {
+                self.AddressCityLbl.text = addressone
+            } else {
+                self.AddressCityLbl.text = "NA"
+            }
+            
+            if let intrst = self.profileData?.intersttype, !intrst.isEmpty {
+                self.IntrstLbl.text = intrst
+            } else {
+                self.IntrstLbl.text = "NA"
+            }
+            
+            if let reason = profileData?.reason, !reason.isEmpty {
+                self.ReasonLbl.text = reason
+            } else {
+                self.ReasonLbl.text = "NA"
+            }
+            
+            
+            
+            if let addressone = self.profileData?.phoneno, !addressone.isEmpty {
+                self.MobileLbl.text = addressone
+            } else {
+                self.MobileLbl.text = "NA"
+            }
+            
             //            self.EmergencyLbl.text = self.profileData?.emerPhone
             self.DobLbl.text = self.profileData?.dob
             self.GenderLbl.text = self.profileData?.gender
@@ -345,7 +399,7 @@ class MyProfileViewController: BaseViewController {
             self.MyNameLbl.text = self.profileData?.username
             self.MyNameLbl.textColor = UIColor.secondaryLabel
             self.FirstNameLbl.textColor = UIColor.secondaryLabel
-            if let address = self.profileData?.address,
+            if let address = self.profileData?.addressone,
                let neighborhood = self.profileData?.neighborhood {
                 
                 print("Neighborhood string is: \(neighborhood)")
@@ -391,7 +445,7 @@ class MyProfileViewController: BaseViewController {
                     self.AddressCityLbl.numberOfLines = 0
                     self.AddressCityLbl.lineBreakMode = .byWordWrapping
                     self.AddressCityLbl.backgroundColor = .clear
-                    self.AddressCityLbl.text = combinedAddress
+                    //                    self.AddressCityLbl.text = combinedAddress
                     
                     // Debugging
                     print("Combined Address: \(combinedAddress)")
@@ -402,18 +456,16 @@ class MyProfileViewController: BaseViewController {
                     self.AddressCityLbl.text = "Address information is unavailable."
                 }
             }
-                        
-            if let interests = self.profileData?.reason {
-                // Split the string by comma and trim whitespace
-                let interestArray = interests.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            
+            if let interests = profileData?.reason, !interests.isEmpty {
+                let interestArray = interests
+                    .split(separator: ",")
+                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                 
-                // Create a bullet list
                 let bulletList = interestArray.map { "• \($0)" }.joined(separator: "\n")
-                
-                // Set the label text
                 self.ReasonLbl.text = bulletList
             } else {
-                self.ReasonLbl.text = "No interests available."
+                self.ReasonLbl.text = "NA"
             }
             
             self.EventsLbl.text = self.profileData?.events
@@ -440,17 +492,17 @@ class MyProfileViewController: BaseViewController {
             
             //  self.EventprcntgLbl.text =  "\(self.profileData?.eventper ?? 0 )%"
             
-//            let url = URL(string: (self.profileData?.userpic ?? ""))
-//            self.profileImgView.kf.indicatorType = .activity
-//            self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: ""))
-//            
+            //            let url = URL(string: (self.profileData?.userpic ?? ""))
+            //            self.profileImgView.kf.indicatorType = .activity
+            //            self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: ""))
+            //
             
             
             self.profileData = profileData
             if profileData?.verfiedMsg == "User Verification is completed!" {
                 self.btnAdress.isHidden = true
                 self.btnAddressDetails.isHidden = true
-//                personalViewHeightConstraint.constant = 230
+                //                personalViewHeightConstraint.constant = 230
                 FirstNameLbl.isHidden = true
                 topFirstNameLblHeightConst.constant = 0
                 bottomFirstNameLblHeightConst.constant = 0
@@ -464,7 +516,7 @@ class MyProfileViewController: BaseViewController {
             } else {
                 self.btnAdress.isHidden = false
                 self.btnAddressDetails.isHidden = false
-//                personalViewHeightConstraint.constant = 265
+                //                personalViewHeightConstraint.constant = 265
                 self.FirstNameLbl.isHidden = false
                 self.topFirstNameLblHeightConst.constant = 10
                 self.bottomFirstNameLblHeightConst.constant = 10
@@ -501,9 +553,6 @@ class MyProfileViewController: BaseViewController {
         
         self.profileImgView.addSubview(initialLabel)
     }
-
-
-    
     
     
     func updateEventFill() {
@@ -610,6 +659,8 @@ class MyProfileViewController: BaseViewController {
         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC else {return}
         vc.profileData = profileData
         vc.sourceScreen = "profile"
+        vc.isComingFromSearchVC = false
+        vc.shouldCallAPIOnAppear = true
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -625,141 +676,141 @@ class MyProfileViewController: BaseViewController {
     }
     
     private func updateColors() {
-            if traitCollection.userInterfaceStyle == .dark {
-                // Dark mode colors
-                
-                MyprofileView.backgroundColor = .black
-                PersonalView.backgroundColor = .black
-                AddressView.backgroundColor = .black
-                OtherView.backgroundColor = .black
-                LoveView.backgroundColor = .black
-                PersonalView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-                
-                PersonalView.layer.borderWidth = 1.0
-                
-                AddressView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-                
-                AddressView.layer.borderWidth = 1.0
-                
-                OtherView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-                
-                OtherView.layer.borderWidth = 1.0
-                
-                LblPersonal.textColor = .white
-                LblAddrss.textColor = .white
-                lblAddressDetail.textColor = .white
-                LblOther.textColor = .white
-                //            NameLbl.textColor = .white
-                
-                SectorLbl.textColor = .white
-                
-                EmailLbl.textColor = .white
-                MobileLbl.textColor = .white
-                EmergencyLbl.textColor = .white
-                DobLbl.textColor = .white
-                GenderLbl.textColor = .white
-                ProfessioLbl.textColor = .white
-                
-                IntrstLbl.textColor = .white
-                MemberLbl.textColor = .white
-                AddressCityLbl.textColor = .white
-                ReasonLbl.textColor = .white
-                AddProofLbl.textColor = .white
-                EventsLbl.textColor = .white
-                PollLbl.textColor = .white
-                BusinessLbl.textColor = .white
-                GroupLbl.textColor = .white
-                PostLbl.textColor = .white
-                FavoriteLbl.textColor = .white
-                
-                LblMemberText.textColor = .white
-                LblEmailText.textColor = .white
-                LblMobileText.textColor = .white
-                LblDobText.textColor = .white
-                LblGenderText.textColor = .white
-                LblAddressText.textColor = .white
-                LblIDText.textColor = .white
-                LblProffesioalText.textColor = .white
-                LblIntrsrtText.textColor = .white
-                LblLoveText.textColor = .white
-                
-                
-                
-                
-            } else {
-                // Light mode mein storyboard ke original colors preserve karna
-                //  questionView.textColor = UIColor.secondaryLabel
-                PersonalView.backgroundColor = .white
-                AddressView.backgroundColor = .white
-                OtherView.backgroundColor = .white
-                LoveView.backgroundColor = .white
-                EventsLbl.textColor = .white
-                BusinessLbl.textColor = .white
-                pollslbl.textColor = .white
-                AddressView.backgroundColor = .white
-                OtherView.backgroundColor = .white
-                LoveView.backgroundColor = .white
-                
-                
-                PersonalView.isUserInteractionEnabled = true
-                PersonalView.layer.borderWidth = 0
-                
-                AddressView.isUserInteractionEnabled = true
-                AddressView.layer.borderWidth = 0
-                
-                OtherView.isUserInteractionEnabled = true
-                OtherView.layer.borderWidth = 0
-                MyprofileView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-                
-                LblPersonal.textColor = UIColor.secondaryLabel
-                LblAddrss.textColor = UIColor.secondaryLabel
-                lblAddressDetail.textColor = UIColor.secondaryLabel
-                LblOther.textColor = UIColor.secondaryLabel
-                
-                LblPersonal.textColor = UIColor.secondaryLabel
-                LblAddrss.textColor = UIColor.secondaryLabel
-                LblOther.textColor = UIColor.secondaryLabel
-                //            NameLbl.textColor = UIColor.secondaryLabel
-                // SecLbl.textColor = UIColor.secondaryLabel
-                SectorLbl.textColor = UIColor.secondaryLabel
-                
-                EmailLbl.textColor = UIColor.secondaryLabel
-                MobileLbl.textColor = UIColor.secondaryLabel
-                EmergencyLbl.textColor = UIColor.secondaryLabel
-                DobLbl.textColor = UIColor.secondaryLabel
-                GenderLbl.textColor = UIColor.secondaryLabel
-                ProfessioLbl.textColor = UIColor.secondaryLabel
-                
-                IntrstLbl.textColor = UIColor.secondaryLabel
-                MemberLbl.textColor = UIColor.secondaryLabel
-                AddressCityLbl.textColor = UIColor.secondaryLabel
-                ReasonLbl.textColor = UIColor.secondaryLabel
-                AddProofLbl.textColor = UIColor.secondaryLabel
-                // EventsLbl.textColor = UIColor.secondaryLabel
-                
-                //            PollLbl.textColor = UIColor.secondaryLabel
-                //            BusinessLbl.textColor = UIColor.secondaryLabel
-                //            GroupLbl.textColor = UIColor.secondaryLabel
-                //
-                //            PostLbl.textColor = UIColor.secondaryLabel
-                // FavoriteLbl.textColor = UIColor.secondaryLabel
-                
-                
-                LblMemberText.textColor = UIColor.secondaryLabel
-                LblEmailText.textColor = UIColor.secondaryLabel
-                LblMobileText.textColor = UIColor.secondaryLabel
-                LblDobText.textColor = UIColor.secondaryLabel
-                LblGenderText.textColor = UIColor.secondaryLabel
-                LblAddressText.textColor = UIColor.secondaryLabel
-                LblIDText.textColor = UIColor.secondaryLabel
-                LblProffesioalText.textColor = UIColor.secondaryLabel
-                LblIntrsrtText.textColor = UIColor.secondaryLabel
-                LblLoveText.textColor = UIColor.secondaryLabel
-                
-                
-            }
-            //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+        if traitCollection.userInterfaceStyle == .dark {
+            // Dark mode colors
+            
+            MyprofileView.backgroundColor = .black
+            PersonalView.backgroundColor = .black
+            AddressView.backgroundColor = .black
+            OtherView.backgroundColor = .black
+            LoveView.backgroundColor = .black
+            PersonalView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            PersonalView.layer.borderWidth = 1.0
+            
+            AddressView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            AddressView.layer.borderWidth = 1.0
+            
+            OtherView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
+            
+            OtherView.layer.borderWidth = 1.0
+            
+            LblPersonal.textColor = .white
+            LblAddrss.textColor = .white
+            lblAddressDetail.textColor = .white
+            LblOther.textColor = .white
+            //            NameLbl.textColor = .white
+            
+            SectorLbl.textColor = .white
+            
+            EmailLbl.textColor = .white
+            MobileLbl.textColor = .white
+            EmergencyLbl.textColor = .white
+            DobLbl.textColor = .white
+            GenderLbl.textColor = .white
+            ProfessioLbl.textColor = .white
+            
+            IntrstLbl.textColor = .white
+            MemberLbl.textColor = .white
+            AddressCityLbl.textColor = .white
+            ReasonLbl.textColor = .white
+            AddProofLbl.textColor = .white
+            EventsLbl.textColor = .white
+            PollLbl.textColor = .white
+            BusinessLbl.textColor = .white
+            GroupLbl.textColor = .white
+            PostLbl.textColor = .white
+            FavoriteLbl.textColor = .white
+            
+            LblMemberText.textColor = .white
+            LblEmailText.textColor = .white
+            LblMobileText.textColor = .white
+            LblDobText.textColor = .white
+            LblGenderText.textColor = .white
+            LblAddressText.textColor = .white
+            LblIDText.textColor = .white
+            LblProffesioalText.textColor = .white
+            LblIntrsrtText.textColor = .white
+            LblLoveText.textColor = .white
+            
+            
+            
+            
+        } else {
+            // Light mode mein storyboard ke original colors preserve karna
+            //  questionView.textColor = UIColor.secondaryLabel
+            PersonalView.backgroundColor = .white
+            AddressView.backgroundColor = .white
+            OtherView.backgroundColor = .white
+            LoveView.backgroundColor = .white
+            EventsLbl.textColor = .white
+            BusinessLbl.textColor = .white
+            pollslbl.textColor = .white
+            AddressView.backgroundColor = .white
+            OtherView.backgroundColor = .white
+            LoveView.backgroundColor = .white
+            
+            
+            PersonalView.isUserInteractionEnabled = true
+            PersonalView.layer.borderWidth = 0
+            
+            AddressView.isUserInteractionEnabled = true
+            AddressView.layer.borderWidth = 0
+            
+            OtherView.isUserInteractionEnabled = true
+            OtherView.layer.borderWidth = 0
+            MyprofileView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+            
+            LblPersonal.textColor = UIColor.secondaryLabel
+            LblAddrss.textColor = UIColor.secondaryLabel
+            lblAddressDetail.textColor = UIColor.secondaryLabel
+            LblOther.textColor = UIColor.secondaryLabel
+            
+            LblPersonal.textColor = UIColor.secondaryLabel
+            LblAddrss.textColor = UIColor.secondaryLabel
+            LblOther.textColor = UIColor.secondaryLabel
+            //            NameLbl.textColor = UIColor.secondaryLabel
+            // SecLbl.textColor = UIColor.secondaryLabel
+            SectorLbl.textColor = UIColor.secondaryLabel
+            
+            EmailLbl.textColor = UIColor.secondaryLabel
+            MobileLbl.textColor = UIColor.secondaryLabel
+            EmergencyLbl.textColor = UIColor.secondaryLabel
+            DobLbl.textColor = UIColor.secondaryLabel
+            GenderLbl.textColor = UIColor.secondaryLabel
+            ProfessioLbl.textColor = UIColor.secondaryLabel
+            
+            IntrstLbl.textColor = UIColor.secondaryLabel
+            MemberLbl.textColor = UIColor.secondaryLabel
+            AddressCityLbl.textColor = UIColor.secondaryLabel
+            ReasonLbl.textColor = UIColor.secondaryLabel
+            AddProofLbl.textColor = UIColor.secondaryLabel
+            // EventsLbl.textColor = UIColor.secondaryLabel
+            
+            //            PollLbl.textColor = UIColor.secondaryLabel
+            //            BusinessLbl.textColor = UIColor.secondaryLabel
+            //            GroupLbl.textColor = UIColor.secondaryLabel
+            //
+            //            PostLbl.textColor = UIColor.secondaryLabel
+            // FavoriteLbl.textColor = UIColor.secondaryLabel
+            
+            
+            LblMemberText.textColor = UIColor.secondaryLabel
+            LblEmailText.textColor = UIColor.secondaryLabel
+            LblMobileText.textColor = UIColor.secondaryLabel
+            LblDobText.textColor = UIColor.secondaryLabel
+            LblGenderText.textColor = UIColor.secondaryLabel
+            LblAddressText.textColor = UIColor.secondaryLabel
+            LblIDText.textColor = UIColor.secondaryLabel
+            LblProffesioalText.textColor = UIColor.secondaryLabel
+            LblIntrsrtText.textColor = UIColor.secondaryLabel
+            LblLoveText.textColor = UIColor.secondaryLabel
+            
+            
         }
+        //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
+    }
     
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -772,7 +823,8 @@ class MyProfileViewController: BaseViewController {
     
     
     @IBAction func dismissButtonTapped(_ sender: UIButton) {
-        if fromScreen == "profile" || fromScreen == "AddBussiness" {
+        print("fromScreen:", fromScreen)
+        if fromScreen == "profile" || fromScreen == "AddBussiness" || fromScreen == "profileback" || fromScreen == "profilebackUn" {
             if let homeVC = self.navigationController?.viewControllers.first(where: { $0 is NeigbrnookViewController }) {
                 self.navigationController?.popToViewController(homeVC, animated: true)
             } else {
@@ -785,6 +837,8 @@ class MyProfileViewController: BaseViewController {
             _ = navigationController?.popViewController(animated: true)
         }
     }
+    
+    
     
     
     
@@ -844,52 +898,86 @@ class MyProfileViewController: BaseViewController {
         
     }
     
-    
     @IBAction func btnEditNameAction(_ sender: UIButton) {
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditNameVC") as? EditNameVC else {return}
+        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditNameVC") as? EditNameVC else { return }
         vc.modalPresentationStyle = .overCurrentContext
-        vc.lName = self.profileData?.lastname ?? ""
-        vc.fName = self.profileData?.firstname ?? ""
+        vc.fullName = self.profileData?.username ?? ""
+        vc.verfiedMsg = sourceViewController
         vc.onUpdateSuccess = { [weak self] status in
+            print("Await status is :\(status)")
             self?.callUserProfileWebService {
-                self?.NameLbl.text = self?.profileData?.username
-//                self?.NameLbl.text = self?.profileData?.username
-                let messageText = "Thank you for choosing Neighbrsnook. Your account will be active ater a quick verification."
-                let alert = UIAlertController(title: "", message: messageText, preferredStyle: .alert)
-                let messageAttributes: [NSAttributedString.Key: Any] = [.font:UIFont(name: "Montserrat-Regular", size: 15) ?? UIFont.systemFont(ofSize: 15),.foregroundColor: UIColor.darkGray]
-                let attributedMessage = NSAttributedString(string: messageText, attributes: messageAttributes)
-                alert.setValue(attributedMessage, forKey: "attributedMessage")
-                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-                okAction.setValue( #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1) , forKey: "titleTextColor")
-                alert.addAction(okAction)
-                self?.present(alert, animated: true, completion: nil)
-                SVProgressHUD.dismiss()
-            }                }
+                if self?.sourceViewController == "HomeViewController" {
+                    // ✅ Show verification alert only if status = success
+                    self?.NameLbl.text = "\(self?.profileData?.username ?? "")"
+                    self?.MyNameLbl.text = "\(self?.profileData?.username ?? "")"
+                    let messageText = "Thank you for choosing Neighbrsnook. Your account will be active ater a quick verification."
+                    let alert = UIAlertController(title: "", message: messageText, preferredStyle: .alert)
+                    let messageAttributes: [NSAttributedString.Key: Any] = [
+                        .font: UIFont(name: "Montserrat-Regular", size: 15) ?? UIFont.systemFont(ofSize: 15),
+                        .foregroundColor: UIColor.darkGray
+                    ]
+                    let attributedMessage = NSAttributedString(string: messageText, attributes: messageAttributes)
+                    alert.setValue(attributedMessage, forKey: "attributedMessage")
+                    let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                    okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+                    alert.addAction(okAction)
+                    self?.present(alert, animated: true, completion: nil)
+                    SVProgressHUD.dismiss()
+                } else {
+                    // ✅ For all other statuses just update labels
+                    self?.NameLbl.text = "\(self?.profileData?.username ?? "")"
+                    self?.MyNameLbl.text = "\(self?.profileData?.username ?? "")"
+                }
+            }
+        }
         self.present(vc, animated: false)
     }
     
     
+    
+    
+    //    @IBAction func btnEditNameAction(_ sender: UIButton) {
+    //            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EditNameVC") as? EditNameVC else {return}
+    //            vc.modalPresentationStyle = .overCurrentContext
+    //            vc.fullName = self.profileData?.username ?? ""
+    //            vc.onUpdateSuccess = { [weak self] status in
+    //                self?.callUserProfileWebService {
+    //                    self?.NameLbl.text = "\(self?.profileData?.firstname ?? "") \(self?.profileData?.lastname ?? "")"
+    //                    self?.MyNameLbl.text = "\(self?.profileData?.firstname ?? "") \(self?.profileData?.lastname ?? "")"
+    //                    let messageText = "Thank you for choosing Neighbrsnook. Your account will be active ater a quick verification."
+    //                    let alert = UIAlertController(title: "", message: messageText, preferredStyle: .alert)
+    //                    let messageAttributes: [NSAttributedString.Key: Any] = [.font:UIFont(name: "Montserrat-Regular", size: 15) ?? UIFont.systemFont(ofSize: 15),.foregroundColor: UIColor.darkGray]
+    //                    let attributedMessage = NSAttributedString(string: messageText, attributes: messageAttributes)
+    //                    alert.setValue(attributedMessage, forKey: "attributedMessage")
+    //                    let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+    //                    okAction.setValue( #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1) , forKey: "titleTextColor")
+    //                    alert.addAction(okAction)
+    //                    self?.present(alert, animated: true, completion: nil)
+    //                    SVProgressHUD.dismiss()
+    //                }                }
+    //            self.present(vc, animated: false)
+    //        }
+    
+    
     @IBAction func btnOpenGallery(_ : UIButton) {
         
-//        openCameraGallery()
+        //        openCameraGallery()
         //   selectPictureThroughPhotoGallery()
         //        openCameraGallery()
-                checkCameraPermission { [weak self] granted in
-                    guard let self = self else { return }
-                    if granted {
-                        openCameraGallery()
-                    }
-                }
+        checkCameraPermission { [weak self] granted in
+            guard let self = self else { return }
+            if granted {
+                openCameraGallery()
+            }
+        }
         
     }
     
     @IBAction func btnDetails(_ : UIButton){
-        
-        
         guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC else {return}
         vc.profileData = profileData
         vc.sourceScreen = "profile"
-
+        vc.bntNameUpdate = "Update"
         self.navigationController?.pushViewController(vc, animated: true)
         
     }
@@ -918,53 +1006,54 @@ class MyProfileViewController: BaseViewController {
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
-//    @IBAction func btnMarket(_ : UIButton){
-//        
-//        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyitemsMarketViewController") as? MyitemsMarketViewController else {return}
-//        vc.sourceViewController = sourceViewController
-//        //        vc.sourceViewController = "OtherProfile"
-//        vc.Newid = Oid
-//        self.navigationController?.pushViewController(vc, animated: true)
-//    }
+    //    @IBAction func btnMarket(_ : UIButton){
+    //
+    //        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyitemsMarketViewController") as? MyitemsMarketViewController else {return}
+    //        vc.sourceViewController = sourceViewController
+    //        //        vc.sourceViewController = "OtherProfile"
+    //        vc.Newid = Oid
+    //        self.navigationController?.pushViewController(vc, animated: true)
+    //    }
     
     @IBAction func btnMarket(_ : UIButton){
-            if profileData?.market == "0" {
-                self.showToast(message: "Marketplace is zero!")
-            } else {
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyitemsMarketViewController") as? MyitemsMarketViewController else {return}
-                let id = UserDefaults.standard.string(forKey: "userid")
-                if id == Oid {
-                    vc.sourceViewController = "MyProfile"
-                    vc.Newid = Oid
-                } else {
-                    vc.sourceViewController = "OtherProfile"
-                    vc.Newid = Oid
-                }
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
-            
+        //            if profileData?.market == "0" {
+        //                self.showToast(message: "Marketplace is zero!")
+        //            } else {
+        //
+        //            }
+        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyitemsMarketViewController") as? MyitemsMarketViewController else {return}
+        let id = UserDefaults.standard.string(forKey: "userid")
+        if id == Oid {
+            vc.sourceViewController = "MyProfile"
+            vc.Newid = Oid
+        } else {
+            vc.sourceViewController = "OtherProfile"
+            vc.Newid = Oid
         }
+        self.navigationController?.pushViewController(vc, animated: true)
         
-        func showToast(message: String) { // show Toast Messages
-            let toastLabel = UILabel(frame: CGRect(x: 0, y: view.frame.size.height - 100, width: view.frame.size.width, height: 40))
-            let font = UIFont(name: "Montserrat-Regular", size: 13) ?? .systemFont(ofSize: 13)
-            let messageSize = (message as NSString).size(withAttributes: [.font: font])
-            let desiredWidth = messageSize.width + 30
-            toastLabel.frame.origin.x = (view.frame.size.width - desiredWidth) / 2
-            toastLabel.frame.size.width = desiredWidth
-            toastLabel.backgroundColor = UIColor(red: 0, green: 0.56, blue: 0, alpha: 0.8)
-            toastLabel.textColor = .white
-            toastLabel.textAlignment = .center
-            toastLabel.font = font
-            toastLabel.text = message
-            toastLabel.alpha = 1.0
-            toastLabel.layer.cornerRadius = 8
-            toastLabel.clipsToBounds = true
-            view.addSubview(toastLabel)
-            UIView.animate(withDuration: 0.5, delay: 0.8, options: .curveEaseOut) {
-                toastLabel.alpha = 0.0
-            } completion: { _ in  toastLabel.removeFromSuperview() }
-        }
+    }
+    
+    func showToast(message: String) { // show Toast Messages
+        let toastLabel = UILabel(frame: CGRect(x: 0, y: view.frame.size.height - 100, width: view.frame.size.width, height: 40))
+        let font = UIFont(name: "Montserrat-Regular", size: 13) ?? .systemFont(ofSize: 13)
+        let messageSize = (message as NSString).size(withAttributes: [.font: font])
+        let desiredWidth = messageSize.width + 30
+        toastLabel.frame.origin.x = (view.frame.size.width - desiredWidth) / 2
+        toastLabel.frame.size.width = desiredWidth
+        toastLabel.backgroundColor = UIColor(red: 0, green: 0.56, blue: 0, alpha: 0.8)
+        toastLabel.textColor = .white
+        toastLabel.textAlignment = .center
+        toastLabel.font = font
+        toastLabel.text = message
+        toastLabel.alpha = 1.0
+        toastLabel.layer.cornerRadius = 8
+        toastLabel.clipsToBounds = true
+        view.addSubview(toastLabel)
+        UIView.animate(withDuration: 0.5, delay: 0.8, options: .curveEaseOut) {
+            toastLabel.alpha = 0.0
+        } completion: { _ in  toastLabel.removeFromSuperview() }
+    }
     
     @IBAction func btnFullImage(_ : UIButton) {
         
@@ -999,13 +1088,22 @@ class MyProfileViewController: BaseViewController {
                 "userid": id ?? "",
                 "loggeduser": id ?? ""
             ]
-        } else {
+        }
+        else if sourceViewController == "profilebackUn" {
+            dictParams = [
+                "userid": id ?? "",
+                "loggeduser": id ?? ""
+            ]
+        }
+        
+        else {
             // Default behavior for other sources
             dictParams = [
                 "userid": Oid ?? "",
                 "loggeduser": id ?? ""
             ]
         }
+        
         print(dictParams)
         
         // Call the web service
@@ -1126,7 +1224,7 @@ extension MyProfileViewController: UIImagePickerControllerDelegate, UINavigation
     
     func showCrop(image: UIImage) {
         let vc = CropViewController(croppingStyle: .default, image: image)
-//        vc.aspectRatioPreset = .presetSquare
+        //        vc.aspectRatioPreset = .presetSquare
         vc.aspectRatioLockEnabled = false
         vc.toolbarPosition = .bottom
         vc.doneButtonTitle = "Continue"

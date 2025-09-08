@@ -32,11 +32,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     
                     switch registrationStep {
                     case "step1":
-                        let vc = storyboard.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC")
-                        self.window?.rootViewController = UINavigationController(rootViewController: vc)
+                        if let vc = storyboard.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
+                            vc.sourceScreen = "Malik"
+                            self.window?.rootViewController = UINavigationController(rootViewController: vc)
+                        }
                     case "step2":
-                        let vc = storyboard.instantiateViewController(withIdentifier: "RegistationAdressProofVC")
-                        self.window?.rootViewController = UINavigationController(rootViewController: vc)
+                        if let vc = storyboard.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC{
+                            vc.sourceScreen = "Malik"
+                            self.window?.rootViewController = UINavigationController(rootViewController: vc)
+                        }
                     default:
                         let homeVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController")
                         self.window?.rootViewController = UINavigationController(rootViewController: homeVC)
@@ -48,10 +52,67 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 
                     self.window?.makeKeyAndVisible()
             }
+        
+        
+        
+        
         }
 
 
 
+    func checkAppVersion() {
+        let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0"
+        let bundleId = Bundle.main.bundleIdentifier ?? ""
+        
+        guard let url = URL(string: "https://itunes.apple.com/lookup?bundleId=\(bundleId)") else { return }
+        
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            guard let data = data, error == nil else { return }
+            
+            if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+               let results = json["results"] as? [[String: Any]],
+               let appStoreVersion = results.first?["version"] as? String {
+                
+                DispatchQueue.main.async {
+                    if self.isUpdateAvailable(currentVersion: currentVersion, appStoreVersion: appStoreVersion) {
+                        self.showForceUpdateAlert()
+                    }
+                }
+            }
+        }
+        task.resume()
+    }
+
+    func isUpdateAvailable(currentVersion: String, appStoreVersion: String) -> Bool {
+        return currentVersion.compare(appStoreVersion, options: .numeric) == .orderedAscending
+    }
+
+    func showForceUpdateAlert() {
+        guard let window = self.window else { return }
+        
+        let alert = UIAlertController(title: "Update Required",
+                                      message: "Please update to the latest version to continue using the app",
+                                      preferredStyle: .alert)
+        
+        let updateAction = UIAlertAction(title: "Update", style: .default) { _ in
+            if let url = URL(string: "itms-apps://itunes.apple.com/app/id6746369263") {
+                UIApplication.shared.open(url)
+            }
+
+        }
+        
+        alert.addAction(updateAction)
+        
+        // ✅ Cancel option नहीं देंगे ताकि force update हो
+        window.rootViewController?.present(alert, animated: true, completion: nil)
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.checkAppVersion()
+    }
+
+    
+    
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
@@ -60,6 +121,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
+        checkAppVersion()
         if let userID = UserDefaults.standard.string(forKey: "userid"), !userID.isEmpty {
                 print("App became active - Resuming from last screen")
             }

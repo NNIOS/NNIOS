@@ -186,7 +186,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//         UserDefaults.standard.set("step1", forKey: "registrationStep")
+         UserDefaults.standard.set("step1", forKey: "registrationStep")
         
         setUp()
         self.navigationItem.hidesBackButton = true
@@ -1575,11 +1575,23 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             }
         }
         
+        var formattedDOB = ""
+        if let dobString = self.dobTextField.text, !dobString.isEmpty {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd-MM-yyyy"
+            if let date = dateFormatter.date(from: dobString) {
+                formattedDOB = dateFormatter.string(from: date)
+            } else {
+                formattedDOB = dobString // fallback: pass as is
+            }
+        }
+
+        
         // Parameters prepare karein
         let dictParams: [String: String] = [
             "userid": userID,
             "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
-            "dob": self.dobTextField.text ?? "",
+            "dob": formattedDOB,
             "areas": self.NeighbrhdData?.data?.first?.nbdID ?? "",
             "gender": genderValue,
             "addlineone": self.tfFlat.text ?? "",
@@ -1667,8 +1679,8 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
             return
         }
         
-        // Set URL dev.
-        guard let url = URL(string: "https://neighbrsnook.com/oldadmin/api/master?flag=reg-step-II") else {
+        // Set URL //dev.
+        guard let url = URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=reg-step-II") else {
             print("URL invalid hai")
             return
         }
@@ -2149,7 +2161,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     
     // MARK: -  CALL API FOR USER LOCATION   UserLocation current dev.
     
-    func callUserLocationWebService() {
+    func callUserLocationWebService() { //dev.
         let id = UserDefaults.standard.string(forKey: "userid")
         print("✅ User ID after login: \(id ?? "Not Found")")
         let url = "https://dev.neighbrsnook.com/admin/api/user-location"

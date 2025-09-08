@@ -930,6 +930,20 @@ extension UIViewController {
         }
     }
     
+    func alertToast(Message:String) {
+            let alert = UIAlertController(title: nil, message: Message, preferredStyle: .alert)
+            let attributedMessage = NSAttributedString(
+                string: Message,
+                attributes: [
+                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),.foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                ])
+            alert.setValue(attributedMessage, forKey: "attributedMessage")
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            okAction.setValue( #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1) , forKey: "titleTextColor")
+            alert.addAction(okAction)
+            self.present(alert, animated: true, completion: nil)
+        }
+    
     
     
     @objc func showAlert(message: String,yesNo: String) {
@@ -1045,4 +1059,6 @@ extension UIColor {
         
         self.init(red: r, green: g, blue: b, alpha: 1.0)
     }
+    
+    
 }

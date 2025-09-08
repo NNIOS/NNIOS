@@ -84,7 +84,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     var fullDescriptionText: String = ""
     var emojiSelectionHandler: ((String) -> Void)?
     var showAlertCallback: ((String) -> Void)?
-    
+    var shareAppCallback: (() -> Void)?
     
     
     weak var delegate: HomeTableViewCellDelegate?
@@ -622,54 +622,9 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     
     @IBAction func shareButtonTapped(_ sender: UIButton) {
         // Step 1: Internet Check
-        if !NetworkMonitor.shared.isConnected {
-            showAlertCallback?("Internet not available. Please check your connection.")
-            return
-        }
-        
-        // Step 2: Debug print to check message
-        print("🔍 Verification Message:", profileData?.verfiedMsg ?? "No message")
-        
-        // Step 3: Check if user is verified
-        if profileData?.verfiedMsg == "User Verification is completed!" {
-            shareCount += 1
-            lblShareCount.text = "\(shareCount)"
-            
-            let textToShare = "Check out this post!"
-            let activityVC = UIActivityViewController(activityItems: [textToShare], applicationActivities: nil)
-            
-            // Present share sheet
-            UIApplication.shared.windows.first?.rootViewController?.present(activityVC, animated: true, completion: nil)
-        } else {
-            // Step 4: Show Alert if not verified
-            let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-            
-            let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-            let messageAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-            ]
-            
-            let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-            let attributedMessage = NSAttributedString(
-                string: "You have limited access till verification is complete. We thank you for your patience.",
-                attributes: messageAttributes
-            )
-            
-            alert.setValue(attributedTitle, forKey: "attributedTitle")
-            alert.setValue(attributedMessage, forKey: "attributedMessage")
-            
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-                alert.dismiss(animated: true, completion: nil)
-            }))
-            
-            // Step 5: Present Alert
-            if let parentVC = sender.parentViewController {
-                parentVC.present(alert, animated: true, completion: nil)
-            } else {
-                print("❌ Could not find parent view controller.")
-            }
-        }
+        shareAppCallback?()
+        shareCount += 1
+        lblShareCount.text = "\(shareCount)"
     }
     
     
