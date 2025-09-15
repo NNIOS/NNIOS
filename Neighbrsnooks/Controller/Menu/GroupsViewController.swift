@@ -108,16 +108,17 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
             btnAll.backgroundColor =  #colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1) // Default color   //008000  // Highlighted color
         }
         fetchGroupListData()
+        refreshPageData()
         
         // Start timer to call API every 5 seconds
-        //        refreshTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
-        //            if !self.isTimerStopped {  // Jab tak timer band nahi hai tabhi API call hogi
-        //                self.callGroupListWebService(searchQuery: "") {
-        //
-        //                    self.tableviewMembers.reloadData()
-        //                }
-        //            }
-        //        }
+                refreshTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+                    if !self.isTimerStopped {  // Jab tak timer band nahi hai tabhi API call hogi
+                        self.callGroupListWebService(searchQuery: "") {
+        
+                            self.tableviewMembers.reloadData()
+                        }
+                    }
+                }
         
     }
     
@@ -207,21 +208,7 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
         callGroupListWebService(searchQuery: "") {
             self.tableviewMembers.reloadData()
         }
-        
     }
-    
-    
-    
-    //    @IBAction func filterOwnerGroups(_ sender: UIButton) {
-    //        switch sender {
-    //        case btnAll:
-    //            filteredGroupData = GroupListData?.listdata?.filter { $0.getjoin == "owner" } ?? []
-    //
-    //        default:
-    //            break
-    //        }
-    //        tableviewMembers.reloadData()
-    //    }
     
     @IBAction func filterGroups(_ sender: UIButton) {
         
@@ -536,24 +523,31 @@ class GroupsViewController: BaseViewController, ConfirmDelegate,UITextFieldDeleg
     
     func callJoinGroupWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
-        let idName = UserDefaults.standard.string(forKey: "name")
-        let UserName = UserDefaults.standard.string(forKey: "UserName")
+        
         let dictParams: Dictionary<String, Any> = [
-            "userid":id ?? "",
+            "userid": id ?? "",
             "groupid": groupid ?? "",
             "groupname": groupName ?? "",
             "username": userName ?? ""
-            
         ]
+        
+        print("Param is : \(dictParams)")
+        
         WebService.sharedInstance.callJoinGroupWebService(withParams: dictParams) { data in
             self.JoinListData = data
-            if self.JoinListData?.status == "success"{
+            
+            if self.JoinListData?.status == "success" {
+                self.callGroupListWebService(searchQuery: "") {
+                    self.tableviewMembers.reloadData()
+                    self.tableviewMembers.refreshControl?.endRefreshing()
+                }
                 completionClosure()
-            }else{
+            } else {
                 self.showAlert(Message: self.JoinListData?.message ?? "")
             }
         }
     }
+
 }
 
 @available(iOS 16.0, *)
@@ -565,615 +559,288 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "GroupsTableViewCell", for: indexPath) as! GroupsTableViewCell
+        
+        cell.lblName.text = filteredGroupData?.listdata?[indexPath.row].username
+        cell.lblGroupName.text = filteredGroupData?.listdata?[indexPath.row].groupname
+        cell.lblPrivate.text = filteredGroupData?.listdata?[indexPath.row].group_type
+        cell.lblSec.text = filteredGroupData?.listdata?[indexPath.row].neighbrhood
+        cell.lblPendingCount.text = filteredGroupData?.listdata?[indexPath.row].pendingRequestCount
+        if let memberCount = GroupListData?.listdata?[indexPath.row].membercount {
+            cell.lblMember.text = "\(memberCount)"
+        } else {
+            cell.lblMember.text = "N/A" // Or some default value
+        }
+        
+        cell.lblOwner.text = filteredGroupData?.listdata?[indexPath.row].getjoin
+        
+        cell.lblName.font  = UIFont(name: "Montserrat-Regular", size: 13)
+        cell.lblGroupName.font  = UIFont(name: "Montserrat-Regular", size: 14)
+        cell.lblPrivate.font  = UIFont(name: "Montserrat-Regular", size: 13)
+        cell.lblSec.font  = UIFont(name: "Montserrat-Regular", size: 13)
+        cell.lblMemberText.font = UIFont(name: "Montserrat-Regular", size: 10)
+        cell.lblOwner.font = UIFont(name: "Montserrat-Regular", size: 14)
+        
+        
+        if filteredGroupData?.listdata![indexPath.row].getjoin == "owner" {
+            cell.viewOwner.isHidden = false  // Ensure viewOwner is visible
+            cell.viewOwner.backgroundColor = #colorLiteral(red: 1, green: 0.8, blue: 0, alpha: 1)
+            cell.btnExit.isHidden = true
+            cell.btnJoin.isHidden = true
+            cell.lblOwner.text = "Owner"
+            cell.btnDetails.isHidden = false
+            cell.btnDetails2.isHidden = false
             
-            let cell = tableView.dequeueReusableCell(withIdentifier: "GroupsTableViewCell", for: indexPath) as! GroupsTableViewCell
-            
-            cell.lblName.text = filteredGroupData?.listdata?[indexPath.row].username
-            cell.lblGroupName.text = filteredGroupData?.listdata?[indexPath.row].groupname
-            cell.lblPrivate.text = filteredGroupData?.listdata?[indexPath.row].group_type
-            cell.lblSec.text = filteredGroupData?.listdata?[indexPath.row].neighbrhood
-            cell.lblPendingCount.text = filteredGroupData?.listdata?[indexPath.row].pendingRequestCount
-            if let memberCount = GroupListData?.listdata?[indexPath.row].membercount {
-                cell.lblMember.text = "\(memberCount)"
+            // Check the value of pendingRequestCount
+            if filteredGroupData?.listdata![indexPath.row].pendingRequestCount == "0" {
+                cell.btnReqPending.isHidden = true
+                cell.viewPendingCount.isHidden = true
             } else {
-                cell.lblMember.text = "N/A" // Or some default value
+                cell.btnReqPending.isHidden = false
+                cell.viewPendingCount.isHidden = false
+            }
+        }
+        
+        else if filteredGroupData?.listdata![indexPath.row].getjoin == "joined" {
+            
+            cell.viewOwner.backgroundColor = #colorLiteral(red: 1, green: 0.8, blue: 0, alpha: 1)
+            cell.viewOwner.isHidden = true
+            cell.btnExit.isHidden = false
+            cell.btnJoin.isHidden = true
+            cell.btnReqPending.isHidden = true
+            cell.viewPendingCount.isHidden = true
+            cell.btnDetails.isHidden = false
+            cell.btnDetails2.isHidden = false
+            
+        }
+        
+        else if filteredGroupData?.listdata![indexPath.row].getjoin == "pending" {
+            
+            cell.viewOwner.backgroundColor = #colorLiteral(red: 0.5019607843, green: 0, blue: 0.5019607843, alpha: 1)
+            cell.btnJoin.isHidden = true
+            cell.btnExit.isHidden = true
+            cell.btnReqPending.isHidden = true
+            cell.viewPendingCount.isHidden = true
+            cell.btnDetails.isHidden = true
+            cell.btnDetails2.isHidden = true
+            cell.viewOwner.isHidden = false
+            cell.lblOwner.text =  "Approval Pending"
+            
+        }
+        
+        else if filteredGroupData?.listdata![indexPath.row].getjoin == "join" {
+            
+            
+            cell.btnExit.isHidden = true
+            cell.btnJoin.isHidden = false
+            cell.btnReqPending.isHidden = true
+            cell.viewPendingCount.isHidden = true
+            cell.btnDetails.isHidden = false
+            cell.btnDetails2.isHidden = false
+        }
+        
+        else if filteredGroupData?.listdata![indexPath.row].getjoin == "Public" {
+            
+            
+            cell.btnExit.isHidden = true
+            cell.btnJoin.isHidden = false
+            cell.btnReqPending.isHidden = true
+            cell.viewPendingCount.isHidden = true
+            cell.btnDetails.isHidden = false
+            cell.btnDetails2.isHidden = false
+        }
+        
+        else if filteredGroupData?.listdata![indexPath.row].pendingRequestCount == "0" {
+            
+            
+            cell.btnReqPending.isHidden = true
+            cell.viewOwner.backgroundColor = #colorLiteral(red: 0.5019607843, green: 0, blue: 0.5019607843, alpha: 1)
+            cell.viewOwner.isHidden = false
+            cell.lblOwner.text =  "Approval Pending"
+        }
+        
+        
+        
+        
+        
+        let url = URL(string: (filteredGroupData?.listdata?[indexPath.row].image ?? ""))
+        cell.profileImgView.kf.indicatorType = .activity
+        cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "groupImg"))
+        
+        cell.ExitCallback = { [self] value in
+            
+            
+            
+            let vc = storyboard?.instantiateViewController(withIdentifier:"ExitPopupViewController")as! ExitPopupViewController
+            vc.modalPresentationStyle = .overFullScreen
+            vc.modalTransitionStyle = .crossDissolve
+            vc.delegate = self
+            vc.groupid = filteredGroupData?.listdata![indexPath.row].groupid ?? ""
+            vc.userid = filteredGroupData?.listdata![indexPath.row].userid ?? ""
+            
+            vc.onUpdateForGroup = { [weak self] in
+                self?.fetchGroupListData()
             }
             
-            cell.lblOwner.text = filteredGroupData?.listdata?[indexPath.row].getjoin
+            self.present(vc , animated: true)
             
-            cell.lblName.font  = UIFont(name: "Montserrat-Regular", size: 13)
-            cell.lblGroupName.font  = UIFont(name: "Montserrat-Regular", size: 14)
-            cell.lblPrivate.font  = UIFont(name: "Montserrat-Regular", size: 13)
-            cell.lblSec.font  = UIFont(name: "Montserrat-Regular", size: 13)
-            cell.lblMemberText.font = UIFont(name: "Montserrat-Regular", size: 10)
-            cell.lblOwner.font = UIFont(name: "Montserrat-Regular", size: 14)
-            
-            
-            if filteredGroupData?.listdata![indexPath.row].getjoin == "owner" {
-                cell.viewOwner.isHidden = false  // Ensure viewOwner is visible
-                cell.viewOwner.backgroundColor = #colorLiteral(red: 1, green: 0.8, blue: 0, alpha: 1)
-                cell.btnExit.isHidden = true
-                cell.btnJoin.isHidden = true
-                cell.lblOwner.text = "Owner"
-                cell.btnDetails.isHidden = false
-                cell.btnDetails2.isHidden = false
+        }
+        
+        cell.JoinCallback = { [weak self] value in
+            guard let self = self else { return }
+
+            // Check if verification is completed
+            if GroupListData?.verfied_msg == "User Verification is completed!" {
+                // Fetch required data
+                self.groupid = filteredGroupData?.listdata![indexPath.row].groupid ?? ""
+                self.groupName = filteredGroupData?.listdata![indexPath.row].groupname ?? ""
+                self.userName = filteredGroupData?.listdata![indexPath.row].username ?? ""
+
+                // Call the API
                 
-                // Check the value of pendingRequestCount
-                if filteredGroupData?.listdata![indexPath.row].pendingRequestCount == "0" {
-                    cell.btnReqPending.isHidden = true
-                    cell.viewPendingCount.isHidden = true
-                } else {
-                    cell.btnReqPending.isHidden = false
-                    cell.viewPendingCount.isHidden = false
-                }
-            }
-            
-            else if filteredGroupData?.listdata![indexPath.row].getjoin == "joined" {
-                
-                cell.viewOwner.backgroundColor = #colorLiteral(red: 1, green: 0.8, blue: 0, alpha: 1)
-                cell.viewOwner.isHidden = true
-                cell.btnExit.isHidden = false
-                cell.btnJoin.isHidden = true
-                cell.btnReqPending.isHidden = true
-                cell.viewPendingCount.isHidden = true
-                cell.btnDetails.isHidden = false
-                cell.btnDetails2.isHidden = false
-                
-            }
-            
-            else if filteredGroupData?.listdata![indexPath.row].getjoin == "pending" {
-                
-                cell.viewOwner.backgroundColor = #colorLiteral(red: 0.5019607843, green: 0, blue: 0.5019607843, alpha: 1)
-                cell.btnJoin.isHidden = true
-                cell.btnExit.isHidden = true
-                cell.btnReqPending.isHidden = true
-                cell.viewPendingCount.isHidden = true
-                cell.btnDetails.isHidden = true
-                cell.btnDetails2.isHidden = true
-                cell.viewOwner.isHidden = false
-                cell.lblOwner.text =  "Approval Pending"
-                
-            }
-            
-            else if filteredGroupData?.listdata![indexPath.row].getjoin == "join" {
-                
-                
-                cell.btnExit.isHidden = true
-                cell.btnJoin.isHidden = false
-                cell.btnReqPending.isHidden = true
-                cell.viewPendingCount.isHidden = true
-                cell.btnDetails.isHidden = false
-                cell.btnDetails2.isHidden = false
-            }
-            
-            else if filteredGroupData?.listdata![indexPath.row].getjoin == "Public" {
-                
-                
-                cell.btnExit.isHidden = true
-                cell.btnJoin.isHidden = false
-                cell.btnReqPending.isHidden = true
-                cell.viewPendingCount.isHidden = true
-                cell.btnDetails.isHidden = false
-                cell.btnDetails2.isHidden = false
-            }
-            
-            else if filteredGroupData?.listdata![indexPath.row].pendingRequestCount == "0" {
-                
-                
-                cell.btnReqPending.isHidden = true
-                cell.viewOwner.backgroundColor = #colorLiteral(red: 0.5019607843, green: 0, blue: 0.5019607843, alpha: 1)
-                cell.viewOwner.isHidden = false
-                cell.lblOwner.text =  "Approval Pending"
-            }
-            
-            
-            
-            
-            
-            let url = URL(string: (filteredGroupData?.listdata?[indexPath.row].image ?? ""))
-            cell.profileImgView.kf.indicatorType = .activity
-            cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "groupImg"))
-            
-            cell.ExitCallback = { [self] value in
-                
-                
-                
-                let vc = storyboard?.instantiateViewController(withIdentifier:"ExitPopupViewController")as! ExitPopupViewController
-                vc.modalPresentationStyle = .overFullScreen
-                vc.modalTransitionStyle = .crossDissolve
-                vc.delegate = self
-                vc.groupid = filteredGroupData?.listdata![indexPath.row].groupid ?? ""
-                vc.userid = filteredGroupData?.listdata![indexPath.row].userid ?? ""
-                
-                vc.onUpdateForGroup = { [weak self] in
-                    self?.fetchGroupListData()
-                }
-                
-                self.present(vc , animated: true)
-                
-            }
-            
-            
-            
-            cell.JoinCallback = { [weak self] value in
-                guard let self = self else { return }
-                if !NetworkMonitor.shared.isConnected {
-                    // Show your own alert or prevent API call
-                    showAlert(message: "Internet not available. Please check your connection.")
-                    return
-                }
-                
-                // Check if verification is completed
-                if GroupListData?.verfied_msg == "User Verification is completed!" {
-                    // Fetch required data
-                    self.groupid = filteredGroupData?.listdata![indexPath.row].groupid ?? ""
-                    self.groupName = filteredGroupData?.listdata![indexPath.row].groupname ?? ""
-                    self.userName = filteredGroupData?.listdata![indexPath.row].username ?? ""
-                    
-                    // Call the API
-                    
-                    self.callJoinGroupWebService {
-                        // Show the popup after API success
-                        if self.filteredGroupData?.listdata?[indexPath.row].group_type == "Private" {
-                            let message = "Group joining request sent."
-                            let messageAttributes: [NSAttributedString.Key: Any] = [
-                                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-                            ]
-                            let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
-                            
-                            // Show popup message
-                            let alert = UIAlertController(
-                                title: "",
-                                message: nil,
-                                preferredStyle: .alert
-                            )
-                            alert.setValue(attributedMessage, forKey: "attributedMessage") // Set formatted message
-                            
-                            alert.addAction(UIAlertAction(title: "OK", style: .default))
-                            self.present(alert, animated: true, completion: nil)
-                            
-                            // Reload group list
-                            self.callGroupListWebService(searchQuery: "") {
-                                SVProgressHUD.dismiss()
-                                self.tableviewMembers.reloadData()
-                            }
-                        }
-                        
-                        else {
-                            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as? GroupDetailsViewController else {return}
-                            vc.groupid = self.filteredGroupData?.listdata![indexPath.row].groupid ?? ""
-                            vc.userid = self.filteredGroupData?.listdata![indexPath.row].userid ?? ""
-                            
-                            self.navigationController?.pushViewController(vc, animated: true)
-                        }
-                    }
-                } else {
-                    let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-                    
-                    // Define font and color attributes
-                    let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-                    let messageAttributes: [NSAttributedString.Key: Any] = [
-                        .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                        .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-                    ]
-                    
-                    // Create attributed strings
-                    let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-                    let attributedMessage = NSAttributedString(
-                        string: "You have limited access till verification is complete. We thank you for your patience.",
-                        attributes: messageAttributes
-                    )
-                    
-                    // Set the title and message of the alert
-                    alert.setValue(attributedTitle, forKey: "attributedTitle")
-                    alert.setValue(attributedMessage, forKey: "attributedMessage")
-                    
-                    // Add an action to the alert
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-                        alert.dismiss(animated: true, completion: nil)
-                    }))
-                    
-                    // Present the alert
-                    self.present(alert, animated: true, completion: nil)
-                }
-            }
-            
-            
-            
-            
-            
-            //  "It's private group please send request to join."
-            cell.DetailsCallback = { [self] value in
-                let index = indexPath.row
-                if let group = filteredGroupData?.listdata?[index] {
-                    
-                    if group.group_type == "Private" && group.getjoin == "join" {
-                        // Customize the message with larger font
-                        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-                        
-                        // Define font and color attributes
-                        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                self.callJoinGroupWebService {
+                    // Show the popup after API success
+                    if self.filteredGroupData?.listdata?[indexPath.row].group_type == "Private" {
+                        let message = "Group joining request sent."
                         let messageAttributes: [NSAttributedString.Key: Any] = [
-                            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                            .font: UIFont.systemFont(ofSize: 18),
+                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1) // Hex Color Literal
                         ]
+                        let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
                         
-                        // Create attributed strings
-                        let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-                        let attributedMessage = NSAttributedString(
-                            string: "It's a private group. Please send request to join.",
-                            attributes: messageAttributes
+                        // Show popup message
+                        let alert = UIAlertController(
+                            title: "",
+                            message: nil,
+                            preferredStyle: .alert
                         )
+                        alert.setValue(attributedMessage, forKey: "attributedMessage") // Set formatted message
                         
-                        // Set the title and message of the alert
-                        alert.setValue(attributedTitle, forKey: "attributedTitle")
-                        alert.setValue(attributedMessage, forKey: "attributedMessage")
-                        
-                        // Add an action to the alert
-                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-                            alert.dismiss(animated: true, completion: nil)
-                        }))
-                        
-                        // Present the alert
+                        alert.addAction(UIAlertAction(title: "OK", style: .default))
                         self.present(alert, animated: true, completion: nil)
+                        self.callGroupListWebService(searchQuery: "") {
+                            SVProgressHUD.dismiss()
+                            self.tableviewMembers.reloadData()
+                        }
                     }
                     else {
-                        if !NetworkMonitor.shared.isConnected {
-                            // Show your own alert or prevent API call
-                            showAlert(message: "Internet not available. Please check your connection.")
-                            return
-                        }
-                        
-                        if GroupListData?.verfied_msg == "User Verification is completed!" {
-                            let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as! GroupDetailsViewController
-                            vc.groupid = group.groupid ?? ""
-                            vc.userid = group.userid ?? ""
-                            self.navigationController?.pushViewController(vc, animated: true)
-                        }
-                        else {
-                            // Create the alert controller
-                            let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-                            
-                            // Define font and color attributes
-                            let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-                            let messageAttributes: [NSAttributedString.Key: Any] = [
-                                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                                .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-                            ]
-                            
-                            // Create attributed strings
-                            let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-                            let attributedMessage = NSAttributedString(
-                                string: "You have limited access till verification is complete. We thank you for your patience.",
-                                attributes: messageAttributes
-                            )
-                            
-                            // Set the title and message of the alert
-                            alert.setValue(attributedTitle, forKey: "attributedTitle")
-                            alert.setValue(attributedMessage, forKey: "attributedMessage")
-                            
-                            // Add an action to the alert
-                            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-                                alert.dismiss(animated: true, completion: nil)
-                            }))
-                            
-                            // Present the alert
-                            self.present(alert, animated: true, completion: nil)
-                        }
+                        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as? GroupDetailsViewController else {return}
+                        vc.groupid = self.filteredGroupData?.listdata![indexPath.row].groupid ?? ""
+                        vc.userid = self.filteredGroupData?.listdata![indexPath.row].userid ?? ""
+                       
+                        self.navigationController?.pushViewController(vc, animated: true)
                     }
                 }
+            } else {
+                let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                
+                // Define font and color attributes
+                let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                let messageAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                    .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                ]
+                
+                // Create attributed strings
+                let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                let attributedMessage = NSAttributedString(
+                    string: "You have limited access till verification is complete. We thank you for your patience.",
+                    attributes: messageAttributes
+                )
+                
+                // Set the title and message of the alert
+                alert.setValue(attributedTitle, forKey: "attributedTitle")
+                alert.setValue(attributedMessage, forKey: "attributedMessage")
+                
+                // Add an action to the alert
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                    alert.dismiss(animated: true, completion: nil)
+                }))
+                
+                // Present the alert
+                self.present(alert, animated: true, completion: nil)
             }
-            
-            
-            return cell
         }
-    
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        
-//        let cell = tableView.dequeueReusableCell(withIdentifier: "GroupsTableViewCell", for: indexPath) as! GroupsTableViewCell
-//        
-//        cell.lblName.text = filteredGroupData?.listdata?[indexPath.row].username
-//        cell.lblGroupName.text = filteredGroupData?.listdata?[indexPath.row].groupname
-//        cell.lblPrivate.text = filteredGroupData?.listdata?[indexPath.row].group_type
-//        cell.lblSec.text = filteredGroupData?.listdata?[indexPath.row].neighbrhood
-//        cell.lblPendingCount.text = filteredGroupData?.listdata?[indexPath.row].pendingRequestCount
-//        if let memberCount = GroupListData?.listdata?[indexPath.row].membercount {
-//            cell.lblMember.text = "\(memberCount)"
-//        } else {
-//            cell.lblMember.text = "N/A" // Or some default value
-//        }
-//        
-//        cell.lblOwner.text = filteredGroupData?.listdata?[indexPath.row].getjoin
-//        
-//        cell.lblName.font  = UIFont(name: "Montserrat-Regular", size: 13)
-//        cell.lblGroupName.font  = UIFont(name: "Montserrat-Regular", size: 14)
-//        cell.lblPrivate.font  = UIFont(name: "Montserrat-Regular", size: 13)
-//        cell.lblSec.font  = UIFont(name: "Montserrat-Regular", size: 13)
-//        cell.lblMemberText.font = UIFont(name: "Montserrat-Regular", size: 10)
-//        cell.lblOwner.font = UIFont(name: "Montserrat-Regular", size: 14)
-//        
-//        
-//        if filteredGroupData?.listdata![indexPath.row].getjoin == "owner" {
-//            cell.viewOwner.isHidden = false  // Ensure viewOwner is visible
-//            cell.viewOwner.backgroundColor = #colorLiteral(red: 1, green: 0.8, blue: 0, alpha: 1)
-//            cell.btnExit.isHidden = true
-//            cell.btnJoin.isHidden = true
-//            cell.lblOwner.text = "Owner"
-//            cell.btnDetails.isHidden = false
-//            
-//            // Check the value of pendingRequestCount
-//            if filteredGroupData?.listdata![indexPath.row].pendingRequestCount == "0" {
-//                cell.btnReqPending.isHidden = true
-//                cell.viewPendingCount.isHidden = true
-//            } else {
-//                cell.btnReqPending.isHidden = false
-//                cell.viewPendingCount.isHidden = false
-//            }
-//        }
-//        
-//        else if filteredGroupData?.listdata![indexPath.row].getjoin == "joined" {
-//            
-//            cell.viewOwner.backgroundColor = #colorLiteral(red: 1, green: 0.8, blue: 0, alpha: 1)
-//            cell.viewOwner.isHidden = true
-//            cell.btnExit.isHidden = false
-//            cell.btnJoin.isHidden = true
-//            cell.btnReqPending.isHidden = true
-//            cell.viewPendingCount.isHidden = true
-//            cell.btnDetails.isHidden = false
-//            
-//        }
-//        
-//        else if filteredGroupData?.listdata![indexPath.row].getjoin == "pending" {
-//            
-//            cell.viewOwner.backgroundColor = #colorLiteral(red: 0.5019607843, green: 0, blue: 0.5019607843, alpha: 1)
-//            cell.btnJoin.isHidden = true
-//            cell.btnExit.isHidden = true
-//            cell.btnReqPending.isHidden = true
-//            cell.viewPendingCount.isHidden = true
-//            cell.btnDetails.isHidden = true
-//            cell.viewOwner.isHidden = false
-//            cell.lblOwner.text =  "Approval Pending"
-//            
-//        }
-//        
-//        else if filteredGroupData?.listdata![indexPath.row].getjoin == "join" {
-//            
-//            
-//            cell.btnExit.isHidden = true
-//            cell.btnJoin.isHidden = false
-//            cell.btnReqPending.isHidden = true
-//            cell.viewPendingCount.isHidden = true
-//            cell.btnDetails.isHidden = false
-//        }
-//        
-//        else if filteredGroupData?.listdata![indexPath.row].getjoin == "Public" {
-//            
-//            
-//            cell.btnExit.isHidden = true
-//            cell.btnJoin.isHidden = false
-//            cell.btnReqPending.isHidden = true
-//            cell.viewPendingCount.isHidden = true
-//            cell.btnDetails.isHidden = false
-//        }
-//        
-//        else if filteredGroupData?.listdata![indexPath.row].pendingRequestCount == "0" {
-//            
-//            
-//            cell.btnReqPending.isHidden = true
-//            cell.viewOwner.backgroundColor = #colorLiteral(red: 0.5019607843, green: 0, blue: 0.5019607843, alpha: 1)
-//            cell.viewOwner.isHidden = false
-//            cell.lblOwner.text =  "Approval Pending"
-//        }
-//        
-//        
-//        
-//        
-//        
-//        let url = URL(string: (filteredGroupData?.listdata?[indexPath.row].image ?? ""))
-//        cell.profileImgView.kf.indicatorType = .activity
-//        cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "groupImg"))
-//        
-//        cell.ExitCallback = { [self] value in
-//            
-//            
-//            
-//            let vc = storyboard?.instantiateViewController(withIdentifier:"ExitPopupViewController")as! ExitPopupViewController
-//            vc.modalPresentationStyle = .overFullScreen
-//            vc.modalTransitionStyle = .crossDissolve
-//            vc.delegate = self
-//            vc.groupid = filteredGroupData?.listdata![indexPath.row].groupid ?? ""
-//            vc.userid = filteredGroupData?.listdata![indexPath.row].userid ?? ""
-//            
-//            vc.onUpdateForGroup = { [weak self] in
-//                self?.fetchGroupListData()
-//            }
-//            
-//            self.present(vc , animated: true)
-//            
-//        }
-//        
-//        
-//        
-//        cell.JoinCallback = { [weak self] value in
-//            guard let self = self else { return }
-//            if !NetworkMonitor.shared.isConnected {
-//                // Show your own alert or prevent API call
-//                showAlert(message: "Internet not available. Please check your connection.")
-//                return
-//            }
-//            
-//            // Check if verification is completed
-//            if GroupListData?.verfied_msg == "User Verification is completed!" {
-//                // Fetch required data
-//                self.groupid = filteredGroupData?.listdata![indexPath.row].groupid ?? ""
-//                self.groupName = filteredGroupData?.listdata![indexPath.row].groupname ?? ""
-//                self.userName = filteredGroupData?.listdata![indexPath.row].username ?? ""
-//                
-//                // Call the API
-//                
-//                self.callJoinGroupWebService {
-//                    // Show the popup after API success
-//                    if self.filteredGroupData?.listdata?[indexPath.row].group_type == "Private" {
-//                        let message = "Group joining request sent."
-//                        let messageAttributes: [NSAttributedString.Key: Any] = [
-//                            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-//                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-//                        ]
-//                        let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
-//                        
-//                        // Show popup message
-//                        let alert = UIAlertController(
-//                            title: "",
-//                            message: nil,
-//                            preferredStyle: .alert
-//                        )
-//                        alert.setValue(attributedMessage, forKey: "attributedMessage") // Set formatted message
-//                        
-//                        alert.addAction(UIAlertAction(title: "OK", style: .default))
-//                        self.present(alert, animated: true, completion: nil)
-//                        
-//                        // Reload group list
-//                        self.callGroupListWebService(searchQuery: "") {
-//                            SVProgressHUD.dismiss()
-//                            self.tableviewMembers.reloadData()
-//                        }
-//                    }
-//                    
-//                    else {
-//                        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as? GroupDetailsViewController else {return}
-//                        vc.groupid = self.filteredGroupData?.listdata![indexPath.row].groupid ?? ""
-//                        vc.userid = self.filteredGroupData?.listdata![indexPath.row].userid ?? ""
-//                        
-//                        self.navigationController?.pushViewController(vc, animated: true)
-//                    }
-//                }
-//            } else {
-//                let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-//                
-//                // Define font and color attributes
-//                let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-//                let messageAttributes: [NSAttributedString.Key: Any] = [
-//                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-//                    .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-//                ]
-//                
-//                // Create attributed strings
-//                let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-//                let attributedMessage = NSAttributedString(
-//                    string: "You have limited access till verification is complete. We thank you for your patience.",
-//                    attributes: messageAttributes
-//                )
-//                
-//                // Set the title and message of the alert
-//                alert.setValue(attributedTitle, forKey: "attributedTitle")
-//                alert.setValue(attributedMessage, forKey: "attributedMessage")
-//                
-//                // Add an action to the alert
-//                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-//                    alert.dismiss(animated: true, completion: nil)
-//                }))
-//                
-//                // Present the alert
-//                self.present(alert, animated: true, completion: nil)
-//            }
-//        }
-//        
-//        
-//        
-//        
-//        
-//        //  "It's private group please send request to join."
-//        cell.DetailsCallback = { [self] value in
-//            let index = indexPath.row
-//            if let group = filteredGroupData?.listdata?[index] {
-//                
-//                if group.group_type == "Private" && group.getjoin == "join" {
-//                    // Customize the message with larger font
-//                    let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-//                    
-//                    // Define font and color attributes
-//                    let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-//                    let messageAttributes: [NSAttributedString.Key: Any] = [
-//                        .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-//                        .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-//                    ]
-//                    
-//                    // Create attributed strings
-//                    let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-//                    let attributedMessage = NSAttributedString(
-//                        string: "It's a private group. Please send request to join.",
-//                        attributes: messageAttributes
-//                    )
-//                    
-//                    // Set the title and message of the alert
-//                    alert.setValue(attributedTitle, forKey: "attributedTitle")
-//                    alert.setValue(attributedMessage, forKey: "attributedMessage")
-//                    
-//                    // Add an action to the alert
-//                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-//                        alert.dismiss(animated: true, completion: nil)
-//                    }))
-//                    
-//                    // Present the alert
-//                    self.present(alert, animated: true, completion: nil)
-//                }
-//                else {
-//                    if !NetworkMonitor.shared.isConnected {
-//                        // Show your own alert or prevent API call
-//                        showAlert(message: "Internet not available. Please check your connection.")
-//                        return
-//                    }
-//                    
-//                    if GroupListData?.verfied_msg == "User Verification is completed!" {
-//                        let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as! GroupDetailsViewController
-//                        vc.groupid = group.groupid ?? ""
-//                        vc.userid = group.userid ?? ""
-//                        self.navigationController?.pushViewController(vc, animated: true)
-//                    }
-//                    else {
-//                        // Create the alert controller
-//                        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
-//                        
-//                        // Define font and color attributes
-//                        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
-//                        let messageAttributes: [NSAttributedString.Key: Any] = [
-//                            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-//                            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
-//                        ]
-//                        
-//                        // Create attributed strings
-//                        let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
-//                        let attributedMessage = NSAttributedString(
-//                            string: "You have limited access till verification is complete. We thank you for your patience.",
-//                            attributes: messageAttributes
-//                        )
-//                        
-//                        // Set the title and message of the alert
-//                        alert.setValue(attributedTitle, forKey: "attributedTitle")
-//                        alert.setValue(attributedMessage, forKey: "attributedMessage")
-//                        
-//                        // Add an action to the alert
-//                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
-//                            alert.dismiss(animated: true, completion: nil)
-//                        }))
-//                        
-//                        // Present the alert
-//                        self.present(alert, animated: true, completion: nil)
-//                    }
-//                }
-//            }
-//        }
-//        
-//        
-//        return cell
-//    }
+        
+        
+        
+        
+        
+        //  "It's private group please send request to join."
+        cell.DetailsCallback = { [self] value in
+                      let index = indexPath.row
+                      if let group = filteredGroupData?.listdata?[index] {
+                          
+                          if group.group_type == "Private" && group.getjoin == "join" {
+                              // Customize the message with larger font
+                              let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+
+                              // Define font and color attributes
+                              let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                              let messageAttributes: [NSAttributedString.Key: Any] = [
+                                  .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                                  .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                              ]
+
+                              // Create attributed strings
+                              let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                              let attributedMessage = NSAttributedString(
+                                  string: "It's private group please send request to join.",
+                                  attributes: messageAttributes
+                              )
+
+                              // Set the title and message of the alert
+                              alert.setValue(attributedTitle, forKey: "attributedTitle")
+                              alert.setValue(attributedMessage, forKey: "attributedMessage")
+
+                              // Single OK action with custom color
+                              let okAction = UIAlertAction(title: "OK", style: .default, handler: { _ in
+                                  alert.dismiss(animated: true, completion: nil)
+                              })
+                              okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+                              alert.addAction(okAction)
+
+                              // Present the alert
+                              self.present(alert, animated: true, completion: nil)
+
+                          }
+                       else {
+                              if GroupListData?.verfied_msg == "User Verification is completed!" {
+                              let vc = self.storyboard?.instantiateViewController(withIdentifier: "GroupDetailsViewController") as! GroupDetailsViewController
+                              vc.groupid = group.groupid ?? ""
+                              vc.userid = group.userid ?? ""
+                              self.navigationController?.pushViewController(vc, animated: true)
+                              }
+                              else {
+                                  let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+                                  let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
+                                  let messageAttributes: [NSAttributedString.Key: Any] = [
+                                      .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                                      .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                                  ]
+                                  let attributedTitle = NSAttributedString(string: "", attributes: titleFont)
+                                  let attributedMessage = NSAttributedString(
+                                      string: "You have limited access till verification is complete. We thank you for your patience.",
+                                      attributes: messageAttributes
+                                  )
+                                  alert.setValue(attributedTitle, forKey: "attributedTitle")
+                                  alert.setValue(attributedMessage, forKey: "attributedMessage")
+                                  alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+                                      alert.dismiss(animated: true, completion: nil)
+                                  }))
+                                  self.present(alert, animated: true, completion: nil)
+                              }
+                          }
+                      }
+                  }
+        return cell
+    }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         130
     }
     func showBottomPopup(message: String) {
-        // Create the popup view
         let popupView = UIView()
         popupView.backgroundColor = UIColor.black.withAlphaComponent(0.8)
         popupView.layer.cornerRadius = 10
@@ -1215,6 +882,4 @@ extension GroupsViewController: UITableViewDataSource, UITableViewDelegate {
             }
         }
     }
-    
-    
 }

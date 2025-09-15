@@ -50,7 +50,10 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
     @IBOutlet weak var gmailContainerHeight: NSLayoutConstraint!
     @IBOutlet weak var phoneContainerHeight: NSLayoutConstraint!
 
+    @IBOutlet weak var docTypeEye: UIImageView!
+    @IBOutlet weak var btnViewDoc: UIButton!
     
+    @IBOutlet weak var messageReviewViewHeight: NSLayoutConstraint!
     
     var bussData = [ImageBussi]()
     var thisWidth:CGFloat = 0
@@ -203,7 +206,7 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
             self.lblWeek.font = UIFont(name: "Montserrat-Regular", size: 15)
             self.CategoryLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
             // self.LblUploadDoc.font = UIFont(name: "Montserrat-Regular", size: 15)
-            self.BussinessLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
+            self.BussinessLbl.font = UIFont(name: "Montserrat-SemiBold", size: 18)
             self.RatingLbl.font = UIFont(name: "Montserrat-SemiBold", size: 14)
             self.ReviewLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
             self.ReviewText.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -276,10 +279,26 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
         }
     }
     
+    // MARK: - height for textview height auto fill
+    
     func textViewDidChange(_ textView: UITextView) {
-        // Show or hide placeholder label based on text view content
+        // Content ka size nikalna
+        let fixedWidth = textView.frame.width
+        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
+        
+        // ✅ Minimum height = 60, Maximum height = 200
+        let newHeight = min(max(newSize.height, 60), 200)
+        messageReviewViewHeight.constant = newHeight
+        
+        // ✅ Placeholder hide/show
         placeholderLabel.isHidden = !textView.text.isEmpty
+        
+        // Layout update
+        view.layoutIfNeeded()
     }
+
+
+    
     
     func scrollToBottom() {
         let bottomOffset = CGPoint(x: 0, y: scrollView.contentSize.height - scrollView.bounds.height + scrollView.contentInset.bottom)
@@ -368,13 +387,6 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
     }
 
 
-
-        @IBAction func btnViewdocHideden(_ : UIButton){
-        
-        
-        
-    }
-    
     @IBAction func btRating(_ : UIButton){
         let vc = storyboard?.instantiateViewController(withIdentifier:"BusinessRatingViewController")as! BusinessRatingViewController
         vc.modalPresentationStyle = .overFullScreen
@@ -534,11 +546,6 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
             self.navigationController?.pushViewController(postEnlargeVC, animated: true)
         }
     }
-    
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        thisWidth = CGFloat(self.collectionViewEvent.width) / 1
-//        return CGSize(width: thisWidth, height: 500)
-//    }
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {

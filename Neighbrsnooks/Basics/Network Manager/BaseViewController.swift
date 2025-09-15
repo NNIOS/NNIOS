@@ -636,18 +636,35 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
     }
     
     func showAlert(with message: String, sender: UIButton, loader: UIActivityIndicatorView, originalTitle: String?) {
-        DispatchQueue.main.async {
-            loader.stopAnimating()
-            loader.removeFromSuperview()
-            sender.setTitle(originalTitle, for: .normal)
-            sender.isEnabled = true
+            DispatchQueue.main.async {
+                loader.stopAnimating()
+                loader.removeFromSuperview()
+                sender.setTitle(originalTitle, for: .normal)
+                sender.isEnabled = true
 
-            let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true)
+                let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
+
+                // ✅ Styled message (Montserrat font + gray color)
+                let messageAttributes: [NSAttributedString.Key: Any] = [
+                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                    .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+                ]
+                let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+                alert.setValue(attributedMessage, forKey: "attributedMessage")
+
+                // ✅ Styled OK button (green color)
+                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                okAction.setValue(#colorLiteral(red: 0, green: 0.5603090525, blue: 0, alpha: 1), forKey: "titleTextColor")
+                alert.addAction(okAction)
+
+                // ✅ Present using UIWindowScene (no deprecation warning)
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first,
+                   let rootVC = window.rootViewController {
+                    rootVC.present(alert, animated: true)
+                }
+            }
         }
-    }
-
     
     
 }

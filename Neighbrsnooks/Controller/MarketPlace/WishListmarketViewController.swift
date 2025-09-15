@@ -126,7 +126,7 @@ class WishListmarketViewController: UIViewController,UICollectionViewDelegate,UI
                 return
             }
        // let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let url = "https://dev.neighbrsnook.com/admin/api/wishlist/\(id)"
+        let url = "https://neighbrsnook.com/admin/api/wishlist/\(id)"
 
         
        

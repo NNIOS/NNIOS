@@ -602,11 +602,9 @@ class CreatePostViewController: BaseViewController, UITextViewDelegate,CropViewC
         }))
 
         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-
         self.present(actionSheet, animated: true, completion: nil)
     }
 
-    
     
     
     func openCamera() {

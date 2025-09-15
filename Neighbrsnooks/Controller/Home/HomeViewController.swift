@@ -180,18 +180,14 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         super.viewWillAppear(animated)
         self.searchView.isHidden = true
         self.currentPage = 1
-        
         // 👇 API call to refresh
         self.tableviewMember.setContentOffset(.zero, animated: false)
-        
         callUserProfileWebService { [weak self] in
             self?.callHomeAllWebService {
                 SVProgressHUD.dismiss()
                 self?.tableviewMember.reloadData()
             }
         }
-        
-        
         if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
             appDelegate.shouldSupportAllOrientations = false
         }
@@ -255,25 +251,7 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
         
     }
     
-    //    func refreshPage() {
-    //        callUserProfileWebService {
-    //            self.callHomeAllWebService {
-    //                self.tableviewMember.reloadData()
-    //                self.tableviewMember.refreshControl?.endRefreshing()
-    //            }
-    //        }
-    //    }
     
-    //    func refreshPage() {
-    //        print("✅ Refreshing page")
-    //
-    //        callUserProfileWebService {
-    //            self.callHomeAllWebService {
-    //                self.tableviewMember.reloadData()
-    //                self.tableviewMember.refreshControl?.endRefreshing()
-    //            }
-    //        }
-    //    }
     
     
     
@@ -876,76 +854,13 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         filterData(with: searchText)
     }
     
-    //    func filterData(with searchText: String) {
-    //        print("🔍 Searching for: \(searchText)")
-    //        guard let list = HomeNewData?.listdata else {
-    //            print("❌ No original data to search")
-    //            return
-    //        }
-    //
-    //        if searchText.trimmingCharacters(in: .whitespaces).isEmpty {
-    //            print("✅ Empty search: show full data")
-    //            filteredData = HomeNewData
-    //            isSearching = false
-    //            prepareSortedData(homeModel: HomeNewData)
-    //            tableviewMember.reloadData()
-    //            return
-    //        }
-    //
-    //        isSearching = true
-    //        let normalizedSearchText = searchText.lowercased().trimmingCharacters(in: .whitespaces)
-    //
-    //        let filteredList = list.filter { datum in
-    //            let username = datum.username ?? ""
-    //            let postMessage = datum.postMessage ?? ""
-    //            let company = datum.company ?? ""
-    //            let eventName = datum.eventName ?? ""
-    //
-    //            print("🔸 Item postMessage: '\(postMessage)'")  // check actual content
-    //
-    //            let match = username.lowercased().contains(normalizedSearchText) ||
-    //            postMessage.lowercased().contains(normalizedSearchText) ||
-    //            company.lowercased().contains(normalizedSearchText) ||
-    //            eventName.lowercased().contains(normalizedSearchText)
-    //
-    //            if match {
-    //                print("✅ Matched item: \(datum.username ?? "No username")")
-    //            }
-    //            return match
-    //        }
-    //
-    //        print("🔎 Filtered items: \(filteredList.count) / \(list.count)")
-    //
-    //        filteredData = HomeAllModel(
-    //            status: HomeNewData?.status,
-    //            message: HomeNewData?.message,
-    //            announcement: HomeNewData?.announcement,
-    //            myNeighborhoodID: HomeNewData?.myNeighborhoodID,
-    //            myNeighborhood: HomeNewData?.myNeighborhood,
-    //            verfiedMsg: HomeNewData?.verfiedMsg,
-    //            missmatchRemarks: HomeNewData?.missmatchRemarks,
-    //            awaitStatus: HomeNewData?.awaitStatus,
-    //            memberCount: HomeNewData?.memberCount,
-    //            verifiedStatus: HomeNewData?.verifiedStatus,
-    //            popupVerifiedStatus: HomeNewData?.popupVerifiedStatus ?? 0,
-    //            missmatchStatus: HomeNewData?.missmatchStatus,
-    //            listdata: filteredList
-    //        )
-    //
-    //
-    //        prepareSortedData(homeModel: filteredData)
-    //        tableviewMember.reloadData()
-    //    }
-    
     func filterData(with searchText: String) {
         print("🔍 Searching for: \(searchText)")
         guard let originalData = HomeNewData else {
             print("❌ No original data to search")
             return
         }
-        
         print("🧾 Original data count: \(originalData.listdata?.count ?? 0)")
-        
         let trimmedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedSearchText.isEmpty {
             print("✅ Empty search: show full data")
@@ -957,24 +872,19 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             }
             return
         }
-        
         isSearching = true
         let normalizedSearchText = trimmedSearchText.lowercased()
-        
         let filteredList = originalData.listdata?.filter { datum in
             let username = (datum.username ?? "").lowercased()
             let postMessage = (datum.postMessage ?? "").lowercased()
             let company = (datum.company ?? "").lowercased()
             let eventName = (datum.eventName ?? "").lowercased()
-            
             return username.contains(normalizedSearchText) ||
             postMessage.contains(normalizedSearchText) ||
             company.contains(normalizedSearchText) ||
             eventName.contains(normalizedSearchText)
         } ?? []
-        
         print("🔎 Filtered items count: \(filteredList.count)")
-        
         // Final filtered model
         filteredData = HomeAllModel(
             status: originalData.status,
@@ -991,9 +901,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             missmatchStatus: originalData.missmatchStatus,
             listdata: filteredList
         )
-        
         prepareSortedData(homeModel: filteredData)
-        
         DispatchQueue.main.async {
             self.tableviewMember.reloadData()
         }
@@ -1006,37 +914,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
         let filteredList = dataSource?.listdata?.filter { $0.type == type } ?? []
         return index < filteredList.count ? filteredList[index] : nil
     }
-    
-    
-    // warking code hai ye tabke view ko theek karne ke liye
-    //    func prepareSortedData(homeModel: HomeAllModel?) {
-    //        guard let homeModel = homeModel else {
-    //            print("❌ homeModel is NIL")
-    //            return
-    //        }
-    //        guard let data = homeModel.listdata, !data.isEmpty else {
-    //            print("❌ listdata is NIL or EMPTY")
-    //            return
-    //        }
-    //        print("✅ listdata found, Count: \(data.count)")
-    //        sortedSections.removeAll()
-    //        // Add Announcement section first
-    //        if let announcement = homeModel.announcement, !announcement.isEmpty {
-    //            sortedSections.append(("Announcement", announcement))
-    //            print("🟢 Added Announcement Section")
-    //        }
-    //        // **Maintain Exact API Order**
-    //        for item in data {
-    //            let type = item.type ?? "" // ✅ Optional handling
-    //            sortedSections.append((type, [item])) // ✅ Correct tuple format
-    //            print("✅ Section Added: \(type) - Count: 1 (Individual Item)")
-    //        }
-    //        print("🔢 Total Sections: \(sortedSections.count)")
-    //        //        print("🟡 Final Sorted Sections: \(sortedSections)")
-    //    }
-    
-    
-    
     
     func prepareSortedData(homeModel: HomeAllModel?) {
         guard let homeModel = homeModel else {
@@ -1077,8 +954,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             let type = item.type ?? ""
             sortedSections.append((type, [item]))
         }
-        
-        
         tableviewMember.backgroundView = nil  // Clear "Data not found"
         tableviewMember.reloadData()
     }
@@ -1150,8 +1025,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                     totalLike: Int(postData.totallike ?? "0") ?? 0,
                     selectedEmoji: postData.emojiunicode
                 )
-                
-                
+
                 
                 cell.lblCommentCount.text = postData.totcomment
                 cell.lblName.text = postData.username
@@ -1170,8 +1044,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                 // Handle Favourite Button Tap
                 cell.userId = postData.createdby // Assign user ID
                 print(postData.createdby)
-                
-                
                 cell.showAlertCallback = { [weak self] message in
                     guard let self = self else { return }
                     let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
@@ -1205,7 +1077,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                         showAlert(message: "Internet not available. Please check your connection.")
                         return
                     }
-                    
                     guard self.HomeNewData?.verfiedMsg == "User Verification is completed!" else {
                         let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
                         let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .regular)]
@@ -1226,33 +1097,57 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                     }
                     var mutablePostData = postData
                     guard let postId = mutablePostData.postid, !postId.isEmpty else { return }
-                    if mutablePostData.favouritstatus == 1 {
-                        // Unfavourite
-                        self.callFavouriteRemoveBussinessWebService(postId: postId) { message in
-                            mutablePostData.favouritstatus = 0
-                            self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 0
-                            cell.updateFavouriteButton(isFavourite: false)
-                            self.callUserProfileWebService {
-                                self.callHomeAllWebService {
-                                    // Completion block (agar kuch karna ho)
-                                }
+                    
+//                    if mutablePostData.favouritstatus == 1 {
+//                        // Unfavourite
+//                        self.callFavouriteRemoveBussinessWebService(postId: postId) { message in
+//                            mutablePostData.favouritstatus = 0
+//                            self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 0
+//                            cell.updateFavouriteButton(isFavourite: false)
+//                            self.callUserProfileWebService {
+//                                self.callHomeAllWebService {
+//                                 }
+//                            }
+//                            //                            self.showAutoDismissAlert(message: message)
+//                        }
+//                    } else {
+//                        // Favourite
+//                        self.callFavouriteBussinessWebService(postId: postId) { message in
+//                            mutablePostData.favouritstatus = 1
+//                            self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 1 // or 0
+//                            cell.updateFavouriteButton(isFavourite: true)
+//                            self.callUserProfileWebService {
+//                                self.callHomeAllWebService {
+//                                 }
+//                            }
+//                            //                            self.showAutoDismissAlert(message: message)
+//                        }
+//                    }
+                    
+                    
+                    cell.favouriteButtonCallback = { [weak self] in
+                        guard let self = self else { return }
+                        // ... Check verification and API call logic ...
+                        if mutablePostData.favouritstatus == 1 {
+                            // Unfavourite flow
+                            self.callFavouriteRemoveBussinessWebService(postId: postId) { message in
+                                mutablePostData.favouritstatus = 0
+                                self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 0
+                                cell.updateFavouriteButton(isFavourite: false)
+                                self.callHomeAllWebService{}
                             }
-                            //                            self.showAutoDismissAlert(message: message)
-                        }
-                    } else {
-                        // Favourite
-                        self.callFavouriteBussinessWebService(postId: postId) { message in
-                            mutablePostData.favouritstatus = 1
-                            self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 1 // or 0
-                            cell.updateFavouriteButton(isFavourite: true)
-                            self.callUserProfileWebService {
-                                self.callHomeAllWebService {
-                                    // Completion block (agar kuch karna ho)
-                                }
+                        } else {
+                            // Favourite flow
+                            self.callFavouriteBussinessWebService(postId: postId) { message in
+                                mutablePostData.favouritstatus = 1
+                                self.HomeNewData?.listdata?[indexPath.row].favouritstatus = 1
+                                cell.updateFavouriteButton(isFavourite: true)
+                                self.callHomeAllWebService{}
                             }
-                            //                            self.showAutoDismissAlert(message: message)
                         }
                     }
+
+
                 }
                 
                 
@@ -2384,10 +2279,6 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
                         postDetailsVC.postid = postData.postid ?? ""
                         print("✅ Post ID: \(postData.postid ?? "No Post ID")")
                         
-                        
-                        
-                        
-                        
                     } else {
                         print("❌ Post Data Not Found")
                         postDetailsVC.postid = ""
@@ -2650,8 +2541,8 @@ extension HomeViewController {
     func callUpdateFirebaseTokenPostWebServiceDirect(userId: String, firebaseToken: String, _ completion: @escaping () -> ()) {
         
         // 🔗 Step 1: Create the full URL directly
-        guard let url = URL(string: "http://neighbrsnook.com/admin/api/update-token") else {
-            print("❌ Invalid URL")
+        guard let url = URL(string: "https://neighbrsnook.com/admin/api/update-token") else {
+            print("❌ Invalid URL")  
             return
         }
         

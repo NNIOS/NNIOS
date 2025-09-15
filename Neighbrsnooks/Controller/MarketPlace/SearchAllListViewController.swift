@@ -130,7 +130,7 @@ class SearchAllListViewController: UIViewController,UICollectionViewDelegate,UIC
     }
     //dev.
     func callAllMarketListWebService() {
-                  let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_home?"
+                  let url = "https://neighbrsnook.com/admin/api/mpk_product_home?"
 
        // let dictParams: Dictionary<String, Any> = ["":""]
         

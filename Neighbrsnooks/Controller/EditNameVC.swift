@@ -47,85 +47,6 @@ class EditNameVC: BaseViewController {
     }
     
     // MARK: - Button's Action
-//    @IBAction func btnUpdateAction(_ sender: CustomButton) {
-//        if sender.tag == 0 {
-//            print("Cancel Button is tapped")
-//            self.dismiss(animated: true)
-//        } else if sender.tag == 1 {
-//            if areFieldsEmpty(firstNameField: firstNameTF, lastNameField: lastNameTF) {
-//                showAlert(message: "Please fill in both first name and last name.", yesNo: "OK")
-//            } else {
-//                self.callRegisterWebService {
-//                    // After successful register, call await status API
-//                    self.callAwaitStatusapiWebService { success in
-//                        if success {
-//                            print("✅ Await Status API Call Done")
-//                            // Aap yahan aage navigation ya alert show kar sakte hain
-//                        } else {
-//                            print("❌ Await Status API failed")
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-    
-//    @IBAction func btnUpdateAction(_ sender: CustomButton) {
-//        if sender.tag == 0 {
-//            print("Cancel Button is tapped")
-//            self.dismiss(animated: true)
-//        } else if sender.tag == 1 {
-//            if areFieldsEmpty(firstNameField: firstNameTF/*, lastNameField: lastNameTF*/) {
-//                showAlert(message: "Please enter your full name", yesNo: "OK")
-//            } else if firstNameTF.text?.trimmingCharacters(in: .whitespacesAndNewlines) == fullName?.trimmingCharacters(in: .whitespacesAndNewlines) {
-//                showToast(message: "Please Enter name as per your gov ID")
-//            } else if verfiedMsg == "User Verification is not completed!" {
-//                
-//                // ✅ Only call Register API here
-//                self.activityIndicator.startAnimating()
-//                sender.isUserInteractionEnabled = true
-//                self.dismissKeyboard()
-//                self.callRegisterWebService {
-//                    self.stopLoader(sender)
-//                    self.dismiss(animated: true) {
-//                        sender.isUserInteractionEnabled = false
-//                        self.onUpdateSuccess?(self.awaitStatusModel?.status ?? "")
-//                    }
-//                    print("✅ Register API Call Done (without Await Status)")
-//                }
-//                
-//            } else {
-//                let firstName = firstNameTF.text ?? ""
-//    //            let lastName = lastNameTF.text ?? ""
-//
-//                // ✅ Check for English-only names
-//                if !isEnglishOnly(firstName)/* || !isEnglishOnly(lastName)*/ {
-//                    showAlert(message: "Please enter name in English only.", yesNo: "OK")
-//                    return
-//                }
-//
-//                // ✅ Proceed with API
-//                self.activityIndicator.startAnimating()
-//                sender.isUserInteractionEnabled = true
-//                self.dismissKeyboard()
-//                self.callRegisterWebService {
-//                    self.callAwaitStatusapiWebService { success in
-//                        if success {
-//                            self.stopLoader(sender)
-//                            self.dismiss(animated: true) {
-//                                sender.isUserInteractionEnabled = false
-//                                self.onUpdateSuccess?(self.awaitStatusModel?.message ?? "")
-//                            }
-//                            print("✅ Await Status API Call Done")
-//                        } else {
-//                            print("❌ Await Status API failed")
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-    
     @IBAction func btnUpdateAction(_ sender: CustomButton) {
             if sender.tag == 0 {
                 print("Cancel Button is tapped")
@@ -141,9 +62,53 @@ class EditNameVC: BaseViewController {
                     """
                     showAlert(message: message, yesNo: "OK")
                     return
-                }
-                else if firstNameTF.text?.trimmingCharacters(in: .whitespacesAndNewlines) == fullName?.trimmingCharacters(in: .whitespacesAndNewlines) {
-                    showToast(message: "Please Enter name as per your gov ID")
+                } else if sourceViewController == "HomeViewController" {
+                    let enteredName = firstNameTF.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                    let originalName = fullName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                    
+                    if enteredName.caseInsensitiveCompare(originalName) == .orderedSame {
+                        showToast(message: "Please enter name as per your gov ID")
+                    } else if verfiedMsg == "User Verification is not completed!" {
+                        self.activityIndicator.startAnimating()
+                        sender.isUserInteractionEnabled = true
+                        self.dismissKeyboard()
+                        self.callRegisterWebService {
+                            self.stopLoader(sender)
+                            self.dismiss(animated: true) {
+                                sender.isUserInteractionEnabled = false
+                                self.onUpdateSuccess?(self.awaitStatusModel?.status ?? "")
+                            }
+                            print("✅ Register API Call Done (without Await Status)")
+                        }
+                    } else {
+                        let firstName = firstNameTF.text ?? ""
+            //            let lastName = lastNameTF.text ?? ""
+
+                        // ✅ Check for English-only names
+                        if !isEnglishOnly(firstName)/* || !isEnglishOnly(lastName)*/ {
+                            showAlert(message: "Please enter name in English only.", yesNo: "OK")
+                            return
+                        }
+
+                        // ✅ Proceed with API
+                        self.activityIndicator.startAnimating()
+                        sender.isUserInteractionEnabled = true
+                        self.dismissKeyboard()
+                        self.callRegisterWebService {
+                            self.callAwaitStatusapiWebService { success in
+                                if success {
+                                    self.stopLoader(sender)
+                                    self.dismiss(animated: true) {
+                                        sender.isUserInteractionEnabled = false
+                                        self.onUpdateSuccess?(self.awaitStatusModel?.message ?? "")
+                                    }
+                                    print("✅ Await Status API Call Done")
+                                } else {
+                                    print("❌ Await Status API failed")
+                                }
+                            }
+                        }
+                    }
                 } else if verfiedMsg == "User Verification is not completed!" {
                     self.activityIndicator.startAnimating()
                     sender.isUserInteractionEnabled = true
@@ -156,7 +121,6 @@ class EditNameVC: BaseViewController {
                         }
                         print("✅ Register API Call Done (without Await Status)")
                     }
-                    
                 } else {
                     let firstName = firstNameTF.text ?? ""
         //            let lastName = lastNameTF.text ?? ""

@@ -218,7 +218,7 @@ class SelectMarketCatViewController: UIViewController {
     }
     
     @objc func callMarketCategoriesWebService() { //dev.
-        let url = "https://dev.neighbrsnook.com/admin/api/category"
+        let url = "https://neighbrsnook.com/admin/api/category"
         let dictParams: Dictionary<String, Any> = ["":""]
         RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
         {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in

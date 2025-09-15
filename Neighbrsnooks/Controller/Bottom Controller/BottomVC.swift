@@ -88,7 +88,7 @@ extension BottomVC {
     }
     
     @objc func handleBackgroundTap(_ sender: UITapGestureRecognizer) {
-        self.dismiss(animated: true, completion: nil)
+        self.dismiss(animated: false, completion: nil)
     }
 
     
@@ -97,7 +97,7 @@ extension BottomVC {
     }
      
     func handleUnblockAPI(completion: @escaping () -> Void) {  // Un-Block APi dev.
-        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
+        let url = "https://neighbrsnook.com/admin/api/toggle-block-user"
         guard let blockerId = blocker_userid else { print("Error: Missing blocker ID"); return }
         guard let blockedId = blocked_userid else { print("Error: Missing blocked ID"); return }
         
@@ -137,7 +137,7 @@ extension BottomVC {
     }
      
     func handleBlockAPI(completion: @escaping () -> Void) { // Block APi dev.
-        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
+        let url = "https://neighbrsnook.com/admin/api/toggle-block-user"
         guard let blockerId = blocker_userid else {
             print("Error: Missing blocker ID")
             return
@@ -185,9 +185,10 @@ extension BottomVC {
     func ConfirmAlert(titleText: String, messageText: String) {
         let alertController = UIAlertController(title: titleText, message: messageText, preferredStyle: .alert)
         let titleColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .label
-        let messageColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .secondaryLabel
-        let attributedTitle = NSAttributedString(string: titleText, attributes: [ .foregroundColor: titleColor, .font: UIFont.boldSystemFont(ofSize: 17)])
-        let attributedMessage = NSAttributedString(string: messageText, attributes: [.foregroundColor: messageColor, .font: UIFont.systemFont(ofSize: 15) ])
+        let messageColor: UIColor = UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+        let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
+        let attributedTitle = NSAttributedString(string: titleText, attributes: [ .foregroundColor: titleColor, .font: font])
+        let attributedMessage = NSAttributedString(string: messageText, attributes: [.foregroundColor: messageColor, .font: font ])
         alertController.setValue(attributedTitle, forKey: "attributedTitle")
         alertController.setValue(attributedMessage, forKey: "attributedMessage")
         let confirmAction = UIAlertAction(title: "Yes", style: .default) { [weak self] _ in

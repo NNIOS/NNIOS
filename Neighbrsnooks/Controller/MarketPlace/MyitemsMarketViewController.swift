@@ -123,7 +123,7 @@ extension MyitemsMarketViewController: UICollectionViewDelegate,UICollectionView
 extension MyitemsMarketViewController {
     
     func callMarketMyItemsWebService() { //dev.
-        let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_list?"
+        let url = "https://neighbrsnook.com/admin/api/mpk_product_list?"
         let id = UserDefaults.standard.string(forKey: "userid")
         var dictParams: [String: Any] = [:]
         
@@ -163,7 +163,7 @@ extension MyitemsMarketViewController {
     }
     
     func callSearchAllMarketListWebService() { //dev.
-        let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_home?"
+        let url = "https://neighbrsnook.com/admin/api/mpk_product_home?"
         let id = UserDefaults.standard.string(forKey: "userid")
         let dictParams: Dictionary<String, Any> = [
             "user_id":id ?? "",

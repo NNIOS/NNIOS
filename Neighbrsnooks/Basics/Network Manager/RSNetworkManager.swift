@@ -144,6 +144,7 @@ public class RSNetworkManager {
             completionClosure(nil, nil, .noNetwork, .NO_RESPONSE)
           }
         }
+    
     func newMarketRequestApi(withServiceName serviceName: String, requestMethod method: kHTTPMethod, requestParameters dictParams: Dictionary<String, Any>, withProgressHUD showProgress: Bool, completionClosure:@escaping (_ result: Data?, _ error: Error?, _ errorType: ErrorType, _ statusCode: HTTPStatusCodeConstants) -> ()) -> Void {
       
       if NetworkReachabilityManager()?.isReachable == true {

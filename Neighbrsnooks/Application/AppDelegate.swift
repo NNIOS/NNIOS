@@ -254,15 +254,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window?.makeKeyAndVisible()
     }
     
-    // MARK: - Call api firebaseToken
+    // MARK: - Call api firebaseToken change api old admin and admin 
     func callUpdateFirebaseTokenPostWebService(userId: String, firebaseToken: String, _ completionClosure: @escaping () -> ()) {
-        let dictParams: Dictionary<String, Any> = [
+        let dictParams: [String: Any] = [
             "userid": userId,
             "firebase_token": firebaseToken
         ]
-        print(dictParams)
-        WebService.sharedInstance.callUpdatetokenPostWebService(withParams: dictParams) { data in
-            self.fireBaseToken = data
+        print("Request Params: \(dictParams)")
+
+        WebService.sharedInstance.callUpdatetokenPostWebService(withParams: dictParams) { (data: UpdateTokenModel?) in
+            if let fireBaseToken = data {
+                print("✅ Full Webservice Response:")
+                dump(fireBaseToken) // Pretty print the full model
+                self.fireBaseToken = fireBaseToken
+            } else {
+                print("❌ No response received from server (nil)")
+            }
             completionClosure()
         }
     }
@@ -307,11 +314,17 @@ extension AppDelegate: MessagingDelegate {
             sendTokenToServer(token)
         }
     }
+    
     func sendTokenToServer(_ fcmToken: String) {
         guard let userId = UserDefaults.standard.string(forKey: "userid") else { return }
         callUpdateFirebaseTokenPostWebService(userId: userId, firebaseToken: fcmToken) {
             print("📡 Token updated to server successfully")
         }
+        
+        let dictParams: [String: Any] = [
+            "userid": userId,
+            "firebase_token": fcmToken
+        ]
         
         let url = URL(string: "https://yourdomain.com/api/store-fcm-token")!
         var request = URLRequest(url: url)

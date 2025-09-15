@@ -40,20 +40,20 @@ func showCameraPermissionAlert(completion: @escaping (Bool) -> Void) {
     guard let topVC = UIApplication.shared.windows.first?.rootViewController else { return }
     
     let alert = UIAlertController(
-        title: "Camera Permission Needed",
-        message: "Please allow camera access in Settings to continue.",
+        title: "\"Neighbrsnook\" Would Like to Access the Camera",
+        message: "",
         preferredStyle: .alert
     )
     
     alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
-        completion(false) // ❌ User cancelled, so don't proceed
+        completion(false)
     }))
     
     alert.addAction(UIAlertAction(title: "Settings", style: .default, handler: { _ in
         if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(settingsURL)
         }
-        completion(false) // ❌ Don't proceed until user enables permission
+        completion(false)
     }))
     
     topVC.present(alert, animated: true, completion: nil)

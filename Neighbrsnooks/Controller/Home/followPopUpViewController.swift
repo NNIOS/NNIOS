@@ -179,11 +179,28 @@ class followPopUpViewController: BaseViewController {
 
 @available(iOS 16.0, *)
 extension UIViewController {
+//    func showAlert(title: String = "", message: String, buttonTitle: String = "OK") {
+//        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+//        alert.addAction(UIAlertAction(title: buttonTitle, style: .default, handler: nil))
+//        self.present(alert, animated: true, completion: nil)
+//    }
+    
     func showAlert(title: String = "", message: String, buttonTitle: String = "OK") {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: buttonTitle, style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
+            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+            
+            // Title styling
+            let attributedTitle = NSAttributedString(
+                string: title, attributes: [.font: UIFont(name: "Montserrat-Bold", size: 18) ?? UIFont.systemFont(ofSize: 18),.foregroundColor: UIColor.black])
+            alertController.setValue(attributedTitle, forKey: "attributedTitle")
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16), .foregroundColor: UIColor.darkGray ]
+            let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+            alertController.setValue(attributedMessage, forKey: "attributedMessage")
+            let okAction = UIAlertAction(title: buttonTitle, style: .default, handler: nil)
+            okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+            alertController.addAction(okAction)
+            self.present(alertController, animated: true, completion: nil)
+        }
 }
 
 @available(iOS 16.0, *)

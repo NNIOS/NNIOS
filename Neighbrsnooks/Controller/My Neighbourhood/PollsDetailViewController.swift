@@ -60,7 +60,7 @@ class PollsDetailViewController: UIViewController, ConfirmPollDelDelegate, Delet
             self.profileImgView.kf.indicatorType = .activity
             self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "NewEvents"))
             
-            self.NameLbl.textColor = UIColor.secondaryLabel
+//            self.NameLbl.textColor = UIColor.secondaryLabel
             self.SectLbl.textColor = UIColor.secondaryLabel
             self.StartLbl.textColor = UIColor.secondaryLabel
             self.EnddateLbl.textColor = UIColor.secondaryLabel
@@ -343,47 +343,53 @@ extension PollsDetailViewController: UITableViewDataSource, UITableViewDelegate 
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: "PollTableViewCell", for: indexPath) as? PollTableViewCell else {
-                return UITableViewCell()
-            }
-
-            let option = PollDetailData?.options?[indexPath.row]
-
-            // Set option text
-            cell.lblPrcntg.text = "\(option?.percentage ?? "") %"
-            cell.lblTitle.text = option?.option ?? ""
-            cell.lblTitle.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
-            cell.lblPrcntg.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
-            cell.lblTitle.font =  UIFont(name: "Montserrat-Regular", size: 15)
-            cell.lblPrcntg.font =  UIFont(name: "Montserrat-Regular", size: 15)
-            
-            cell.customBackgroundView.layer.sublayers?.removeAll(where: { $0.name == "progressLayer" })
-
-            // Set default background
-            cell.customBackgroundView.backgroundColor = UIColor.systemGray5
-
-            if PollDetailData?.isvoted == "1" {
-                // Show progress layer
-                let height = cell.customBackgroundView.bounds.height
-                let percentage = CGFloat(Double(option?.percentage ?? "0") ?? 0)
-                let progressWidth = cell.customBackgroundView.bounds.width * percentage / 100
-
-                let progressLayer = CALayer()
-                progressLayer.name = "progressLayer"
-                progressLayer.backgroundColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
-                progressLayer.frame = CGRect(x: 0, y: 0, width: progressWidth, height: height)
-                progressLayer.cornerRadius = height / 2
-                cell.customBackgroundView.layer.insertSublayer(progressLayer, at: 0)
-                if option?.option == PollDetailData?.userget {
-                    cell.customBackgroundView.backgroundColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
-                }
-            }
-        if PollDetailData?.pollRunningStatus == "2" {
-                    cell.isUserInteractionEnabled = false
-                }
-            cell.selectionStyle = .none
-            return cell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "PollTableViewCell", for: indexPath) as? PollTableViewCell else {
+            return UITableViewCell()
         }
+        let option = PollDetailData?.options?[indexPath.row]
+        cell.lblPrcntg.text = "\(option?.percentage ?? "") %"
+        cell.lblTitle.text = option?.option ?? ""
+        cell.lblTitle.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+        cell.lblPrcntg.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+        cell.lblTitle.font =  UIFont(name: "Montserrat-Regular", size: 15)
+        cell.lblPrcntg.font =  UIFont(name: "Montserrat-Regular", size: 15)
+        
+        cell.customBackgroundView.layer.sublayers?.removeAll(where: { $0.name == "progressLayer" })
+        cell.customBackgroundView.backgroundColor = UIColor.systemGray5
+        
+        if PollDetailData?.isvoted == "1" {
+            cell.lblPrcntg.text = "\(option?.percentage ?? "") %"
+        } else {
+            cell.lblPrcntg.text = "0 %"
+        }
+        
+        cell.lblTitle.text = option?.option ?? ""
+        cell.lblTitle.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+        cell.lblPrcntg.textColor = #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
+        cell.lblTitle.font =  UIFont(name: "Montserrat-Regular", size: 15)
+        cell.lblPrcntg.font =  UIFont(name: "Montserrat-Regular", size: 15)
+        
+        cell.customBackgroundView.layer.sublayers?.removeAll(where: { $0.name == "progressLayer" })
+        cell.customBackgroundView.backgroundColor = UIColor.systemGray5
+        
+        if PollDetailData?.isvoted == "1" {
+            let height = cell.customBackgroundView.bounds.height
+            let percentage = CGFloat(Double(option?.percentage ?? "0") ?? 0)
+            let progressWidth = cell.customBackgroundView.bounds.width * percentage / 100
+            let progressLayer = CALayer()
+            progressLayer.name = "progressLayer"
+            progressLayer.backgroundColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
+            progressLayer.frame = CGRect(x: 0, y: 0, width: progressWidth, height: height)
+            progressLayer.cornerRadius = height / 2
+            cell.customBackgroundView.layer.insertSublayer(progressLayer, at: 0)
+            
+            if option?.option == PollDetailData?.userget {
+                cell.customBackgroundView.backgroundColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
+            }
+        }
+        cell.selectionStyle = .none
+        return cell
+    }
         
         func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
             if PollDetailData?.isvoted == "0",

@@ -45,7 +45,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     @IBOutlet weak var btnFav: UIButton!
     @IBOutlet weak var lblShare: UILabel!
     @IBOutlet weak var bottomConstraint: NSLayoutConstraint!
-   
+    
     var createdBy: String?
     var selectedCommentIndexPath: IndexPath?
     var fullText: String = "" // Full text from backend
@@ -92,7 +92,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     var selectedUserID: String?
     var selectRreateOn : String?
     let loader = UIActivityIndicatorView(style: .large)
-    
     var mediaData: [PostImageD] = [] {
         didSet {
             updateCollectionViewHeight()
@@ -141,7 +140,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         }
         setupLabel()
         tableviewPost.rowHeight = UITableView.automaticDimension
-//        tableviewPost.estimatedRowHeight = 80 // Approximate height
+        //        tableviewPost.estimatedRowHeight = 80 // Approximate height
         fullText = self.PostDetailData?.listdata?.first?.postMessage ?? ""
         // Ensure selection is enabled
         collectionViewBanner.isUserInteractionEnabled = true
@@ -173,7 +172,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(showEmojis(_:)))
         longPressGesture.minimumPressDuration = 2.0 // Only trigger after 2 seconds
         btnLike.addGestureRecognizer(longPressGesture)
-        
         // Initialize all sections as hidden by default
         if let postDataCount = CommentPostListData?.postlistdata.count {
             for section in 0..<postDataCount {
@@ -185,11 +183,9 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.MembersLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
-        
         // ✅ Call your post detail API
         callpostDetailWebService(postid: self.postid) {
             self.collectionViewBanner.reloadData()
-            
             // ✅ Safely unwrap the first item from listdata
             guard let data = self.PostDetailData?.listdata?.first else {
                 print("🚫 No post data available.")
@@ -238,8 +234,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     
     
     
-    
-    
     @objc func keyboardWillShow(_ notification: Notification) {
         guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
         let keyboardHeight = keyboardFrame.height
@@ -257,9 +251,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             self.view.layoutIfNeeded()
         }
     }
-    
-    
-    
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
@@ -320,7 +311,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     func setupContainerView() {
         let screenWidth = self.view.frame.width
         let screenHeight = self.view.frame.height
-        
         // 🎯 `containerView` ko bottom pe rakho
         containerView.frame = CGRect(x: 0, y: screenHeight, width: screenWidth, height: 200)
         containerView.backgroundColor = UIColor.white
@@ -368,11 +358,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         }
     }
     
-    
-    
-    
-    
-    
+  
     
     func setupLabel() {
         lblDescription.numberOfLines = 2  // Initially, show only 2 lines
@@ -414,7 +400,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         let size = CGSize(width: lblDescription.frame.width, height: CGFloat.greatestFiniteMagnitude)
         let attributes: [NSAttributedString.Key: Any] = [.font: lblDescription.font!]
         let boundingRect = (fullText as NSString).boundingRect(with: size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil)
-        
         let lineHeight = lblDescription.font.lineHeight
         let maxHeight = lineHeight * 2  // Maximum height allowed for 2 lines
         return boundingRect.height > maxHeight  // If text height exceeds 2 lines, return true
@@ -440,7 +425,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         return truncated
     }
     
-   
+    
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -466,7 +451,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
                 self.callPostCommenteWebService {
                     // Any completion after refresh
                 }
-                
                 // Reload post detail to update comment count label
                 self.callpostDetailWebService(postid: self.postid) {
                     self.lblComment.text = "\(self.PostDetailData?.listdata?.first?.totcomment ?? 0)"
@@ -482,7 +466,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             likeCount += isLikedByUser ? 1 : -1
             likeCount = max(0, likeCount)
             lblLike.text = "\(likeCount)"
-            
             // Button style
             btnLike.setTitle("", for: .normal)
             btnLike.setImage(UIImage(systemName: isLikedByUser ? "hand.thumbsup.circle.fill" : "hand.thumbsup.circle"), for: .normal)
@@ -511,10 +494,8 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         if let existingEmojiView = UIApplication.shared.windows.first?.viewWithTag(9999) {
             existingEmojiView.removeFromSuperview()
         }
-        
         guard let rootView = UIApplication.shared.windows.first?.rootViewController?.view else { return }
         let buttonFrame = button.convert(button.bounds, to: rootView)
-        
         // Create custom view for emoji selection (wider & taller for bigger emojis)
         let emojiSelectionView = UIView(frame: CGRect(x: buttonFrame.midX - 2, y: buttonFrame.minY - 70, width: 350, height: 80))
         emojiSelectionView.backgroundColor = .white
@@ -524,14 +505,11 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         emojiSelectionView.layer.shadowOffset = CGSize(width: 0, height: 2)
         emojiSelectionView.layer.shadowRadius = 6
         emojiSelectionView.tag = 9999
-        
         let emojis = ["👍", "❤️", "😂", "😮", "😎", "🥳"]
-        
         // Horizontal scroll view
         let scrollView = UIScrollView(frame: emojiSelectionView.bounds)
         scrollView.contentSize = CGSize(width: emojis.count * 70, height: 80)
         scrollView.showsHorizontalScrollIndicator = false
-        
         for (index, emoji) in emojis.enumerated() {
             let button = UIButton(frame: CGRect(x: CGFloat(index) * 70, y: 0, width: 70, height: 80))
             button.setTitle(emoji, for: .normal)
@@ -543,7 +521,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         
         emojiSelectionView.addSubview(scrollView)
         rootView.addSubview(emojiSelectionView)
-        
         // Auto remove after 3 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
             emojiSelectionView.removeFromSuperview()
@@ -556,7 +533,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         guard let emoji = sender.titleLabel?.text else { return }
         selectedEmoji = emoji
         updateLikeWithEmoji()
-        
         // Remove emoji selection popup
         sender.superview?.superview?.removeFromSuperview()
     }
@@ -564,7 +540,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     // Update like button with selected emoji
     func updateLikeWithEmoji() {
         guard let emoji = selectedEmoji else { return }
-        
         if !isLikedByUser {
             likeCount += 1
             isLikedByUser = true
@@ -575,13 +550,11 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         btnLike.setImage(nil, for: .normal)
         btnLike.setNeedsLayout()
         btnLike.layoutIfNeeded()
-        
         // 🔁 Call like API with emoji
         callPostLikeWebService(postId: postId, emoji: emoji) {
             print("✅ Emoji like API called with emoji: \(emoji)")
         }
     }
-    
     
     // Long press gesture to show emoji selection
     @objc func showEmojis(_ gesture: UILongPressGestureRecognizer) {
@@ -636,7 +609,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     @IBAction func actionReplyPopup(_ sender: Any) {
         // Hide the popup first
         containerView.isHidden = true
-        
         // Use the stored selected index path or fallback to default
         guard let indexPath = selectedCommentIndexPath ??
                 tableviewPost.indexPathForSelectedRow ??
@@ -646,10 +618,8 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         
         // Clear the selection after use
         selectedCommentIndexPath = nil
-        
         dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
-            
             // Get the post data
             guard let postData = self.CommentPostListData?.postlistdata[indexPath.section] else {
                 return
@@ -660,14 +630,12 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             if indexPath.row > 0, let reply = postData.replies?[indexPath.row - 1] {
                 selectedComment = reply
             }
-            
             // Set up the reply UI
             self.btnComment.isHidden = true
             self.btnCommentReply.isHidden = false
             self.tvmessage.isHidden = false
             self.tvmessage.becomeFirstResponder()
             self.tvmessage.text = ""
-            
             // Set the reply target information
             self.topLevelUsername = selectedComment.username
             self.topLevelUserID = selectedComment.userid
@@ -713,28 +681,18 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     func textViewDidChange(_ textView: UITextView) {
         let size = CGSize(width: textView.frame.width, height: .infinity)
         let estimatedSize = textView.sizeThatFits(size)
-        
         placeholderLabel.isHidden = !textView.text.isEmpty
-        
         // ✅ Limit max height to 150
         let finalHeight = min(estimatedSize.height, 150)
-        
         // ✅ Update constraints
         tvmessageHeightConstraint.constant = finalHeight
         viewMessageHeight.constant = finalHeight
-        
         // ✅ Enable scrolling if content > 150
         textView.isScrollEnabled = estimatedSize.height >= 150
-        
         UIView.animate(withDuration: 0.2) {
             self.view.layoutIfNeeded()
         }
     }
-    
-    
-    
-    
-    
     
     
     @IBAction func SendBtn(_ sender: UIButton){
@@ -761,28 +719,48 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     
     
     
-    @IBAction func actionCommentReply(_ sender: UIButton){
+    @IBAction func actionCommentReply(_ sender: UIButton) {
         self.tvmessage.resignFirstResponder()
-        if tvmessage.text == "" {
+        guard let text = tvmessage.text, !text.isEmpty else {
             let alert = UIAlertController(title: "", message: "Please Enter Your Message", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
             self.present(alert, animated: true)
-        } else {
-            callCommenteReplyPostWebService(parentID: parentID, topLevelUsername: topLevelUsername, topLevelUserID: topLevelUserID) { [weak self] in
-                guard let self = self else { return }
-                self.tvmessage.text = ""
-                self.callPostCommenteWebService {
-                    self.refreshTableView()
+            return
+        }
+        
+        callCommenteReplyPostWebService(parentID: self.parentID,
+                                        topLevelUsername: self.topLevelUsername,
+                                        topLevelUserID: self.topLevelUserID) { [weak self] in
+            guard let self = self else { return }
+            print("✅ Reply successfully added")
+            
+            // Reset UI
+            self.tvmessage.text = ""
+            self.btnComment.isHidden = false
+            self.btnCommentReply.isHidden = true
+            self.tvmessage.resignFirstResponder()
+            
+            // Refresh comments
+            self.callPostCommenteWebService {
+                DispatchQueue.main.async {
+                    // 🔹 Scroll parent comment ke last reply tak
+                    if let sectionIndex = self.CommentPostListData?.postlistdata.firstIndex(where: { $0.pcID == self.parentID }),
+                       let replies = self.CommentPostListData?.postlistdata[sectionIndex].replies {
+                        
+                        let lastRow = replies.count - 1
+                        let indexPath = IndexPath(row: lastRow, section: sectionIndex)
+                        self.tableviewPost.scrollToRow(at: indexPath, at: .bottom, animated: true)
+                    }
                 }
-                
-                // Reload post detail to update comment count label
-                self.callpostDetailWebService(postid: self.postid) {
-                    self.lblComment.text = "\(self.PostDetailData?.listdata?.first?.totcomment ?? 0)"
-                }
+            }
+            
+            // Update comment count
+            self.callpostDetailWebService(postid: self.postid) {
+                self.lblComment.text = "\(self.PostDetailData?.listdata?.first?.totcomment ?? 0)"
             }
         }
     }
-    
+
     
     
     func loadPostData() {
@@ -811,7 +789,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     }
     
     //MARK: - updateCollectionViewHeight
-    
     func updateCollectionViewHeight() {
         if mediaData.isEmpty {
             collectionViewBannerHeight.constant = -30
@@ -820,7 +797,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             collectionViewBannerHeight.constant = 546 // Your desired height
             collectionViewBanner.isHidden = false
         }
-        
         updateMainHeight()
     }
     
@@ -888,7 +864,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             "userid": id ?? "",
             "postid": postid ?? ""
         ]
-        
         WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { (data: CommentPostModel?) in
             // Now data is properly optional
             self.CommentPostListData = data
@@ -906,18 +881,30 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 self.updateTableViewHeight()
+                self.scrollToBottom()
             }
-            
             completionClosure()
         }
     }
     
+    func scrollToBottom(animated: Bool = true) {
+        DispatchQueue.main.async {
+            let sections = self.tableviewPost.numberOfSections
+            if sections > 0 {
+                let lastSection = sections - 1
+                let rows = self.tableviewPost.numberOfRows(inSection: lastSection)
+                if rows > 0 {
+                    let indexPath = IndexPath(row: rows - 1, section: lastSection)
+                    self.tableviewPost.scrollToRow(at: indexPath, at: .bottom, animated: animated)
+                }
+            }
+        }
+    }
     
     func updateTableViewHeight() {
         tableviewPost.layoutIfNeeded()
-        
         let contentHeight = tableviewPost.contentSize.height
-//        print("Content Height: \(contentHeight)")
+        //        print("Content Height: \(contentHeight)")
         let dataCount = CommentPostListData?.postlistdata.count ?? 0
         tableviewHeightMess.constant = dataCount == 0 ? 0 : contentHeight
         updateMainHeight()
@@ -927,17 +914,15 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     func callCommenteReplyPostWebService(parentID: String?, topLevelUsername: String?, topLevelUserID: String?, completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
         let idPost = UserDefaults.standard.string(forKey: "postid")
-        
         var dictParams: [String: Any] = [
             "userid": id ?? "",
-            //            "postid": idPost ?? "",
             "postid": self.postid,
             "commenttext": self.tvmessage.text ?? "",
             "parent_id": parentID ?? "",
             "top_level_username": topLevelUsername ?? "",
             "top_level_userid": topLevelUserID ?? ""
         ]
-        
+        print(dictParams)
         WebService.sharedInstance.callCommentePostWebService(withParams: dictParams) { data in
             self.PostCommentData = data
             
@@ -972,14 +957,11 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             "comment_id": commentId
         ]
         print(dictParams)
-        
         WebService.sharedInstance.callLikeCommentWebService(withParams: dictParams) { data in
             self.likeComModel = data
             completionClosure()
         }
     }
-    
-    
     
     
     func callCommentePostWebService(_ completionClosure: @escaping () -> ()) {
@@ -1025,7 +1007,6 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
         guard let postData = CommentPostListData?.postlistdata[indexPath.section] else {
             return UITableViewCell()
         }
-        
         if indexPath.row == 0 {
             // Main comment cell
             let cell = tableView.dequeueReusableCell(withIdentifier: "PostDetailsTableViewCell", for: indexPath) as! PostDetailsTableViewCell
@@ -1037,7 +1018,6 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
             cell.lblReplyMessCount.text = postData.totalComments
             let url = URL(string: postData.userpic)
             cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "defaultImage"))
-            
             // Set like state
             let isLiked = postData.isLiked
             cell.configure(with: isLiked)
@@ -1057,8 +1037,6 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
                 self.parentID = postData.pcID
                 self.postid = postData.postid
             }
-            
-            
             cell.configureCell(for: indexPath.section)
             cell.profileTapHandler = { [weak self] section in
                 guard let self = self else { return }
@@ -1070,17 +1048,13 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
             }
-            
             cell.likeButtonTapped = { [weak self] newState in
                 guard let self = self else { return }
-                
                 let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
                 let postId = postData.postid
                 let commentId = postData.pcID
-                
                 // ✅ First, update your model
                 self.CommentPostListData?.postlistdata[indexPath.section].isLiked = newState
-                
                 // ✅ Then, call API (don't care about API response for now)
                 self.callCommLikePostWebService(postId: postId, userId: userId, commentId: commentId) {
                     // Optional: handle response
@@ -1088,28 +1062,21 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
                 }
             }
             
-            
             // Handle hide/show button action
             cell.toggleReplyCellAction = { [weak self] in
                 guard let self = self else { return }
-                
                 let section = indexPath.section
                 let isCurrentlyVisible = self.isReplyVisible[section] ?? false
                 let newState = !isCurrentlyVisible
-                
                 // Update the state
                 self.isReplyVisible[section] = newState
-                
                 // Update the button label
                 cell.lblHideShow.text = newState ? "Hide" : "Show"
-                
                 // Get replies count
                 let repliesCount = postData.replies?.count ?? 0
-                
                 // Only proceed if there are replies
                 if repliesCount > 0 {
                     let indexPaths = (1...repliesCount).map { IndexPath(row: $0, section: section) }
-                    
                     // Perform updates with animation
                     tableView.performBatchUpdates({
                         if newState {
@@ -1132,7 +1099,7 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
                 cell.lblneighbrhood.text = reply.neighbrhood
                 let url = URL(string: reply.userpic)
                 cell.userPicImageView.kf.setImage(with: url, placeholder: UIImage(named: "defaultImage"))
-                
+                cell.lblReplyUserName.text = "@\(reply.top_level_username ?? "")"
                 cell.replyButtonTapped = { [weak self] in
                     guard let self = self else { return }
                     self.btnComment.isHidden = true
@@ -1140,9 +1107,11 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
                     self.tvmessage.isHidden = false
                     self.tvmessage.becomeFirstResponder()
                     self.tvmessage.text = ""
-                    self.topLevelUsername = postData.username
-                    self.topLevelUserID = postData.userid
-                    self.parentID = postData.pcID
+                    // ParentID = jis reply pe click kiya
+                    self.parentID = reply.pcID
+                    // Top-level username & userID = API se directly
+                    self.topLevelUsername = reply.top_level_username ?? ""
+                    self.topLevelUserID = reply.top_level_userid ?? ""
                     self.isReplyCellSelected = true
                     self.postid = reply.postid
                 }
@@ -1157,16 +1126,10 @@ extension PostDetailsNewViewController: UITableViewDataSource, UITableViewDelega
                         self.navigationController?.pushViewController(vc, animated: true)
                     }
                 }
-                
-                
-                
             }
             return cell
         }
     }
-    
-    
-    
 }
 
 
@@ -1194,14 +1157,12 @@ extension PostDetailsNewViewController {
     func callFavouriteBussinessWebService(postId: String, _ completionClosure: @escaping (Int, String) -> Void) {
         let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
         let neighborhoodId = UserDefaults.standard.string(forKey: "neighbrshood") ?? ""
-        
         let dictParams: [String: Any] = [
             "userid": userId,
             "postid": postId,
             "type": "Post",
             "neighbrhood": neighborhoodId
         ]
-        
         WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
             if let json = data as? [String: Any],
                let message = json["message"] as? String,
@@ -1221,7 +1182,6 @@ extension PostDetailsNewViewController {
             "postid": postId,
             "type": "Post"
         ]
-        
         WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
             if let json = data as? [String: Any],
                let message = json["message"] as? String,
@@ -1233,8 +1193,6 @@ extension PostDetailsNewViewController {
         }
     }
     
-    
-    
     func callPostLikeWebService(postId: String, emoji: String?, completion: @escaping () -> Void) {
         let userId = UserDefaults.standard.string(forKey: "userid") ?? ""
         let params: [String: Any] = [
@@ -1243,7 +1201,6 @@ extension PostDetailsNewViewController {
             "likestatus": "1",
             "emojiunicode": emoji ?? ""
         ]
-        
         WebService.sharedInstance.callPostLikeWebService(withParams: params) { data in
             completion()
         }
@@ -1259,7 +1216,6 @@ extension PostDetailsNewViewController {
             "likestatus": "0",
             "emojiunicode": ""
         ]
-        
         WebService.sharedInstance.callPostUnLikeWebService(withParams: params) { data in
             completion()
         }
@@ -1271,17 +1227,13 @@ extension PostDetailsNewViewController {
     func callPostLikelistWebService(postid: String, completion: @escaping () -> Void) {
         let currentUserId = UserDefaults.standard.string(forKey: "userid") ?? ""
         let params: [String: Any] = ["postid": postid]
-        
         WebService.sharedInstance.callLikeListPostWebService(withParams: params) { data in
             if let status = data.status, status == "success" {
-                
                 DispatchQueue.main.async {
                     // ✅ Update like count
                     self.lblLike.text = "\(data.totalEmojis ?? 0)"
-                    
                     // ✅ Check if current user liked this post
                     if let likeList = data.listdata.first(where: { $0.userid == currentUserId }) {
-                        
                         if let emoji = likeList.emojiunicode, !emoji.isEmpty {
                             // ✅ User already liked with emoji
                             self.selectedEmoji = emoji
@@ -1309,9 +1261,6 @@ extension PostDetailsNewViewController {
             completion()
         }
     }
-    
-    
-    
     
 }
 

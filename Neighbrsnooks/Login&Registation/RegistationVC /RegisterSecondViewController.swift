@@ -1680,7 +1680,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
         }
         
         // Set URL //dev.
-        guard let url = URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=reg-step-II") else {
+        guard let url = URL(string: "https://neighbrsnook.com/oldadmin/api/master?flag=reg-step-II") else {
             print("URL invalid hai")
             return
         }
@@ -2164,7 +2164,7 @@ class RegisterSecondViewController: BaseViewController, UIPickerViewDelegate, UI
     func callUserLocationWebService() { //dev.
         let id = UserDefaults.standard.string(forKey: "userid")
         print("✅ User ID after login: \(id ?? "Not Found")")
-        let url = "https://dev.neighbrsnook.com/admin/api/user-location"
+        let url = "https://neighbrsnook.com/admin/api/user-location"
         let params: [String: Any] = [
             "userid": id,
             "latitude": lat ?? 0.0,

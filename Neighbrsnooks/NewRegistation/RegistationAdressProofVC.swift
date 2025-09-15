@@ -30,7 +30,6 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     @IBOutlet weak var dobTextField: UITextField!
     @IBOutlet weak var genderTopHeight: NSLayoutConstraint!
     
-    @IBOutlet weak var btnReachout: UIButton!
     @IBOutlet weak var lblNeighbrsnookHeading: UILabel!
     @IBOutlet weak var lblVoterId: UILabel!
     @IBOutlet weak var lblDriving: UILabel!
@@ -75,6 +74,15 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     var bntNameUpdate : String?
     //    var sourceScreen: String?
     
+    // ✅ Address related
+      var city: String?
+      var state: String?
+      var zipcode: String?
+      var fullAddress: String?
+      var latitude: Double?
+      var longitude: Double?
+    
+    
     enum DocumentType: String {
         case aadhaar = "aadhar"
         case passport = "passport"
@@ -87,8 +95,8 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         super.viewDidLoad()
         setupGenderPicker()
         setupDatePicker()
-
-        if sourceScreen != "profile" && sourceScreen != "home" {
+        
+        if sourceScreen != "profile" && sourceScreen != "home" && sourceScreen != "profilebackUn" {
             UserDefaults.standard.set("step2", forKey: "registrationStep")
         }
         
@@ -152,7 +160,6 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         }
         lblGenderHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
         lblDateOfBirthheading.font = UIFont(name: "Montserrat-Regular", size: 17)
-//        lblYourNeighbourhood.font = UIFont(name: "Montserrat-Regular", size: 20)
         lblSelectTheAdressProof.font = UIFont(name: "Montserrat-Regular", size: 16)
         genderTextField.font = UIFont(name: "Montserrat-Regular", size: 16)
         dobTextField.font = UIFont(name: "Montserrat-Regular", size: 16)
@@ -195,16 +202,10 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-//        if let location = selectedLocation, !location.isEmpty {
-//            lblYourNeighbourhood.text = "Id & Address Proof \n(for \(location))"
-//        } else if let neighborhood = profileData?.neighborhood {
-//            lblYourNeighbourhood.text = "Id & Address Proof \n(for \(neighborhood))"
-//        }
-        
         
         var mainText = ""
         var subText = ""
-
+        
         if let location = selectedLocation, !location.isEmpty {
             mainText = "Id & Address Proof "
             subText = "(for \(location))"
@@ -212,17 +213,17 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             mainText = "Id & Address Proof "
             subText = "(for \(neighborhood))"
         }
-
+        
         let attributedString = NSMutableAttributedString(string: mainText + "\n" + subText)
-
+        
         // Main line (before \n) — default font
         let mainRange = NSRange(location: 0, length: mainText.count)
         attributedString.addAttribute(.font, value: UIFont.systemFont(ofSize: 20), range: mainRange)
-
+        
         // Sub line (after \n) — font size 14
         let subRange = NSRange(location: mainText.count + 1, length: subText.count)
         attributedString.addAttribute(.font, value: UIFont.systemFont(ofSize: 14), range: subRange)
-
+        
         lblYourNeighbourhood.attributedText = attributedString
         
         // ✅ Prevent reloading data after image picker
@@ -334,22 +335,6 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             
             // 2️⃣ Save registration flags
             UserDefaults.standard.set("done", forKey: "registrationStep")
-            
-            
-            //            // 3️⃣ Navigate to next screen
-            //            if self.sourceScreen == "profile" {
-            //
-            //                if let homeVC = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController {
-            //
-            //                    self.navigationController?.setViewControllers([homeVC], animated: true)
-            //                }
-            //            } else {
-            //                // Registration flow → NeigbrnookViewController जाना है
-            //                if let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController {
-            //                    self.navigationController?.pushViewController(vc, animated: true)
-            //                }
-            //            }
-            
             guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else { return }
             UserDefaults.standard.set("done", forKey: "registrationStep")
             UserDefaults.standard.set(true, forKey: "isRegistered")
@@ -420,14 +405,36 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
                 vc.shouldCallAPIOnAppear = true
                 self.navigationController?.pushViewController(vc, animated: true)
             }
-        }else if sourceScreen == "home" {
+            
+        } // MARK: - Pop logic
+        else if sourceScreen == "FirstSteep" {
+            if let step2VC = self.navigationController?.viewControllers.first(where: { $0 is NewRegistationSecondStepVC }) as? NewRegistationSecondStepVC {
+
+                // ✅ Save current values before going back
+                step2VC.savedCity = self.city
+                step2VC.savedState = self.state
+                step2VC.savedZipcode = self.zipcode
+                step2VC.savedFullAddress = self.fullAddress
+                step2VC.savedNeighbourhood = self.selectedLocation
+                step2VC.savedLatitude = self.latitude
+                step2VC.savedLongitude = self.longitude
+
+//                step2VC.shouldUpdateUIOnAppear = false
+                step2VC.shouldCallAPIOnAppear = false
+                step2VC.sourceScreen = "FirstSteep"
+
+                self.navigationController?.popToViewController(step2VC, animated: true)
+            }
+        }
+
+        else if sourceScreen == "home" {
             // SecondStep VC pe wapas jao
             if let step2VC = self.navigationController?.viewControllers.first(where: { $0 is NewRegistationSecondStepVC }) {
                 self.navigationController?.popToViewController(step2VC, animated: true)
             } else {
                 let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as! NewRegistationSecondStepVC
-                    vc.profileData = self.profileData
-                    vc.sourceScreen = "home"
+                vc.profileData = self.profileData
+                vc.sourceScreen = "home"
                 vc.shouldCallAPIOnAppear = true
                 self.navigationController?.pushViewController(vc, animated: true)
             }
@@ -437,18 +444,18 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
                 self.navigationController?.popToViewController(step2VC, animated: true)
             } else {
                 let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as! NewRegistationSecondStepVC
-                    vc.profileData = self.profileData
-                    vc.sourceScreen = "profilebackUn"
+                vc.profileData = self.profileData
+                vc.sourceScreen = "profilebackUn"
                 vc.shouldCallAPIOnAppear = true
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }
         else if self.sourceScreen == "Malik" {
-           if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
-               self.navigationController?.pushViewController(vc, animated: true)
-           }
-           
-       }
+            if let vc = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            
+        }
         
         else {
             self.navigationController?.popViewController(animated: true)
@@ -458,77 +465,53 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     
     func frontImageMessage(for docType: DocumentType) -> String {
         switch docType {
-        case .aadhaar: return "Please upload the front photo of your Aadhaar."
-        case .passport: return "Please upload the front photo of your Passport."
-        case .voterID: return "Please upload the front photo of your Voter ID."
-        case .drivingLicense: return "Please upload the front photo of your Driving License."
-        case .rentdocs: return "Please upload a photo of your Rent Lease."
+        case .aadhaar: return "Please upload the front of your Aadhaar."
+        case .passport: return "Please upload the photo page of your Passport."
+        case .voterID: return "Please upload the front of your Voter ID."
+        case .drivingLicense: return "Please upload the front of your Driving License."
+        case .rentdocs: return "Please upload your rental lease."
         default: return "Please upload the front image"
         }
     }
-
+    
     func backImageMessage(for docType: DocumentType) -> String {
         switch docType {
         case .aadhaar: return "Please upload the back photo of your Aadhaar."
-        case .passport: return "Please upload the back photo of your Passport."
-        case .voterID: return "Please upload the back photo of your Voter ID."
-        case .drivingLicense: return "Please upload the back photo of your Driving License."
+        case .passport: return "Please upload the address page of your Passport."
+        case .voterID: return "Please upload the back of your Voter ID."
+        case .drivingLicense: return "Please upload the back of your Driving License."
         default: return "Please upload the back image"
         }
     }
-
+    
     
     
     
     @IBAction func action_Register(_ sender: Any) {
-        
-        
         // 1. Document selection required
         guard let docType = selectedDocumentType, docType != .none else {
             showAlert(message: "Please select a document type for your address proof")
             return
         }
         
-        // 2. Image Validation based on Document Type
-//        switch docType {
-//        case .aadhaar, .passport, .voterID, .drivingLicense:
-//            if frontImage == nil {
-//                showAlert(message: "Please upload the front image")
-//                return
-//            }
-//            if backImage == nil {
-//                showAlert(message: "Please upload the back image")
-//                return
-//            }
-//        case .rentdocs:
-//            if frontImage == nil {
-//                showAlert(message: "Please upload the Rent/Lease document image")
-//                return
-//            }
-//        default:
-//            break
-//        }
-        
         switch docType {
-            case .aadhaar, .passport, .voterID, .drivingLicense:
-                if frontImage == nil {
-                    showAlert(message: frontImageMessage(for: docType))
-                    return
-                }
-                if backImage == nil {
-                    showAlert(message: backImageMessage(for: docType))
-                    return
-                }
-            case .rentdocs:
-                if frontImage == nil {
-                    showAlert(message: frontImageMessage(for: docType))
-                    return
-                }
-            default:
-                break
+        case .aadhaar, .passport, .voterID, .drivingLicense:
+            if frontImage == nil {
+                showAlert(message: frontImageMessage(for: docType))
+                return
             }
-        
-        
+            if backImage == nil {
+                showAlert(message: backImageMessage(for: docType))
+                return
+            }
+        case .rentdocs:
+            if frontImage == nil {
+                showAlert(message: frontImageMessage(for: docType))
+                return
+            }
+        default:
+            break
+        }
         
         // 3. Gender Validation
         guard let genderText = genderTextField.text,
@@ -546,48 +529,96 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         UIHelper.showLoader(on: sender as! UIButton, show: true)
         
         // --- API call only if ALL validations pass ----
-        self.callRegSecWebService {
-            DispatchQueue.main.async {
-                UIHelper.showLoader(on: sender as! UIButton, show: false)
-                let dimView = UIView(frame: self.view.bounds)
-                dimView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
-                dimView.tag = 999
-                self.view.addSubview(dimView)
-                self.viewThankYou.layer.cornerRadius = 12
-                self.viewThankYou.center = self.view.center // Center horizontally + vertically
-                UserDefaults.standard.set("completed", forKey: "registrationStep")
-                
-                self.viewThankYou.isHidden = false
-                self.viewThankYou.alpha = 1
-                
-                // Bring thank you view above dim background
-                self.view.bringSubviewToFront(self.viewThankYou)
-                print("🎉 Registration Step III success")
+        
+        showRegSecConfirmationAlert(loaderButton: sender as! UIButton) {
+            self.callRegSecWebService {
+                DispatchQueue.main.async {
+                    UIHelper.showLoader(on: sender as! UIButton, show: false)
+                    // Thank you/or next screen wala code yahan
+                    let dimView = UIView(frame: self.view.bounds)
+                    dimView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
+                    dimView.tag = 999
+                    self.view.addSubview(dimView)
+                    self.viewThankYou.layer.cornerRadius = 12
+                    self.viewThankYou.center = self.view.center
+                    UserDefaults.standard.set("completed", forKey: "registrationStep")
+                    self.viewThankYou.isHidden = false
+                    self.viewThankYou.alpha = 1
+                    self.view.bringSubviewToFront(self.viewThankYou)
+                    print("🎉 Registration Step III success")
+                }
             }
         }
     }
- 
-    // Show simple alert
-    func showAlert(message: String) {
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+    
+    func showRegSecConfirmationAlert(loaderButton: UIButton, completion: @escaping () -> Void) {
+        var locText = "your area"
+        if let location = selectedLocation, !location.isEmpty {
+            locText = location
+        } else if let neighborhood = profileData?.neighborhood, !neighborhood.isEmpty {
+            locText = neighborhood
+        }
+        let confirmMessage = "Please confirm that the address proof is for your address in \(locText)"
         
-        // Custom attributed message: font & color
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.alignment = .center
-        let attributedMessage = NSAttributedString(
-            string: message,
-            attributes: [
-                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                .foregroundColor: UIColor.darkGray,
-                .paragraphStyle: paragraph
-            ]
-        )
+        let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
+        
+        let messageFont = [NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)]
+        let messageAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+            .foregroundColor: UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1) // 5C5C5C hex color
+        ]
+        let attributedMessage = NSAttributedString(string: confirmMessage, attributes: messageAttributes)
         alert.setValue(attributedMessage, forKey: "attributedMessage")
         
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+        
+        // Cancel action: loader bhi band karo
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { [self] _ in
+            UIHelper.showLoader(on: loaderButton, show: false)
+            if let btnTitle = bntNameUpdate {
+                btnRegister.setTitle(btnTitle, for: .normal)
+            }
+        }
+        cancelAction.setValue(UIColor.red, forKey: "titleTextColor")
+        
+        let confirmAction = UIAlertAction(title: "Confirm", style: .default) { [self] _ in
+            if let btnTitle = bntNameUpdate {
+                btnRegister.setTitle(btnTitle, for: .normal)
+            }
+            completion()
+        }
+        confirmAction.setValue(UIColor(red: 0/255, green: 128/255, blue: 0/255, alpha: 1), forKey: "titleTextColor") // Dark green
+        
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+        self.present(alert, animated: true, completion: nil)
     }
     
+    
+    
+    
+    func showAlert(message: String) {
+        let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+        let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
+        
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: UIColor.black
+        ]
+        let messageAttributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: UIColor.darkGray
+        ]
+        
+        let attributedTitle = NSAttributedString(string: title ?? "", attributes: titleAttributes)
+        let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+        alertController.setValue(attributedTitle, forKey: "attributedTitle")
+        alertController.setValue(attributedMessage, forKey: "attributedMessage")
+        
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
+    }
     
     
     
@@ -677,23 +708,6 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         cropViewController.dismiss(animated: true) { [self] in
             self.isComingFromImagePicker = false // ✅ Reset here safely
             
-            //            if self.selectedDocumentType == .aadhaar {
-            //                self.performAadhaarMasking(on: image) { success in
-            //                    if success {
-            //                        self.updateImageCountLabels()
-            //                    }
-            //                }
-            //            } else {
-            //                if self.isSelectingFrontImage {
-            //                    self.frontImage = image
-            //                    self.viewFrontImg.backgroundColor = .white
-            //                } else {
-            //                    self.backImage = image
-            //                    self.viewBackImg.backgroundColor = .white
-            //                }
-            //                self.updateImageCountLabels()
-            //            }
-            
             
             if selectedDocumentType == .aadhaar {
                 if isSelectingFrontImage {
@@ -722,41 +736,19 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     
     
     
-    
-//    func updateImageCountLabels() {
-//        self.isComingFromImagePicker = false
-//        let frontSelected: Bool = (frontImage != nil)
-//        let backSelected: Bool = (backImage != nil)
-//        
-//        // Stylish text
-//        lblFront.text = frontSelected ? "Front Preview " : "Front"
-//        lblBack.text  = backSelected  ? "Back Preview " : "Back"
-//        
-//        
-//        // Color
-//        lblFront.textColor = frontSelected ? .systemGreen : .darkGray
-//        lblBack.textColor  = backSelected  ? .systemGreen : .darkGray
-//        
-//        lblFront.font = UIFont.boldSystemFont(ofSize: 15)
-//        lblBack.font  = UIFont.boldSystemFont(ofSize: 15)
-//        
-//        btnFront.isHidden = frontSelected
-//        btnBack.isHidden  = backSelected
-//    }
-    
     func updateImageCountLabels() {
-        // Agar front image select hai toh imageView me dikhao, label hide karo
+        
         if let image = frontImage {
             print("Front image set ho rahi hai: \(image)")
-            frontImgView.image = image        // ImageView me image show karo
-            lblFront.isHidden = true          // Label hata do
+            frontImgView.image = image
+            lblFront.isHidden = true
         } else {
-            frontImgView.image = nil          // ImageView empty karo
-            lblFront.isHidden = false         // Label dikhao (optional, agar chahiye "Front" likha ho)
+            frontImgView.image = nil
+            lblFront.isHidden = false
             lblFront.text = "Front"
         }
-
-        // Agar back image select hai toh imageView me dikhao, label hide karo
+        
+        
         if let image = backImage {
             print("back image set ho rahi hai: \(image)")
             backImgView.image = image
@@ -766,12 +758,15 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             lblBack.isHidden = false
             lblBack.text = "Back"
         }
-
+        
         // Button logic yahan bhi rakh sakta hai, agar chaho toh
         btnFront.isHidden = (frontImage != nil)
         btnBack.isHidden = (backImage != nil)
     }
-
+    
+    
+    
+    
     
     
     
@@ -870,81 +865,81 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         request.usesLanguageCorrection = true
         try? requestHandler.perform([request])
     }
-
+    
     func performAadhaarMasking(on image: UIImage, completion: @escaping (Bool) -> Void) {
-            let request = VNRecognizeTextRequest { [weak self] request, error in
-                guard let self = self else { return }
-                let observations = request.results as? [VNRecognizedTextObservation] ?? []
-                let aadhaarObservations = self.findAadhaarNumbers(in: observations)
-                
-                if self.isSelectingFrontImage {
-                    // ✅ Front side logic
-                    if !aadhaarObservations.isEmpty,
-                       let masked = self.maskDigits(in: image, from: observations) {
-                        DispatchQueue.main.async {
-                            self.frontImage = masked
-                            self.viewFrontImg.backgroundColor = .white
-                            self.updateImageCountLabels()
-                            completion(true)
-                        }
-                    } else {
-                        DispatchQueue.main.async {
-                            let msgString = "Couldn’t read the Aadhaar card. Please take a clearer photo."
-                            let alert = UIAlertController(title: nil, message: msgString, preferredStyle: .alert)
-                            let attributedMessage = NSAttributedString(
-                                string: msgString,
-                                attributes: [
-                                    .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                                    .foregroundColor: #colorLiteral(red: 0.3764705882, green: 0.3725490196, blue: 0.3725490196, alpha: 1)
-                                ]
-                            )
-                            alert.setValue(attributedMessage, forKey: "attributedMessage")
-                            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-                            okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
-                            alert.addAction(okAction)
-                            self.present(alert, animated: true, completion: nil)
-                            completion(false)
-                        }
+        let request = VNRecognizeTextRequest { [weak self] request, error in
+            guard let self = self else { return }
+            let observations = request.results as? [VNRecognizedTextObservation] ?? []
+            let aadhaarObservations = self.findAadhaarNumbers(in: observations)
+            
+            if self.isSelectingFrontImage {
+                // ✅ Front side logic
+                if !aadhaarObservations.isEmpty,
+                   let masked = self.maskDigits(in: image, from: observations) {
+                    DispatchQueue.main.async {
+                        self.frontImage = masked
+                        self.viewFrontImg.backgroundColor = .white
+                        self.updateImageCountLabels()
+                        completion(true)
                     }
                 } else {
-                    if !aadhaarObservations.isEmpty,
-                       let masked = self.maskDigits(in: image, from: observations) {
-                        DispatchQueue.main.async {
-                            self.backImage = masked
-                            self.viewBackImg.backgroundColor = .white
-                            self.updateImageCountLabels()
-                            completion(true)
-                        }
-                    } else {
-                        DispatchQueue.main.async {
-                            self.backImage = image
-                            self.viewBackImg.backgroundColor = .white
-                            completion(false)
-                        }
+                    DispatchQueue.main.async {
+                        let msgString = "Couldn’t read the Aadhaar card. Please take a clearer photo."
+                        let alert = UIAlertController(title: nil, message: msgString, preferredStyle: .alert)
+                        let attributedMessage = NSAttributedString(
+                            string: msgString,
+                            attributes: [
+                                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+                                .foregroundColor: #colorLiteral(red: 0.3764705882, green: 0.3725490196, blue: 0.3725490196, alpha: 1)
+                            ]
+                        )
+                        alert.setValue(attributedMessage, forKey: "attributedMessage")
+                        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                        okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+                        alert.addAction(okAction)
+                        self.present(alert, animated: true, completion: nil)
+                        completion(false)
+                    }
+                }
+            } else {
+                if !aadhaarObservations.isEmpty,
+                   let masked = self.maskDigits(in: image, from: observations) {
+                    DispatchQueue.main.async {
+                        self.backImage = masked
+                        self.viewBackImg.backgroundColor = .white
+                        self.updateImageCountLabels()
+                        completion(true)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.backImage = image
+                        self.viewBackImg.backgroundColor = .white
+                        completion(false)
                     }
                 }
             }
-            
-            request.recognitionLevel = .accurate
-            request.recognitionLanguages = ["en-IN"]
-            guard let cgImage = image.cgImage else { return }
-            DispatchQueue.global(qos: .userInitiated).async {
-                try? VNImageRequestHandler(cgImage: cgImage, options: [:]).perform([request])
-            }
         }
+        
+        request.recognitionLevel = .accurate
+        request.recognitionLanguages = ["en-IN"]
+        guard let cgImage = image.cgImage else { return }
+        DispatchQueue.global(qos: .userInitiated).async {
+            try? VNImageRequestHandler(cgImage: cgImage, options: [:]).perform([request])
+        }
+    }
     
     func findAadhaarNumbers(in observations: [VNRecognizedTextObservation]) -> [(text: String, boundingBox: CGRect)] {
-            var result: [(text: String, boundingBox: CGRect)] = []
-            for observation in observations {
-                guard let candidate = observation.topCandidates(1).first else { continue }
-                let text = candidate.string.replacingOccurrences(of: " ", with: "")
-                if text.range(of: #"^[0-9]{12}$"#, options: .regularExpression) != nil {
-                    result.append((candidate.string, observation.boundingBox))
-                    print("Musk text is : \(text)")
-                }
+        var result: [(text: String, boundingBox: CGRect)] = []
+        for observation in observations {
+            guard let candidate = observation.topCandidates(1).first else { continue }
+            let text = candidate.string.replacingOccurrences(of: " ", with: "")
+            if text.range(of: #"^[0-9]{12}$"#, options: .regularExpression) != nil {
+                result.append((candidate.string, observation.boundingBox))
+                print("Musk text is : \(text)")
             }
-            return result
         }
+        return result
+    }
     
     func maskDigits(in image: UIImage, from observations: [VNRecognizedTextObservation]) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(image.size, false, 0)
@@ -1133,7 +1128,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         }
         
         // API URL  //dev.
-        guard let url = URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=reg-step-III") else {
+        guard let url = URL(string: "https://neighbrsnook.com/oldadmin/api/master?flag=reg-step-III") else {
             print("URL invalid hai")
             return
         }

@@ -21,12 +21,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             
         // Always show SplashVC first
-                let splashVC = storyboard.instantiateViewController(withIdentifier: "SplashVC")
-                window?.rootViewController = splashVC
-                window?.makeKeyAndVisible()
+//                let splashVC = storyboard.instantiateViewController(withIdentifier: "SplashVC")
+//                window?.rootViewController = splashVC
+//                window?.makeKeyAndVisible()
                 
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) { // 2 seconds splash delay
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 2) { // 2 seconds splash delay
                 if let userID = UserDefaults.standard.string(forKey: "userid"), !userID.isEmpty {
                     let registrationStep = UserDefaults.standard.string(forKey: "registrationStep") ?? "done"
                     
@@ -51,10 +51,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 }
                 
                     self.window?.makeKeyAndVisible()
-            }
-        
-        
-        
+//            }
         
         }
 

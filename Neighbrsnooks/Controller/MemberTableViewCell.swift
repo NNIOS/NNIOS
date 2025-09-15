@@ -629,18 +629,19 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     
     
     @IBAction func favouriteButtonTapped(_ sender: UIButton) {
-        
         favouriteButtonCallback?()
     }
     
     // Update UI based on fav/unfav status
     func updateFavouriteButton(isFavourite: Bool) {
-        let imageName = isFavourite ? "favorites" : "Un favorites" // ✅ Image names from Assets
-        let image = UIImage(named: imageName)
-        btnFavourite.setImage(image, for: .normal)
+        let imageName = isFavourite ? "favorites" : "Un favorites"
+        if let image = UIImage(named: imageName) {
+            btnFavourite.setImage(image, for: .normal)
+        } else {
+            btnFavourite.setImage(UIImage(systemName: "heart"), for: .normal) // fallback icon, just in case
+        }
     }
-    
-    
+
     
     
 }

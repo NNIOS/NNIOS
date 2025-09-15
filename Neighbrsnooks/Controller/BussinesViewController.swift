@@ -73,6 +73,8 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
            refreshControl.addTarget(self, action: #selector(refreshPageData), for: .valueChanged)
         tableviewBussiness.refreshControl = refreshControl
         
+        
+        
     }
     
     
@@ -286,14 +288,36 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     }
     
     
+//    @IBAction func BackButtionAction(_ sender: UIButton) {
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        if backAction == "homeBack" {
+//            guard let homeVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else {
+//                return
+//            }
+//            self.navigationController?.setViewControllers([homeVC], animated: true)
+//        } else {
+//            guard let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {
+//                return
+//            }
+//            myProfileVC.fromScreen = "AddBussiness"
+//            myProfileVC.Newid = self.Newid
+//            self.navigationController?.setViewControllers([myProfileVC], animated: true)
+//        }
+//    }
+    
+    
     @IBAction func BackButtionAction(_ sender: UIButton) {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if backAction == "homeBack" {
-            guard let homeVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else {
-                return
+            if let navController = self.navigationController {
+                for controller in navController.viewControllers {
+                    if controller is NeigbrnookViewController {
+                        navController.popToViewController(controller, animated: true)
+                        return
+                    }
+                }
             }
-            self.navigationController?.setViewControllers([homeVC], animated: true)
         } else {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
             guard let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {
                 return
             }
@@ -302,6 +326,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
             self.navigationController?.setViewControllers([myProfileVC], animated: true)
         }
     }
+
 
     
     

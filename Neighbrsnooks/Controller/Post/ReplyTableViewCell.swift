@@ -15,7 +15,7 @@ class ReplyTableViewCell: UITableViewCell {
     @IBOutlet weak var lblneighbrhood: UILabel!
     @IBOutlet weak var lblTime: UILabel!
     @IBOutlet weak var actionReply: UIButton!
-    
+    @IBOutlet weak var lblReplyUserName : UILabel!
     //    var profileTapHandler: ((_ section: Int) -> Void)?
     //    var sectionForTap: Int = 0
     //    var replyButtonTapped: (() -> Void)? // Closure to handle button tap

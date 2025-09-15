@@ -54,8 +54,8 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         super.viewDidLoad()
         //        updateColors()
         collectionViewDirectory.isScrollEnabled = false
-
         self.EventsLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
+        self.LblMemberText.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.lblTotalMember.font = UIFont(name: "Montserrat-Regular", size: 13)
         self.PollLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.BusinessLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
@@ -69,6 +69,12 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         self.MyNearByLbl.font  = UIFont(name: "Montserrat-Regular", size: 20)
         self.LblMyNeighbrhoods.font  = UIFont(name: "Montserrat-Regular", size: 20)
         defaultTextColor = lblMember.textColor
+        self.LblMemberText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblGroupsText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblEventText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblPollText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblBussinessText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblPostText.font = UIFont(name: "Montserrat-Regular", size: 17)
         
     }
     

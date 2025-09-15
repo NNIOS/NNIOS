@@ -402,15 +402,15 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
 //            }
             
             if sourceScreen == "FirstSteep" {
-                       registerSecondVC.sourceScreen = "FirstSteep"
-                   } else if sourceScreen == "profile" {
-                       registerSecondVC.sourceScreen = "profile"
-                       registerSecondVC.isFromProfile = true
-                   } else if sourceScreen == "home" {
-                       registerSecondVC.sourceScreen = "home"
-                   } else {
-                       registerSecondVC.sourceScreen = "home" // Default fallback
-                   }
+                registerSecondVC.sourceScreen = "FirstSteep"
+            } else if sourceScreen == "profile" {
+                registerSecondVC.sourceScreen = "profile"
+                registerSecondVC.isFromProfile = true
+            } else if sourceScreen == "home" {
+                registerSecondVC.sourceScreen = "home"
+            } else {
+                registerSecondVC.sourceScreen = "home" // Default fallback
+            }
 
             
             

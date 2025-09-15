@@ -368,35 +368,38 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     }
     
     @IBAction func PublishBtn(_ sender: UIButton){
-        
-        
-        // Show loader
-        showLoader()
-        self.hideLoader()
-        
-        switch selectedCheckbox {
-        case .sold:
-            callMarketSoldWebService {
-                self.callMarketCreateWebService {
-                    
+        if tfItemName.text == "" {
+            alertToast(Message: "Please enter market name")
+        } else if tfDesc.text == "" {
+            alertToast(Message: "Please enter market description")
+        } else {
+            // Show loader
+            showLoader()
+            self.hideLoader()
+            
+            switch selectedCheckbox {
+            case .sold:
+                callMarketSoldWebService {
+                    self.callMarketCreateWebService {
+                        
+                    }
+                }
+            case .active:
+                callMarketActiveWebService {
+                    self.callMarketCreateWebService {
+                        
+                    }
+                }
+            case .deactivate, .none:
+                callMarketDeactiveWebService {
+                    self.callMarketCreateWebService {
+                        
+                    }
                 }
             }
-        case .active:
-            callMarketActiveWebService {
-                self.callMarketCreateWebService {
-                    
-                }
-            }
-        case .deactivate, .none:
-            callMarketDeactiveWebService {
-                self.callMarketCreateWebService {
-                    
-                }
-            }
+            
+            self.navigationController?.popViewController(animated: true)
         }
-        
-        self.navigationController?.popViewController(animated: true)
-       
     }
     
     func showLoader() {
@@ -553,7 +556,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
 
     // dev.
         func callMarketDeactiveWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/product_inactive_status?"
+            let url = "https://neighbrsnook.com/admin/api/product_inactive_status?"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -615,7 +618,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         //dev.
         
         func callMarketActiveWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/product_active_status"
+            let url = "https://neighbrsnook.com/admin/api/product_active_status"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -678,7 +681,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         //dev.
         
         func callMarketSoldWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/product_sold_status"
+            let url = "https://neighbrsnook.com/admin/api/product_sold_status"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -742,7 +745,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         }
         //dev.
         func callMarketDetailWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
+            let url = "https://neighbrsnook.com/admin/api/mpk_product_detail?"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -804,7 +807,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         
         //dev.
         func callMarketCreateWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add?"
+            let url = "https://neighbrsnook.com/admin/api/mpk_product_add?"
            
             
             let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
@@ -996,7 +999,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         //dev.
         
         func callMarketCatWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/category"
+            let url = "https://neighbrsnook.com/admin/api/category"
             
             let dictParams: Dictionary<String, Any> = ["":""]
             

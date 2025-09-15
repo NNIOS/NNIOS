@@ -3215,7 +3215,7 @@ class WebService {
     // MARK: - Update token firebase
     
     func callUpdatetokenPostWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: UpdateTokenModel) -> ()) {
-              RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kUpdateToken, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+              RSNetworkManager.shared.newMarketRequestApi(withServiceName: WebServiceName.kUpdateToken, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
               {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
                 let dictResponse = FunctionsConstants.kShared.getDictionary(result)
                 switch statusCode {

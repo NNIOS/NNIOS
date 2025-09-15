@@ -217,12 +217,13 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
     }
     
     @IBAction func btnMyitemViewAll(_ : UIButton){
-        
-        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyitemsMarketViewController") as? MyitemsMarketViewController else {return}
-        
-        self.navigationController?.pushViewController(vc, animated: true)
-        
-    }
+            let id = UserDefaults.standard.string(forKey: "userid") ?? ""
+            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyitemsMarketViewController") as? MyitemsMarketViewController else {return}
+            vc.Newid = id
+            vc.sourceViewController = "MyProfile"
+            self.navigationController?.pushViewController(vc, animated: true)
+            
+        }
     
     @IBAction func btnLatestViewAll(_ : UIButton){
         
@@ -690,7 +691,7 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
     //dev.
     
     @objc func callMarketwalltWebService() {
-        let url = "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?"
+        let url = "https://neighbrsnook.com/admin/api/mpk_home_wall?"
         
         // let dictParams: Dictionary<String, Any> = ["":""]
         

@@ -179,9 +179,10 @@ class CreateEventViewController: UIViewController{
             showAlert(message: "Please remove inappropriate words from Address Line 1")
         } else if containsBadWords(tfAdd2.text ?? "") {
             showAlert(message: "Please remove inappropriate words from Address Line 2")
-        } else if images.isEmpty {
-            showAlert(message: "Plesae upload a banner")
-        } else {
+//        } else if images.isEmpty {
+////            showAlert(message: "Plesae upload a banner")
+        }
+        else {
             SVProgressHUD.show()
             callCreateEventWebService {
                 // success callback
@@ -451,22 +452,28 @@ extension CreateEventViewController {
     }
     
     func showAlert(message: String) {
-        let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
-        
-        let attributedMessage = NSAttributedString(
-            string: message,
-            attributes: [
-                NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 18, weight: .medium),
-                NSAttributedString.Key.foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+            let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
+            
+            let titleAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.black
             ]
-        )
-        
-        alert.setValue(attributedMessage, forKey: "attributedMessage")
-        
-        alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
-        
-        self.present(alert, animated: true, completion: nil)
-    }
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.darkGray
+            ]
+            
+            let attributedTitle = NSAttributedString(string: title ?? "", attributes: titleAttributes)
+            let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+            alertController.setValue(attributedTitle, forKey: "attributedTitle")
+            alertController.setValue(attributedMessage, forKey: "attributedMessage")
+            
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+            alertController.addAction(okAction)
+            present(alertController, animated: true, completion: nil)
+        }
     
     
     func updateCollectionView() {

@@ -19,11 +19,11 @@ let kDeviceModel                = UIDevice.current.model
 
  
  // dev.
-let kBASEURL = "https://dev.neighbrsnook.com/oldadmin/api/"
+let kBASEURL = "https://neighbrsnook.com/oldadmin/api/"
 
 //let kMBASEURL = "https://dev.neighbrsnook.com/marketplace/api/"
 
-let kMBASEURL = "https://dev.neighbrsnook.com/admin/api/"
+let kMBASEURL = "https://neighbrsnook.com/admin/api/"
 // https://www.getpostman.com/collections/26b0e1c72aca6e901d76
 
 let kImageBaseUrl = ""

@@ -37,6 +37,7 @@ class RegistationFirstStepVC: BaseViewController {
     @IBOutlet weak var otpViewHeightConst: NSLayoutConstraint!
     @IBOutlet weak var otpTopHeightConst: NSLayoutConstraint!
     @IBOutlet weak var otpBottomHeightConst: NSLayoutConstraint!
+    @IBOutlet weak var imgEmail: UIImageView!
     
     // MARK: - Variables
     
@@ -141,25 +142,33 @@ class RegistationFirstStepVC: BaseViewController {
 extension RegistationFirstStepVC : UITextFieldDelegate {
 
     
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-            guard let currentField = textField as? CustomLabelFirstName else { return true }
-            let isDeleting = string.isEmpty
-            if isDeleting {
-                if currentField.text?.isEmpty ?? true {
-                    currentField.previousTextField?.becomeFirstResponder()
-                } else {
-                    currentField.text = ""
+    func textField(_ textField: UITextField,shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+                if let currentField = textField as? CustomLabelFirstName {
+                    let isDeleting = string.isEmpty
+                    if isDeleting {
+                        if currentField.text?.isEmpty ?? true {
+                            currentField.previousTextField?.becomeFirstResponder()
+                        } else {
+                            currentField.text = ""
+                        }
+                        return false
+                    } else {
+                        currentField.text = string
+                        if let next = currentField.nextTextFiled {
+                            next.becomeFirstResponder()
+                        } else {
+                            currentField.resignFirstResponder()
+                            checkOTPCompletion()
+                        }
+                        return false
+                    }
                 }
-                return false
-            } else {
-                currentField.text = string
-                if let next = currentField.nextTextFiled {
-                    next.becomeFirstResponder()
-                } else {
-                    currentField.resignFirstResponder()
-                    checkOTPCompletion()
-                }
-                return false
+                return true
+            }
+        
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            if textField == emailTF {
+                imgEmail.image = UIImage(named: "email") // ✅ update the icon
             }
         }
     
@@ -261,7 +270,7 @@ extension RegistationFirstStepVC {
         otpViewHeightConst.constant = 0
         self.otpTopHeightConst.constant = 5
         self.otpBottomHeightConst.constant = 5
-//        scrollView.isScrollEnabled = false
+        emailTF.delegate = self
     }
     
     // MARK: function for setup delegates for otp fields
@@ -316,21 +325,21 @@ extension RegistationFirstStepVC {
             }
             
             guard let email = emailTF.text, !email.isEmpty else {
+                imgEmail.image = UIImage(named: "CrossOtp")
                 alertToast(Message: "Please enter email"); return
             }
             if containsBadWords(email) {
                 alertToast(Message: "Contains inappropriate words"); return
-                
             }
             
-            if self.objVerifyModel?.description.desc == "Code does not match." {
-                            alertToast(Message: self.objVerifyModel?.description.desc ?? ""); return
-                        }
-            
             guard email.isValidEmail() else {
+                imgEmail.image = UIImage(named: "CrossOtp")
                 alertToast(Message: "Please enter a valid email address"); return
             }
             
+            if self.objVerifyModel?.description.desc == "Code does not match." {
+                alertToast(Message: self.objVerifyModel?.description.desc ?? ""); return
+            }
             guard let password = passwordTF.text, !password.isEmpty else {
                 alertToast(Message: "Please enter password"); return
             }
@@ -696,7 +705,6 @@ extension RegistationFirstStepVC {
     
     func callsendImageAPI(param: [String: Any], arrImage: [UIImage], imageKey: String, URlName: String, withblock: @escaping () -> Void) {
         let headers: HTTPHeaders = ["Content-type": "multipart/form-data"]
-        
         AF.upload(multipartFormData: { (multipartFormData) in
             // Append all parameters
             for (key, value) in param {
@@ -712,37 +720,29 @@ extension RegistationFirstStepVC {
                 }
             }
         }, to: URlName, method: .post, headers: headers).response { response in
-            
             if let error = response.error {
                 print("❌ Error in upload: \(error.localizedDescription)")
                 return
             }
-            
             guard let jsonData = response.data else {
                 print("❌ No data received from server.")
                 return
             }
-            
             do {
                 let decoder = JSONDecoder()
                 self.registerData = try decoder.decode(RegisterModel.self, from: jsonData)
-                
                 print("✅ Parsed Response: \(String(describing: self.registerData))")
-                
                 DispatchQueue.main.async {
                     // ✅ Dismiss loading alert before navigation
                     self.dismiss(animated: true) {
                         if self.registerData?.status == "success" {
-                            
                             // ✅ Save userID
                             if let userID = self.registerData?.userid {
                                 UserDefaults.standard.set(userID, forKey: "userid")
                                 print("✅ Saved userID: \(userID)")
-                                
                                 // ✅ Call Location API
                                 self.callUserLocationWebService()
                             }
-                            
                             // ✅ Navigate to next VC
                             if let nextVC = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
                                 nextVC.sourceScreen = "FirstSteep"
@@ -754,10 +754,8 @@ extension RegistationFirstStepVC {
                             self.showAlert(message: self.registerData?.message ?? "Something went wrong")
                         }
                     }
-                    
                     withblock() // ✅ Call completion
                 }
-                
                 withblock() // ✅ Call completion
             } catch {
                 print("❌ Error parsing response: \(error.localizedDescription)")
@@ -792,7 +790,7 @@ extension RegistationFirstStepVC {
     // MARK:  USER LOCATION Api method  //dev.
     func callUserLocationWebService() {
         let id = UserDefaults.standard.string(forKey: "userid")
-        let url = "https://dev.neighbrsnook.com/admin/api/user-location"
+        let url = "https://neighbrsnook.com/admin/api/user-location"
         let params: [String: Any] = [
             "userid": id ?? "",
             "latitude": currentLatitude ?? 0.0,

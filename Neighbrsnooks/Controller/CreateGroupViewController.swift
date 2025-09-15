@@ -197,39 +197,27 @@ class CreateGroupViewController: BaseViewController,CropViewControllerDelegate, 
 
             // 🔍 Validation Checks
             if groupName.isEmpty {
-    //            showAlert(with: "Please enter group name", sender: sender, loader: loader, originalTitle: originalTitle)
-                self.alertToast(Message: "Please enter group name")
+                showAlert(with: "Please enter group name", sender: sender, loader: loader, originalTitle: originalTitle)
                 return
             }
 
             if containsBadWords(groupName) {
-    //            showAlert(with: "Group name contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
-                self.alertToast(Message: "Group name contains inappropriate words")
+                showAlert(with: "Group name contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
                 return
             }
 
             if groupDescription.isEmpty {
-    //            showAlert(with: "Please enter group description", sender: sender, loader: loader, originalTitle: originalTitle)
-                self.alertToast(Message: "Please enter group description")
+                showAlert(with: "Please enter group description", sender: sender, loader: loader, originalTitle: originalTitle)
                 return
             }
             
-            if profilePic.image == nil || profilePic.image == UIImage(named: "placeholder") {
-    //            showAlert(with: "Please upload a image", sender: sender, loader: loader, originalTitle: originalTitle)
-                self.alertToast(Message: "Please upload a image")
-                return
-            }
-
-
             if containsBadWords(groupDescription) {
-    //            showAlert(with: "Group description contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
-                self.alertToast(Message: "Group description contains inappropriate words")
+                showAlert(with: "Group description contains inappropriate words", sender: sender, loader: loader, originalTitle: originalTitle)
                 return
             }
 
             if account == "" {
-    //            showAlert(with: "Please select who can join", sender: sender, loader: loader, originalTitle: originalTitle)
-                self.alertToast(Message: "Please select who can join")
+                showAlert(with: "Please select who can join", sender: sender, loader: loader, originalTitle: originalTitle)
                 return
             }
 

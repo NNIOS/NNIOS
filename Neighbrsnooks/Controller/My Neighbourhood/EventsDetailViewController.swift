@@ -8,7 +8,7 @@ import PhotosUI
 import Kingfisher
 import TOCropViewController  // Yaha se shuru kia din mai
 @available(iOS 16.0, *)
-class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource, ConfirmEventDelegate, ConfirmNoEventDelegate, ConfirmDeleteEvent, PHPickerViewControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, ImageCollectionViewControllerDelegate, TOCropViewControllerDelegate, MediaCountUpdateDelegate {
+class EventsDetailViewController: BaseViewController , UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource, ConfirmEventDelegate, ConfirmNoEventDelegate, ConfirmDeleteEvent, PHPickerViewControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, ImageCollectionViewControllerDelegate, TOCropViewControllerDelegate, MediaCountUpdateDelegate {
     
     func didTapDeleteButton(at index: Int) {
         
@@ -147,7 +147,6 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
         let cellHeight: CGFloat = 50
         let spacingBetweenRows: CGFloat = 8
         let topBottomInset: CGFloat = 16 // adjust as per design
-
         if itemCount == 0 {
             AttendesCollectionViewHeightConst.constant = 0
         } else {
@@ -155,183 +154,182 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             let collectionHeight = (numberOfRows * cellHeight) + ((numberOfRows - 1) * spacingBetweenRows) + topBottomInset
             AttendesCollectionViewHeightConst.constant = collectionHeight - 20
         }
-
         self.view.layoutIfNeeded()
     }
     
     
     override func viewDidLoad() {
-        super.viewDidLoad()
-        //            updateColors()
-        NetworkMonitor.shared.startMonitoring()
-        AttendesCollectionView.isScrollEnabled = false
-        SVProgressHUD.show()
-        UserDefaults.standard.set(eventid, forKey: "eventid")
-        DateLbl.textColor = UIColor.secondaryLabel
-        collectionViewEvent.delegate = self
-        collectionViewEvent.dataSource = self
-        AttendesCollectionView.delegate = self
-        AttendesCollectionView.dataSource = self
-        NetworkMonitor.shared.startMonitoring()
-        self.UserNameLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16) // yaha tak back aa skte hain
-        self.HradingTitleLbl.font = UIFont(name: "Montserrat-Regular", size: 20)
-        self.DateLbl.font = UIFont(name: "Montserrat-Regular", size: 14)
-        self.TitleLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
-        self.VenueLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-        self.LblVenue.font = UIFont(name: "Montserrat-SemiBold", size: 15)
-        self.Add2Lbl.font = UIFont(name: "Montserrat-Regular", size: 16)
-        self.StartDateLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-        self.EndDateLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-        self.StartTimeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
-        self.EndTimeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
-        self.LikeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
-        self.StartTimeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
-        self.EventDetailLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
-        self.StcStartDateLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
-        self.StcEndDateLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
-        self.StcStartTimeLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
-        self.StcEndTimeLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
-        self.lblImgLimit.font = UIFont(name: "Montserrat-Regular", size: 10)
-        self.LblAttendesPhoto.font = UIFont(name: "Montserrat-Regular", size: 14)
-        self.LblOwnerPhoto.font = UIFont(name: "Montserrat-Regular", size: 14)
-        self.HradingTitleLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
-        btnUplImg.isHidden = true
-        btnPostHeightConst.constant = 0
-        self.UploadImgView.isHidden = true
-        super.viewDidLayoutSubviews()
-        if let userAttends = self.EventDetauilData?.userunjoinmemberlist as? String {
-            switch userAttends {
-            case "1":
-                btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-                if selection != 1 {
-                    UploadImgView.isHidden = false
-                    lblImgLimit.isHidden = false
+            super.viewDidLoad()
+            //            updateColors()
+            NetworkMonitor.shared.startMonitoring()
+            AttendesCollectionView.isScrollEnabled = false
+            SVProgressHUD.show()
+            UserDefaults.standard.set(eventid, forKey: "eventid")
+            DateLbl.textColor = UIColor.secondaryLabel
+            collectionViewEvent.delegate = self
+            collectionViewEvent.dataSource = self
+            AttendesCollectionView.delegate = self
+            AttendesCollectionView.dataSource = self
+            NetworkMonitor.shared.startMonitoring()
+            self.UserNameLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16) // yaha tak back aa skte hain
+            self.HradingTitleLbl.font = UIFont(name: "Montserrat-Regular", size: 20)
+            self.DateLbl.font = UIFont(name: "Montserrat-Regular", size: 14)
+            self.TitleLbl.font = UIFont(name: "Montserrat-SemiBold", size: 16)
+            self.VenueLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
+            self.LblVenue.font = UIFont(name: "Montserrat-SemiBold", size: 15)
+            self.Add2Lbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+            self.StartDateLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
+            self.EndDateLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
+            self.StartTimeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+            self.EndTimeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+            self.LikeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+            self.StartTimeLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+            self.EventDetailLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
+            self.StcStartDateLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
+            self.StcEndDateLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
+            self.StcStartTimeLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
+            self.StcEndTimeLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
+            self.lblImgLimit.font = UIFont(name: "Montserrat-Regular", size: 10)
+            self.LblAttendesPhoto.font = UIFont(name: "Montserrat-Regular", size: 14)
+            self.LblOwnerPhoto.font = UIFont(name: "Montserrat-Regular", size: 14)
+            self.HradingTitleLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
+            btnUplImg.isHidden = true
+            btnPostHeightConst.constant = 0
+            self.UploadImgView.isHidden = true
+            super.viewDidLayoutSubviews()
+            if let userAttends = self.EventDetauilData?.userunjoinmemberlist as? String {
+                switch userAttends {
+                case "1":
+                    btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                    if selection != 1 {
+                        UploadImgView.isHidden = false
+                        lblImgLimit.isHidden = false
+                    }
+                case "0":
+                    btnNo.backgroundColor = #colorLiteral(red: 0.5807225108, green: 0.066734083, blue: 0, alpha: 1)
+                    if selection != 1 {
+                        UploadImgView.isHidden = true
+                        lblImgLimit.isHidden = true
+                    }
+    //            case "2":
+    //                DispatchQueue.main.async {
+    //                    self.UploadImgView.isHidden = true
+    //                    self.lblImgLimit.isHidden = true
+    //                }
+                default:
+                    break
                 }
-            case "0":
-                btnNo.backgroundColor = #colorLiteral(red: 0.5807225108, green: 0.066734083, blue: 0, alpha: 1)
-                if selection != 1 {
-                    UploadImgView.isHidden = true
-                    lblImgLimit.isHidden = true
-                }
-//            case "2":
-//                DispatchQueue.main.async {
-//                    self.UploadImgView.isHidden = true
-//                    self.lblImgLimit.isHidden = true
-//                }
-            default:
-                break
             }
-        }
 
-        if let selectedBtnValue = self.EventDetauilData?.userunjoinmemberlist?.compactMap({ Int($0.status ?? "") }).first {
-            switch selectedBtnValue {
-            case 1:
-                self.UploadImgView.isHidden = false
-                
-                self.lblImgLimit.isHidden = false
-            case 0:
-                if selection != 1 {
-                    UploadImgView.isHidden = true
-                    self.lblImgLimit.isHidden = true
-                }
-            default:
-                break
-            }
-        }
-        
-        if let userAttends = self.EventDetauilData?.userunjoinmemberlist as? String {
-            switch userAttends {
-            case "1":
-                btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-                if selection != 1 {
-                    UploadImgView.isHidden = false
-                    lblImgLimit.isHidden = false
-                }
-            case "0":
-                btnNo.backgroundColor = #colorLiteral(red: 0.5807225108, green: 0.066734083, blue: 0, alpha: 1)
-                if selection != 1 {
-                    UploadImgView.isHidden = true
-                    lblImgLimit.isHidden = true
-                }
-//            case "2":
-//                DispatchQueue.main.async {
-//                    self.UploadImgView.isHidden = true
-//                    self.lblImgLimit.isHidden = true
-//                }
-            default:
-                break
-            }
-        }
-
-        
-        if let selectedBtnValue = self.EventDetauilData?.userunjoinmemberlist?
-            .compactMap({ Int($0.status ?? "") }).first {
-            
-            switch selectedBtnValue {
-            case 1:
-                self.UploadImgView.isHidden = false
-                
-                self.lblImgLimit.isHidden = false
-            case 0:
-                if selection != 1 {
-                    UploadImgView.isHidden = true
+            if let selectedBtnValue = self.EventDetauilData?.userunjoinmemberlist?.compactMap({ Int($0.status ?? "") }).first {
+                switch selectedBtnValue {
+                case 1:
+                    self.UploadImgView.isHidden = false
                     
-                    self.lblImgLimit.isHidden = true
+                    self.lblImgLimit.isHidden = false
+                case 0:
+                    if selection != 1 {
+                        UploadImgView.isHidden = true
+                        self.lblImgLimit.isHidden = true
+                    }
+                default:
+                    break
                 }
-                
-            default:
-                break
             }
-        }
-        
-        if let id = UserDefaults.standard.string(forKey: "userid"),
-           let idCr = UserDefaults.standard.string(forKey: "usercr") {
-            print("id: \(id), idCr: \(idCr)") // Debugging output
             
-            if id == idCr {
-                yesNewView.isHidden = true
-                // btnEdit.isHidden = false
-                appLbl.isHidden = false
-                DeclLbl.isHidden = false
-                btnAccptIcon.isHidden = false
-                btnDeclineIcon.isHidden = false
-                btnAccpt.isHidden = false
-                btnDec.isHidden = false
-                UploadImgView.isHidden = false
-                lblImgLimit.isHidden = false
-                btnDelete.isHidden = false
-                btnEdit.isHidden = false
-            } else {
-                if EventDetauilData?.userunjoinmemberlist?.compactMap({ $0.status }).contains("1") == true {
+            if let userAttends = self.EventDetauilData?.userunjoinmemberlist as? String {
+                switch userAttends {
+                case "1":
+                    btnyes.backgroundColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                    if selection != 1 {
+                        UploadImgView.isHidden = false
+                        lblImgLimit.isHidden = false
+                    }
+                case "0":
+                    btnNo.backgroundColor = #colorLiteral(red: 0.5807225108, green: 0.066734083, blue: 0, alpha: 1)
+                    if selection != 1 {
+                        UploadImgView.isHidden = true
+                        lblImgLimit.isHidden = true
+                    }
+    //            case "2":
+    //                DispatchQueue.main.async {
+    //                    self.UploadImgView.isHidden = true
+    //                    self.lblImgLimit.isHidden = true
+    //                }
+                default:
+                    break
+                }
+            }
+
+            
+            if let selectedBtnValue = self.EventDetauilData?.userunjoinmemberlist?
+                .compactMap({ Int($0.status ?? "") }).first {
+                
+                switch selectedBtnValue {
+                case 1:
+                    self.UploadImgView.isHidden = false
+                    
+                    self.lblImgLimit.isHidden = false
+                case 0:
+                    if selection != 1 {
+                        UploadImgView.isHidden = true
+                        
+                        self.lblImgLimit.isHidden = true
+                    }
+                    
+                default:
+                    break
+                }
+            }
+            
+            if let id = UserDefaults.standard.string(forKey: "userid"),
+               let idCr = UserDefaults.standard.string(forKey: "usercr") {
+                print("id: \(id), idCr: \(idCr)") // Debugging output
+                
+                if id == idCr {
+                    yesNewView.isHidden = true
+                    // btnEdit.isHidden = false
+                    appLbl.isHidden = false
+                    DeclLbl.isHidden = false
+                    btnAccptIcon.isHidden = false
+                    btnDeclineIcon.isHidden = false
+                    btnAccpt.isHidden = false
+                    btnDec.isHidden = false
                     UploadImgView.isHidden = false
                     lblImgLimit.isHidden = false
+                    btnDelete.isHidden = false
+                    btnEdit.isHidden = false
                 } else {
-                    UploadImgView.isHidden = true
-                    lblImgLimit.isHidden = true
+                    if EventDetauilData?.userunjoinmemberlist?.compactMap({ $0.status }).contains("1") == true {
+                        UploadImgView.isHidden = false
+                        lblImgLimit.isHidden = false
+                    } else {
+                        UploadImgView.isHidden = true
+                        lblImgLimit.isHidden = true
+                    }
+                    yesNewView.isHidden = false
+                    //  btnEdit.isHidden = true
+                    appLbl.isHidden = true
+                    DeclLbl.isHidden = true
+                    btnAccpt.isHidden = true
+                    btnAccptIcon.isHidden = true
+                    btnDeclineIcon.isHidden = true
+                    btnDec.isHidden = true
+                    btnDelete.isHidden = true
+                    btnEdit.isHidden = true
                 }
-                yesNewView.isHidden = false
-                //  btnEdit.isHidden = true
-                appLbl.isHidden = true
-                DeclLbl.isHidden = true
-                btnAccpt.isHidden = true
-                btnAccptIcon.isHidden = true
-                btnDeclineIcon.isHidden = true
-                btnDec.isHidden = true
-                btnDelete.isHidden = true
-                btnEdit.isHidden = true
+            } else {
+                print("UserDefaults values are nil")
             }
-        } else {
-            print("UserDefaults values are nil")
+            
+            
+            if imgCountlLbl.gestureRecognizers?.isEmpty ?? true {
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(previewLabelTapped))
+                imgCountlLbl.isUserInteractionEnabled = true
+                imgCountlLbl.addGestureRecognizer(tapGesture)
+            }
+            
         }
-        
-        
-        if imgCountlLbl.gestureRecognizers?.isEmpty ?? true {
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(previewLabelTapped))
-            imgCountlLbl.isUserInteractionEnabled = true
-            imgCountlLbl.addGestureRecognizer(tapGesture)
-        }
-        
-    }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -646,7 +644,8 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             
             // 🛑 Image empty check
             if selectedImages.isEmpty {
-                showAlert(message: "Please select at least one image before uploading.")
+//                showAlert(message: "Please select at least one image before uploading.")
+                alertToast(Message: "Please select at least one image before uploading.")
                 return
             }
             
@@ -655,7 +654,8 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             print("🟡 Selected images: \(selectedImages.count), Limit: \(limit)")
             
             if selectedImages.count > limit {
-                showAlert(message: "You have already reached maximum \(limit) media limit.")
+//                showAlert(message: "You have already reached maximum \(limit) media limit.")
+                alertToast(Message: "You have already reached maximum \(limit) media limit.")
                 return
             }
             
@@ -755,68 +755,73 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
         }
         
         // Change this code btnyes Irshad malik
-        @IBAction func btnYes(_ sender: UIButton) {
-            btnNo.isUserInteractionEnabled = true
-                  
-                    setUploadSectionVisibility(true)
-                    sender.isUserInteractionEnabled = false
-                    btnyes.backgroundColor =  #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-                    btnNo.backgroundColor =  #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-                    btnyes.setTitleColor(.white, for: .normal)
-                    btnNo.setTitleColor(.white, for: .normal)
-                   
-            //        self.finalizeUIRefresh()
-                    SVProgressHUD.show()
-                    callEventDetailWebService { [self] in
-                        SVProgressHUD.dismiss()
+    @IBAction func btnYes(_ sender: UIButton) {
+                btnNo.isUserInteractionEnabled = true
+                      
+                        setUploadSectionVisibility(true)
+                        sender.isUserInteractionEnabled = false
+                        btnyes.backgroundColor =  #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                        btnNo.backgroundColor =  #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
+                        btnyes.setTitleColor(.white, for: .normal)
+                        btnNo.setTitleColor(.white, for: .normal)
+                       
+                //        self.finalizeUIRefresh()
+                        SVProgressHUD.show()
+                        callEventDetailWebService { [self] in
+                            SVProgressHUD.dismiss()
 
-                        self .selection = 1
-                        if selection == 1 {
-                            self.finalizeUIRefresh()
-                            if let id = UserDefaults.standard.string(forKey: "userid"),
-                               let idCr = UserDefaults.standard.string(forKey: "usercr") {
-                                
-                                let ownerImages = self.EventDetauilData?.images?.filter { $0.type == "owner" } ?? []
-                                self.id = id
-                                self.idCr = idCr
-                                
-                                if self.id != self.idCr {
-                                    if ownerImages.isEmpty {
-                                        self.LblOwnerPhoto.isHidden = true
-                                    }
+                            self .selection = 1
+                            if selection == 1 {
+                                self.finalizeUIRefresh()
+                                if let id = UserDefaults.standard.string(forKey: "userid"),
+                                   let idCr = UserDefaults.standard.string(forKey: "usercr") {
                                     
+                                    let ownerImages = self.EventDetauilData?.images?.filter { $0.type == "owner" } ?? []
+                                    self.id = id
+                                    self.idCr = idCr
+                                    
+                                    if self.id != self.idCr {
+                                        if ownerImages.isEmpty {
+                                            self.LblOwnerPhoto.isHidden = true
+                                        }
+                                    }
+                                    if self.id == self.idCr {
+                                        if ownerImages.isEmpty {
+                                            self.LblOwnerPhoto.isHidden = true
+                                        }
+                                        
+                                    }
                                 }
                             }
+                            
+                            UserDefaults.standard.set(1, forKey: "selection")
+                            
+                            self.UserNameLbl.text = self.EventDetauilData?.createby
+                            self.DateLbl.text = self.EventDetauilData?.datetimeandneighbrhood
+                            self.TitleLbl.text = self.EventDetauilData?.title
+                            self.HradingTitleLbl.text = self.EventDetauilData?.title
+                            self.VenueLbl.text = self.EventDetauilData?.addlineone
+                            self.StartDateLbl.text = self.EventDetauilData?.eventStartDate
+                            self.EndDateLbl.text = self.EventDetauilData?.eventEndDate
+                            self.StartTimeLbl.text = self.EventDetauilData?.eventStarttime
+                            self.EndTimeLbl.text = self.EventDetauilData?.eventEndtime
+                            self.EventDetailLbl.text = self.EventDetauilData?.eventDetail
+                            self.appLbl.text = self.EventDetauilData?.totalJoin ?? "0"
+                            self.DeclLbl.text = self.EventDetauilData?.nojoin
+                            self.handleUserJoinStatus(value: self.selection ?? 0)
+                            if let coverImage = self.EventDetauilData?.coverImage, let url = URL(string: coverImage) {
+                                self.profileImgView.kf.indicatorType = .activity
+                                self.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "EventImage"))
+                            }
+                            
+                            if let userPic = self.EventDetauilData?.userpic, let urlU = URL(string: userPic) {
+                                self.UserImgView.kf.indicatorType = .activity
+                                self.UserImgView.kf.setImage(with: urlU, placeholder: UIImage(named: "EventImage"))
+                            }
                         }
-                        
-                        UserDefaults.standard.set(1, forKey: "selection")
-                        
-                        self.UserNameLbl.text = self.EventDetauilData?.createby
-                        self.DateLbl.text = self.EventDetauilData?.datetimeandneighbrhood
-                        self.TitleLbl.text = self.EventDetauilData?.title
-                        self.HradingTitleLbl.text = self.EventDetauilData?.title
-                        self.VenueLbl.text = self.EventDetauilData?.addlineone
-                        self.StartDateLbl.text = self.EventDetauilData?.eventStartDate
-                        self.EndDateLbl.text = self.EventDetauilData?.eventEndDate
-                        self.StartTimeLbl.text = self.EventDetauilData?.eventStarttime
-                        self.EndTimeLbl.text = self.EventDetauilData?.eventEndtime
-                        self.EventDetailLbl.text = self.EventDetauilData?.eventDetail
-                        self.appLbl.text = self.EventDetauilData?.totalJoin ?? "0"
-                        self.DeclLbl.text = self.EventDetauilData?.nojoin
-                        self.handleUserJoinStatus(value: self.selection ?? 0)
-                        if let coverImage = self.EventDetauilData?.coverImage, let url = URL(string: coverImage) {
-                            self.profileImgView.kf.indicatorType = .activity
-                            self.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "EventImage"))
-                        }
-                        
-                        if let userPic = self.EventDetauilData?.userpic, let urlU = URL(string: userPic) {
-                            self.UserImgView.kf.indicatorType = .activity
-                            self.UserImgView.kf.setImage(with: urlU, placeholder: UIImage(named: "EventImage"))
-                        }
-                    }
-                    refreshAllEventData(from: "yes")
-            
-        }
+                        refreshAllEventData(from: "yes")
+                
+            }
         
         
         @IBAction func btnNo(_ sender: UIButton) {
@@ -985,22 +990,22 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             self.present(alertController, animated: true, completion: nil)
         }
         
-        @IBAction func selectPhotos(_ sender: UIButton) {
-            let limit = Int(EventDetauilData?.eventImgRemainLimit ?? "") ?? 0
-            if selectedImages.count >= limit {
-                showAlert(message: "You have already reached maximum limit.")
-                return
-            }
-            checkCameraPermission { [weak self] granted in
-                guard let self = self else { return }
-                if granted {
-                    selectImages()
-                    btnUplImg.isHidden = false
-                    btnPostHeightConst.constant = 40
+    @IBAction func selectPhotos(_ sender: UIButton) {
+                let limit = Int(EventDetauilData?.eventImgRemainLimit ?? "") ?? 0
+                if selectedImages.count >= limit {
+    //                showAlert(message: "You have already uploaded max images allowed.")
+                    alertToast(Message: "You have already uploaded max images allowed.")
+                    return
+                }
+                checkCameraPermission { [weak self] granted in
+                    guard let self = self else { return }
+                    if granted {
+                        selectImages()
+                        btnUplImg.isHidden = false
+                        btnPostHeightConst.constant = 40
+                    }
                 }
             }
-        }
-        
         @IBAction func yesJoin(_ sender: UIButton) {
             callEventYesjointWebService{}
         }
@@ -1207,169 +1212,169 @@ class EventsDetailViewController: UIViewController , UICollectionViewDelegateFlo
             }
         }
         
-        func finalizeUIRefresh() {
-            DispatchQueue.main.async {
-                SVProgressHUD.dismiss()
-                self.UploadImgView.isHidden = true
-                
-                guard let data = self.EventDetauilData else {
-                    print("❌ EventDetauilData missing")
-                    return
-                }
-                
-                // Set basic labels
-                self.UserNameLbl.text = data.createby
-                self.DateLbl.text = data.datetimeandneighbrhood
-                self.TitleLbl.text = data.title
-                self.HradingTitleLbl.text = data.title
-                self.VenueLbl.text = (data.addlineone ?? "") + (data.addlinetwo ?? "")
-                self.StartDateLbl.text = data.eventStartDate
-                self.EndDateLbl.text = data.eventEndDate
-                self.StartTimeLbl.text = data.eventStarttime
-                self.EndTimeLbl.text = data.eventEndtime
-                self.LikeLbl.text = data.eventEndtime?.isEmpty == true ? "0" : data.userlikes
-                self.EventDetailLbl.text = data.eventDetail
-                self.appLbl.text = data.totalJoin ?? "0"
-                self.DeclLbl.text = data.nojoin
-                
-                // Button state
-                let selectedBtnValue = data.userunjoinmemberlist?.compactMap { Int($0.status ?? "") }.first
-                self.updateUploadViewBasedOnSelectionAndStatus(selectedBtnValue)
-                self.selection = selectedBtnValue
-                
-                // Images
-                if let coverImageUrl = URL(string: data.coverImage ?? "") {
-                    self.profileImgView.kf.setImage(with: coverImageUrl, placeholder: UIImage(named: "EventImage"))
-                }
-                if let userPicUrl = URL(string: data.userpic ?? "") {
-                    self.UserImgView.kf.setImage(with: userPicUrl, placeholder: UIImage(named: "EventImage"))
-                }
-                
-                // User-specific UI logic
-                if let id = UserDefaults.standard.string(forKey: "userid"),
-                   let idCr = UserDefaults.standard.string(forKey: "usercr") {
-                    
-                    let ownerImages = data.images?.filter { $0.type == "owner" } ?? []
-                    let userImages = data.images?.filter { $0.type == "user" } ?? []
-                    self.id = id
-                    self.idCr = idCr
-                    
-                    print("ID creator is : \(idCr)")
-                    print("ID is : \(id)")
-                    
-                    if id == idCr {
-                        self.yesNewView.isHidden = true
-                        self.yesNewViewHeightConstraint.constant = 0
-                        self.UploadImgView.isHidden = false
-                        self.LblAttendesPhoto.isHidden = true
-                        // Owner Images
-                        
-                        if ownerImages.isEmpty {
-                            self.LblOwnerPhoto.isHidden = true
-                            self.collectionViewEvent.isHidden = true
-                            self.collectionViewEventHeightConst.constant = 0
-                        } else {
-                            self.LblOwnerPhoto.isHidden = false
-                            self.collectionViewEvent.isHidden = false
-                            self.collectionViewEventHeightConst.constant = 128
-                        }
-
-                        // User Images
-                        if !userImages.isEmpty {
-                            self.LblAttendesPhoto.isHidden = false
-                            self.AttendesCollectionView.isHidden = false
-                            self.AttendesCollectionViewHeightConst.constant = 128
-                        }
-
-                    } else {
-                        self.yesNewView.isHidden = false
-                        self.yesNewViewHeightConstraint.constant = 50
-                        self.lblImgLimit.isHidden = true
-
-                        // Attendee-side user image logic
-                        if !userImages.isEmpty {
-                            self.LblOwnerPhoto.isHidden = false
-                        } else {
-                            self.LblOwnerPhoto.isHidden = true
-                            self.LblAttendesPhoto.isHidden = true
-                            self.UploadImgView.isHidden = true
-                        }
+    func finalizeUIRefresh() {
+                DispatchQueue.main.async {
+                    SVProgressHUD.dismiss()
+                    self.UploadImgView.isHidden = true
+                    guard let data = self.EventDetauilData else {
+                        print("❌ EventDetauilData missing")
+                        return
                     }
-
-                    // User Join Status Based Image Logic
-                    if let userList = data.userjoinmemberlist,
-                       let currentUser = userList.first(where: { $0.userid == id }) {
+                    
+                    // Set basic labels
+                    self.UserNameLbl.text = data.createby
+                    self.DateLbl.text = data.datetimeandneighbrhood
+                    self.TitleLbl.text = data.title
+                    self.HradingTitleLbl.text = data.title
+                    self.VenueLbl.text = (data.addlineone ?? "") + (data.addlinetwo ?? "")
+                    self.StartDateLbl.text = data.eventStartDate
+                    self.EndDateLbl.text = data.eventEndDate
+                    self.StartTimeLbl.text = data.eventStarttime
+                    self.EndTimeLbl.text = data.eventEndtime
+                    self.LikeLbl.text = data.eventEndtime?.isEmpty == true ? "0" : data.totalLike
+                    self.EventDetailLbl.text = data.eventDetail
+                    self.appLbl.text = data.totalJoin ?? "0"
+                    self.DeclLbl.text = data.nojoin
+                    
+                    // Button state
+                    let selectedBtnValue = data.userunjoinmemberlist?.compactMap { Int($0.status ?? "") }.first
+                    self.updateUploadViewBasedOnSelectionAndStatus(selectedBtnValue)
+                    self.selection = selectedBtnValue
+                    
+                    // Images
+                    if let coverImageUrl = URL(string: data.coverImage ?? "") {
+                        self.profileImgView.kf.setImage(with: coverImageUrl, placeholder: UIImage(named: "EventImage"))
+                    }
+                    if let userPicUrl = URL(string: data.userpic ?? "") {
+                        self.UserImgView.kf.setImage(with: userPicUrl, placeholder: UIImage(named: "EventImage"))
+                    }
+                    
+                    // User-specific UI logic
+                    if let id = UserDefaults.standard.string(forKey: "userid"),
+                       let idCr = UserDefaults.standard.string(forKey: "usercr") {
                         
-                        let status = currentUser.status ?? ""
-                        print("Status is : \(status)")
+                        let ownerImages = data.images?.filter { $0.type == "owner" } ?? []
+                        let userImages = data.images?.filter { $0.type == "user" } ?? []
+                        self.id = id
+                        self.idCr = idCr
                         
-                        if status == "0" && id != idCr {
-                            self.UploadImgView.isHidden = true
-                            self.LblOwnerPhoto.isHidden = true
-                            self.LblAttendesPhoto.isHidden = true
-                            self.collectionViewEvent.isHidden = true
-                            self.collectionViewEventHeightConst.constant = 0
-                            self.AttendesCollectionView.isHidden = true
-                            self.AttendesCollectionViewHeightConst.constant = 0
-                        }
+                        print("ID creator is : \(idCr)")
+                        print("ID is : \(id)")
                         
-                        if status == "1" && id != idCr {
+                        if id == idCr {
+                            self.yesNewView.isHidden = true
+                            self.yesNewViewHeightConstraint.constant = 0
                             self.UploadImgView.isHidden = false
+                            self.LblAttendesPhoto.isHidden = true
+                            // Owner Images
                             
                             if ownerImages.isEmpty {
+                                self.LblOwnerPhoto.isHidden = true
+                                self.collectionViewEvent.isHidden = true
                                 self.collectionViewEventHeightConst.constant = 0
                             } else {
+                                self.LblOwnerPhoto.isHidden = false
                                 self.collectionViewEvent.isHidden = false
                                 self.collectionViewEventHeightConst.constant = 128
-                                self.LblOwnerPhoto.isHidden = false
                             }
-                            
-                            if userImages.isEmpty {
-                                self.AttendesCollectionView.isHidden = true
-                                self.AttendesCollectionViewHeightConst.constant = 0
-                                self.LblAttendesPhoto.isHidden = true
-                            } else {
+
+                            // User Images
+                            if !userImages.isEmpty {
+                                self.LblAttendesPhoto.isHidden = false
                                 self.AttendesCollectionView.isHidden = false
                                 self.AttendesCollectionViewHeightConst.constant = 128
+                            }
+
+                        } else {
+                            self.yesNewView.isHidden = false
+                            self.yesNewViewHeightConstraint.constant = 50
+                            self.lblImgLimit.isHidden = true
+
+                            // Attendee-side user image logic
+                            if !userImages.isEmpty {
                                 self.LblOwnerPhoto.isHidden = false
-                                self.LblAttendesPhoto.isHidden = false
+                            } else {
+                                self.LblOwnerPhoto.isHidden = true
+                                self.LblAttendesPhoto.isHidden = true
+                                self.UploadImgView.isHidden = true
+                            }
+                        }
+
+                        // User Join Status Based Image Logic
+                        if let userList = data.userjoinmemberlist,
+                           let currentUser = userList.first(where: { $0.userid == id }) {
+                            
+                            let status = currentUser.status ?? ""
+                            print("Status is : \(status)")
+                            
+                            if status == "0" && id != idCr {
+                                self.UploadImgView.isHidden = true
+                                self.LblOwnerPhoto.isHidden = true
+                                self.LblAttendesPhoto.isHidden = true
+                                self.collectionViewEvent.isHidden = true
+                                self.collectionViewEventHeightConst.constant = 0
+                                self.AttendesCollectionView.isHidden = true
+                                self.AttendesCollectionViewHeightConst.constant = 0
+                            }
+                            
+                            if status == "1" && id != idCr {
+                                self.UploadImgView.isHidden = false
+                                
+                                if ownerImages.isEmpty {
+                                    self.collectionViewEventHeightConst.constant = 0
+                                } else {
+                                    self.collectionViewEvent.isHidden = false
+                                    self.collectionViewEventHeightConst.constant = 128
+                                    self.LblOwnerPhoto.isHidden = false
+                                }
+                                
+                                if userImages.isEmpty {
+                                    self.AttendesCollectionView.isHidden = true
+                                    self.AttendesCollectionViewHeightConst.constant = 0
+                                    self.LblAttendesPhoto.isHidden = true
+                                } else {
+                                    self.AttendesCollectionView.isHidden = false
+                                    self.AttendesCollectionViewHeightConst.constant = 128
+                                    self.LblOwnerPhoto.isHidden = false
+                                    self.LblAttendesPhoto.isHidden = false
+                                }
                             }
                         }
                     }
-                }
-                
-                // Event Status Conditions
-                if data.iseventrunning == "0" {
-                    self.yesNewView.isHidden = true
-                    self.UploadImgView.isHidden = true
-                    self.yesNewViewHeightConstraint.constant = 0
-                }
-                
-                if data.futureeventstatus == "1" {
-                    if self.id != self.idCr {
-                        self.yesNewView.isHidden = false
-                        self.UploadImgView.isHidden = true
-                        self.yesNewViewHeightConstraint.constant = 50
-                    } else {
+                    
+                    // Event Status Conditions
+                    if data.iseventrunning == "0" {
                         self.yesNewView.isHidden = true
-                        self.UploadImgView.isHidden = false
+                        self.UploadImgView.isHidden = true
                         self.yesNewViewHeightConstraint.constant = 0
                     }
-                }
+                    
+                    if data.futureeventstatus == "1" {
+                        if self.id != self.idCr {
+                            self.yesNewView.isHidden = false
+                            self.UploadImgView.isHidden = true
+                            self.yesNewViewHeightConstraint.constant = 50
+                        } else {
+                            self.yesNewView.isHidden = true
+                            self.UploadImgView.isHidden = false
+                            self.yesNewViewHeightConstraint.constant = 0
+                        }
+                    }
 
-                // Reload Collections
-                self.collectionViewEvent.reloadData()
-                self.AttendesCollectionView.reloadData()
-                self.updateCollectionViewHeight()
+                    // Reload Collections
+                    self.collectionViewEvent.reloadData()
+                    self.AttendesCollectionView.reloadData()
+                    self.updateCollectionViewHeight()
+                }
             }
-        }
 
         
         
         // Code irshad change
         func callEventDetailWebService(_ completionClosure: @escaping () -> ()) {
             if !NetworkMonitor.shared.isConnected {
-                showAlert(message: "Internet not available. Please check your connection.")
+//                showAlert(message: "Internet not available. Please check your connection.")
+                alertToast(Message: "Internet not available. Please check your connection.")
                 return
             }
             let id = UserDefaults.standard.string(forKey: "userid")

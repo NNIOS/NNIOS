@@ -304,7 +304,7 @@ class CreatePollViewController: UIViewController, UITextViewDelegate {
         let optionsSet = Set(nonEmptyOptions)
         
         if optionsSet.count < nonEmptyOptions.count {
-            showNewAlert(message: "Options contain duplicate data. Please enter unique values.")
+            showPopAlert(message: "Options contain duplicate data. Please enter unique values.")
             return
         }
 
@@ -331,22 +331,28 @@ class CreatePollViewController: UIViewController, UITextViewDelegate {
 
     
     func showPopAlert(message: String) {
-        let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
-        
-        let attributedMessage = NSAttributedString(
-            string: message,
-            attributes: [
-                NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 18, weight: .medium),
-                NSAttributedString.Key.foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+            let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
+            
+            let titleAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.black
             ]
-        )
-        
-        alert.setValue(attributedMessage, forKey: "attributedMessage")
-        
-        alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
-        
-        self.present(alert, animated: true, completion: nil)
-    }
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.darkGray
+            ]
+            
+            let attributedTitle = NSAttributedString(string: title ?? "", attributes: titleAttributes)
+            let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+            alertController.setValue(attributedTitle, forKey: "attributedTitle")
+            alertController.setValue(attributedMessage, forKey: "attributedMessage")
+            
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+            alertController.addAction(okAction)
+            present(alertController, animated: true, completion: nil)
+        }
 
     
     func showAlert(message: String) {

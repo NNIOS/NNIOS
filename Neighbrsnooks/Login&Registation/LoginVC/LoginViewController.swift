@@ -7,10 +7,12 @@
 
 import UIKit
 import Kingfisher
+import FirebaseMessaging
 
 
-protocol UserIDReceivable {
+protocol UserIDReceivable: AnyObject {
     var userId: String? { get set }
+    var sourceScreen: String? { get set }
 }
 
 
@@ -27,7 +29,7 @@ class LoginViewController: BaseViewController {
     @IBOutlet weak var btnPassword: UIButton!
     @IBOutlet weak var btnRegister: UIButton!
     
-    
+    var fireBaseToken : UpdateTokenModel?
     var show = false
     var loginData : LoginModel?
     // irshad code
@@ -42,47 +44,7 @@ class LoginViewController: BaseViewController {
     }
     
     
-//    override func viewDidAppear(_ animated: Bool) {
-//        super.viewDidAppear(animated)
-//        updateColors()
-//    }
-    
-//    private func updateColors() {
-//        if traitCollection.userInterfaceStyle == .dark {
-//            // Dark mode colors
-//            loginView.backgroundColor = .black
-////            tfMobile.backgroundColor = .black
-////            tfPassword.backgroundColor = .black
-//            emailView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-//            passwordView.layer.borderColor = #colorLiteral(red: 0.1607843137, green: 0.1647058824, blue: 0.1843137255, alpha: 1)
-//             emailView.backgroundColor = .black
-//            passwordView.backgroundColor = .black
-//             emailView.layer.borderWidth = 1.0 // Enable border in dark mode
-//            passwordView.layer.borderWidth = 1.0
-//            EventPostPrcntgLbl.textColor =  #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1)
-//            btnPassword.setTitleColor(#colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1), for: .normal)
-//            btnRegister.setTitleColor(#colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1), for: .normal)
-//         } else {
-//            // Light mode mein storyboard ke original colors preserve karna
-//          //  questionView.textColor = UIColor.secondaryLabel
-//            emailView.isUserInteractionEnabled = true
-//            passwordView.isUserInteractionEnabled = true
-//            tfMobile.backgroundColor = .white
-//            tfPassword.backgroundColor = .white
-//             emailView.layer.borderWidth = 0 // Remove border in light mode
-//            passwordView.layer.borderWidth = 0
-//             loginView.backgroundColor = #colorLiteral(red: 0.9411764706, green: 0.968627451, blue: 0.9411764706, alpha: 1)
-//            
-//        }
-//      //  lblTime.textColor = UIColor.secondaryLabel // Dynamic system color
-//    }
-//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-//        super.traitCollectionDidChange(previousTraitCollection)
-//        
-//        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-//            updateColors()
-//        }
-//    }
+ 
     
     @IBAction func btnEye(_ sender: UIButton) {
         
@@ -221,6 +183,7 @@ class LoginViewController: BaseViewController {
             "login": tfMobile.text ?? "",
             "pass": tfPassword.text ?? ""
         ]
+        print(dictParams)
         
         WebService.sharedInstance.callLoginWebService(withParams: dictParams) { data in
             self.loginData = data
@@ -229,7 +192,6 @@ class LoginViewController: BaseViewController {
             
             guard let loginData = self.loginData else {
                 print("Login data is nil.")
-//                self.showAlert(Message: "Unable to process response.")
                 self.alertToast(Message: "Unable to process response.")
                 return
             }
@@ -262,53 +224,131 @@ class LoginViewController: BaseViewController {
                 UserDefaults.standard.set("done", forKey: "registrationStep") // ✅ Add this
                 UserDefaults.standard.synchronize()
                 
+                // ✅ Firebase token update call
+                Messaging.messaging().token { token, error in
+                    if let error = error {
+                        print("❌ Error fetching FCM token: \(error.localizedDescription)")
+                    } else if let token = token, let userId = userIdString {
+                        print("🔥 Got FCM token after login: \(token)")
+                        self.callUpdateFirebaseTokenPostWebService(userId: userId, firebaseToken: token) {
+                            print("📡 Firebase token updated successfully")
+                            completionClosure() // 🚀 call after firebase token update
+                        }
+                    } else {
+                        // Agar token nahi mila, tab bhi continue
+                        completionClosure()
+                    }
+                }
+                
                 print("✅ Login successful. Proceeding...")
                 completionClosure()
             } else {
                 if let message = loginData.message {
                     let userId = UserDefaults.standard.string(forKey: "userid")
                     print("⚠️ Redirecting based on message: \(message), UserID: \(userId ?? "nil")")
-                    
                     switch message {
-                    case "Address Incomplete":
-                        self.navigateToViewController(identifier: "NewRegistationSecondStepVC", type: NewRegistationSecondStepVC.self, userId: userId)
-                    case "DOB Incomplete":
-                        self.navigateToViewController(identifier: "NewRegistationSecondStepVC", type: NewRegistationSecondStepVC.self, userId: userId)
-                    case "You can't login, Kindly wait Nighborhood assign soon by Admin":
-                           self.navigateToViewController(identifier: "NewRegistationSecondStepVC", type: NewRegistationSecondStepVC.self, userId: userId)
-                    case "You can login, Neighbourhood could not be found then take him to address page":
-                           self.navigateToViewController(identifier: "NewRegistationSecondStepVC", type: NewRegistationSecondStepVC.self, userId: userId)
-                          
+                    case "Address Incomplete",
+                         "DOB Incomplete",
+                         "You can't login, Kindly wait Nighborhood assign soon by Admin",
+                         "You can login, Neighbourhood could not be found then take him to address page":
+
+                        self.navigateToViewController(
+                            identifier: "NewRegistationSecondStepVC",
+                            userId: userId,
+                            sourceScreen: "FirstSteep"
+                        )
+
                     default:
-//                        self.showCustomAlert(message: message)
-                        self.alertToast(Message: message)                    }
+                        self.alertToast(Message: message)
+                    }
+
                 }
             }
         }
     }
 
     
+    // MARK: - Call api firebaseToken // dev
+    func callUpdateFirebaseTokenPostWebService(userId: String, firebaseToken: String, _ completionClosure: @escaping () -> ()) {
+        let urlString = "https://neighbrsnook.com/admin/api/update-token"
+        guard let url = URL(string: urlString) else {
+            print("❌ Invalid URL")
+            return
+        }
+        
+        let dictParams: [String: Any] = [
+            "userid": userId,
+            "firebase_token": firebaseToken
+        ]
+        
+        print("📤 Request Params for UpdateToken API: \(dictParams)")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("Bearer ", forHTTPHeaderField: "Authorization") // ✅ agar token chahiye toh yahaan add karo
+        
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: dictParams, options: [])
+            request.httpBody = jsonData
+        } catch {
+            print("❌ Error encoding parameters: \(error.localizedDescription)")
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Request error: \(error.localizedDescription)")
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 Response Status Code: \(httpResponse.statusCode)")
+            }
+            
+            guard let data = data else {
+                print("❌ No response data received")
+                return
+            }
+            
+            // ✅ Raw JSON print karo
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📥 Raw Response: \(jsonString)")
+            }
+            
+            // ✅ Agar aapko UpdateTokenModel decode karna hai
+            do {
+                let decodedResponse = try JSONDecoder().decode(UpdateTokenModel.self, from: data)
+                print("✅ Decoded Response: \(decodedResponse)")
+            } catch {
+                print("❌ JSON Decode Error: \(error.localizedDescription)")
+            }
+            
+            DispatchQueue.main.async {
+                completionClosure()
+            }
+        }
+        
+        task.resume()
+    }
+
+
     
 }
-
 
 extension UIViewController {
-    func navigateToViewController<T: UIViewController>(identifier: String, type: T.Type, userId: String? = nil) {
-        if let viewController = storyboard?.instantiateViewController(withIdentifier: identifier) as? T {
-            print("Navigating to \(identifier) successfully.")
+    func navigateToViewController(identifier: String, userId: String? = nil, sourceScreen: String? = nil) {
+        if let viewController = storyboard?.instantiateViewController(withIdentifier: identifier) {
             
-            // 👇 Pass userId if destination view controller has that property
-            if let userId = userId {
-                if var vc = viewController as? UserIDReceivable {
-                    vc.userId = userId
-                }
+            // ✅ Agar destination NewRegistationSecondStepVC hai
+            if let step2VC = viewController as? NewRegistationSecondStepVC {
+                step2VC.userId = userId
+                step2VC.sourceScreen = sourceScreen
             }
-            
+
             navigationController?.pushViewController(viewController, animated: true)
         } else {
-            print("Failed to find or cast view controller with identifier: \(identifier).")
-            print("Ensure storyboard ID and custom class mapping are correct.")
+            print("❌ Failed to navigate: \(identifier)")
         }
     }
 }
-

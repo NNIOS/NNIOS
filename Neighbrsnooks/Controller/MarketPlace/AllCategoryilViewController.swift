@@ -87,7 +87,7 @@ class AllCategoryilViewController: UIViewController,UICollectionViewDelegateFlow
     
     //dev.
     func callMarketMyItemsWebService() {
-                  let url = "https://dev.neighbrsnook.com/admin/api/category"
+                  let url = "https://neighbrsnook.com/admin/api/category"
 
         let dictParams: Dictionary<String, Any> = ["":""]
         

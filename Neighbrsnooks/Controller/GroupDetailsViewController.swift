@@ -202,7 +202,12 @@ class GroupDetailsViewController: BaseViewController, ConfirmNewDelegate  {
         let noColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 1)
         let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
             self.callGroupDeleteWebService {
-                self.navigationController?.popViewController(animated: true)
+                DispatchQueue.main.async {
+                    self.navigationController?.popViewController(animated: true)
+                    self.tableviewDetails.reloadData()
+                    self.tableviewDetails.layoutIfNeeded()
+                    print("UI updated")
+                }
             }
         }
         yesAction.setValue(yesColor, forKey: "titleTextColor")
@@ -218,8 +223,8 @@ class GroupDetailsViewController: BaseViewController, ConfirmNewDelegate  {
         let dictParams: Dictionary<String, Any> = [
             "userid":id ?? "",
             "groupid": groupid ?? "",
-            
         ]
+        print("param is :\(dictParams)")
         WebService.sharedInstance.callGroupDeleteWebService(withParams: dictParams) { data in
             self.GrouDeleteData = data
             completionClosure()
@@ -267,6 +272,7 @@ extension GroupDetailsViewController {
             self.ApproveGroupData = data
 //            self.callGroupListGroupWebService{}
 //            self.navigationController?.popViewController(animated: true)
+            completionClosure()
         }
     }
     
@@ -318,6 +324,8 @@ extension GroupDetailsViewController {
         print("Param is :\(dictParams)")
         WebService.sharedInstance.callDelUserGroupWebService(withParams: dictParams) { data in
             self.DeleteUserData = data
+            self.tableviewDetails.reloadData()
+            self.tableviewDetails.layoutIfNeeded()
             completionClosure()
         }
     }
@@ -361,167 +369,164 @@ extension GroupDetailsViewController:  UITableViewDataSource, UITableViewDelegat
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            if indexPath.section == 0 {
-                let cell: GroupOwnerableViewCell = tableView.dequeueReusableCell(withIdentifier: "GroupOwnerableViewCell") as! GroupOwnerableViewCell
-                
-                cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 15)
-                cell.lblOwner.font = UIFont(name: "Montserrat-Regular", size: 13)
-                cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 13)
-                cell.lblName.text = GrouListsData?.groupusername
-                cell.lblSector.text = GrouListsData?.groupuserneigh
-                let url = URL(string: (GrouListsData?.groupuserpic ?? ""))
-                cell.profileImgView.kf.indicatorType = .activity
-                cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "defaultImage"))
-                cell.ProfileDetailCallback = { [self] value in
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController")as! MyProfileViewController
-                    vc.Oid = GrouListsData?.ownerid
-                    if let id = UserDefaults.standard.string(forKey: "userid") {
-                        if id == memberUserId {
-                            vc.Oid = memberUserId
-                            vc.sourceViewController = "MyProfile"
-                        } else {
-                            vc.Oid = id
-                            vc.sourceViewController = "OtherProfile"
-                        }
+        if indexPath.section == 0 {
+            let cell: GroupOwnerableViewCell = tableView.dequeueReusableCell(withIdentifier: "GroupOwnerableViewCell") as! GroupOwnerableViewCell
+            
+            cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 15)
+            cell.lblOwner.font = UIFont(name: "Montserrat-Regular", size: 13)
+            cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 13)
+            cell.lblName.text = GrouListsData?.groupusername
+            cell.lblSector.text = GrouListsData?.groupuserneigh
+            let url = URL(string: (GrouListsData?.groupuserpic ?? ""))
+            cell.profileImgView.kf.indicatorType = .activity
+            cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "defaultImage"))
+            cell.ProfileDetailCallback = { [self] value in
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController")as! MyProfileViewController
+                if let id = UserDefaults.standard.string(forKey: "userid") {
+                    if id == memberUserId {
+                        vc.Oid = memberUserId
+                    } else if let ownerId = GrouListsData?.ownerid {
+                        vc.Oid = ownerId
                     }
-                    self.navigationController?.pushViewController(vc, animated: true)
                 }
-                return cell
-            }else {
-                let cell: GroupMemberTableViewCell = tableView.dequeueReusableCell(withIdentifier: "GroupMemberTableViewCell") as! GroupMemberTableViewCell
-                cell.lblName.text = GrouListsData?.memberlist[indexPath.row].username
-                cell.lblSector.text = GrouListsData?.memberlist[indexPath.row].neighbrhood
-                cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 15)
-                cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 13)
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            return cell
+        }else {
+            let cell: GroupMemberTableViewCell = tableView.dequeueReusableCell(withIdentifier: "GroupMemberTableViewCell") as! GroupMemberTableViewCell
+            cell.lblName.text = GrouListsData?.memberlist[indexPath.row].username
+            cell.lblSector.text = GrouListsData?.memberlist[indexPath.row].neighbrhood
+            cell.lblName.font = UIFont(name: "Montserrat-Regular", size: 15)
+            cell.lblSector.font = UIFont(name: "Montserrat-Regular", size: 13)
+            
+            if let id = UserDefaults.standard.string(forKey: "userid"),
+               let idCr = UserDefaults.standard.string(forKey: "usercr") {
+                print("id: \(id), idCr: \(idCr)") // Debugging output
                 
-                if let id = UserDefaults.standard.string(forKey: "userid"),
-                   let idCr = UserDefaults.standard.string(forKey: "usercr") {
-                    print("id: \(id), idCr: \(idCr)") // Debugging output
-                    
-                    if id == idCr {
+                if id == idCr {
+                    cell.btnDelete.isHidden = true
+                    if GrouListsData?.memberlist[indexPath.row].status == "2" {
+                        cell.btnAccept.isHidden = false
+                        cell.btnDecline.isHidden = false
                         cell.btnDelete.isHidden = true
-                        if GrouListsData?.memberlist[indexPath.row].status == "2" {
-                            cell.btnAccept.isHidden = false
-                            cell.btnDecline.isHidden = false
-                            cell.btnDelete.isHidden = true
-                        } else if GrouListsData?.memberlist[indexPath.row].status == "1" {
-                            cell.btnAccept.isHidden = true
-                            cell.btnDecline.isHidden = true
-                            cell.btnDelete.isHidden = false
-                        }
-                    } else {
-                        if GrouListsData?.memberlist[indexPath.row].status == "2" {
-                            cell.btnAccept.isHidden = true
-                            cell.btnDecline.isHidden = true
-                            cell.btnDelete.isHidden = true
-                        } else if GrouListsData?.memberlist[indexPath.row].status == "1" {
-                            cell.btnAccept.isHidden = true
-                            cell.btnDecline.isHidden = true
-                            cell.btnDelete.isHidden = true
-                        }
+                    } else if GrouListsData?.memberlist[indexPath.row].status == "1" {
+                        cell.btnAccept.isHidden = true
+                        cell.btnDecline.isHidden = true
+                        cell.btnDelete.isHidden = false
                     }
                 } else {
-                    print("UserDefaults values are nil")
+                    if GrouListsData?.memberlist[indexPath.row].status == "2" {
+                        cell.btnAccept.isHidden = true
+                        cell.btnDecline.isHidden = true
+                        cell.btnDelete.isHidden = true
+                    } else if GrouListsData?.memberlist[indexPath.row].status == "1" {
+                        cell.btnAccept.isHidden = true
+                        cell.btnDecline.isHidden = true
+                        cell.btnDelete.isHidden = true
+                    }
                 }
+            } else {
+                print("UserDefaults values are nil")
+            }
+            
+            cell.AcceptCallback = { [weak self] value in
+                guard let self = self else { return }
+                print("Accept callback triggered")
+                self.account = "1"
+                self.memberUserId = self.GrouListsData?.memberlist[indexPath.row].userid
+                print("Selected UserID for Accept: \(self.memberUserId ?? "")")
                 
-                cell.AcceptCallback = { [weak self] value in
+                self.callAcceptGroupWebService { [weak self] in
                     guard let self = self else { return }
-                    print("Accept callback triggered")
-                    self.account = "1"
+                    print("Accept service completed")
+                    self.callGroupListGroupWebService {
+                        DispatchQueue.main.async {
+                            print("Final UI update")
+                            self.tableviewDetails.reloadData()
+                            self.tableviewDetails.layoutIfNeeded()
+                            
+                            // 🚫 prevent navigation back
+                            if let nav = self.navigationController,
+                               nav.topViewController != self {
+                                nav.pushViewController(self, animated: false)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            
+            cell.DeclineCallback = { [self] value in
+                account = "2"
+                self.memberUserId = self.GrouListsData?.memberlist[indexPath.row].userid
+                print("Selected UserID for Accept: \(self.memberUserId ?? "")")
+                self.callAcceptGroupWebService { [weak self] in
+                    print("Accept service completed")
+                    self?.callGroupListGroupWebService {
+                        DispatchQueue.main.async {
+                            print("Final UI update")
+                            self?.tableviewDetails.reloadData()
+                            self?.tableviewDetails.layoutIfNeeded()
+                            
+                            if let nav = self?.navigationController,
+                               nav.topViewController != self {
+                                nav.pushViewController(self!, animated: false)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            cell.ProfileDetailCallback = { [self] value in
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController")as! MyProfileViewController
+                if let id = UserDefaults.standard.string(forKey: "userid") {
+                    if id == self.GrouListsData?.memberlist[indexPath.row].userid {
+                        vc.Oid = id
+                        vc.sourceViewController = "MyProfile"
+                    } else {
+                        vc.Oid = self.GrouListsData?.memberlist[indexPath.row].userid
+                        vc.sourceViewController = "OtherProfile"
+                    }
+                }
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            
+            
+            cell.DelUserCallback = { [self] value in
+                let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+                let messageText = "Are you sure you want to remove this user?"
+                let attributedMessage = NSAttributedString(string: messageText, attributes: [
+                    .font: UIFont(name: "Montserrat-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17),
+                    .foregroundColor: UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
+                ])
+                alertController.setValue(attributedMessage, forKey: "attributedMessage")
+                
+                let yesColor = UIColor(red: 0/255, green: 128/255, blue: 0/255, alpha: 1)
+                let noColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 1)
+                let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
                     self.memberUserId = self.GrouListsData?.memberlist[indexPath.row].userid
                     print("Selected UserID for Accept: \(self.memberUserId ?? "")")
-                    
-                    self.callAcceptGroupWebService { [weak self] in
-                        guard let self = self else { return }
-                        print("Accept service completed")
+                    self.callDelUserGroupWebService {
                         self.callGroupListGroupWebService {
                             DispatchQueue.main.async {
-                                print("Final UI update")
                                 self.tableviewDetails.reloadData()
                                 self.tableviewDetails.layoutIfNeeded()
-                                
-                                // 🚫 prevent navigation back
-                                if let nav = self.navigationController,
-                                   nav.topViewController != self {
-                                    nav.pushViewController(self, animated: false)
-                                }
+                                print("UI updated")
                             }
                         }
                     }
                 }
-                
-                
-                cell.DeclineCallback = { [self] value in
-                    account = "2"
-                    self.memberUserId = self.GrouListsData?.memberlist[indexPath.row].userid
-                    print("Selected UserID for Accept: \(self.memberUserId ?? "")")
-                    self.callAcceptGroupWebService { [weak self] in
-                        print("Accept service completed")
-                        self?.callGroupListGroupWebService {
-                            DispatchQueue.main.async {
-                                print("Final UI update")
-                                self?.tableviewDetails.reloadData()
-                                self?.tableviewDetails.layoutIfNeeded()
-                                
-                                if let nav = self?.navigationController,
-                                   nav.topViewController != self {
-                                    nav.pushViewController(self!, animated: false)
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                cell.ProfileDetailCallback = { [self] value in
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "MyProfileViewController")as! MyProfileViewController
-                    if let id = UserDefaults.standard.string(forKey: "userid") {
-                        if id == self.GrouListsData?.memberlist[indexPath.row].userid {
-                            vc.Oid = id
-                            vc.sourceViewController = "MyProfile"
-                        } else {
-                            vc.Oid = self.GrouListsData?.memberlist[indexPath.row].userid
-                            vc.sourceViewController = "OtherProfile"
-                        }
-                    }
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-                
-                
-                cell.DelUserCallback = { [self] value in
-                    let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
-                    let messageText = "Are you sure you want to remove this user?"
-                    let attributedMessage = NSAttributedString(string: messageText, attributes: [
-                        .font: UIFont(name: "Montserrat-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17),
-                        .foregroundColor: UIColor(red: 92/255, green: 92/255, blue: 92/255, alpha: 1)
-                    ])
-                    alertController.setValue(attributedMessage, forKey: "attributedMessage")
-                    
-                    let yesColor = UIColor(red: 0/255, green: 128/255, blue: 0/255, alpha: 1)
-                    let noColor = UIColor(red: 255/255, green: 0/255, blue: 0/255, alpha: 1)
-                    let yesAction = UIAlertAction(title: "Yes", style: .default) { _ in
-                        self.memberUserId = self.GrouListsData?.memberlist[indexPath.row].userid
-                        print("Selected UserID for Accept: \(self.memberUserId ?? "")")
-                        self.callDelUserGroupWebService {
-                            self.callGroupListGroupWebService {
-                                DispatchQueue.main.async {
-                                    self.tableviewDetails.reloadData()
-                                    self.tableviewDetails.layoutIfNeeded()
-                                    print("UI updated")
-                                }
-                            }
-                        }
-                    }
-                    yesAction.setValue(yesColor, forKey: "titleTextColor")
-                    let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
-                    noAction.setValue(noColor, forKey: "titleTextColor")
-                    alertController.addAction(yesAction)
-                    alertController.addAction(noAction)
-                    self.present(alertController, animated: true, completion: nil)
-                }
-                let url = URL(string: (GrouListsData?.memberlist[indexPath.row].userphoto ?? ""))
-                cell.profileImgView.kf.indicatorType = .activity
-                cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "defaultImage"))
-                return cell
+                yesAction.setValue(yesColor, forKey: "titleTextColor")
+                let noAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
+                noAction.setValue(noColor, forKey: "titleTextColor")
+                alertController.addAction(yesAction)
+                alertController.addAction(noAction)
+                self.present(alertController, animated: true, completion: nil)
             }
+            let url = URL(string: (GrouListsData?.memberlist[indexPath.row].userphoto ?? ""))
+            cell.profileImgView.kf.indicatorType = .activity
+            cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "defaultImage"))
+            return cell
         }
+    }
 }

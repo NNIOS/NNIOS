@@ -138,31 +138,19 @@ class UpdateGroupViewController: BaseViewController,CropViewControllerDelegate {
         let groupDescription = tvaboutGroup.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
         if groupName.isEmpty {
-            let alert = UIAlertController(title: "", message: "Please Enter Your Group Name", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return
+            alertToast(Message: "Please Enter Your Group Name")
         }
 
         if containsBadWords(groupName) {
-            let alert = UIAlertController(title: "", message: "Group name contains inappropriate words", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return
+            alertToast(Message: "Group name contains inappropriate words")
         }
 
         if groupDescription.isEmpty {
-            let alert = UIAlertController(title: "", message: "Please Enter Description", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return
+            alertToast(Message: "Please Enter Description")
         }
 
         if containsBadWords(groupDescription) {
-            let alert = UIAlertController(title: "", message: "Description contains inappropriate words", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "close", style: .default, handler: nil))
-            self.present(alert, animated: true, completion: nil)
-            return
+            alertToast(Message: "Description contains inappropriate words")
         }
 
         callUpdateGroupWebService { success in

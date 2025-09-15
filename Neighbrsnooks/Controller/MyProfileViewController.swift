@@ -903,6 +903,7 @@ class MyProfileViewController: BaseViewController {
         vc.modalPresentationStyle = .overCurrentContext
         vc.fullName = self.profileData?.username ?? ""
         vc.verfiedMsg = sourceViewController
+        vc.sourceViewController = sourceViewController
         vc.onUpdateSuccess = { [weak self] status in
             print("Await status is :\(status)")
             self?.callUserProfileWebService {
