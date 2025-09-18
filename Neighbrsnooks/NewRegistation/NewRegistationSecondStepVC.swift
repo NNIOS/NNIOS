@@ -731,7 +731,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 vc.secname = self.secname ?? ""
                 vc.profileData = self.profileData
                 vc.uploadedDocuments = self.savedUploadedDocuments
-                
+                vc.bntNameUpdate = "Register"
                 Analytics.logEvent("registration_step2_completed_iOS", parameters: [
                     "name": self.name ?? "",
                     "secname": self.secname ?? "",
@@ -749,6 +749,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 print(selectedLocation ?? "")
                 vc.name = self.name ?? ""
                 vc.secname = self.secname ?? ""
+                vc.bntNameUpdate = "Register"
                 vc.profileData = self.profileData
                 vc.uploadedDocuments = self.savedUploadedDocuments
                 self.navigationController?.pushViewController(vc, animated: true)
@@ -762,6 +763,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 vc.name = self.name ?? ""
                 vc.secname = self.secname ?? ""
                 vc.sourceScreen = "FirstSteep"
+                vc.bntNameUpdate = "Register"
                 // Firebase Analytics event yahan log karein
                 Analytics.logEvent("registration_step2_completed_iOS", parameters: [
                     "name": self.name ?? "",

@@ -532,7 +532,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         
         showRegSecConfirmationAlert(loaderButton: sender as! UIButton) {
             self.callRegSecWebService {
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [self] in
                     UIHelper.showLoader(on: sender as! UIButton, show: false)
                     // Thank you/or next screen wala code yahan
                     let dimView = UIView(frame: self.view.bounds)
@@ -541,6 +541,9 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
                     self.view.addSubview(dimView)
                     self.viewThankYou.layer.cornerRadius = 12
                     self.viewThankYou.center = self.view.center
+                    if let btnTitle = self.bntNameUpdate {
+                        btnRegister.setTitle(btnTitle, for: .normal)
+                    }
                     UserDefaults.standard.set("completed", forKey: "registrationStep")
                     self.viewThankYou.isHidden = false
                     self.viewThankYou.alpha = 1

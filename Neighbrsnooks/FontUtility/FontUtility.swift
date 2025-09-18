@@ -164,6 +164,18 @@ class CustomLabelHeadingUseranme: UILabel {
     }
 }
 
+class CustomLabelAdhar: UILabel {
+    @IBInspectable var customFontSize: CGFloat = 10 {
+        didSet {
+            self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+        }
+    }
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.font = UIFont(name: "Montserrat-Regular", size: customFontSize)
+    }
+}
+
 
 @IBDesignable
 class CustomLabelHeadingOptional: UILabel {
