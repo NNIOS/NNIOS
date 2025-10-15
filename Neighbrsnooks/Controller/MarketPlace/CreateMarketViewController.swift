@@ -1458,7 +1458,7 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
             ]
             print("Params is : \(dictParams)")
             
-            let url = "https://neighbrsnook.com/admin/api/mpk_product_add"  // dev.
+            let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add"  // dev.
             let dispatchGroup = DispatchGroup()
             var convertedVideos: [URL] = []
             
@@ -1568,7 +1568,7 @@ class CreateMarketViewController: BaseViewController, UIPickerViewDelegate,UITex
         }
         
         func callMarketCatWebService(completion: @escaping () -> Void) {
-            let url = "https://neighbrsnook.com/admin/api/category"     // dev.
+            let url = "https://dev.neighbrsnook.com/admin/api/category"     // dev.
             let dictParams: Dictionary<String, Any> = ["":""]
             RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
             {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in

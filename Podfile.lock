@@ -3,50 +3,128 @@ PODS:
   - AlamofireImage (4.3.0):
     - Alamofire (~> 5.8)
   - CropViewController (2.7.4)
+  - FBAEMKit (17.1.0):
+    - FBSDKCoreKit_Basics (= 17.1.0)
+  - FBSDKCoreKit (17.1.0):
+    - FBAEMKit (= 17.1.0)
+    - FBSDKCoreKit_Basics (= 17.1.0)
+  - FBSDKCoreKit_Basics (17.1.0)
+  - FBSDKLoginKit (17.1.0):
+    - FBSDKCoreKit (= 17.1.0)
+  - FBSDKShareKit (17.1.0):
+    - FBSDKCoreKit (= 17.1.0)
   - GoogleMaps (9.4.0):
     - GoogleMaps/Maps (= 9.4.0)
   - GoogleMaps/Maps (9.4.0)
   - GooglePlaces (9.4.1)
   - iOSDropDown (0.4.0)
-  - IQKeyboardManager (6.5.13)
+  - IQKeyboardCore (1.0.8)
+  - IQKeyboardManagerSwift (8.0.0):
+    - IQKeyboardManagerSwift/Appearance (= 8.0.0)
+    - IQKeyboardManagerSwift/Core (= 8.0.0)
+    - IQKeyboardManagerSwift/IQKeyboardReturnManager (= 8.0.0)
+    - IQKeyboardManagerSwift/IQKeyboardToolbarManager (= 8.0.0)
+    - IQKeyboardManagerSwift/IQTextView (= 8.0.0)
+    - IQKeyboardManagerSwift/Resign (= 8.0.0)
+  - IQKeyboardManagerSwift/Appearance (8.0.0):
+    - IQKeyboardManagerSwift/Core
+  - IQKeyboardManagerSwift/Core (8.0.0):
+    - IQKeyboardNotification
+    - IQTextInputViewNotification
+  - IQKeyboardManagerSwift/IQKeyboardReturnManager (8.0.0):
+    - IQKeyboardReturnManager
+  - IQKeyboardManagerSwift/IQKeyboardToolbarManager (8.0.0):
+    - IQKeyboardManagerSwift/Core
+    - IQKeyboardToolbarManager
+  - IQKeyboardManagerSwift/IQTextView (8.0.0):
+    - IQTextView
+  - IQKeyboardManagerSwift/Resign (8.0.0):
+    - IQKeyboardManagerSwift/Core
+  - IQKeyboardNotification (1.0.6)
+  - IQKeyboardReturnManager (1.0.6):
+    - IQKeyboardCore
+  - IQKeyboardToolbar (1.1.2):
+    - IQKeyboardToolbar/Core (= 1.1.2)
+  - IQKeyboardToolbar/Core (1.1.2):
+    - IQKeyboardCore
+    - IQKeyboardToolbar/Placeholderable
+  - IQKeyboardToolbar/Placeholderable (1.1.2)
+  - IQKeyboardToolbarManager (1.1.4):
+    - IQKeyboardToolbar
+    - IQTextInputViewNotification
+  - IQTextInputViewNotification (1.0.9):
+    - IQKeyboardCore
+  - IQTextView (1.0.5):
+    - IQKeyboardToolbar/Placeholderable
   - Kingfisher (7.9.1)
   - SVProgressHUD (2.3.1):
     - SVProgressHUD/Core (= 2.3.1)
   - SVProgressHUD/Core (2.3.1)
+  - SwiftKeychainWrapper (4.0.1)
 
 DEPENDENCIES:
   - AlamofireImage
   - CropViewController
+  - FBSDKCoreKit (~> 17.1.0)
+  - FBSDKLoginKit (~> 17.1.0)
+  - FBSDKShareKit (~> 17.1.0)
   - GoogleMaps
   - GooglePlaces
   - iOSDropDown
-  - IQKeyboardManager
+  - IQKeyboardManagerSwift (= 8.0.0)
   - Kingfisher
   - SVProgressHUD
+  - SwiftKeychainWrapper
 
 SPEC REPOS:
   trunk:
     - Alamofire
     - AlamofireImage
     - CropViewController
+    - FBAEMKit
+    - FBSDKCoreKit
+    - FBSDKCoreKit_Basics
+    - FBSDKLoginKit
+    - FBSDKShareKit
     - GoogleMaps
     - GooglePlaces
     - iOSDropDown
-    - IQKeyboardManager
+    - IQKeyboardCore
+    - IQKeyboardManagerSwift
+    - IQKeyboardNotification
+    - IQKeyboardReturnManager
+    - IQKeyboardToolbar
+    - IQKeyboardToolbarManager
+    - IQTextInputViewNotification
+    - IQTextView
     - Kingfisher
     - SVProgressHUD
+    - SwiftKeychainWrapper
 
 SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
   AlamofireImage: 843953fa97bee5f561cf05d83abd759e590b068d
   CropViewController: 3489bbf95a3e11c654382b0bae08ac645cdf1b93
+  FBAEMKit: cb719c53575a3be86ea873279f30d6a2c4e15881
+  FBSDKCoreKit: ecdb980a24633ccb012700299ceb16d0235e14d2
+  FBSDKCoreKit_Basics: 045101c4a9ef10c845347424d73a29aae02c3e43
+  FBSDKLoginKit: 69eb59b2f839aba635616df6e422acd0ca88030a
+  FBSDKShareKit: be9db7d121cbc3d6700c1b712a61183cac407f64
   GoogleMaps: 0608099d4870cac8754bdba9b6953db543432438
   GooglePlaces: 8afca6c4e946472e91298589d1640d614b51749a
   iOSDropDown: ce9daa584eaa5567cafc1b633e3cc7eb6d9cea42
-  IQKeyboardManager: a932e53c5175755c60a3e2ad31a9f3aa5e33dd89
+  IQKeyboardCore: 8652977ec919cf5351aa2977fedd1a6546476fbc
+  IQKeyboardManagerSwift: 0c6fbbaa2e60739e48d7cf59f25661471a7a3a65
+  IQKeyboardNotification: eb4910401f5a0e68f97e71c62f8a0c5b7e9d535c
+  IQKeyboardReturnManager: fcbf51fc68d7536fc1fbcca5231c4e82576b12ac
+  IQKeyboardToolbar: a8aab764a27d55892b951e58ebfffdde14a01ce8
+  IQKeyboardToolbarManager: c8a575e8b5fffe5873d0e75312244498a0759473
+  IQTextInputViewNotification: 3b9fb27a16e7ee8958cc9092cfb07a1a9e1fd559
+  IQTextView: ae13b4922f22e6f027f62c557d9f4f236b19d5c7
   Kingfisher: 1d14e9f59cbe19389f591c929000332bf70efd32
   SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
+  SwiftKeychainWrapper: 807ba1d63c33a7d0613288512399cd1eda1e470c
 
-PODFILE CHECKSUM: 0a54043818c82fe113eef46c3c3c3c625f1c7758
+PODFILE CHECKSUM: a00889794397558b22d0d29a34b3450c756f039b
 
 COCOAPODS: 1.16.2

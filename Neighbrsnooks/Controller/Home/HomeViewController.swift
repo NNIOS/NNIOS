@@ -2541,7 +2541,7 @@ extension HomeViewController {
     func callUpdateFirebaseTokenPostWebServiceDirect(userId: String, firebaseToken: String, _ completion: @escaping () -> ()) {
         
         // 🔗 Step 1: Create the full URL directly
-        guard let url = URL(string: "https://neighbrsnook.com/admin/api/update-token") else {
+        guard let url = URL(string: "https://dev.neighbrsnook.com/admin/api/update-token") else {
             print("❌ Invalid URL")  
             return
         }

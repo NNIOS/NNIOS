@@ -9,7 +9,7 @@ import UIKit
 import TOCropViewController
 import Vision
 import FirebaseAnalytics
-
+import FBSDKCoreKit
 
 class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate, TOCropViewControllerDelegate{
     
@@ -52,6 +52,9 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     @IBOutlet weak var backImgView: UIImageView!
     @IBOutlet weak var frontImgView: UIImageView!
     
+    @IBOutlet weak var expandableViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var expandableView: UIView!
+    
     var isSelectingFrontImage: Bool = true
     var frontImage: UIImage?
     var backImage: UIImage?
@@ -81,7 +84,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
       var fullAddress: String?
       var latitude: Double?
       var longitude: Double?
-    
+    var isExpanded = false
     
     enum DocumentType: String {
         case aadhaar = "aadhar"
@@ -195,6 +198,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             viewThankYou.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
         
+        expandableViewHeightConstraint.constant = 0
         
         
     }
@@ -312,6 +316,19 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     }
     
     
+    @IBAction func expandCollapseButtonTapped(_ sender: UIButton) {
+        isExpanded.toggle() // true/false toggle
+        expandableView.clipsToBounds = true
+        expandableViewHeightConstraint.constant = isExpanded ? 300 : 0 
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+
+        // Optional: Change button title/image for expand/collapse
+        sender.setTitle(isExpanded ? "Collapse" : "Expand", for: .normal)
+    }
+    
+    
     // MARK: - Action
     
     @IBAction func actionVerifiedOK(_ sender: Any) {
@@ -333,6 +350,15 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
                 "platform": "iOS"
             ])
             
+            
+            // Facebook Analytics event bhi fire karo
+            AppEvents.shared.logEvent(
+                .init("registration_complete_iOS"),
+                parameters: [
+                    AppEvents.ParameterName("method"): "app_registration",
+                    AppEvents.ParameterName("platform"): "iOS"
+                ]
+            )
             // 2️⃣ Save registration flags
             UserDefaults.standard.set("done", forKey: "registrationStep")
             guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else { return }
@@ -1131,7 +1157,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         }
         
         // API URL  //dev.
-        guard let url = URL(string: "https://neighbrsnook.com/oldadmin/api/master?flag=reg-step-III") else {
+        guard let url = URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=reg-step-III") else {
             print("URL invalid hai")
             return
         }

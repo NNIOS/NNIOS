@@ -14,7 +14,7 @@ import AVKit
 import SystemConfiguration
 import Alamofire
 import FirebaseAnalytics
-
+import FBSDKCoreKit
 
 
 class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITextViewDelegate {
@@ -566,7 +566,18 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                     "userid": userID,
                     "platform": "iOS"
                 ])
-                // =============================================
+                
+                AppEvents.shared.logEvent(
+                    .init("neighborhood_search_fetched_iOS"),
+                    parameters: [
+                        AppEvents.ParameterName("status"): fetchedStatus,
+                        AppEvents.ParameterName("message"): message,
+                        AppEvents.ParameterName("area"): areaToSend,
+                        AppEvents.ParameterName("userid"): userID,
+                        AppEvents.ParameterName("platform"): "iOS"
+                    ]
+                )
+                 
                 
             }
         }
@@ -611,6 +622,18 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                     "userid": userID,
                     "platform": "iOS"
                 ])
+                
+                AppEvents.shared.logEvent(
+                    .init("neighborhood_status_fetched_iOS"),
+                    parameters: [
+                        AppEvents.ParameterName("status"): responseModel.status,
+                        AppEvents.ParameterName("message"): responseModel.message,
+                        AppEvents.ParameterName("area"): areaToSend ?? "",
+                        AppEvents.ParameterName("userid"): userID,
+                        AppEvents.ParameterName("platform"): "iOS"
+                    ]
+                )
+                
                 completion?(responseModel.message)
             }
         }
@@ -638,6 +661,16 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                         "count": neighbourhoods.count,
                         "platform": "iOS"
                     ])
+                    
+                    AppEvents.shared.logEvent(
+                        .init("neighborhood_Current_success_iOS"),
+                        parameters: [
+                            AppEvents.ParameterName("area"): self.lblNeighbrhood.text ?? "",
+                            AppEvents.ParameterName("count"): neighbourhoods.count,
+                            AppEvents.ParameterName("platform"): "iOS"
+                        ]
+                    )
+                    
                 }
                 self.tblViewNeighbrhood.reloadData()
                 self.callUserLocationWebService()
@@ -740,6 +773,16 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                     "platform": "iOS"
                 ])
                 
+                AppEvents.shared.logEvent(
+                    .init("registration_step2_completed_iOS"),
+                    parameters: [
+                        AppEvents.ParameterName("name"): self.name ?? "",
+                        AppEvents.ParameterName("secname"): self.secname ?? "",
+                        AppEvents.ParameterName("neighbourhood"): (self.selectedIndexPath != nil) ? (self.NeighbrhdData?.data?[self.selectedIndexPath!.row].nbdName ?? "") : "",
+                        AppEvents.ParameterName("timestamp"): Date().timeIntervalSince1970,
+                        AppEvents.ParameterName("platform"): "iOS"
+                    ]
+                )
                 
                 self.navigationController?.pushViewController(vc, animated: true)
             }
@@ -772,6 +815,20 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                     "timestamp": Date().timeIntervalSince1970,
                     "platform": "iOS"
                 ])
+                
+                
+                // Facebook Analytics event log
+                AppEvents.shared.logEvent(
+                    .init("registration_step2_completed_iOS"),
+                    parameters: [
+                        AppEvents.ParameterName("name"): self.name ?? "",
+                        AppEvents.ParameterName("secname"): self.secname ?? "",
+                        AppEvents.ParameterName("neighbourhood"): (self.selectedIndexPath != nil) ? (self.NeighbrhdData?.data?[self.selectedIndexPath!.row].nbdName ?? "") : "",
+                        AppEvents.ParameterName("timestamp"): Date().timeIntervalSince1970,
+                        AppEvents.ParameterName("platform"): "iOS"
+                    ]
+                )
+                
                 self.navigationController?.pushViewController(vc, animated: true)
             }
         }
@@ -804,7 +861,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
     func callUserLocationWebService() { // dev.
         let id = UserDefaults.standard.string(forKey: "userid")
         print("✅ User ID after login: \(id ?? "Not Found")")
-        let url = "https://neighbrsnook.com/admin/api/user-location"
+        let url = "https://dev.neighbrsnook.com/admin/api/user-location"
         let params: [String: Any] = [
             "userid": id,
             "latitude": lat ?? 0.0,
@@ -910,7 +967,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
         print(params)
         
         let boundary = "Boundary-\(UUID().uuidString)" //dev.
-        var request = URLRequest(url: URL(string: "https://neighbrsnook.com/oldadmin/api/master?flag=requestneighborhood")!)
+        var request = URLRequest(url: URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=requestneighborhood")!)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         if let token = UserDefaults.standard.string(forKey: "token") {

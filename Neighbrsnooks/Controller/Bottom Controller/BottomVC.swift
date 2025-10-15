@@ -97,7 +97,7 @@ extension BottomVC {
     }
      
     func handleUnblockAPI(completion: @escaping () -> Void) {  // Un-Block APi dev.
-        let url = "https://neighbrsnook.com/admin/api/toggle-block-user"
+        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
         guard let blockerId = blocker_userid else { print("Error: Missing blocker ID"); return }
         guard let blockedId = blocked_userid else { print("Error: Missing blocked ID"); return }
         
@@ -137,7 +137,7 @@ extension BottomVC {
     }
      
     func handleBlockAPI(completion: @escaping () -> Void) { // Block APi dev.
-        let url = "https://neighbrsnook.com/admin/api/toggle-block-user"
+        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
         guard let blockerId = blocker_userid else {
             print("Error: Missing blocker ID")
             return

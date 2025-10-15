@@ -12,6 +12,7 @@ import FirebaseMessaging
 import Alamofire
 import FirebaseAnalytics
 import CoreLocation
+import FBSDKCoreKit
 
 class RegistationFirstStepVC: BaseViewController {
     
@@ -168,7 +169,7 @@ extension RegistationFirstStepVC : UITextFieldDelegate {
         
         func textFieldDidBeginEditing(_ textField: UITextField) {
             if textField == emailTF {
-                imgEmail.image = UIImage(named: "email") // ✅ update the icon
+                imgEmail.image = UIImage(named: "email") 
             }
         }
     
@@ -200,7 +201,6 @@ extension RegistationFirstStepVC : UITextFieldDelegate {
             }
         }
     }
-    
     
     
     
@@ -378,13 +378,26 @@ extension RegistationFirstStepVC {
                 
                 self.callRegisterWebService(firebaseToken: token, completionClosure: {
                     DispatchQueue.main.async {
-                        //MARK: - Firebase Analytics event log
+                        // MARK: - Firebase Analytics event log
                         UserDefaults.standard.set(fullName, forKey: "userFullName")
                         Analytics.logEvent("registration_firstStep_complete_iOS", parameters: [
                             "Full_name": fullName,
                             "method": "firstStep_app_registration_iOS",
                             "platform": "iOS"
                         ])
+
+                        // MARK: - Facebook Analytics event log
+                        let facebookEventParams: [AppEvents.ParameterName: Any] = [
+                            AppEvents.ParameterName("Full_name"): fullName,
+                            AppEvents.ParameterName("method"): "firstStep_app_registration_iOS",
+                            AppEvents.ParameterName("platform"): "iOS"
+                        ]
+                        AppEvents.shared.logEvent(
+                            .init("registration_firstStep_complete_iOS"),
+                            parameters: facebookEventParams
+                        )
+                        print("📊 Facebook Event Sent: registration_firstStep_complete_iOS with params: \(facebookEventParams)")
+
                     }
                 })
             }
@@ -790,7 +803,7 @@ extension RegistationFirstStepVC {
     // MARK:  USER LOCATION Api method  //dev.
     func callUserLocationWebService() {
         let id = UserDefaults.standard.string(forKey: "userid")
-        let url = "https://neighbrsnook.com/admin/api/user-location"
+        let url = "https://dev.neighbrsnook.com/admin/api/user-location"
         let params: [String: Any] = [
             "userid": id ?? "",
             "latitude": currentLatitude ?? 0.0,

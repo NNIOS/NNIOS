@@ -119,7 +119,7 @@ class NotificationViewController: BaseViewController {
     
     // dev.
     func callNotificationCountWebService() {
-        let url = "https://neighbrsnook.com/admin/api/notificationcount?flag=counter&appkey=abc1239"
+        let url = "https://dev.neighbrsnook.com/admin/api/notificationcount?flag=counter&appkey=abc1239"
         
         // let dictParams: Dictionary<String, Any> = ["":""]
         

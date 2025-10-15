@@ -19,43 +19,17 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
     var homeData: HomeAllModel?
     var profileData : ProfileModel?
     var selectedNeighborhoodId: String?
-    let menuItems = ["My Profile", "My Neighbourhood", "Business", "Event", "Group", "Poll", "Post", "Public Agency Directory", "Share App", "Setting", "Contact Us"]
-    let menuItemImages = ["person", "location 1", "Market", "calendar", "person.2", "icons8-poll-24", "envelope", "bag", "arrowshape.turn.up.right", "gearshape", "phone"]
+    
+    let menuItems = ["My Profile", "My Neighbourhood", "Business", "Event", "Group", "Poll", "Post", "Public Agency Directory", "Refer", "Share App", "Setting", "Contact Us"]
+
+    let menuItemImages = ["person", "location 1", "Market", "calendar", "person.2", "icons8-poll-24", "envelope", "bag", "arrowshape.turn.up.right", "arrowshape.turn.up.right", "gearshape", "phone"]
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         print(profileData)
         userProfileImg.layer.cornerRadius = userProfileImg.frame.height/2
         userProfileImg.clipsToBounds = true
-        
-        
-//        self.lblUserName.text = self.profileData?.username ?? ""
-//
-//        let userName = self.profileData?.username ?? ""
-//        let firstLetter = String(userName.prefix(1)).uppercased()
-//
-//        if let imageUrlString = self.profileData?.userpic,
-//           let url = URL(string: imageUrlString),
-//           !imageUrlString.trimmingCharacters(in: .whitespaces).isEmpty {
-//            
-//            self.userProfileImg.kf.indicatorType = .activity
-//            self.userProfileImg.kf.setImage(with: url, placeholder: UIImage(named: "profile 1")) { result in
-//                switch result {
-//                case .success(_):
-//                    // Image loaded successfully, kuch nahi karna
-//                    break
-//                case .failure(_):
-//                    // Agar load fail ho gaya toh first letter set karo
-//                    self.setInitialLetterProfile(firstLetter)
-//                }
-//            }
-//        } else {
-//            // Agar URL hi empty hai toh direct first letter set karo
-//            self.setInitialLetterProfile(firstLetter)
-//        }
-//        
-      
-        
         self.view.layoutIfNeeded()
         self.lblUserName.text = self.profileData?.username
             let userName = self.profileData?.username ?? ""
@@ -79,9 +53,6 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
        
         self.lblNeighbourhood.text = self.profileData?.neighborhood ?? ""
-
-    
-        
         let desiredWidth: CGFloat = 280
         
         if sideMenuContainer.frame.width != desiredWidth {
@@ -268,6 +239,14 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
                     return
                 }
                 self.pushTo(vc)
+                
+            case "Refer":
+                guard let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ReferViewController") as? ReferViewController else {
+                    print("❌ ReferViewController not found")
+                    return
+                }
+                self.pushTo(vc)
+
                 
             case "Share App":
                 let appName = "NeighboursNook"

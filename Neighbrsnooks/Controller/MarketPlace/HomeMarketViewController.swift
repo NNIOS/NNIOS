@@ -691,7 +691,7 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
     //dev.
     
     @objc func callMarketwalltWebService() {
-        let url = "https://neighbrsnook.com/admin/api/mpk_home_wall?"
+        let url = "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?"
         
         // let dictParams: Dictionary<String, Any> = ["":""]
         

@@ -8,7 +8,6 @@
 import UIKit
 import SVProgressHUD
 import AVKit
-import IQKeyboardManager
 @available(iOS 16.0, *)
 
 class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource,UITextViewDelegate {

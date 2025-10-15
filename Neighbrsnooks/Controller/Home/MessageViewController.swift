@@ -8,7 +8,7 @@
 import UIKit
 import SVProgressHUD
 import Kingfisher
-import IQKeyboardManager
+
 import Alamofire
 @available(iOS 16.0, *)
 class MessageViewController: BaseViewC, UITextViewDelegate {

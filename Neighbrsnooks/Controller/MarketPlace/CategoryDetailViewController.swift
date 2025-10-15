@@ -192,7 +192,7 @@ class CategoryDetailViewController: UIViewController,UICollectionViewDelegate,UI
     
     // dev.
     func callMarketcatWebService() {
-                  let url = "https://neighbrsnook.com/admin/api/mpk_product_home?"
+                  let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_home?"
 
        // let dictParams: Dictionary<String, Any> = ["":""]
         

@@ -145,13 +145,42 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
                 for comp in components {
                     if comp.types.contains("locality") {
                         foundCity = comp.name
-                    } else if comp.types.contains("administrative_area_level_1") {
+                    }
+                    else if comp.types.contains("administrative_area_level_2"), foundCity == nil {
+                        // Fallback to district if city not found
+                        foundCity = comp.name
+                    }
+                    else if comp.types.contains("sublocality"), foundCity == nil {
+                        // Sometimes locality is missing, use sublocality
+                        foundCity = comp.name
+                    }
+                    else if comp.types.contains("administrative_area_level_1") {
                         foundState = comp.name
-                    } else if comp.types.contains("postal_code") {
+                    }
+                    else if comp.types.contains("postal_code") {
                         foundZip = comp.name
                     }
                 }
             }
+
+            // ✅ Hardcoded mapping correction for known localities
+            let cityNameMap: [String: String] = [
+                "Maitri Kunj": "Bhilai",
+                "Sector 10": "Bhilai",
+                "Sector 1": "Bhilai",
+                "Sector 2": "Bhilai",
+                "Sector 3": "Bhilai",
+                "Sector 4": "Bhilai",
+                "Sector 5": "Bhilai",
+                "Talpur": "Bhilai",
+                "Talpuri": "Bhilai",
+                "Talpuri Twincity Intnl Clny (CGHB)": "Bhilai"
+            ]
+
+            if let city = foundCity, let corrected = cityNameMap[city] {
+                foundCity = corrected
+            }
+
             
             // 🌐 If postal code not found, fallback using CLGeocoder
             if foundZip == nil {
@@ -319,7 +348,8 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
                 "trichur": "Thrissur",
                 "pondicherry": "Puducherry",
                 "gurgaon": "Gurugram",
-                "allahabad": "Prayagraj"
+                "allahabad": "Prayagraj",
+                "maitri kunj" : "Bhilai"
                 // ...aur bhi jitne chahe add kar lo
             ]
 

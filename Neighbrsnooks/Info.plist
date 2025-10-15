@@ -56,5 +56,33 @@
 		<string>fetch</string>
 		<string>processing</string>
 	</array>
+    
+    <key>FacebookAppID</key>
+    <string>929962769257001</string>
+    <key>FacebookDisplayName</key>
+    <string>Neighbrsnook</string>
+    <key>FacebookClientToken</key>
+    <string>d5492151458f6c35a3177b9ea03e0c29</string>
+    <key>FacebookAutoLogAppEventsEnabled</key>
+    <true/>
+    <key>FacebookAdvertiserIDCollectionEnabled</key>
+    <true/>
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>fb1845017522768855</string>
+        </array>
+      </dict>
+    </array>
+
+    <key>FacebookAutoLogAppEventsEnabled</key>
+    <true/>
+    <key>FacebookAdvertiserIDCollectionEnabled</key>
+    <true/>
+
+    
+    
 </dict>
 </plist>

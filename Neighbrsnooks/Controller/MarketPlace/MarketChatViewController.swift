@@ -237,7 +237,7 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
     
     //dev.
     func callMarketChatWebService(completion: @escaping () -> Void) {
-        let baseURL = "https://neighbrsnook.com/admin/api/messages/"
+        let baseURL = "https://dev.neighbrsnook.com/admin/api/messages/"
         let id = UserDefaults.standard.string(forKey: "userid")
         let Sid: String
 
@@ -293,7 +293,7 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
     
     //  "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?" dev.
     func callMarketChatPostWebService(message: String, completion: @escaping () -> Void) {
-        let url = "https://neighbrsnook.com/admin/api/send-message"
+        let url = "https://dev.neighbrsnook.com/admin/api/send-message"
         
         let id = UserDefaults.standard.string(forKey: "userid")
         let Sid = UserDefaults.standard.string(forKey: "SenderidN")

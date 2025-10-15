@@ -22,7 +22,7 @@ class Terms_ConditionsViewController: UIViewController {
             viewWeb.addSubview(webView)
             
             // Load the URL //dev.
-            if let url = URL(string: "https://neighbrsnook.com/terms-conditions/") {
+            if let url = URL(string: "https://dev.neighbrsnook.com/terms-conditions/") {
                 let request = URLRequest(url: url)
                 webView.load(request)
             } else {

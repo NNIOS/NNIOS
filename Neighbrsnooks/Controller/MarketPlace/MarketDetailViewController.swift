@@ -383,7 +383,7 @@ class MarketDetailViewController: BaseViewController,UICollectionViewDelegateFlo
         }
         
         // dev.
-        let url = "https://neighbrsnook.com/admin/api/mpk_product_add/edit/\(idPr)"
+        let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add/edit/\(idPr)"
         
         let dictParams: [String: Any] = [:]
         DispatchQueue.global(qos: .userInitiated).async {
@@ -426,7 +426,7 @@ class MarketDetailViewController: BaseViewController,UICollectionViewDelegateFlo
     //dev.
     
     func callMarketReadStatus2(completion: @escaping () -> Void) {
-            let url = "https://neighbrsnook.com/admin/api/chat_read_status"
+            let url = "https://dev.neighbrsnook.com/admin/api/chat_read_status"
             let id = UserDefaults.standard.string(forKey: "userid")
         let createdBy = UserDefaults.standard.integer(forKey: "SenderidN")
             let dictParams: Dictionary<String, Any> = [
@@ -486,7 +486,7 @@ class MarketDetailViewController: BaseViewController,UICollectionViewDelegateFlo
    // dev.
      
     func callMarketDetailWebService(completion: @escaping () -> Void) {
-        let url = "https://neighbrsnook.com/admin/api/mpk_product_detail?"
+        let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
         
         let id = UserDefaults.standard.string(forKey: "userid")
         let dictParams: Dictionary<String, Any> = [
@@ -558,7 +558,7 @@ class MarketDetailViewController: BaseViewController,UICollectionViewDelegateFlo
     //dev.
     
     func callWishListWebService(completion: @escaping () -> Void) { //dev.
-            let url = "https://neighbrsnook.com/admin/api/wishlist"
+            let url = "https://dev.neighbrsnook.com/admin/api/wishlist"
             let id = UserDefaults.standard.string(forKey: "userid")
             let dictParams: Dictionary<String, Any> = [
                 "user_id":id ?? "",
@@ -609,7 +609,7 @@ class MarketDetailViewController: BaseViewController,UICollectionViewDelegateFlo
         
         //dev.
         func callWishlistDeleteWebService(completion: @escaping () -> Void) { // dev.
-            let url = "https://neighbrsnook.com/admin/api/wishlist/\(idD)"
+            let url = "https://dev.neighbrsnook.com/admin/api/wishlist/\(idD)"
             let dictParams: Dictionary<String, Any> = ["":""]
             print("Param is : \(dictParams)")
             self.loadingAlert = self.showLoadingAlert(on: self)

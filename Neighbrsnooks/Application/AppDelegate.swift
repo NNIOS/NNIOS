@@ -14,7 +14,11 @@ import FirebaseCore
 import FirebaseFirestore
 import FirebaseAnalytics
 import FirebaseAuth
-import IQKeyboardManager
+import IQKeyboardManagerSwift
+import FBSDKCoreKit
+import FBSDKLoginKit
+import FBSDKShareKit
+import AppTrackingTransparency
 
 
 @available(iOS 16.0, *)
@@ -26,6 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var lastNotificationIdentifier: String?
     var fireBaseToken : UpdateTokenModel?
     var HomeNewData : HomeAllModel?
+    
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
         return OrientationManager.shared.shouldSupportAllOrientations ? .all : .portrait
     }
@@ -63,9 +68,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("❌ Failed to register for remote notifications: \(error.localizedDescription)")
     }
+    func application(
+          _ app: UIApplication,
+          open url: URL,
+          options: [UIApplication.OpenURLOptionsKey : Any] = [:]
+      ) -> Bool {
+          return ApplicationDelegate.shared.application(app, open: url, options: options)
+      }
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         NetworkMonitor.shared.startMonitoring()
+        
+        let keyboardManager = IQKeyboardManager.shared
+        keyboardManager.isEnabled = true
+        keyboardManager.resignOnTouchOutside = true
+        keyboardManager.enableAutoToolbar = false
         // Listen for verification popup notification
+        if #available(iOS 16.0, *) {
+                ATTrackingManager.requestTrackingAuthorization { status in
+                    // User ne permission allow ya disallow kiya
+                    print("Tracking authorization status: \(status.rawValue)")
+                }
+            }
         NotificationCenter.default.addObserver(self, selector: #selector(showVerificationPopup), name: Notification.Name("ShowVerificationPopup"), object: nil)
         UserDefaults.standard.set(true, forKey: "FIRDebugEnabled")
         FirebaseApp.configure()
@@ -73,19 +97,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.standard.set(true, forKey: "FIRAnalyticsDebugEnabled")
         
         let isFirstLaunch = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
+        ApplicationDelegate.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
+        
         if isFirstLaunch {
-            // Pehli baar launch, event log karo
+            // Firebase Analytics Event
             Analytics.logEvent("app_install_iOS", parameters: [
                 "time": Date().timeIntervalSince1970,
                 "platform": "iOS"
             ])
-            
-            // Flag ko set karo taaki agli baar ye na chale
+
+            // Facebook Analytics Event (instance method)
+            AppEvents.shared.logEvent(
+                .init("app_install_iOS"),
+                parameters: [
+                    AppEvents.ParameterName("time"): Date().timeIntervalSince1970,
+                    AppEvents.ParameterName("platform"): "iOS"
+                ]
+            )
+
             UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
             UserDefaults.standard.synchronize()
         }
-        
-        
         
         
         Messaging.messaging().delegate = self
@@ -125,16 +157,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         GMSServices.provideAPIKey("AIzaSyD7gl7LrxtbTjlplCXphN2EJi7HRi9s_8Y")
         GMSPlacesClient.provideAPIKey("AIzaSyBWpyfvSIauIk1wgzWU4PhnZuYe-doOv1I")
-        
-        //  AIzaSyDzLGIh8vJ1SCOkp_rgSLch3z7uSPFOl3I
-        
-        // AIzaSyD7gl7LrxtbTjlplCXphN2EJi7HRi9s_8Y
-        // Override point for customization after application launch.
-        //        let homeVC = HomeViewController()
-        //                // Set title and image for the fifth tab
-        //                let homeTabBarItem = UITabBarItem(title: "MenuRaj", image: UIImage(named: "menu_icon"), tag: 4)
-        //                homeVC.tabBarItem = homeTabBarItem
-        
+
         window?.rootViewController = NeigbrnookViewController()
         window?.makeKeyAndVisible()
         Messaging.messaging().token { token, error in
@@ -161,6 +184,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
         
         application.registerForRemoteNotifications()
+        
+        // Facebook SDK Initialization
+        ApplicationDelegate.shared.application(
+            application,
+            didFinishLaunchingWithOptions: launchOptions
+        )
+ 
+        print("✅ Facebook SDK Initialized with App ID: 929962769257001")
+
         return true
     }
     
@@ -228,8 +260,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
+     
+
     
     func applicationDidBecomeActive(_ application: UIApplication) {
+        AppEvents.shared.activateApp()
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
         if let userID = UserDefaults.standard.string(forKey: "userid"), !userID.isEmpty {
