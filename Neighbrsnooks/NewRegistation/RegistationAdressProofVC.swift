@@ -51,9 +51,16 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     @IBOutlet weak var imgPrivacy: UIImageView!
     @IBOutlet weak var backImgView: UIImageView!
     @IBOutlet weak var frontImgView: UIImageView!
-    
+
     @IBOutlet weak var expandableViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet weak var expandableView: UIView!
+    @IBOutlet weak var lblReferCode: UITextField!
+    @IBOutlet weak var viewExpand: UIView!
+    @IBOutlet weak var btnExpand: UIButton!
+    @IBOutlet weak var viewReferdCodeHeight: NSLayoutConstraint!
+    @IBOutlet weak var viewSelectProof: UIView!
+    @IBOutlet weak var viewReferralCodeBottmHeight: NSLayoutConstraint!
+    @IBOutlet weak var selectViewHeightShowOptinal: NSLayoutConstraint!
     
     var isSelectingFrontImage: Bool = true
     var frontImage: UIImage?
@@ -75,15 +82,18 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     var uploadedDocuments: UploadedDocumentsModel?
     var sourceScreen: String?
     var bntNameUpdate : String?
+    var referralDetailsModel: ReferralDetailsModel?
+    var optionalLabel: UILabel?
+    var userId: String?
     //    var sourceScreen: String?
-    
+   
     // ✅ Address related
-      var city: String?
-      var state: String?
-      var zipcode: String?
-      var fullAddress: String?
-      var latitude: Double?
-      var longitude: Double?
+    var city: String?
+    var state: String?
+    var zipcode: String?
+    var fullAddress: String?
+    var latitude: Double?
+    var longitude: Double?
     var isExpanded = false
     
     enum DocumentType: String {
@@ -94,11 +104,18 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         case rentdocs = "rentdocs"
         case none = ""
     }
+    
+    var referNeighbourhoodID: String?
+    var referNeighbourhoodName: String?
+    var referrerNeighbourhoodStatus: Int?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupGenderPicker()
         setupDatePicker()
-        
+        lblReferCode.isEnabled = false
+        print("viewDidLoad → referrerNeighbourhoodStatus:", referrerNeighbourhoodStatus ?? -1)
+
         if sourceScreen != "profile" && sourceScreen != "home" && sourceScreen != "profilebackUn" {
             UserDefaults.standard.set("step2", forKey: "registrationStep")
         }
@@ -144,6 +161,14 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         viewMain.layer.shadowRadius = 10
         viewMain.layer.masksToBounds = false
         
+        viewExpand.layer.cornerRadius = 12
+        viewExpand.clipsToBounds = true
+        
+        expandableView.layer.cornerRadius = 20
+        expandableView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]  
+        expandableView.clipsToBounds = true
+
+        
         
         documentViews = [viewRentLease, viewDrivingLicense, viewVoterID, viewPassport, viewAadhaarCard]
         documentViews.forEach { view in
@@ -163,7 +188,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         }
         lblGenderHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
         lblDateOfBirthheading.font = UIFont(name: "Montserrat-Regular", size: 17)
-        lblSelectTheAdressProof.font = UIFont(name: "Montserrat-Regular", size: 16)
+        lblSelectTheAdressProof.font = UIFont(name: "Montserrat-Regular", size: 14)
         genderTextField.font = UIFont(name: "Montserrat-Regular", size: 16)
         dobTextField.font = UIFont(name: "Montserrat-Regular", size: 16)
         lblThankYouMessage.font = UIFont(name: "Montserrat-Regular", size: 16)
@@ -178,8 +203,6 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         viewBackImg.addGestureRecognizer(backTapGesture)
         
         let neighbourhood = selectedLocation ?? ""
-        
-        
         viewThankYou.layer.shadowColor = UIColor.black.cgColor
         viewThankYou.layer.shadowOpacity = 0.3
         viewThankYou.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -198,10 +221,147 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             viewThankYou.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
         
-        expandableViewHeightConstraint.constant = 0
+        // Retrieve referralStatus from UserDefaults
+        let referralStatus = UserDefaults.standard.integer(forKey: "referralStatus")
         
+
+//        if referralStatus == 0 && referrerNeighbourhoodStatus == 0 {
+//            // status 0: update texts and hide expand view and button
+//            lblSelectTheAdressProof.text = "Select Address Proof for your residence"
+//            viewExpand.isHidden = true
+//            btnExpand.isHidden = true
+//            viewReferdCodeHeight.constant = -40
+//            viewReferralCodeBottmHeight.constant = 0
+//            self.view.layoutIfNeeded()
+//        } else if referralStatus == 1 {
+//            // status 1: update texts and show expand view and button
+//            lblSelectTheAdressProof.text = "Address Proof for your residence"
+//            if optionalLabel == nil {
+//                selectViewHeightShowOptinal.constant += 20
+//                let label = UILabel()
+//                label.text = "(optional)"
+//                label.font = UIFont.systemFont(ofSize: 12)
+//                label.textColor = UIColor.gray
+//                label.translatesAutoresizingMaskIntoConstraints = false
+//                viewExpand.addSubview(label)
+//                lblSelectTheAdressProof.superview?.addSubview(label)
+//                NSLayoutConstraint.activate([
+//                    label.topAnchor.constraint(equalTo: lblSelectTheAdressProof.bottomAnchor, constant: 4),
+//                    label.leadingAnchor.constraint(equalTo: lblSelectTheAdressProof.leadingAnchor),
+//                    label.trailingAnchor.constraint(equalTo: lblSelectTheAdressProof.trailingAnchor)
+//                ])
+//
+//                optionalLabel = label
+//            }
+//
+//            fetchReferralDetails()
+//            viewExpand.isHidden = false
+//            btnExpand.isHidden = false
+//            imgPrivacy.isHidden = true
+//            expandableViewHeightConstraint.constant = 0
+//           
+//            expandableView.clipsToBounds = true
+//            
+//            // MARK: - API se aaye data ke saath label update
+//            if let decoded = self.referralDetailsModel { // assume yeh variable API response store karta hai
+//                if let referredName = decoded.data?.referredName,
+//                   let nbdName = decoded.data?.referrer?.nbdName {
+//                    lblNeighbrsnookHeading.text = "You have been referred by \(referredName) from \(nbdName), hence providing ID is optional"
+//                } else {
+//                    lblNeighbrsnookHeading.text = "You have been referred, hence providing ID is optional"
+//                }
+//            } else {
+//                // fallback text agar API data abhi nahi aaya
+//                lblNeighbrsnookHeading.text = "You have been referred, hence providing ID is optional"
+//            }
+//            
+//        } else {
+//            // Optional: handle other cases or default UI
+//            lblSelectTheAdressProof.text = "Address Proof for your residence"
+//            viewExpand.isHidden = true
+//            btnExpand.isHidden = true
+//        }
+
+        
+        // MARK: - Referral UI Logic
+
+        if referralStatus == 1 && referrerNeighbourhoodStatus == 0 {
+
+            // Case 1: referral = 1 AND referrerNeighbourhoodStatus = 0
+            // Hide Expand View (ID is optional)
+            lblSelectTheAdressProof.text = "Select Address Proof for your residence"
+            viewExpand.isHidden = true
+            btnExpand.isHidden = true
+            viewReferdCodeHeight.constant = -40
+            viewReferralCodeBottmHeight.constant = 0
+            self.view.layoutIfNeeded()
+
+        } else if referralStatus == 1 && referrerNeighbourhoodStatus == 1 {
+
+            // Case 2: referral = 1 AND referrerNeighbourhoodStatus = 1
+            // Show Expand View + Optional Label
+            lblSelectTheAdressProof.text = "Address Proof for your residence"
+
+            if optionalLabel == nil {
+                selectViewHeightShowOptinal.constant += 20
+                let label = UILabel()
+                label.text = "(optional)"
+                label.font = UIFont.systemFont(ofSize: 12)
+                label.textColor = UIColor.gray
+                label.translatesAutoresizingMaskIntoConstraints = false
+                viewExpand.addSubview(label)
+                lblSelectTheAdressProof.superview?.addSubview(label)
+
+                NSLayoutConstraint.activate([
+                    label.topAnchor.constraint(equalTo: lblSelectTheAdressProof.bottomAnchor, constant: 4),
+                    label.leadingAnchor.constraint(equalTo: lblSelectTheAdressProof.leadingAnchor),
+                    label.trailingAnchor.constraint(equalTo: lblSelectTheAdressProof.trailingAnchor)
+                ])
+
+                optionalLabel = label
+            }
+
+            fetchReferralDetails()
+            viewExpand.isHidden = false
+            btnExpand.isHidden = false
+            imgPrivacy.isHidden = true
+            expandableViewHeightConstraint.constant = 0
+            expandableView.clipsToBounds = true
+
+            // API data update
+            if let decoded = self.referralDetailsModel {
+                if let referredName = decoded.data?.referredName,
+                   let nbdName = decoded.data?.referrer?.nbdName {
+                    lblNeighbrsnookHeading.text = "You have been referred by \(referredName) from \(nbdName), hence providing ID is optional"
+                } else {
+                    lblNeighbrsnookHeading.text = "You have been referred, hence providing ID is optional"
+                }
+            } else {
+                lblNeighbrsnookHeading.text = "You have been referred, hence providing ID is optional"
+            }
+
+        } else if referralStatus == 0 {
+
+            // Case 3: referral = 0 (no referral)
+            lblSelectTheAdressProof.text = "Select Address Proof for your residence"
+            viewExpand.isHidden = true
+            btnExpand.isHidden = true
+            viewReferdCodeHeight.constant = -40
+            viewReferralCodeBottmHeight.constant = 0
+            self.view.layoutIfNeeded()
+        }
+
+        
+        
+        viewSelectProof.layer.cornerRadius = 16
+        viewSelectProof.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
+        viewSelectProof.clipsToBounds = true
+
         
     }
+    
+   
+    
     
     
     override func viewWillAppear(_ animated: Bool) {
@@ -286,6 +446,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.viewThankYou.center = self.view.center
+        
     }
     
     func loadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
@@ -315,19 +476,16 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         }
     }
     
-    
     @IBAction func expandCollapseButtonTapped(_ sender: UIButton) {
-        isExpanded.toggle() // true/false toggle
-        expandableView.clipsToBounds = true
-        expandableViewHeightConstraint.constant = isExpanded ? 300 : 0 
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
-
-        // Optional: Change button title/image for expand/collapse
-        sender.setTitle(isExpanded ? "Collapse" : "Expand", for: .normal)
-    }
-    
+            isExpanded.toggle()
+            expandableView.clipsToBounds = true
+            expandableViewHeightConstraint.constant = isExpanded ? 300 : 0
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+             // Optional: Change button title/image for expand/collapse
+            sender.setTitle(isExpanded ? "Collapse" : "Expand", for: .normal)
+        }
     
     // MARK: - Action
     
@@ -360,10 +518,8 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
                 ]
             )
             // 2️⃣ Save registration flags
-            UserDefaults.standard.set("done", forKey: "registrationStep")
             guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else { return }
-            UserDefaults.standard.set("done", forKey: "registrationStep")
-            UserDefaults.standard.set(true, forKey: "isRegistered")
+
             
             self.navigationController?.pushViewController(vc, animated: true)
         }
@@ -514,32 +670,64 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     
     
     @IBAction func action_Register(_ sender: Any) {
-        // 1. Document selection required
-        guard let docType = selectedDocumentType, docType != .none else {
-            showAlert(message: "Please select a document type for your address proof")
+        let referralStatus = UserDefaults.standard.integer(forKey: "referralStatus")
+        let referrerNeighbourhoodStatus = self.referrerNeighbourhoodStatus ?? 0  // ← from API or model
+        print("referralStatus:", referralStatus)
+        print("referrerNeighbourhoodStatus:", referrerNeighbourhoodStatus)
+        
+        // ✅ CASE 1: Skip validation if BOTH are 1
+        if referralStatus == 1 && referrerNeighbourhoodStatus == 1 {
+            print("✅ Both statuses are 1 — skipping document validation")
+            
+            // Gender validation
+            guard let genderText = genderTextField.text,
+                  genderOptions.contains(genderText),
+                  genderText != genderOptions[0] else {
+                showAlert(message: "Please select your gender")
+                return
+            }
+
+            // DOB validation
+            guard let dob = dobTextField.text, !dob.isEmpty else {
+                showAlert(message: "Please enter your Date of Birth")
+                return
+            }
+
+            // All good → Navigate directly
+            navigateToNeigbrnookViewController()
             return
         }
-        
-        switch docType {
-        case .aadhaar, .passport, .voterID, .drivingLicense:
-            if frontImage == nil {
-                showAlert(message: frontImageMessage(for: docType))
+
+        // ✅ CASE 2: referralStatus == 0 → Document validation required
+        if referralStatus == 0 || referrerNeighbourhoodStatus == 0 {
+            print("⚠️ One or both statuses are 0 — perform document validation")
+            
+            guard let docType = selectedDocumentType, docType != .none else {
+                showAlert(message: "Please select a document type for your address proof")
                 return
             }
-            if backImage == nil {
-                showAlert(message: backImageMessage(for: docType))
-                return
+            
+            switch docType {
+            case .aadhaar, .passport, .voterID, .drivingLicense:
+                if frontImage == nil {
+                    showAlert(message: frontImageMessage(for: docType))
+                    return
+                }
+                if backImage == nil {
+                    showAlert(message: backImageMessage(for: docType))
+                    return
+                }
+            case .rentdocs:
+                if frontImage == nil {
+                    showAlert(message: frontImageMessage(for: docType))
+                    return
+                }
+            default:
+                break
             }
-        case .rentdocs:
-            if frontImage == nil {
-                showAlert(message: frontImageMessage(for: docType))
-                return
-            }
-        default:
-            break
         }
         
-        // 3. Gender Validation
+        // ✅ Gender validation (for both cases)
         guard let genderText = genderTextField.text,
               genderOptions.contains(genderText),
               genderText != genderOptions[0] else {
@@ -547,38 +735,53 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             return
         }
         
-        // 4. DOB Validation
+        // ✅ DOB validation (for both cases)
         guard let dob = dobTextField.text, !dob.isEmpty else {
             showAlert(message: "Please enter your Date of Birth")
             return
         }
+        
+        // ✅ All validations passed → Proceed
         UIHelper.showLoader(on: sender as! UIButton, show: true)
-        
-        // --- API call only if ALL validations pass ----
-        
         showRegSecConfirmationAlert(loaderButton: sender as! UIButton) {
             self.callRegSecWebService {
                 DispatchQueue.main.async { [self] in
                     UIHelper.showLoader(on: sender as! UIButton, show: false)
-                    // Thank you/or next screen wala code yahan
+                    
                     let dimView = UIView(frame: self.view.bounds)
                     dimView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
                     dimView.tag = 999
                     self.view.addSubview(dimView)
+                    
                     self.viewThankYou.layer.cornerRadius = 12
                     self.viewThankYou.center = self.view.center
                     if let btnTitle = self.bntNameUpdate {
                         btnRegister.setTitle(btnTitle, for: .normal)
                     }
+                    
                     UserDefaults.standard.set("completed", forKey: "registrationStep")
                     self.viewThankYou.isHidden = false
                     self.viewThankYou.alpha = 1
                     self.view.bringSubviewToFront(self.viewThankYou)
+                    
                     print("🎉 Registration Step III success")
                 }
             }
         }
     }
+
+
+    func navigateToNeigbrnookViewController() {
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil) // Adjust if storyboard name different
+        if let neighbrnookVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController {
+            callRegSecWebService{}
+ 
+            self.navigationController?.pushViewController(neighbrnookVC, animated: true)
+        }
+    }
+
+
     
     func showRegSecConfirmationAlert(loaderButton: UIButton, completion: @escaping () -> Void) {
         var locText = "your area"
@@ -736,8 +939,6 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     func cropViewController(_ cropViewController: TOCropViewController, didCropTo image: UIImage, with cropRect: CGRect, angle: Int) {
         cropViewController.dismiss(animated: true) { [self] in
             self.isComingFromImagePicker = false // ✅ Reset here safely
-            
-            
             if selectedDocumentType == .aadhaar {
                 if isSelectingFrontImage {
                     // ✅ Mask only Aadhaar front image
@@ -792,13 +993,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         btnFront.isHidden = (frontImage != nil)
         btnBack.isHidden = (backImage != nil)
     }
-    
-    
-    
-    
-    
-    
-    
+   
     @objc func frontImageTapped() {
         if let frontImage = self.frontImage {
             showImagePopup(with: frontImage, isFront: true)
@@ -1063,13 +1258,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             dobTextField.text = dateFormatter.string(from: selectedDate)
         }
     }
-    
-    
-    
-    
-    
-    
-    
+   
     // Hide karte waqt aap ye function use kar sakte hain:
     func hideStackViewImage() {
         stackViewImg.isHidden = true
@@ -1082,6 +1271,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     // MARK: - api call
     
     func callRegSecWebService(_ completionClosure: @escaping () -> ()) {
+        let referralStatus = UserDefaults.standard.integer(forKey: "referralStatus")
         let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
         
         // Gender mapping
@@ -1092,7 +1282,6 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             case "female": genderValue = "2"
             case "other": genderValue = "3"
             default: genderValue = ""
-                
             }
         }
         
@@ -1103,7 +1292,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             if let date = dateFormatter.date(from: dobString) {
                 formattedDOB = dateFormatter.string(from: date)
             } else {
-                formattedDOB = dobString // fallback: pass as is
+                formattedDOB = dobString
             }
         }
         
@@ -1113,56 +1302,59 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
             "dob": formattedDOB,
             "gender": genderValue,
+            "referral_code": lblReferCode.text ?? "",
             "term": "1"
         ]
-        
-        
         print("Request Parameters: \(dictParams)")
-        
-        // Handle images
+        // Images array
         var images: [(key: String, image: UIImage?)] = []
         
-        switch selectedDocumentType {
-        case .aadhaar:
-            guard let front = frontImage else { print("Aadhaar Front image upload karein"); return }
-            guard let back = backImage else { print("Aadhaar Back image upload karein"); return }
-            images.append(("aadharFront", front))
-            images.append(("aadharBack", back))
-            
-        case .passport:
-            guard let front = frontImage else { print("Passport Front image upload karein"); return }
-            guard let back = backImage else { print("Passport Back image upload karein"); return }
-            images.append(("passportFront", front))
-            images.append(("passportBack", back))
-            
-        case .voterID:
-            guard let front = frontImage else { print("Voter ID Front image upload karein"); return }
-            guard let back = backImage else { print("Voter ID Back image upload karein"); return }
-            images.append(("voterFront", front))
-            images.append(("voterBack", back))
-            
-        case .drivingLicense:
-            guard let front = frontImage else { print("Driving License Front image upload karein"); return }
-            guard let back = backImage else { print("Driving License Back image upload karein"); return }
-            images.append(("dlFront", front))
-            images.append(("dlBack", back))
-            
-        case .rentdocs:
-            guard let front = frontImage else { print("Rent Document image upload karein"); return }
-            images.append(("rentdocs", front))
-            
-        default:
-            print("Koi document selected nahi hai")
-            return
+        if referralStatus == 0 {
+            // Document validation sirf status 0 ke liye
+            switch selectedDocumentType {
+            case .aadhaar:
+                guard let front = frontImage else { print("Aadhaar Front image upload karein"); return }
+                guard let back = backImage else { print("Aadhaar Back image upload karein"); return }
+                images.append(("aadharFront", front))
+                images.append(("aadharBack", back))
+                
+            case .passport:
+                guard let front = frontImage else { print("Passport Front image upload karein"); return }
+                guard let back = backImage else { print("Passport Back image upload karein"); return }
+                images.append(("passportFront", front))
+                images.append(("passportBack", back))
+                
+            case .voterID:
+                guard let front = frontImage else { print("Voter ID Front image upload karein"); return }
+                guard let back = backImage else { print("Voter ID Back image upload karein"); return }
+                images.append(("voterFront", front))
+                images.append(("voterBack", back))
+                
+            case .drivingLicense:
+                guard let front = frontImage else { print("Driving License Front image upload karein"); return }
+                guard let back = backImage else { print("Driving License Back image upload karein"); return }
+                images.append(("dlFront", front))
+                images.append(("dlBack", back))
+                
+            case .rentdocs:
+                guard let front = frontImage else { print("Rent Document image upload karein"); return }
+                images.append(("rentdocs", front))
+                
+            default:
+                print("Koi document selected nahi hai")
+                return
+            }
+        } else {
+            // referralStatus == 1 → image/document validation skip
+            print("Referral status 1: skipping document/image upload")
         }
         
-        // API URL  //dev.
+        // URL & request setup
         guard let url = URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=reg-step-III") else {
             print("URL invalid hai")
             return
         }
         
-        // Request setup
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
@@ -1171,7 +1363,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         let body = createMultipartBody(with: dictParams, images: images, boundary: boundary)
         request.httpBody = body
         
-        // Network call
+        // API call
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Error: \(error.localizedDescription)")
@@ -1210,6 +1402,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         }
         task.resume()
     }
+
     
     
     // Function to create multipart body
@@ -1280,6 +1473,76 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         }
     }
     
+    func fetchReferralDetails() {
+        let referredPhone = UserDefaults.standard.string(forKey: "savedPhoneNumber") ?? ""
+
+        let baseURL = "https://dev.neighbrsnook.com/admin/api/referrals/user-referral-code"
+        let params: [String: String] = [
+            "referred_phone": referredPhone,
+            "api": "DEV-3a9f1d2e7b8c4d6f1234abcd5678ef90"
+        ]
+        
+        var urlComponents = URLComponents(string: baseURL)!
+        urlComponents.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        guard let finalURL = urlComponents.url else { return }
+        
+        var request = URLRequest(url: finalURL)
+        request.httpMethod = "GET"
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ Error:", error.localizedDescription)
+                return
+            }
+            
+            guard let data = data else { return }
+            
+            do {
+                let decoded = try JSONDecoder().decode(ReferralDetailsModel.self, from: data)
+                
+                // Store the model in VC variable
+                self.referralDetailsModel = decoded
+                
+                DispatchQueue.main.async {
+                    print("✅ API Success")
+                    print("Referred Name:", decoded.data?.referredName ?? "")
+                    print("Referral Code:", decoded.data?.referralCode ?? "")
+                    print("Neighbourhood Name:", decoded.data?.referrer?.nbdName ?? "")
+                    self.lblReferCode.text = decoded.data?.referralCode ?? ""
+                    // ✅ Abhi yahan update karo heading label based on referralStatus
+                    let referralStatus = UserDefaults.standard.integer(forKey: "referralStatus")
+                    if referralStatus == 1 {
+                        if let referredName = decoded.data?.referredName,
+                           let nbdName = decoded.data?.referrer?.nbdName {
+                            self.lblNeighbrsnookHeading.text = "You have been referred by \(referredName) from \(nbdName), hence providing ID is optional"
+                        } else {
+                            self.lblNeighbrsnookHeading.text = "You have been referred, hence providing ID is optional"
+                        }
+                        self.viewExpand.isHidden = false
+                        self.btnExpand.isHidden = false
+                        self.expandableViewHeightConstraint.constant = 0
+                        self.expandableView.clipsToBounds = true
+                    } else if referralStatus == 0 {
+                        self.lblSelectTheAdressProof.text = "Select Address Proof for your residence"
+                        self.viewExpand.isHidden = true
+                        self.btnExpand.isHidden = true
+                    } else {
+                        self.lblSelectTheAdressProof.text = "Address Proof for your residence"
+                        self.viewExpand.isHidden = true
+                        self.btnExpand.isHidden = true
+                    }
+                }
+                
+            } catch {
+                let jsonString = String(data: data, encoding: .utf8)
+                print("❌ JSON decode error:", error.localizedDescription)
+                print("📜 Raw Response:", jsonString ?? "")
+            }
+        }
+        
+        task.resume()
+    }
+
     
 }
 

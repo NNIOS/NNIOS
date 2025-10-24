@@ -1080,6 +1080,13 @@ class WebService {
           }
     }
     
+    
+    
+   
+    
+    
+    
+    
 //    func callPostListWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: PostListModel) -> ()) {
 //          RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kPostList, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
 //          {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
@@ -3428,6 +3435,109 @@ class WebService {
                   }
             }
     
+    
+    func callNeighListReferWebService(
+           withParams dictParams: [String: Any],
+           _ completion: @escaping (ReferListNeighbourhoodModel) -> Void,
+           onError: @escaping (String) -> Void
+       ) {
+           RSNetworkManager.shared.newMarketRequestApi(
+               withServiceName: WebServiceName.kFeferSearNeighbourhood,
+               requestMethod: .GET,
+               requestParameters: dictParams,
+               withProgressHUD: true
+           ) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+               
+               let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+               
+               switch statusCode {
+               case .SUCCESS:
+                   do {
+                       guard let result = result else {
+                           onError("No data received")
+                           return
+                       }
+                       let data = try JSONDecoder().decode(ReferListNeighbourhoodModel.self, from: result)
+                       completion(data)
+                   } catch {
+                       onError("Decoding error: \(error.localizedDescription)")
+                   }
+                   
+               case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                   onError(FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                   
+               case .UNAUTHORIZED:
+                   onError("Unauthorized access")
+                   
+               default:
+                   onError("Unexpected response: \(statusCode)")
+               }
+           }
+       }
+
+    
+    
+    func callReferralByPhoneCodeWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: ReferralDetailsModel) -> ()) {
+          RSNetworkManager.shared.newMarketRequestApi(withServiceName: WebServiceName.kreferralsCodeByPhone, requestMethod: .GET, requestParameters: dictParams, withProgressHUD: true)
+          {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+            let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+            switch statusCode {
+            case .SUCCESS:
+              do {
+                let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                  FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+
+                let data = try JSONDecoder().decode(ReferralDetailsModel.self, from: result!)
+                completionClosure(data)
+              } catch {
+                print(error.localizedDescription)
+              }
+
+            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+              print("")
+              self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+            case .UNAUTHORIZED:
+                print(error)
+           //   self.showLogoutAlert()
+            default:
+              break
+            }
+          }
+    }
+    
+    
+    
+    func callReferralListUserWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: ReferralResponseList) -> ()) {
+          RSNetworkManager.shared.newMarketRequestApi(withServiceName: WebServiceName.KFeferralsuserReferralsList, requestMethod: .GET, requestParameters: dictParams, withProgressHUD: true)
+          {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+            let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+            switch statusCode {
+            case .SUCCESS:
+              do {
+                let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                  FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+
+                let data = try JSONDecoder().decode(ReferralResponseList.self, from: result!)
+                completionClosure(data)
+              } catch {
+                print(error.localizedDescription)
+              }
+
+            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+              print("")
+              self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+            case .UNAUTHORIZED:
+                print(error)
+           //   self.showLogoutAlert()
+            default:
+              break
+            }
+          }
+    }
+    
+    
+    
+
     
     
     

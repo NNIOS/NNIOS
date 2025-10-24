@@ -6,7 +6,6 @@
 //
 
 import UIKit
-
 class ReferListNeighbourhoodTableViewCell: UITableViewCell {
     
     @IBOutlet weak var checkboxButton: UIButton!
@@ -20,15 +19,26 @@ class ReferListNeighbourhoodTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        setupButton()
         updateButtonAppearance()
+        selectListDataLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
     }
     
-    func updateButtonAppearance() {
-        checkboxButton.setTitle(isChecked ? "●" : "", for: .normal)
-        checkboxButton.layer.cornerRadius = checkboxButton.bounds.size.width / 2
+    private func setupButton() {
+        checkboxButton.layer.cornerRadius = checkboxButton.frame.height / 2
         checkboxButton.layer.borderWidth = 2
-        let darkGreenColor = UIColor(red: 0.0, green: 128/255.0, blue: 0.0, alpha: 1.0)
-        checkboxButton.layer.borderColor = isChecked ? darkGreenColor.cgColor : UIColor.clear.cgColor
+        checkboxButton.layer.borderColor = UIColor.systemGray4.cgColor
+        checkboxButton.backgroundColor = .clear
         checkboxButton.clipsToBounds = true
+    }
+    
+    private func updateButtonAppearance() {
+        if isChecked {
+            checkboxButton.backgroundColor = UIColor.systemGreen
+            checkboxButton.layer.borderColor = UIColor.systemGreen.cgColor
+        } else {
+            checkboxButton.backgroundColor = .clear
+            checkboxButton.layer.borderColor = UIColor.systemGray4.cgColor
+        }
     }
 }

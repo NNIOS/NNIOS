@@ -81,8 +81,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let keyboardManager = IQKeyboardManager.shared
         keyboardManager.isEnabled = true
+        keyboardManager.enableAutoToolbar = true
         keyboardManager.resignOnTouchOutside = true
-        keyboardManager.enableAutoToolbar = false
+        
+        // Optional: Additional IQKeyboardManager configuration for v8+
+        keyboardManager.toolbarConfiguration.manageBehavior = .bySubviews
+        keyboardManager.toolbarConfiguration.placeholderConfiguration.showPlaceholder = true
+        keyboardManager.toolbarConfiguration.previousNextDisplayMode = .default
+        
         // Listen for verification popup notification
         if #available(iOS 16.0, *) {
                 ATTrackingManager.requestTrackingAuthorization { status in
@@ -192,6 +198,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
  
         print("✅ Facebook SDK Initialized with App ID: 929962769257001")
+        SDK25CompatibilityHelper.enableOldBehavior(window: window)
+        
+        
 
         return true
     }

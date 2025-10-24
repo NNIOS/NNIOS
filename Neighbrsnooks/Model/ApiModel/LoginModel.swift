@@ -39,15 +39,35 @@ import Foundation
 
 import Foundation
 
-// MARK: - Welcome
+// MARK: - LoginModel (root level)
 struct LoginModel: Codable {
-    
     let status, message: String?
-    let logindata: loginData?  // Optional banaya
-    let id: String? 
+    let logindata: loginData?
+    let id: String?
+
+    // New properties added at root level (based on your JSON)
+    let refer_neighbourhood_id: String?
+    let refer_neighbourhood_name: String?
+    let referral_status: Int?
+    let refer_city_name: String?          // added
+    let refer_country_name: String?       // added
+    let refer_pincode: String?                // added; use Int if number
+    let refer_state_name: String?         // added
+    
+    enum CodingKeys: String, CodingKey {
+        case status, message, logindata, id
+        case refer_neighbourhood_id
+        case refer_neighbourhood_name
+        case referral_status
+        case refer_city_name                 // added
+        case refer_country_name              // added
+        case refer_pincode                  // added
+        case refer_state_name               // added
+    }
 }
 
-// MARK: - Logindata
+// MARK: - loginData
+// MARK: - loginData
 struct loginData: Codable {
     let id: Int?
     let username, firstname, lastname, emailid: String?

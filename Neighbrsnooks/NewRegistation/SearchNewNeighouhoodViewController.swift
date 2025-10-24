@@ -246,6 +246,9 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
         // ✅ Find the existing previous VC in the navigation stack
         if let previousVC = self.navigationController?.viewControllers.first(where: { $0 is NewRegistationSecondStepVC }) as? NewRegistationSecondStepVC {
             previousVC.shouldUpdateUIOnAppear = false // ✅ Update the real instance
+            previousVC.city = self.city
+            previousVC.state = self.state
+            previousVC.zipcode = self.zipcode
         }
         // ✅ Pop back
         self.navigationController?.popViewController(animated: true)

@@ -53,6 +53,21 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
             }
        
         self.lblNeighbourhood.text = self.profileData?.neighborhood ?? ""
+        // Label ke text ko set kar rahe hain
+        self.lblNeighbourhood.text = self.profileData?.neighborhood ?? ""
+
+        if let neighborhood = self.profileData?.neighborhood {
+            UserDefaults.standard.set(neighborhood, forKey: "savedNeighborhood")
+        }
+
+        if let nbdId = self.profileData?.nbdId {
+            UserDefaults.standard.set(nbdId, forKey: "savedNbdId")
+        }
+
+        UserDefaults.standard.synchronize()
+
+
+        
         let desiredWidth: CGFloat = 280
         
         if sideMenuContainer.frame.width != desiredWidth {

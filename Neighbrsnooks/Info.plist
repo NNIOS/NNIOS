@@ -57,6 +57,10 @@
 		<string>processing</string>
 	</array>
     
+    <key>UIDesignRequiresCompatibility</key>
+    <true/>
+
+    
     <key>FacebookAppID</key>
     <string>929962769257001</string>
     <key>FacebookDisplayName</key>

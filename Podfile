@@ -8,7 +8,7 @@ target 'Neighbrsnooks' do
   
 
 
-  pod 'IQKeyboardManagerSwift', '8.0.0'
+ pod 'IQKeyboardManagerSwift', '~> 8.0'
   pod 'SwiftKeychainWrapper'
   pod 'SVProgressHUD'
   pod 'Kingfisher'

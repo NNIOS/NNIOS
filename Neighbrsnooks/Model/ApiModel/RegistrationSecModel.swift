@@ -7,20 +7,30 @@
 
 import Foundation
 
-struct RegistrationSecModel: Codable{
+struct RegistrationSecModel: Codable {
     let status: String?
     var data: [RegistrationSec]?
     let message: String?
+
+    // New keys added:
+    let referrer_neighbourhood_status: Int?
+    let referrer_msg: String?
+
+    enum CodingKeys: String, CodingKey {
+        case status, data, message
+        case referrer_neighbourhood_status
+        case referrer_msg
+    }
 }
+
 struct RegistrationSec: Codable {
     let nbdID, nbdName, distance: String?
-    
-    
+
     enum CodingKeys: String, CodingKey {
-            case nbdID = "nbd_id"
-            case nbdName = "nbd_name"
-            case distance
-        }
+        case nbdID = "nbd_id"
+        case nbdName = "nbd_name"
+        case distance
+    }
 }
 
  
@@ -29,4 +39,7 @@ struct RegistrationNewSecModel: Codable {
     let status: String?
     var data: String?
     let message: String?
+    
+    
+    
 }

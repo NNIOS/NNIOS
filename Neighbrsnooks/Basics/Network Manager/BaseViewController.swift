@@ -128,7 +128,11 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
     }
 
 
-
+    func isValidPhoneNumber(_ number: String) -> Bool {
+        let phoneRegex = "^[0-9]{10}$"
+        let predicate = NSPredicate(format: "SELF MATCHES %@", phoneRegex)
+        return predicate.evaluate(with: number)
+    }
 
     
     private func setBackgroundImage() {

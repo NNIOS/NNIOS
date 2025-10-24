@@ -11,49 +11,66 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
+    var loggedInUserId: String?
     
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-            NetworkMonitor.shared.startMonitoring()
-            
-            guard let windowScene = (scene as? UIWindowScene) else { return }
-            window = UIWindow(windowScene: windowScene)
-            window?.overrideUserInterfaceStyle = .light
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            
-        // Always show SplashVC first
-//                let splashVC = storyboard.instantiateViewController(withIdentifier: "SplashVC")
-//                window?.rootViewController = splashVC
-//                window?.makeKeyAndVisible()
-                
-                
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 2) { // 2 seconds splash delay
-                if let userID = UserDefaults.standard.string(forKey: "userid"), !userID.isEmpty {
-                    let registrationStep = UserDefaults.standard.string(forKey: "registrationStep") ?? "done"
-                    
-                    switch registrationStep {
-                    case "step1":
-                        if let vc = storyboard.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
-                            vc.sourceScreen = "Malik"
-                            self.window?.rootViewController = UINavigationController(rootViewController: vc)
-                        }
-                    case "step2":
-                        if let vc = storyboard.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC{
-                            vc.sourceScreen = "Malik"
-                            self.window?.rootViewController = UINavigationController(rootViewController: vc)
-                        }
-                    default:
-                        let homeVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController")
-                        self.window?.rootViewController = UINavigationController(rootViewController: homeVC)
-                    }
-                } else {
-                    let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
-                    self.window?.rootViewController = UINavigationController(rootViewController: loginVC)
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
+
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        window = UIWindow(windowScene: windowScene)
+        window?.overrideUserInterfaceStyle = .light
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+
+        // 1️⃣ Check if user already logged in
+        if let userId = UserDefaults.standard.string(forKey: "userid"),
+           !userId.isEmpty,
+           let message = UserDefaults.standard.string(forKey: "loginMessage")?.lowercased() {
+
+            print("🔁 Auto-login with User ID: \(userId), message: \(message)")
+
+            var rootVC: UIViewController?
+
+            switch message {
+            case "login successfully.":
+                // Registration completed → go directly to Neigbrnook
+                rootVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController")
+
+            case "address incomplete",
+                 "you can login, neighbourhood could not be found then take him to address page":
+                if let vc = storyboard.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
+                    vc.userId = userId
+                    vc.sourceScreen = "FirstSteep"
+                    // Pass saved referral info if available
+                    vc.referNeighbourhoodID = UserDefaults.standard.string(forKey: "referNeighbourhoodID")
+                    vc.referNeighbourhoodName = UserDefaults.standard.string(forKey: "referNeighbourhoodName")
+                    vc.referralStatus = UserDefaults.standard.integer(forKey: "referralStatus")
+                    rootVC = vc
                 }
-                
-                    self.window?.makeKeyAndVisible()
-//            }
-        
+
+            case "dob incomplete":
+                if let vc = storyboard.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
+                    vc.userId = userId
+                    rootVC = vc
+                }
+
+            default:
+                rootVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
+            }
+
+            if let rootVC = rootVC {
+                window?.rootViewController = UINavigationController(rootViewController: rootVC)
+            }
+
+        } else {
+            // No login info → show login screen
+            let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
+            window?.rootViewController = UINavigationController(rootViewController: loginVC)
         }
+
+        window?.makeKeyAndVisible()
+    }
 
 
 

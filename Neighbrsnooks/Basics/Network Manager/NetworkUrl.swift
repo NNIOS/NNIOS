@@ -147,7 +147,6 @@ struct WebServiceName {
     static let kpostDetail = "posting?flag=postdetails"
     static let kDeletePost = "posting?flag=deletepostbyuser"
     static let kDeletePostCmnd = "posting?flag=deletecomment"
-    
     static let kpollEdit = "poll?flag=editpoll"
     static let kUploadedDocuments = "/master?flag=uploaddocs"
     static let kUpdateEvent = "event?flag=updateevent"
@@ -161,8 +160,10 @@ struct WebServiceName {
     static let KAwaitStatus = "master?flag=awaitstatus"
     static let kCommentPostLike = "posting?flag=likecomment"
     static let kDeleteMsg = "chat?flag=deletemessage"
-    
-    
+    static let kReferralCreate = "referrals/create"
+    static let kFeferSearNeighbourhood = "referrals/search-neighbourhood"
+    static let kreferralsCodeByPhone = "referrals/user-referral-code"
+    static let KFeferralsuserReferralsList = "referrals/user-referrals"
     
     
     //https://dev.neighbrsnook.com/marketplace/api/

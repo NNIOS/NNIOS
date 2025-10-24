@@ -31,15 +31,18 @@ class LoginViewController: BaseViewController {
     var fireBaseToken : UpdateTokenModel?
     var show = false
     var loginData : LoginModel?
+    var referNeighbourhoodID: String?
+    var referNeighbourhoodName: String?
     // irshad code
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.hidesBackButton = true
-//        updateColors()
+       
+      
+
           EventPostPrcntgLbl.font = UIFont(name: "Montserrat-Regular", size: 16)
         
          self.additionalSafeAreaInsets.top = -50
-         // Do any additional setup after loading the view.
     }
     
     
@@ -79,82 +82,187 @@ class LoginViewController: BaseViewController {
         
     }
     
-    @IBAction func LoginBtn(_ sender: UIButton){
-        
-        // Mobile and Password Check
-        if tfMobile.text == "" {
-//            showCustomAlert(message: "Please enter your mobile number")
+    @IBAction func LoginBtn(_ sender: UIButton) {
+        if tfMobile.text?.isEmpty ?? true {
             alertToast(Message: "Please enter your mobile number")
-
-//            let alert = UIAlertController(title: "", message: "Please enter your mobile number", preferredStyle: .alert)
-//            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
-//            self.present(alert, animated: true, completion: nil)
-            
-        } else if tfPassword.text == "" {
+            return
+        } else if tfPassword.text?.isEmpty ?? true {
             alertToast(Message: "Please enter password")
-
-//            let alert = UIAlertController(title: "", message: "Please enter password", preferredStyle: .alert)
-//            alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
-//            self.present(alert, animated: true, completion: nil)
+            return
+        }
+        
+        callLoginWebService { [weak self] in
+            guard let self = self else { return }
             
-        } else {
-            // Call the login web service
-            callLoginWebService { [weak self] in
-                guard let self = self else { return }
-                
-                // Ensure loginData is not nil
-                guard let loginData = self.loginData else {
-                    print("Login data is nil.")
-                    return
-                }
-                
-                // Check if message exists in the loginData
-                if let message = loginData.message {
-                    print("Received Message: \(message)") // Debugging log
-                    
-                    // Trim and convert message to lowercase for case-insensitive matching
-                    let trimmedMessage = message.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                    
-                    switch trimmedMessage {
-                    case "login successfully.":
-                        print("Navigating to NeigbrnookViewController")
-                        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController {
-                            self.navigationController?.pushViewController(vc, animated: false)
-                        }
-                    case "address incomplete":
-                        print("Navigating to NewRegistationSecondStepVC")
-                        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
-                            if let userId = UserDefaults.standard.string(forKey: "userid") {
-                                // Assuming destination controller has a property `userId`
-                                (vc as? NewRegistationSecondStepVC)?.userId = userId
-                            }
-                            self.navigationController?.pushViewController(vc, animated: false)
-                        }
-                    case "dob incomplete":
-                        print("Navigating to RegisterFirstViewController")
-                        if let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
-                            if let userId = UserDefaults.standard.string(forKey: "userid") {
-                                // Assuming destination controller has a property `userId`
-                                (vc as? RegisterFirstViewController)?.userId = userId
-                            }
-                            self.navigationController?.pushViewController(vc, animated: false)
-                        }
-                        
-                    
-                    default:
-                        print("Showing alert for message: \(message)")
-//                        self.showCustomAlert(message: message)
-                        alertToast(Message: message)
-                        
-                    }
-                } else {
-                    print("No message received in response.")
-                }
+            guard let loginData = self.loginData else {
+                print("Login data is nil.")
+                return
             }
             
+            guard let message = loginData.message?.trimmingCharacters(in: .whitespacesAndNewlines) else {
+                print("No message received in response.")
+                return
+            }
+            
+            print("Received Message: \(message)")
+            
+            // ✅ Save message for next auto login
+            UserDefaults.standard.set(message.lowercased(), forKey: "loginMessage")
+            UserDefaults.standard.synchronize()
+            
+            switch message.lowercased() {
+                
+            case "login successfully.":
+                print("Navigating to NeigbrnookViewController")
+                if let vc = self.storyboard?.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController {
+                    self.navigationController?.pushViewController(vc, animated: false)
+                }
+                
+            case "address incomplete":
+                print("Navigating to NewRegistationSecondStepVC (Address Incomplete)")
+                if let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
+                    
+                    if let userId = UserDefaults.standard.string(forKey: "userid") {
+                        vc.userId = userId
+                        vc.referNeighbourhoodID = self.referNeighbourhoodID
+                        vc.referNeighbourhoodName = self.referNeighbourhoodName
+                        vc.sourceScreen = "FirstSteep"
+                    }
+
+                    // ✅ Safe optional check to avoid ambiguity
+                    if let referralStatus = self.loginData?.referral_status, referralStatus == 1 {
+                        vc.selectedLocation = self.loginData?.refer_neighbourhood_name ?? ""
+                        vc.city = self.loginData?.refer_city_name ?? ""
+                        vc.state = self.loginData?.refer_state_name ?? ""
+                        vc.zipcode = self.loginData?.refer_pincode ?? "" // ✅ Convert Int? to String
+                        vc.referralStatus = self.loginData?.referral_status
+                    }
+
+
+                    self.navigationController?.pushViewController(vc, animated: false)
+                }
+                
+            case "you can login, neighbourhood could not be found then take him to address page":
+                print("Navigating to NewRegistationSecondStepVC (Neighbourhood not found)")
+                if let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as? NewRegistationSecondStepVC {
+                    if let userId = UserDefaults.standard.string(forKey: "userid") {
+                        vc.userId = userId
+                        vc.referNeighbourhoodID = self.referNeighbourhoodID
+                        vc.referNeighbourhoodName = self.referNeighbourhoodName
+                        vc.sourceScreen = "FirstSteep"
+                    }
+                    if let referralStatus = self.loginData?.referral_status, referralStatus == 1 {
+                        vc.selectedLocation = self.loginData?.refer_neighbourhood_name ?? ""
+                        vc.city = self.loginData?.refer_city_name ?? ""
+                        vc.state = self.loginData?.refer_state_name ?? ""
+                        vc.zipcode = self.loginData?.refer_pincode ?? ""
+                        vc.referralStatus = self.loginData?.referral_status
+                    }
+                    self.navigationController?.pushViewController(vc, animated: false)
+                }
+                
+            case "dob incomplete":
+                print("Navigating to RegistationAdressProofVC (DOB Incomplete)")
+                if let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
+                    if let userId = UserDefaults.standard.string(forKey: "userid") {
+                        vc.userId = userId
+                        vc.referNeighbourhoodID = self.referNeighbourhoodID
+                        vc.referNeighbourhoodName = self.referNeighbourhoodName
+                    }
+                    self.navigationController?.pushViewController(vc, animated: false)
+                }
+                
+            default:
+                print("Showing alert for message: \(message)")
+                alertToast(Message: message)
+            }
         }
     }
-    
+
+
+
+    func callLoginWebService(_ completionClosure: @escaping () -> Void) {
+        UserDefaults.standard.set(self.tfMobile.text ?? "", forKey: "savedPhoneNumber")
+        let dictParams: [String: Any] = [
+            "mobtoken": FunctionsConstants.kSharedUserDefaults.deviceToken(),
+            "login": tfMobile.text ?? "",
+            "pass": tfPassword.text ?? ""
+        ]
+        print("📩 Login API Params: \(dictParams)")
+        
+        WebService.sharedInstance.callLoginWebService(withParams: dictParams) { data in
+            self.loginData = data
+            
+            print("📦 Full API Response: \(String(describing: data))")
+            
+            guard let loginData = self.loginData else {
+                print("❌ Login data is nil.")
+                self.alertToast(Message: "Unable to process response.")
+                return
+            }
+            
+            // ✅ Extract userId (check both places)
+            var userIdString: String?
+            if let id = loginData.logindata?.id {
+                userIdString = "\(id)"
+            } else if let id = loginData.id {
+                userIdString = id
+            }
+            
+            if let userId = userIdString {
+                UserDefaults.standard.set(userId, forKey: "userid")
+                print("✅ User ID saved: \(userId)")
+            }
+
+            // ✅ Save neighbourhood data (if available)
+            if let referID = loginData.refer_neighbourhood_id {
+                UserDefaults.standard.set(referID, forKey: "referNeighbourhoodID")
+                print("✅ referNeighbourhoodID saved: \(referID)")
+            }
+
+            if let referName = loginData.refer_neighbourhood_name {
+                UserDefaults.standard.set(referName, forKey: "referNeighbourhoodName")
+                print("✅ referNeighbourhoodName saved: \(referName)")
+            }
+
+            // ✅ Save referralStatus properly (Int)
+            if let refStatus = loginData.referral_status {
+                UserDefaults.standard.set(refStatus, forKey: "referralStatus")
+                print("✅ referralStatus saved: \(refStatus)")
+            } else {
+                print("⚠️ referralStatus is nil in API response.")
+            }
+
+            UserDefaults.standard.synchronize() // optional, ensures immediate write
+            print("🧠 Saved Data in UserDefaults:")
+            print("UserID: \(UserDefaults.standard.string(forKey: "userid") ?? "nil")")
+            print("referNeighbourhoodID: \(UserDefaults.standard.string(forKey: "referNeighbourhoodID") ?? "nil")")
+            print("referNeighbourhoodName: \(UserDefaults.standard.string(forKey: "referNeighbourhoodName") ?? "nil")")
+            print("referralStatus: \(UserDefaults.standard.integer(forKey: "referralStatus"))")
+
+            // ✅ Firebase token update
+            if loginData.status == "success", let _ = loginData.logindata {
+                Messaging.messaging().token { token, error in
+                    if let error = error {
+                        print("❌ Error fetching FCM token: \(error.localizedDescription)")
+                        completionClosure()
+                    } else if let token = token, let userId = userIdString {
+                        print("🔥 Got FCM token after login: \(token)")
+                        self.callUpdateFirebaseTokenPostWebService(userId: userId, firebaseToken: token) {
+                            print("📡 Firebase token updated successfully")
+                            completionClosure()
+                        }
+                    } else {
+                        completionClosure()
+                    }
+                }
+            } else {
+                completionClosure()
+            }
+        }
+    }
+
+
     func showCustomAlert(message: String) {
         let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
         
@@ -176,95 +284,7 @@ class LoginViewController: BaseViewController {
 
     
     
-    func callLoginWebService(_ completionClosure: @escaping () -> Void) {
-        let dictParams: [String: Any] = [
-            "mobtoken": FunctionsConstants.kSharedUserDefaults.deviceToken(),
-            "login": tfMobile.text ?? "",
-            "pass": tfPassword.text ?? ""
-        ]
-        print(dictParams)
-        
-        WebService.sharedInstance.callLoginWebService(withParams: dictParams) { data in
-            self.loginData = data
-            
-            print("Full API Response: \(String(describing: data))")
-            
-            guard let loginData = self.loginData else {
-                print("Login data is nil.")
-                self.alertToast(Message: "Unable to process response.")
-                return
-            }
-            
-            // ✅ Step 1: Get user ID from logindata OR root-level
-            let userIdString: String? = {
-                if let id = loginData.logindata?.id {
-                    return "\(id)"
-                } else if let id = loginData.id {
-                    return id
-                } else {
-                    return nil
-                }
-            }()
-            
-            if let userId = userIdString {
-                UserDefaults.standard.set(userId, forKey: "userid")
-                UserDefaults.standard.synchronize()
-                print("✅ User ID saved: \(userId)")
-            } else {
-                print("❌ User ID not found.")
-            }
-            
-            // ✅ Step 2: Handle success or failure
-            if loginData.status == "success", let logindata = loginData.logindata {
-                UserDefaults.standard.set(logindata.username, forKey: "username")
-                UserDefaults.standard.set(logindata.neighbrshood, forKey: "neighbrshood")
-                UserDefaults.standard.set(logindata.userphoto, forKey: "userphoto")
-                UserDefaults.standard.set(true, forKey: "isRegistered")
-                UserDefaults.standard.set("done", forKey: "registrationStep") // ✅ Add this
-                UserDefaults.standard.synchronize()
-                
-                // ✅ Firebase token update call
-                Messaging.messaging().token { token, error in
-                    if let error = error {
-                        print("❌ Error fetching FCM token: \(error.localizedDescription)")
-                    } else if let token = token, let userId = userIdString {
-                        print("🔥 Got FCM token after login: \(token)")
-                        self.callUpdateFirebaseTokenPostWebService(userId: userId, firebaseToken: token) {
-                            print("📡 Firebase token updated successfully")
-                            completionClosure() // 🚀 call after firebase token update
-                        }
-                    } else {
-                        // Agar token nahi mila, tab bhi continue
-                        completionClosure()
-                    }
-                }
-                
-                print("✅ Login successful. Proceeding...")
-                completionClosure()
-            } else {
-                if let message = loginData.message {
-                    let userId = UserDefaults.standard.string(forKey: "userid")
-                    print("⚠️ Redirecting based on message: \(message), UserID: \(userId ?? "nil")")
-                    switch message {
-                    case "Address Incomplete",
-                         "DOB Incomplete",
-                         "You can't login, Kindly wait Nighborhood assign soon by Admin",
-                         "You can login, Neighbourhood could not be found then take him to address page":
-
-                        self.navigateToViewController(
-                            identifier: "NewRegistationSecondStepVC",
-                            userId: userId,
-                            sourceScreen: "FirstSteep"
-                        )
-
-                    default:
-                        self.alertToast(Message: message)
-                    }
-
-                }
-            }
-        }
-    }
+   
 
     
     // MARK: - Call api firebaseToken // dev

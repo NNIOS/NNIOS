@@ -37,6 +37,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
     @IBOutlet weak var txtFielsAddheight: NSLayoutConstraint!
     @IBOutlet weak var viewHeight: NSLayoutConstraint!
     @IBOutlet weak var btnReachout: UIButton!
+    
     var shouldCallAPIOnAppear: Bool = false
     let locationManager = CLLocationManager()
     var selectedLocation: String?
@@ -70,7 +71,6 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
     var shouldUpdateUIOnAppear = true
     var isComingrom:String?
     let baseViewHeight: CGFloat = 60
-    
     var savedCity: String?
     var savedState: String?
     var savedZipcode: String?
@@ -78,20 +78,34 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
     var savedNeighbourhood: String?
     var savedLatitude: Double?
     var savedLongitude: Double?
+    var referNeighbourhoodID: String?
+    var referNeighbourhoodName: String?
+    var referralStatus: Int?
+    var referCityName: String?
+    var referStateName : String?
+    var referPincode : String?
     
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //        print(profileData)
-        print(name)
+        print("Neighbourhood ID:", referNeighbourhoodID ?? "nil")
+        print("Neighbourhood Name:", selectedLocation ?? "nil")
+        print("Referral Status:", referralStatus ?? 0)
+        lblNeighbrhood.text = selectedLocation ?? ""
+        lblCity.text = city ?? ""
+        lblPincode.text = zipcode ?? ""
+        lblState.text = state ?? ""
+        lblNeighbroodAddresh.text = selectedLocation ?? ""
         tblViewNeighbrhood.isScrollEnabled = false
         txtFieldFlatHouse.autocapitalizationType = .words
         tblViewNeighbrhood.isScrollEnabled = false
         btnReachout.isHidden = true
+        
         if sourceScreen != "profile" && sourceScreen != "secondStep" && sourceScreen != "home" && sourceScreen != "profileback" && sourceScreen !=  "profilebackUn" && sourceScreen !=  "Malik" {
             UserDefaults.standard.set("step1", forKey: "registrationStep")
         }
+        
         tblViewNeighbrhood.allowsSelection = true
         tblViewNeighbrhood.dataSource = self
         tblViewNeighbrhood.delegate = self
@@ -107,7 +121,39 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
         viewNeighbourhood.layer.cornerRadius = 10
         viewNeighbourhood.layer.masksToBounds = true
         
+        //        if isComingFromSearchVC {
+        //            lblNeighbrhood.text =  selectedLocation ?? ""
+        //            lblNeighbroodAddresh.text = fullAddress ?? ""
+        //            lblCity.text = city ?? ""
+        //            lblState.text = state ?? ""
+        //            lblPincode.text = zipcode ?? ""
+        //            print(city)
+        //            print(state)
+        //            self.selectedLatitude = latitudeS
+        //            self.selectedLongitude = longitudeS
+        //            // User ne search kiya hai, toh API call
+        //            if let lat = latitudeS, let long = longitudeS {
+        //                callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: lat, longitude: long))
+        //            }
+        //        } else if sourceScreen != "profile" && sourceScreen != "secondStep" && sourceScreen != "home" && sourceScreen != "profileback" && sourceScreen != "profilebackUn" && sourceScreen != "referralstatus"{
+        //            locationManager.delegate = self
+        //            locationManager.requestWhenInUseAuthorization()
+        //            locationManager.startUpdatingLocation()
+        //        }
         
+        
+        
+        if referralStatus == 1 {
+               if let area = selectedLocation, !area.isEmpty {
+                   // Use dummy coordinates (0.0, 0.0) if actual lat/lon not available
+                   let locationCoord = CLLocationCoordinate2D(latitude: latitudeS ?? 0.0,
+                                                              longitude: longitudeS ?? 0.0)
+                   callSearchNeighbrWebService(location: locationCoord)
+               }
+           } else {
+               // Normal flow: request location if referralStatus != 1
+               
+           }
         
         if isComingFromSearchVC {
             lblNeighbrhood.text = selectedLocation ?? ""
@@ -115,19 +161,30 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
             lblCity.text = city ?? ""
             lblState.text = state ?? ""
             lblPincode.text = zipcode ?? ""
-            print(city)
-            print(state)
+            
             self.selectedLatitude = latitudeS
             self.selectedLongitude = longitudeS
+            
             // User ne search kiya hai, toh API call
             if let lat = latitudeS, let long = longitudeS {
                 callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: lat, longitude: long))
             }
-        } else if sourceScreen != "profile" && sourceScreen != "secondStep" && sourceScreen != "home" && sourceScreen != "profileback" && sourceScreen != "profilebackUn" {
+        }
+        else if referralStatus != 1,
+                sourceScreen != "profile",
+                sourceScreen != "secondStep",
+                sourceScreen != "home",
+                sourceScreen != "profileback",
+                sourceScreen != "profilebackUn",
+                sourceScreen != "referralstatus" {
+            
+            // Sirf tabhi location get karega jab referralStatus != 1
             locationManager.delegate = self
             locationManager.requestWhenInUseAuthorization()
             locationManager.startUpdatingLocation()
         }
+        
+        
         
         let areaTapGesture = UITapGestureRecognizer(target: self, action: #selector(areaLabelTapped))
         viewNeighbourhood.isUserInteractionEnabled = true
@@ -180,6 +237,10 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
         super.viewWillAppear(animated)
         self.adjustTextViewHeight(self.txtFieldFlatHouse)
         
+        if referralStatus == 1 {
+            print("Referral active — skipping location updates and API calls.")
+            return   // stop further updates if needed
+        }
         
         if sourceScreen == "FirstSteep" && shouldUpdateUIOnAppear == false {
             shouldUpdateUIOnAppear = true // always reset for next appear
@@ -233,21 +294,21 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
             self.selectedLongitude = long
         }
     }
-
+    
     
     func adjustTextViewHeight(_ textView: UITextView) {
         let fixedWidth = textView.frame.size.width
         let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: .greatestFiniteMagnitude))
         txtFielsAddheight.constant = newSize.height
-
+        
         let baseViewHeight: CGFloat = 120 // apne base ke hisaab se adjust karna
         viewHeight.constant = baseViewHeight + (newSize.height - textView.frame.height)
-
+        
         UIView.animate(withDuration: 0.2) {
             self.view.layoutIfNeeded()
         }
     }
-
+    
     
     func textViewDidBeginEditing(_ textView: UITextView) {
         placeholderLabel.isHidden = !textView.text.isEmpty
@@ -289,13 +350,13 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
             self.view.layoutIfNeeded()
         }
     }
-
+    
     // MARK: - Allow normal typing (no manual override)
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         return true
     }
-
-
+    
+    
     
     
     
@@ -475,30 +536,30 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
         
     }
     
-     
+    
     func showAlert(title: String = "", message: String) {
-            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
-            let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
-            
-            let titleAttributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: UIColor.black
-            ]
-            let messageAttributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: UIColor.darkGray
-            ]
-            
-            let attributedTitle = NSAttributedString(string: title, attributes: titleAttributes)
-            let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
-            alertController.setValue(attributedTitle, forKey: "attributedTitle")
-            alertController.setValue(attributedMessage, forKey: "attributedMessage")
-            
-            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-            okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
-            alertController.addAction(okAction)
-            present(alertController, animated: true, completion: nil)
-        }
+        let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+        let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
+        
+        let titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: UIColor.black
+        ]
+        let messageAttributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: UIColor.darkGray
+        ]
+        
+        let attributedTitle = NSAttributedString(string: title, attributes: titleAttributes)
+        let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+        alertController.setValue(attributedTitle, forKey: "attributedTitle")
+        alertController.setValue(attributedMessage, forKey: "attributedMessage")
+        
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
+    }
     
     
     @objc func areaLabelTapped() {
@@ -511,6 +572,10 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
             searchNeighouhoodVC.backsourceScreen = "back"
             searchNeighouhoodVC.profileData = profileData
             searchNeighouhoodVC.sourceScreen = self.sourceScreen
+            searchNeighouhoodVC.city = self.city
+            searchNeighouhoodVC.state = self.state
+            searchNeighouhoodVC.zipcode = self.zipcode
+            
             
             self.navigationController?.pushViewController(searchNeighouhoodVC, animated: true)
         }
@@ -577,13 +642,13 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                         AppEvents.ParameterName("platform"): "iOS"
                     ]
                 )
-                 
+                
                 
             }
         }
     }
     
-   
+    
     
     func callNeighorhodStatusStateCity(shouldShowAlert: Bool = true, completion: ((String) -> Void)? = nil) {
         let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
@@ -687,7 +752,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
     // MARK: - Registation Api
     
     func callRegSecWebService() {
-       
+        
         let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
         let dictParams: [String: Any] = [
             "address": txtFieldFlatHouse.text ?? "",
@@ -704,23 +769,74 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 return
             }
             
-            DispatchQueue.main.async {
+            print("🌐 Full callRegSecWebService Response: \(data)")
+            DispatchQueue.main.async { [self] in
                 let status = data.status?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
                 print("📥 Status: \(status ?? "nil")")
                 self.RegistrationSec = data
                 
                 if status == "success" {
-                    
-                    print("✅ Registration Step 2 successful — pushing to RegistationAdressProofVC")
-                    self.pushToRegistrationProofVC()
+                    if let referrerMessage = data.referrer_msg, !referrerMessage.isEmpty {
+                        self.showReferrerAlert(message: referrerMessage, okHandler: {
+                            self.pushToRegistrationProofVC() // Proceed after OK
+                        }, cancelHandler: {
+                            print("User tapped Cancel")
+                        })
+                    } else {
+                        self.pushToRegistrationProofVC()
+                    }
                 } else {
                     self.showAlert(title: "Error", message: data.message ?? "Something went wrong.")
                 }
+                
             }
         }
     }
     
+    
+    // MARK: - Show Referrer Alert
+    func showReferrerAlert(message: String, okHandler: @escaping () -> Void = {}, cancelHandler: (() -> Void)? = nil) {
+        let alert = UIAlertController(title: "Notice", message: nil, preferredStyle: .alert)
+        
+        // Title styling
+        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .semibold)]
+        let attributedTitle = NSAttributedString(string: "Notice", attributes: titleFont)
+        alert.setValue(attributedTitle, forKey: "attributedTitle")
+        
+        // Message styling
+        let messageAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
+            .foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+        ]
+        let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+        alert.setValue(attributedMessage, forKey: "attributedMessage")
+        
+        // ✅ OK button (only triggers handler)
+        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+            okHandler()
+        }
+        okAction.setValue(#colorLiteral(red: 0, green: 0.5603, blue: 0, alpha: 1), forKey: "titleTextColor")
+        alert.addAction(okAction)
+        
+        // Cancel button
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            cancelHandler?()
+        }
+        cancelAction.setValue(UIColor.red, forKey: "titleTextColor")
+        alert.addAction(cancelAction)
+        
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+
+    
+    
     func pushToRegistrationProofVC() {
+        let referNeighbourhoodID = self.RegistrationSec?.data?.first?.nbdID
+        let referNeighbourhoodName = self.RegistrationSec?.data?.first?.nbdName
+        let referrerNbhdStatus = self.RegistrationSec?.referrer_neighbourhood_status
+        
         if self.sourceScreen == "home" {
             if let homeVC = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
                 homeVC.uploadedDocuments = self.savedUploadedDocuments
@@ -728,6 +844,9 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 homeVC.bntNameUpdate = "Update"
                 homeVC.sourceScreen = "home"
                 homeVC.selectedLocation = self.selectedLocation
+                homeVC.referNeighbourhoodID = referNeighbourhoodID
+                homeVC.referNeighbourhoodName = referNeighbourhoodName
+                homeVC.referrerNeighbourhoodStatus = referrerNbhdStatus
                 print(selectedLocation ?? "")
                 self.navigationController?.setViewControllers([homeVC], animated: true)
             }
@@ -738,10 +857,14 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 homeVC.bntNameUpdate = "Update"
                 homeVC.sourceScreen = "profileback"
                 homeVC.selectedLocation = self.selectedLocation
+                // Pass new values
+                homeVC.referNeighbourhoodID = referNeighbourhoodID
+                homeVC.referNeighbourhoodName = referNeighbourhoodName
+                homeVC.referrerNeighbourhoodStatus = referrerNbhdStatus
                 print(selectedLocation ?? "")
                 self.navigationController?.setViewControllers([homeVC], animated: true)
             }
-           
+            
         }
         else if self.sourceScreen == "profilebackUn" {
             if let homeVC = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
@@ -753,7 +876,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 print(selectedLocation ?? "")
                 self.navigationController?.setViewControllers([homeVC], animated: true)
             }
-           
+            
         }
         else if self.sourceScreen == "FirstSteep" {
             if let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
@@ -765,6 +888,10 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 vc.profileData = self.profileData
                 vc.uploadedDocuments = self.savedUploadedDocuments
                 vc.bntNameUpdate = "Register"
+                vc.referNeighbourhoodID = referNeighbourhoodID
+                vc.referNeighbourhoodName = referNeighbourhoodName
+                vc.referrerNeighbourhoodStatus = referrerNbhdStatus
+                
                 Analytics.logEvent("registration_step2_completed_iOS", parameters: [
                     "name": self.name ?? "",
                     "secname": self.secname ?? "",
@@ -794,12 +921,15 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 vc.secname = self.secname ?? ""
                 vc.bntNameUpdate = "Register"
                 vc.profileData = self.profileData
+                vc.referNeighbourhoodID = referNeighbourhoodID
+                vc.referNeighbourhoodName = referNeighbourhoodName
+                vc.referrerNeighbourhoodStatus = referrerNbhdStatus
                 vc.uploadedDocuments = self.savedUploadedDocuments
                 self.navigationController?.pushViewController(vc, animated: true)
             }
             
         }
-       else {
+        else {
             if let vc = self.storyboard?.instantiateViewController(withIdentifier: "RegistationAdressProofVC") as? RegistationAdressProofVC {
                 vc.selectedLocation = self.selectedLocation
                 print(selectedLocation ?? "")
@@ -807,6 +937,9 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 vc.secname = self.secname ?? ""
                 vc.sourceScreen = "FirstSteep"
                 vc.bntNameUpdate = "Register"
+                vc.referNeighbourhoodID = referNeighbourhoodID
+                vc.referNeighbourhoodName = referNeighbourhoodName
+                vc.referrerNeighbourhoodStatus = referrerNbhdStatus
                 // Firebase Analytics event yahan log karein
                 Analytics.logEvent("registration_step2_completed_iOS", parameters: [
                     "name": self.name ?? "",
