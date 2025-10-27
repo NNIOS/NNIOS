@@ -93,22 +93,22 @@ class DeactivateViewController: UIViewController {
             "days": account ?? ""
         ]
         
-        if #available(iOS 16.0, *) {
-            WebService.sharedInstance.callDeactivateWebService(withParams: dictParams) { data in
-                self.DeactivateData = data
-                
-                // ✅ Success check
-                if self.DeactivateData?.status?.lowercased() == "success" {
-                    completionClosure() // 👉 Call closure only on success
-                } else {
-                    DispatchQueue.main.async {
-                        self.showAlert(Message: self.DeactivateData?.message ?? "Something went wrong")
-                    }
-                }
-            }
-        } else {
+//        if #available(iOS 16.0, *) {
+//            WebService.sharedInstance.callDeactivateWebService(withParams: dictParams) { data in
+//                self.DeactivateData = data
+//                
+//                // ✅ Success check
+//                if self.DeactivateData?.status?.lowercased() == "success" {
+//                    completionClosure() // 👉 Call closure only on success
+//                } else {
+//                    DispatchQueue.main.async {
+//                        self.showAlert(Message: self.DeactivateData?.message ?? "Something went wrong")
+//                    }
+//                }
+//            }
+//        } else {
             // Handle older iOS versions if needed
-        }
+//        }
     }
     
     

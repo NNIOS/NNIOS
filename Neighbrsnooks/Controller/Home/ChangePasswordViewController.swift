@@ -17,8 +17,8 @@ class ChangePasswordViewController: BaseViewController {
     @IBOutlet weak var btnOldEye: UIButton!
     @IBOutlet weak var btnNewEye: UIButton!
     @IBOutlet weak var btnConfirmEye: UIButton!
-    @IBOutlet weak var weaklblNewPassword: CustomLabel!
-    @IBOutlet weak var weaklblConfirmPassword: CustomLabel!
+    @IBOutlet weak var weaklblNewPassword: UILabel!
+    @IBOutlet weak var weaklblConfirmPassword: UILabel!
 
     var show = false
     var showNew = false
@@ -166,13 +166,13 @@ class ChangePasswordViewController: BaseViewController {
             "confirm_password":self.tfConfirmPassword.text ?? ""
         ]
         print("Param is : \(dictParams)")
-        WebService.sharedInstance.callChangePasswordWebService(withParams: dictParams) { data in
-            self.ChangePasswordData = data
-            if self.ChangePasswordData?.status == "success" {
-                completionClosure()
-            }else{
-                self.alertToast(Message: self.ChangePasswordData?.message ?? "")
-            }
-        }
+//        WebService.sharedInstance.callChangePasswordWebService(withParams: dictParams) { data in
+//            self.ChangePasswordData = data
+//            if self.ChangePasswordData?.status == "success" {
+//                completionClosure()
+//            }else{
+//                self.alertToast(Message: self.ChangePasswordData?.message ?? "")
+//            }
+//        }
     }
 }

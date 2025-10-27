@@ -15,7 +15,7 @@ class ReplyTableViewCell: UITableViewCell {
     @IBOutlet weak var lblneighbrhood: UILabel!
     @IBOutlet weak var lblTime: UILabel!
     @IBOutlet weak var actionReply: UIButton!
-    
+    @IBOutlet weak var lblReplyUserName : UILabel!
     //    var profileTapHandler: ((_ section: Int) -> Void)?
     //    var sectionForTap: Int = 0
     //    var replyButtonTapped: (() -> Void)? // Closure to handle button tap
@@ -23,8 +23,8 @@ class ReplyTableViewCell: UITableViewCell {
     
     var sectionForTap: Int = 0
     var replyButtonTapped: (() -> Void)?
-    var profileTapHandler: ((_ reply: Postlistdatum, _ section: Int) -> Void)?
-    var replyObjForTap: Postlistdatum?
+    var profileTapHandler: ((_ reply: CommentListDatum, _ section: Int) -> Void)?
+    var replyObjForTap: CommentListDatum?
     
     
     override func awakeFromNib() {
@@ -48,10 +48,10 @@ class ReplyTableViewCell: UITableViewCell {
         replyButtonTapped?()
     }
     
-    func configureCell(for section: Int, reply: Postlistdatum) {
-        self.sectionForTap = section
-        self.replyObjForTap = reply
-    }
+    func configureCell(for section: Int, reply: CommentListDatum) {
+            self.sectionForTap = section
+            self.replyObjForTap = reply
+        }
     
     @objc private func profileImgTapped() {
         if let reply = replyObjForTap {

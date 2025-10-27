@@ -50,25 +50,25 @@ class EventThreeDotViewController: BottomPopupViewController {
     var callback: ((_ range: Int) -> Void)?
     
     // Override popup configurations from BottomPopup
-    override var popupHeight: CGFloat {
-        return height ?? CGFloat(SCREEN_HEIGHT - 150) // Customize height
-    }
+//    override var popupHeight: CGFloat {
+//        return height ?? CGFloat(SCREEN_HEIGHT - 150) // Customize height
+//    }
 
-    override var popupTopCornerRadius: CGFloat {
-        return topCornerRadius ?? CGFloat(0) // Customize top corner radius
-    }
-
-    override var popupPresentDuration: Double {
-        return presentDuration ?? 1.0 // Customize presentation duration
-    }
-
-    override var popupDismissDuration: Double {
-        return dismissDuration ?? 1.0 // Customize dismissal duration
-    }
-
-    override var popupShouldDismissInteractivelty: Bool {
-        return shouldDismissInteractivelty ?? true // Enable or disable interactive dismiss
-    }
+//    override var popupTopCornerRadius: CGFloat {
+//        return topCornerRadius ?? CGFloat(0) // Customize top corner radius
+//    }
+//
+//    override var popupPresentDuration: Double {
+//        return presentDuration ?? 1.0 // Customize presentation duration
+//    }
+//
+//    override var popupDismissDuration: Double {
+//        return dismissDuration ?? 1.0 // Customize dismissal duration
+//    }
+//
+//    override var popupShouldDismissInteractivelty: Bool {
+//        return shouldDismissInteractivelty ?? true // Enable or disable interactive dismiss
+//    }
     
     
     
@@ -175,11 +175,11 @@ class EventThreeDotViewController: BottomPopupViewController {
                                                   "type": "Post" ,
                                                   "neighbrhood":idNeighbour ?? "",
         ]
-          WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
-            self.BussinessFavouriteData = data
-        
-            completionClosure()
-          }
+//          WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
+//            self.BussinessFavouriteData = data
+//        
+//            completionClosure()
+//          }
         }
     
     func callFavouriteRemoveBussinessWebService(_ completionClosure: @escaping () -> ()) {
@@ -194,10 +194,10 @@ class EventThreeDotViewController: BottomPopupViewController {
                                                   "postid":business_id ?? "",
                                                   "type": "Post" ,
         ]
-          WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
-            self.BussinessRemoveFavouriteData = data
-            completionClosure()
-          }
+//          WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
+//            self.BussinessRemoveFavouriteData = data
+//            completionClosure()
+//          }
         }
     
     func callPostCommenteWebService(_ completionClosure: @escaping () -> ()) {
@@ -209,10 +209,10 @@ class EventThreeDotViewController: BottomPopupViewController {
                                                     "postid": business_id ?? "",
                                                     
                                                                         ]
-          WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
-            self.CommentPostListData = data
-            completionClosure()
-          }
+//          WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
+//            self.CommentPostListData = data
+//            completionClosure()
+//          }
         }
     
     

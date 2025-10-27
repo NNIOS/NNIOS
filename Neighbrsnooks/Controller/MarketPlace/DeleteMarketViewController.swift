@@ -50,7 +50,7 @@ class DeleteMarketViewController: UIViewController {
                 return
             }
        // let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add/edit/\(idPr)"
+        let url = "https://neighbrsnook.com/admin/api/mpk_product_add/edit/\(idPr)"
 
         
        
@@ -59,46 +59,46 @@ class DeleteMarketViewController: UIViewController {
        
         let dictParams: Dictionary<String, Any> = ["":""]
         
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.DELETE,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                
-                do {
-                    let data = try JSONDecoder().decode(DelMarketProductModel.self, from: result!)
-                    self.MarketWDeleteData = data
-                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "CrId")
-                   
-                    
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.MarketWDeleteData = data // Your actual data fetching logic
-                        
-                        DispatchQueue.main.async {
-                            completion() // Call completion handler
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(DelMarketProductModel.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
-            }
-        }
+//        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.DELETE,requestParameters: dictParams, withProgressHUD: true)
+//        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS ,.CREATED:
+//                
+//                do {
+//                    let data = try JSONDecoder().decode(DelMarketProductModel.self, from: result!)
+//                    self.MarketWDeleteData = data
+//                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "CrId")
+//                   
+//                    
+//                    DispatchQueue.global().async {
+//                        // Simulate network delay
+//                        sleep(2)
+//                        
+//                        // Update MarketWDetailData with fetched data
+//                        // Example data assignment
+//                        self.MarketWDeleteData = data // Your actual data fetching logic
+//                        
+//                        DispatchQueue.main.async {
+//                            completion() // Call completion handler
+//                        }
+//                    }
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                do {
+//                    let data = try JSONDecoder().decode(DelMarketProductModel.self, from: result!)
+//                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .UNAUTHORIZED:
+//                print(error?.localizedDescription)
+//                //   self.showLogoutAlert()
+//            default:
+//                break
+//            }
+//        }
     }
 
 }

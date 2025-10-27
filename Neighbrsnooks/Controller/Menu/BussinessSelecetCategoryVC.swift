@@ -71,14 +71,14 @@ class BussinessSelecetCategoryVC: UIViewController {
         let parameters: [String: Any] = [:] // Yaha parameters set karein agar zarurat ho
 
         // API call
-        WebService.sharedInstance.callBussinesTypePostWebService(withParams: parameters) { [weak self] categories in
-            self?.BussinessCategoryData = categories
-            DispatchQueue.main.async {
-                self?.selectBussinessTblView.reloadData()
-            }
-             
-            
-        }
+//        WebService.sharedInstance.callBussinesTypePostWebService(withParams: parameters) { [weak self] categories in
+//            self?.BussinessCategoryData = categories
+//            DispatchQueue.main.async {
+//                self?.selectBussinessTblView.reloadData()
+//            }
+//             
+//            
+//        }
     }
 
      

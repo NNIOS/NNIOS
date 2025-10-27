@@ -39,8 +39,7 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
     var deletePost : DeletePostModel?
     var searchWorkItem: DispatchWorkItem?
     
-    private let bottomPanelView = BottomPanelView()
-    let items = [
+     let items = [
         (id: "1", name: "Item 1"),
         (id: "2", name: "Item 2"),
         (id: "3", name: "Item 3")
@@ -48,9 +47,7 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let selectedIndex = selectedTabIndex {
-            bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
-        }
+        
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.searchView.isHidden = true
         tfSearch.delegate = self
@@ -162,18 +159,7 @@ class PostViewController: BaseViewController, MemberCellDelegate,UITextFieldDele
        }
     
     
-    private func setupBottomPanel() {
-        bottomPanelView.delegate = self
-        bottomPanelView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(bottomPanelView)
-        
-        NSLayoutConstraint.activate([
-            bottomPanelView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomPanelView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomPanelView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -5), // Moves it downward
-            bottomPanelView.heightAnchor.constraint(equalToConstant: 70)
-        ])
-    }
+    
     
     
     
@@ -611,10 +597,10 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
         ]
         print(dictParams)
         
-        WebService.sharedInstance.callDeletePostWebService(withParams: dictParams) { data in
-            self.deletePost = data
-            completionClosure()
-        }
+//        WebService.sharedInstance.callDeletePostWebService(withParams: dictParams) { data in
+//            self.deletePost = data
+//            completionClosure()
+//        }
     }
     
     
@@ -639,27 +625,27 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
 //
 //            completionClosure()
             
-            WebService.sharedInstance.callPostListWebService(withParams: dictParams) { data in
-                self.PostListData = data
-
-                // Filter the GroupListData based on the search query
-                if searchQuery.isEmpty {
-                    self.filteredPostData = self.PostListData // No filtering if search is empty
-                } else {
-                    self.filteredPostData = PostListModel(
-                        status: data.status,
-                        message: data.message,
-                        verfiedMsg: data.verfiedMsg, // Corrected property name
-                        listdata: data.listdata?.filter {
-                            $0.postMessage?.lowercased().contains(searchQuery.lowercased()) ?? false // Safely unwrap optional
-                        }
-                    )
-                }
-
-                // Reload the table view after filtering the data
-                completionClosure()
-                self.tableviewPost.reloadData()
-            }
+//            WebService.sharedInstance.callPostListWebService(withParams: dictParams) { data in
+//                self.PostListData = data
+//
+//                // Filter the GroupListData based on the search query
+//                if searchQuery.isEmpty {
+//                    self.filteredPostData = self.PostListData // No filtering if search is empty
+//                } else {
+//                    self.filteredPostData = PostListModel(
+//                        status: data.status,
+//                        message: data.message,
+//                        verfiedMsg: data.verfiedMsg, // Corrected property name
+//                        listdata: data.listdata?.filter {
+//                            $0.postMessage?.lowercased().contains(searchQuery.lowercased()) ?? false // Safely unwrap optional
+//                        }
+//                    )
+//                }
+//
+//                // Reload the table view after filtering the data
+//                completionClosure()
+//                self.tableviewPost.reloadData()
+//            }
         
     }
     
@@ -676,17 +662,17 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
             "emojiunicode": emoji ?? "",
         ]
         
-        WebService.sharedInstance.callPostLikeWebService(withParams: dictParams) { data in
-            self.PostLikeData = data
-            // UserDefaults.standard.setValue(nil, forKey: "postid")
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
-            //              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-            // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callPostLikeWebService(withParams: dictParams) { data in
+//            self.PostLikeData = data
+//            // UserDefaults.standard.setValue(nil, forKey: "postid")
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
+//            //              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//            // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//            
+//            completionClosure()
+//        }
     }
     
     
@@ -702,16 +688,16 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
             "emojiunicode":  "",
         ]
         
-        WebService.sharedInstance.callPostUnLikeWebService(withParams: dictParams) { data in
-            //  self.LikePostModel = data
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            //  UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
-            //  UserDefaults.standard.set(self.PostListData?.listdata.u, forKey: "accessToken")
-            //   UserDefaults.standard.set(self.PostUnlikeLikeData?..id, forKey: "id")
-            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callPostUnLikeWebService(withParams: dictParams) { data in
+//            //  self.LikePostModel = data
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//            //  UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
+//            //  UserDefaults.standard.set(self.PostListData?.listdata.u, forKey: "accessToken")
+//            //   UserDefaults.standard.set(self.PostUnlikeLikeData?..id, forKey: "id")
+//            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//            
+//            completionClosure()
+//        }
     }
     
     
@@ -728,14 +714,14 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
             "neighbrhood": neighborhoodId
         ]
         
-        WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
-            if let json = data as? [String: Any],
-               let message = json["message"] as? String {
-                completionClosure(message) // Pass message to closure
-            } else {
-                completionClosure("Added to favorite successfully!")
-            }
-        }
+//        WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
+//            if let json = data as? [String: Any],
+//               let message = json["message"] as? String {
+//                completionClosure(message) // Pass message to closure
+//            } else {
+//                completionClosure("Added to favorite successfully!")
+//            }
+//        }
     }
     
     func callFavouriteRemoveBussinessWebService(postId: String, _ completionClosure: @escaping (String) -> Void) {
@@ -747,14 +733,14 @@ extension PostViewController: UITableViewDataSource, UITableViewDelegate, PostTa
             "type": "Post"
         ]
         
-        WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
-            if let json = data as? [String: Any],
-               let message = json["message"] as? String {
-                completionClosure(message) // Pass message to closure
-            } else {
-                completionClosure("Removed to favorite successfully!")
-            }
-        }
+//        WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
+//            if let json = data as? [String: Any],
+//               let message = json["message"] as? String {
+//                completionClosure(message) // Pass message to closure
+//            } else {
+//                completionClosure("Removed to favorite successfully!")
+//            }
+//        }
     }
     
     

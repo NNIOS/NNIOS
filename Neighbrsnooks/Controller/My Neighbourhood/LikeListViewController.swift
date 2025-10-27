@@ -46,15 +46,15 @@ class LikeListViewController: BottomPopupViewController {
     var dismissDuration: Double?
     var shouldDismissInteractivelty: Bool?
 
-    override var popupHeight: CGFloat { return height ?? CGFloat(SCREEN_HEIGHT - 10) }
+//    override var popupHeight: CGFloat { return height ?? CGFloat(SCREEN_HEIGHT - 10) }
 
-    override var popupTopCornerRadius: CGFloat { return topCornerRadius ?? CGFloat(0) }
-
-    override var popupPresentDuration: Double { return presentDuration ?? 1.0 }
-
-    override var popupDismissDuration: Double { return dismissDuration ?? 1.0 }
-
-    override var popupShouldDismissInteractivelty: Bool { return shouldDismissInteractivelty ?? true }
+//    override var popupTopCornerRadius: CGFloat { return topCornerRadius ?? CGFloat(0) }
+//
+//    override var popupPresentDuration: Double { return presentDuration ?? 1.0 }
+//
+//    override var popupDismissDuration: Double { return dismissDuration ?? 1.0 }
+//
+//    override var popupShouldDismissInteractivelty: Bool { return shouldDismissInteractivelty ?? true }
 
 }
 
@@ -135,16 +135,16 @@ extension LikeListViewController: UITableViewDataSource, UITableViewDelegate{
             "postid":Postid,
                                                     
                                                                         ]
-          WebService.sharedInstance.callLikeListPostWebService(withParams: dictParams) { data in
-            self.LikeListData = data
-            //  UserDefaults.standard.set(self.LikeListData?.LikeListData.first?.id, forKey: "id")
-            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callLikeListPostWebService(withParams: dictParams) { data in
+//            self.LikeListData = data
+//            //  UserDefaults.standard.set(self.LikeListData?.LikeListData.first?.id, forKey: "id")
+//            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
+////              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
 }
 @available(iOS 16.0, *)

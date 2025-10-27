@@ -226,30 +226,30 @@ extension MembersViewController: UITableViewDataSource, UITableViewDelegate{
             "nbd_id": neighborhoodId ?? "",
             "type": "members",
         ]
-        WebService.sharedInstance.callMemberListWebService(withParams: dictParams) { data in
-            self.MemberListData = data
-            let blockedStatusArray = self.MemberListData?.listdata.map { $0.is_blocked ?? 0 } ?? []
-            self.is_blocked = blockedStatusArray.allSatisfy { $0 == 1 } ? 1 : 0
-            
-            switch self.isselected {
-            case 2:
-                self.filteredListdata = self.MemberListData?.listdata.filter { $0.is_blocked == 1 } ?? []
-            default:
-                self.filteredListdata = self.MemberListData?.listdata ?? []
-            }
-            if let savedUserID = id {
-                self.filteredListdata.sort {
-                    if $0.id == savedUserID {
-                        return true
-                    } else if $1.id == savedUserID {
-                        return false
-                    } else {
-                        return false
-                    }
-                }
-            }
-            UserDefaults.standard.set(self.filteredListdata.first?.id, forKey: "id")
-            completionClosure()
-        }
+//        WebService.sharedInstance.callMemberListWebService(withParams: dictParams) { data in
+//            self.MemberListData = data
+//            let blockedStatusArray = self.MemberListData?.listdata.map { $0.is_blocked ?? 0 } ?? []
+//            self.is_blocked = blockedStatusArray.allSatisfy { $0 == 1 } ? 1 : 0
+//            
+//            switch self.isselected {
+//            case 2:
+//                self.filteredListdata = self.MemberListData?.listdata.filter { $0.is_blocked == 1 } ?? []
+//            default:
+//                self.filteredListdata = self.MemberListData?.listdata ?? []
+//            }
+//            if let savedUserID = id {
+//                self.filteredListdata.sort {
+//                    if $0.id == savedUserID {
+//                        return true
+//                    } else if $1.id == savedUserID {
+//                        return false
+//                    } else {
+//                        return false
+//                    }
+//                }
+//            }
+//            UserDefaults.standard.set(self.filteredListdata.first?.id, forKey: "id")
+//            completionClosure()
+//        }
     }
 }

@@ -87,23 +87,19 @@ class PostViewShowImgVideosColleViewCell: UICollectionViewCell {
     }
 
     
-    
-    func configure(with postImage: postImagesN) {
-        if let imageUrl = postImage.img {
+ 
+    func configure(with media: PostDetailsMedia) {
+        if let imageUrl = media.img, !imageUrl.isEmpty {
             profileImgVdoView.isHidden = false
             loadImage(from: imageUrl)
-            
-            // Video controls hide karne hain agar sirf image hai
             playPauseButton.isHidden = true
             muteButton.isHidden = true
             totalTimeLabel.isHidden = true
             currentTimeLabel.isHidden = true
             videoSlider.isHidden = true
-        } else if let videoUrl = postImage.video {
+        } else if let videoUrl = media.video, !videoUrl.isEmpty {
             profileImgVdoView.isHidden = true
             playVideo(from: videoUrl)
-            
-            // Video controls show karne hain jab video aaye
             playPauseButton.isHidden = false
             muteButton.isHidden = false
             totalTimeLabel.isHidden = false
@@ -111,18 +107,17 @@ class PostViewShowImgVideosColleViewCell: UICollectionViewCell {
             videoSlider.isHidden = false
         }
     }
-
-    
-    private func loadImage(from urlString: String) {
-        if let url = URL(string: urlString) {
-            URLSession.shared.dataTask(with: url) { data, response, error in
-                guard let data = data, error == nil else { return }
-                DispatchQueue.main.async {
-                    self.profileImgVdoView.image = UIImage(data: data)
-                }
-            }.resume()
-        }
-    }
+ 
+      private func loadImage(from urlString: String) {
+          if let url = URL(string: urlString) {
+              URLSession.shared.dataTask(with: url) { data, response, error in
+                  guard let data = data, error == nil else { return }
+                  DispatchQueue.main.async {
+                      self.profileImgVdoView.image = UIImage(data: data)
+                  }
+              }.resume()
+          }
+      }
     
     private func playVideo(from urlString: String) {
         guard let url = URL(string: urlString) else { return }

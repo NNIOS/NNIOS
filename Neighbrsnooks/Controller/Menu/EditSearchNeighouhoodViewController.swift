@@ -14,7 +14,7 @@ import GoogleMaps
 import SVProgressHUD
 
 @available(iOS 16.0, *)
-class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, CLLocationManagerDelegate, ProfileLocationDelegate{
+class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, CLLocationManagerDelegate{
     
     var isFromProfile: Bool?
     var lat: Double?
@@ -193,7 +193,7 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
                 // Postal code Google se mil gaya
                 self.zipcode = postcode
                 self.isSearchLocation = true
-                self.navigateToRegisterSecondVC()
+//                self.navigateToRegisterSecondVC()
             } else {
                 // Postal code Google Place se nahi mila, to Apple se reverse-geocode karo
                 let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
@@ -207,7 +207,7 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
                         print("No pin even with Apple geocoder!")
                     }
                     self.isSearchLocation = true
-                    self.navigateToRegisterSecondVC()
+//                    self.navigateToRegisterSecondVC()
                 }
                 // Yahan return karo — taki aage method na chale jab tak reverse complete na ho
                 return
@@ -291,7 +291,7 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
                     if !self.isNavigated {
                         self.isNavigated = true
                         DispatchQueue.main.async {
-                            self.navigateToRegisterSecondVC()
+//                            self.navigateToRegisterSecondVC()
                         }
                     }
                 }
@@ -305,41 +305,41 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
         lblCurrentLocationDataShow.text = "Failed to fetch location"
     }
     
-    func navigateToRegisterSecondVC() {
-        if let registerSecondVC = storyboard?.instantiateViewController(withIdentifier: "MyProfileEditViewController") as? MyProfileEditViewController {
-            
-            // Pass location data along with latitude and longitude
-            registerSecondVC.selectedLocation = selectedLocation
-            registerSecondVC.city = self.city
-            registerSecondVC.state = self.state
-            registerSecondVC.zipcode = self.zipcode ?? ""
-            // Pass latitude and longitude
-            registerSecondVC.latitudeS = self.selectedLatitude ?? 0.0
-            registerSecondVC.longitudeS = self.selectedLongitude ?? 0.0
-            registerSecondVC.isFromProfile = true
-            registerSecondVC.isComingFromSearchVC = true
-            registerSecondVC.profileData = profileData
-
-            // Debugging to ensure the data being passed
-            print("Passing latitude: \(registerSecondVC.latitudeS), longitude: \(registerSecondVC.longitudeS)")
-            // Check kis tarah ka location data pass ho raha hai
-            if isSearchLocation {
-                print("Passing Search Location Data")
-            } else {
-                print("Passing Current Location Data")
-            }
-            
-            // Debugging prints to check values
-            print("Location Data: \(selectedLocation ?? "No location")")
-            print("City: \(self.city ?? "No city")")
-            print("State: \(self.state ?? "No state")")
-            print("Zipcode: \(self.zipcode ?? "No zipcode")")
-            print("Latitude: \(self.selectedLatitude ?? 0.0)")
-            print("Longitude: \(self.selectedLongitude ?? 0.0)")
-            
-            navigationController?.pushViewController(registerSecondVC, animated: true)
-        }
-    }
+//    func navigateToRegisterSecondVC() {
+//        if let registerSecondVC = storyboard?.instantiateViewController(withIdentifier: "MyProfileEditViewController") as? MyProfileEditViewController {
+//            
+//            // Pass location data along with latitude and longitude
+//            registerSecondVC.selectedLocation = selectedLocation
+//            registerSecondVC.city = self.city
+//            registerSecondVC.state = self.state
+//            registerSecondVC.zipcode = self.zipcode ?? ""
+//            // Pass latitude and longitude
+//            registerSecondVC.latitudeS = self.selectedLatitude ?? 0.0
+//            registerSecondVC.longitudeS = self.selectedLongitude ?? 0.0
+//            registerSecondVC.isFromProfile = true
+//            registerSecondVC.isComingFromSearchVC = true
+//            registerSecondVC.profileData = profileData
+//
+//            // Debugging to ensure the data being passed
+//            print("Passing latitude: \(registerSecondVC.latitudeS), longitude: \(registerSecondVC.longitudeS)")
+//            // Check kis tarah ka location data pass ho raha hai
+//            if isSearchLocation {
+//                print("Passing Search Location Data")
+//            } else {
+//                print("Passing Current Location Data")
+//            }
+//            
+//            // Debugging prints to check values
+//            print("Location Data: \(selectedLocation ?? "No location")")
+//            print("City: \(self.city ?? "No city")")
+//            print("State: \(self.state ?? "No state")")
+//            print("Zipcode: \(self.zipcode ?? "No zipcode")")
+//            print("Latitude: \(self.selectedLatitude ?? 0.0)")
+//            print("Longitude: \(self.selectedLongitude ?? 0.0)")
+//            
+//            navigationController?.pushViewController(registerSecondVC, animated: true)
+//        }
+//    }
     
     func callUserProfileWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -350,15 +350,15 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
             "loggeduser": id ?? ""
         ]
         
-        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-            print("Abdul data is : \(self.profileData ?? data)")
-            
-            UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
-            UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
-            UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
-            completionClosure()
-        }
+//        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+//            self.profileData = data
+//            print("Abdul data is : \(self.profileData ?? data)")
+//            
+//            UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
+//            UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
+//            UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
+//            completionClosure()
+//        }
     }
 
 
@@ -421,7 +421,7 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
                 if !self.isNavigated {
                     self.isNavigated = true
                     DispatchQueue.main.async {
-                        self.navigateToRegisterSecondVC()
+//                        self.navigateToRegisterSecondVC()
                     }
                 }
             }
@@ -464,7 +464,7 @@ class EditSearchNeighouhoodViewController:  UIViewController,  UITableViewDelega
                 if !self.isNavigated {
                     self.isNavigated = true
                     DispatchQueue.main.async {
-                        self.navigateToRegisterSecondVC()
+//                        self.navigateToRegisterSecondVC()
                     }
                 }
             }

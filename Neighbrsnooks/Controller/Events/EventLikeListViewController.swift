@@ -82,13 +82,13 @@ class EventLikeListViewController: UIViewController {
                                                     "type": "1",
                                                    
                                                                         ]
-          WebService.sharedInstance.callEventLikeListWebService(withParams: dictParams) { data in
-            self.EventLikeListData = data
-           //   UserDefaults.standard.set(self.EventJoinListData?.listdata.id, forKey: "id")
-         
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callEventLikeListWebService(withParams: dictParams) { data in
+//            self.EventLikeListData = data
+//           //   UserDefaults.standard.set(self.EventJoinListData?.listdata.id, forKey: "id")
+//         
+//
+//            completionClosure()
+//          }
         }
 
 }

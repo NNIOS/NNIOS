@@ -57,10 +57,10 @@ extension ContactUsViewController {
         let id = UserDefaults.standard.string(forKey: "userid")
         let dictParams: Dictionary<String, Any> = ["userid":id ?? "", "loggeduser": id ?? ""]
         print("Param is: \(dictParams)")
-        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-            completionClosure()
-        }
+//        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+//            self.profileData = data
+//            completionClosure()
+//        }
     }
     
     func callContactUsWebService(_ completionClosure: @escaping () -> ()) { // function for contact us api
@@ -68,17 +68,17 @@ extension ContactUsViewController {
         let dictParams:Dictionary<String,Any> = ["userid":id ?? "", "textmessage":self.tvmessage.text!, "emailid":self.tfMail.text!, "phoneno":self.MobileLbl.text!]
         print("Param is: \(dictParams)")
         self.loadingAlert = self.showLoadingAlert(on: self)
-        WebService.sharedInstance.callContactUsWebService(withParams: dictParams) { data in
-            self.ContactUsData = data
-            self.loadingAlert?.dismiss(animated: true, completion: {
-                if self.ContactUsData?.status == "success" {
-                    self.showAlert(message: self.ContactUsData?.message ?? "" ,yesNo: "OK")
-                    completionClosure()
-                } else if self.ContactUsData?.status == "failed" {
-                    completionClosure()
-                }
-            })
-        }
+//        WebService.sharedInstance.callContactUsWebService(withParams: dictParams) { data in
+//            self.ContactUsData = data
+//            self.loadingAlert?.dismiss(animated: true, completion: {
+//                if self.ContactUsData?.status == "success" {
+//                    self.showAlert(message: self.ContactUsData?.message ?? "" ,yesNo: "OK")
+//                    completionClosure()
+//                } else if self.ContactUsData?.status == "failed" {
+//                    completionClosure()
+//                }
+//            })
+//        }
     }
     
     func didloadSetup() { // function for handle UI in viewDidLoad

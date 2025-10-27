@@ -8,9 +8,7 @@
 import UIKit
 
 @available(iOS 16.0, *)
-class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource,UITextViewDelegate,PopupSelectionDelegate, PopupSelectionReportDelegate {
-    
-    
+class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource,UITextViewDelegate, PopupSelectionReportDelegate {
     
     @IBOutlet weak var collectionViewBanner: UICollectionView!
     @IBOutlet weak var collectionViewBannerHeight: NSLayoutConstraint!
@@ -49,10 +47,10 @@ class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowL
     var ReportFinalData : FinalReportModel?
     let placeholderText = "State your concern"
     //    var serviceDropdownData = DropDown()
-    var imgDataAll: [String] = []  // Images
+    var imgDataAll: [HomePostMedia] = []
     var videoDataAll: [String] = [] // Videos
     var mediaData: [PostImage] = []
-    var mediaDatas: [postImagesN] = []
+    var mediaDatas: [PostImage] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -215,7 +213,7 @@ class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowL
     
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return mediaData.count
+        return imgDataAll.count
     }
     
     
@@ -280,27 +278,27 @@ class ReportPostViewController: BaseViewController,UICollectionViewDelegateFlowL
         
         print("Request Parameters: \(dictParams)")
         
-        WebService.sharedInstance.callReportPostFinalWebService(withParams: dictParams) { data in
-            // Directly assign the PollVotedModel object to self.PollVotedData
-            self.ReportFinalData = data  // Assuming data is already of type PollVotedModel
-            
-            // Log response data
-            print("Response Data: \(self.ReportFinalData)")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callReportPostFinalWebService(withParams: dictParams) { data in
+//            // Directly assign the PollVotedModel object to self.PollVotedData
+//            self.ReportFinalData = data  // Assuming data is already of type PollVotedModel
+//            
+//            // Log response data
+//            print("Response Data: \(self.ReportFinalData)")
+//            
+//            completionClosure()
+//        }
     }
     
     func callReportPostWebService() {
         
         let dictParams: Dictionary<String, Any> = ["":""]
         
-        WebService.sharedInstance.callReportPostWebService(withParams: dictParams) { data in
-            self.ReportCatData = data
-            for value in self.ReportCatData?.listdata ?? [] {
-                self.serviceName.append(value.name ?? "")
-            }
-            //            self.serviceDropdownData.dataSource = self.serviceName
-        }
+//        WebService.sharedInstance.callReportPostWebService(withParams: dictParams) { data in
+//            self.ReportCatData = data
+//            for value in self.ReportCatData?.listdata ?? [] {
+//                self.serviceName.append(value.name ?? "")
+//            }
+//            //            self.serviceDropdownData.dataSource = self.serviceName
+//        }
     }
 }

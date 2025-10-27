@@ -8,7 +8,7 @@
 import UIKit
 @available(iOS 16.0, *)
 
-class BottomVC: BaseViewC {
+class BottomVC: BaseViewController {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var mainView: UIView!
@@ -55,13 +55,13 @@ extension BottomVC: UITableViewDelegate,UITableViewDataSource {
         return cell
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if is_blocked == 0 {
-            ConfirmAlert(titleText: "Block", messageText: "Are you sure you want to block this user ?")
-        } else if is_blocked == 1 {
-            self.ConfirmAlert(titleText: "Unblock", messageText: "Are you sure you want to unblock this user ?")
-        }
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        if is_blocked == 0 {
+//            ConfirmAlert(titleText: "Block", messageText: "Are you sure you want to block this user ?")
+//        } else if is_blocked == 1 {
+//            self.ConfirmAlert(titleText: "Unblock", messageText: "Are you sure you want to unblock this user ?")
+//        }
+//    }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
@@ -88,7 +88,7 @@ extension BottomVC {
     }
     
     @objc func handleBackgroundTap(_ sender: UITapGestureRecognizer) {
-        self.dismiss(animated: true, completion: nil)
+        self.dismiss(animated: false, completion: nil)
     }
 
     
@@ -96,125 +96,126 @@ extension BottomVC {
         self.tableView.register(UINib(nibName: "BottomDataCell", bundle: nil), forCellReuseIdentifier: "BottomDataCell")
     }
      
-    func handleUnblockAPI(completion: @escaping () -> Void) {  // Un-Block APi dev.
-        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
-        guard let blockerId = blocker_userid else { print("Error: Missing blocker ID"); return }
-        guard let blockedId = blocked_userid else { print("Error: Missing blocked ID"); return }
-        
-        let dictParams: [String: Any] = [
-            "blocker_userid": blockerId,
-            "blocked_userid": blockedId,
-            "action": "unblock"
-        ]
-        print("Block dictParams :\(dictParams)")
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                do {
-                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
-                    self.objBlockUserData = data
-                    DispatchQueue.main.async {
-                        self.onUpdateForBlock!()
-                        self.dismiss(animated: false)
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
-                    self.objBlockUserData = data
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription ?? "")
-            default:
-                break
-            }
-        }
-    }
-     
-    func handleBlockAPI(completion: @escaping () -> Void) { // Block APi dev.
-        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
-        guard let blockerId = blocker_userid else {
-            print("Error: Missing blocker ID")
-            return
-        }
-        
-        guard let blockedId = blocked_userid else {
-            print("Error: Missing blocked ID")
-            return
-        }
-        let dictParams: [String: Any] = [
-            "blocker_userid": blockerId,
-            "blocked_userid": blockedId,
-            "action": "block"
-        ]
-        print("Block dictParams :\(dictParams)")
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                do {
-                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
-                    self.objBlockUserData = data
-                    DispatchQueue.main.async {
-                        self.onUpdateForBlock!()
-                        self.dismiss(animated: false)
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
-                    self.objBlockUserData = data
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription ?? "")
-            default:
-                break
-            }
-        }
-    }
-    
-    func ConfirmAlert(titleText: String, messageText: String) {
-        let alertController = UIAlertController(title: titleText, message: messageText, preferredStyle: .alert)
-        let titleColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .label
-        let messageColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .secondaryLabel
-        let attributedTitle = NSAttributedString(string: titleText, attributes: [ .foregroundColor: titleColor, .font: UIFont.boldSystemFont(ofSize: 17)])
-        let attributedMessage = NSAttributedString(string: messageText, attributes: [.foregroundColor: messageColor, .font: UIFont.systemFont(ofSize: 15) ])
-        alertController.setValue(attributedTitle, forKey: "attributedTitle")
-        alertController.setValue(attributedMessage, forKey: "attributedMessage")
-        let confirmAction = UIAlertAction(title: "Yes", style: .default) { [weak self] _ in
-            guard let self = self else { return }
-            if self.is_blocked == 0 {
-                self.handleBlockAPI(completion: {
-                    self.onUpdateForBlock?()
-                    self.dismiss(animated: false, completion: nil)
-                    
-                })
-            } else if self.is_blocked == 1 {
-                self.handleUnblockAPI(completion: {
-                    self.onUpdateForBlock?()
-                    self.dismiss(animated: false, completion: nil)
-                })
-            }
-        }
-        confirmAction.setValue(#colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1), forKey: "titleTextColor")
-        let cancelAction = UIAlertAction(title: "No", style: .cancel) { [weak self] _ in
-            guard let self = self else { return }
-            self.onUpdateForBlock?()
-            self.dismiss(animated: false, completion: nil)
-        }
-        alertController.addAction(confirmAction)
-        alertController.addAction(cancelAction)
-        self.present(alertController, animated: false, completion: nil)
-    }
+//    func handleUnblockAPI(completion: @escaping () -> Void) {  // Un-Block APi dev.
+//        let url = "https://neighbrsnook.com/admin/api/toggle-block-user"
+//        guard let blockerId = blocker_userid else { print("Error: Missing blocker ID"); return }
+//        guard let blockedId = blocked_userid else { print("Error: Missing blocked ID"); return }
+//        
+//        let dictParams: [String: Any] = [
+//            "blocker_userid": blockerId,
+//            "blocked_userid": blockedId,
+//            "action": "unblock"
+//        ]
+//        print("Block dictParams :\(dictParams)")
+//        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true)
+//        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS ,.CREATED:
+//                do {
+//                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+//                    self.objBlockUserData = data
+//                    DispatchQueue.main.async {
+//                        self.onUpdateForBlock!()
+//                        self.dismiss(animated: false)
+//                    }
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                do {
+//                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+//                    self.objBlockUserData = data
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .UNAUTHORIZED:
+//                print(error?.localizedDescription ?? "")
+//            default:
+//                break
+//            }
+//        }
+//    }
+//     
+//    func handleBlockAPI(completion: @escaping () -> Void) { // Block APi dev.
+//        let url = "https://neighbrsnook.com/admin/api/toggle-block-user"
+//        guard let blockerId = blocker_userid else {
+//            print("Error: Missing blocker ID")
+//            return
+//        }
+//        
+//        guard let blockedId = blocked_userid else {
+//            print("Error: Missing blocked ID")
+//            return
+//        }
+//        let dictParams: [String: Any] = [
+//            "blocker_userid": blockerId,
+//            "blocked_userid": blockedId,
+//            "action": "block"
+//        ]
+//        print("Block dictParams :\(dictParams)")
+//        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true)
+//        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS ,.CREATED:
+//                do {
+//                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+//                    self.objBlockUserData = data
+//                    DispatchQueue.main.async {
+//                        self.onUpdateForBlock!()
+//                        self.dismiss(animated: false)
+//                    }
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                do {
+//                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+//                    self.objBlockUserData = data
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .UNAUTHORIZED:
+//                print(error?.localizedDescription ?? "")
+//            default:
+//                break
+//            }
+//        }
+//    }
+//    
+//    func ConfirmAlert(titleText: String, messageText: String) {
+//        let alertController = UIAlertController(title: titleText, message: messageText, preferredStyle: .alert)
+//        let titleColor: UIColor = traitCollection.userInterfaceStyle == .dark ? .white : .label
+//        let messageColor: UIColor = UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+//        let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
+//        let attributedTitle = NSAttributedString(string: titleText, attributes: [ .foregroundColor: titleColor, .font: font])
+//        let attributedMessage = NSAttributedString(string: messageText, attributes: [.foregroundColor: messageColor, .font: font ])
+//        alertController.setValue(attributedTitle, forKey: "attributedTitle")
+//        alertController.setValue(attributedMessage, forKey: "attributedMessage")
+//        let confirmAction = UIAlertAction(title: "Yes", style: .default) { [weak self] _ in
+//            guard let self = self else { return }
+//            if self.is_blocked == 0 {
+//                self.handleBlockAPI(completion: {
+//                    self.onUpdateForBlock?()
+//                    self.dismiss(animated: false, completion: nil)
+//                    
+//                })
+//            } else if self.is_blocked == 1 {
+//                self.handleUnblockAPI(completion: {
+//                    self.onUpdateForBlock?()
+//                    self.dismiss(animated: false, completion: nil)
+//                })
+//            }
+//        }
+//        confirmAction.setValue(#colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1), forKey: "titleTextColor")
+//        let cancelAction = UIAlertAction(title: "No", style: .cancel) { [weak self] _ in
+//            guard let self = self else { return }
+//            self.onUpdateForBlock?()
+//            self.dismiss(animated: false, completion: nil)
+//        }
+//        alertController.addAction(confirmAction)
+//        alertController.addAction(cancelAction)
+//        self.present(alertController, animated: false, completion: nil)
+//    }
 }
 
 @available(iOS 16.0, *)

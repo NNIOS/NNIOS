@@ -50,12 +50,12 @@ class DeleteEventViewController: UIViewController {
                                                     "e_id": idEvent ?? "",
                                                    
                                                                         ]
-          WebService.sharedInstance.callEventDeleteListWebService(withParams: dictParams) { data in
-         //   self.GrouDeleteData = data
-         
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callEventDeleteListWebService(withParams: dictParams) { data in
+//         //   self.GrouDeleteData = data
+//         
+//
+//            completionClosure()
+//          }
         }
 
 }

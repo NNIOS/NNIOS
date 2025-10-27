@@ -48,7 +48,7 @@ class MarketChatListViewController: UIViewController {
     //dev.
     func callMarketChatListWebService(completion: @escaping () -> Void) {
        // let url = "https://dev.neighbrsnook.com/marketplace/api/seller-chat-list/"
-        let baseURL = "https://dev.neighbrsnook.com/admin/api/seller-chat-list/"
+        let baseURL = "https://neighbrsnook.com/admin/api/seller-chat-list/"
         let id = UserDefaults.standard.string(forKey: "userid")
         let Sid = UserDefaults.standard.string(forKey: "Senderid")
         // let dictParams: Dictionary<String, Any> = ["":""]
@@ -62,48 +62,48 @@ class MarketChatListViewController: UIViewController {
             
         ]
         
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                
-                do {
-                    let data = try JSONDecoder().decode(MarketChatList.self, from: result!)
-                    self.MarketChatListData = data
-                    UserDefaults.standard.set(self.MarketChatListData?.chats?.first?.senderID, forKey: "Senderid")
-//                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                    self.tableviewMembers.reloadData()
-                   
-                    
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.MarketChatListData = data // Your actual data fetching logic
-                        
-                        DispatchQueue.main.async {
-                            completion() // Call completion handler
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
-            }
-        }
+//        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
+//        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS ,.CREATED:
+//                
+//                do {
+//                    let data = try JSONDecoder().decode(MarketChatList.self, from: result!)
+//                    self.MarketChatListData = data
+//                    UserDefaults.standard.set(self.MarketChatListData?.chats?.first?.senderID, forKey: "Senderid")
+////                    UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+//                    self.tableviewMembers.reloadData()
+//                   
+//                    
+//                    DispatchQueue.global().async {
+//                        // Simulate network delay
+//                        sleep(2)
+//                        
+//                        // Update MarketWDetailData with fetched data
+//                        // Example data assignment
+//                        self.MarketChatListData = data // Your actual data fetching logic
+//                        
+//                        DispatchQueue.main.async {
+//                            completion() // Call completion handler
+//                        }
+//                    }
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                do {
+//                    let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
+//                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .UNAUTHORIZED:
+//                print(error?.localizedDescription)
+//                //   self.showLogoutAlert()
+//            default:
+//                break
+//            }
+//        }
     }
 
 }
@@ -173,7 +173,7 @@ extension MarketChatListViewController: UITableViewDataSource, UITableViewDelega
     
     
     func callMarketReadStatus2(completion: @escaping () -> Void) { //dev.
-        let url = "https://dev.neighbrsnook.com/admin/api/chat_read_status"
+        let url = "https://neighbrsnook.com/admin/api/chat_read_status"
         
         let senderID = UserDefaults.standard.string(forKey: "SenderidN") ?? ""
         let receiverID = UserDefaults.standard.string(forKey: "userid") ?? ""
@@ -187,22 +187,22 @@ extension MarketChatListViewController: UITableViewDataSource, UITableViewDelega
         
         print("📩 Params (didSelect): \(dictParams)")
         
-        RSNetworkManager.shared.newRequestApi(
-            withServiceName: url,
-            requestMethod: .PUT,
-            requestParameters: dictParams,
-            withProgressHUD: true
-        ) { (result, error, errorType, statusCode) in
-            switch statusCode {
-            case .SUCCESS, .CREATED:
-                print("🟢 Chat read updated from didSelect")
-            default:
-                print("❌ Chat read update failed")
-            }
-            DispatchQueue.main.async {
-                completion()
-            }
-        }
+//        RSNetworkManager.shared.newRequestApi(
+//            withServiceName: url,
+//            requestMethod: .PUT,
+//            requestParameters: dictParams,
+//            withProgressHUD: true
+//        ) { (result, error, errorType, statusCode) in
+//            switch statusCode {
+//            case .SUCCESS, .CREATED:
+//                print("🟢 Chat read updated from didSelect")
+//            default:
+//                print("❌ Chat read update failed")
+//            }
+//            DispatchQueue.main.async {
+//                completion()
+//            }
+//        }
     }
 
     

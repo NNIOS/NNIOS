@@ -29,58 +29,43 @@ class PostDetailsCollectionViewCell: UICollectionViewCell {
     }
     
     func configureCell(mediaURL: String?, isVideo: Bool) {
-        profileImgView.image = nil // Reset image view
-        if isVideo {
-            muteButton.isHidden = false
-            playPauseButton.isHidden = false
-            if let urlString = mediaURL, let url = URL(string: urlString) {
-                setupVideoPlayer(with: url) // Video player setup
+            profileImgView.image = nil // Reset image view
+            if isVideo {
+                muteButton.isHidden = false
+                playPauseButton.isHidden = false
+                if let urlString = mediaURL, let url = URL(string: urlString) {
+                    setupVideoPlayer(with: url)
+                } else {
+                    print("Invalid video URL: \(String(describing: mediaURL))")
+                }
             } else {
-                print("Invalid video URL: \(String(describing: mediaURL))")
+                if let urlString = mediaURL, let url = URL(string: urlString) {
+                    profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder"))
+                } else {
+                    print("Invalid image URL: \(String(describing: mediaURL))")
+                    profileImgView.image = UIImage(named: "placeholder") // Default placeholder
+                }
+                muteButton.isHidden = true
+                playPauseButton.isHidden = true
             }
-        } else {
-            if let urlString = mediaURL, let url = URL(string: urlString) {
-                profileImgView.loadImage(from: url) // Load image
-            } else {
-                print("Invalid image URL: \(String(describing: mediaURL))")
-                profileImgView.image = UIImage(named: "placeholder") // Default placeholder
-            }
-            muteButton.isHidden = true
-            playPauseButton.isHidden = true
         }
-    }
 
 
     
     private func setupVideoPlayer(with url: URL) {
-        // Remove existing player layers
-        playerLayer?.removeFromSuperlayer()
-        
-        // Initialize AVPlayer
-        player = AVPlayer(url: url)
-        playerLayer = AVPlayerLayer(player: player)
-        
-        // Set playerLayer frame to match profileImgView
-        playerLayer?.frame = profileImgView.bounds
-        playerLayer?.videoGravity = .resizeAspectFill
-        
-        // Add playerLayer to profileImgView
-        if let playerLayer = playerLayer {
-            profileImgView.layer.addSublayer(playerLayer)
-        }
-        
-        // Set default state to pause
-        player?.pause()
-        
-        // Mute the player by default
-        player?.isMuted = true
-        
-        // Update play/pause button icon to "Play"
-        playPauseButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
-        
-        // Update mute button icon to "Muted"
-        muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
-    }
+           playerLayer?.removeFromSuperlayer()
+           player = AVPlayer(url: url)
+           playerLayer = AVPlayerLayer(player: player)
+           playerLayer?.frame = profileImgView.bounds
+           playerLayer?.videoGravity = .resizeAspectFill
+           if let playerLayer = playerLayer {
+               profileImgView.layer.addSublayer(playerLayer)
+           }
+           player?.pause()
+           player?.isMuted = true
+           playPauseButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
+           muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
+       }
 
     
     @IBAction func muteButtonTapped(_ sender: UIButton) {

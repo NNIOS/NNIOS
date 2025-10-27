@@ -24,8 +24,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     @IBOutlet weak var searchView: UIView!
     @IBOutlet weak var bussinessView: UIView!
     
-    private let bottomPanelView = BottomPanelView()
-    var BusinessListData : BussinessListModel?
+     var BusinessListData : BussinessListModel?
     var sourceViewController: String?
     var backAction : String?
     var selectedNeighborhoodId: String?
@@ -47,9 +46,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
         //        updateColors()
         self.searchView.isHidden = true
         tfSearch.delegate = self
-        if let selectedIndex = selectedTabIndex {
-            bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
-        }
+        
         
         tableviewBussiness.backgroundView = noDataLabel
         tableviewBussiness.allowsSelection = true
@@ -73,6 +70,8 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
            refreshControl.addTarget(self, action: #selector(refreshPageData), for: .valueChanged)
         tableviewBussiness.refreshControl = refreshControl
         
+        
+        
     }
     
     
@@ -85,18 +84,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
 
 
     
-    private func setupBottomPanel() {
-        bottomPanelView.delegate = self
-        bottomPanelView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(bottomPanelView)
-        
-        NSLayoutConstraint.activate([
-            bottomPanelView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomPanelView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomPanelView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -5), // Moves it downward
-            bottomPanelView.heightAnchor.constraint(equalToConstant: 70)
-        ])
-    }
+     
     
     
     override func viewWillAppear(_ animated: Bool) {
@@ -232,39 +220,39 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
         print(dictParams)
         
         // Call the web service
-        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { (data: ProfileModel?) in
-            // Check if data is nil (i.e., the API response was unsuccessful)
-            guard let data = data else {
-                print("Error: API response is nil")
-                completionClosure()
-                return
-            }
-            
-            // Now, 'data' is a ProfileModel, and we can safely assign it
-            self.profileData = data
-            
-            // Save required fields to UserDefaults
-            if let emerPhone = self.profileData?.emerPhone {
-                UserDefaults.standard.set(emerPhone, forKey: "emer_phone")
-            }
-            if let userPic = self.profileData?.userpic {
-                UserDefaults.standard.set(userPic, forKey: "profileImage")
-            }
-            if let lastName = self.profileData?.lastname {
-                UserDefaults.standard.set(lastName, forKey: "lastName")
-            }
-            if let neighborhood = self.profileData?.neighborhood {
-                UserDefaults.standard.set(neighborhood, forKey: "myNeighbhrhhod")
-            }
-            
-            // Save address details
-            let addressLineOne = self.profileData?.addlineone ?? ""
-            let addressLineTwo = self.profileData?.addlinetwo ?? ""
-            
-            
-            // Final completion callback
-            completionClosure()
-        }
+//        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { (data: ProfileModel?) in
+//            // Check if data is nil (i.e., the API response was unsuccessful)
+//            guard let data = data else {
+//                print("Error: API response is nil")
+//                completionClosure()
+//                return
+//            }
+//            
+//            // Now, 'data' is a ProfileModel, and we can safely assign it
+//            self.profileData = data
+//            
+//            // Save required fields to UserDefaults
+//            if let emerPhone = self.profileData?.emerPhone {
+//                UserDefaults.standard.set(emerPhone, forKey: "emer_phone")
+//            }
+//            if let userPic = self.profileData?.userpic {
+//                UserDefaults.standard.set(userPic, forKey: "profileImage")
+//            }
+//            if let lastName = self.profileData?.lastname {
+//                UserDefaults.standard.set(lastName, forKey: "lastName")
+//            }
+//            if let neighborhood = self.profileData?.neighborhood {
+//                UserDefaults.standard.set(neighborhood, forKey: "myNeighbhrhhod")
+//            }
+//            
+//            // Save address details
+//            let addressLineOne = self.profileData?.addlineone ?? ""
+//            let addressLineTwo = self.profileData?.addlinetwo ?? ""
+//            
+//            
+//            // Final completion callback
+//            completionClosure()
+//        }
     }
     
     
@@ -286,14 +274,36 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     }
     
     
+//    @IBAction func BackButtionAction(_ sender: UIButton) {
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        if backAction == "homeBack" {
+//            guard let homeVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else {
+//                return
+//            }
+//            self.navigationController?.setViewControllers([homeVC], animated: true)
+//        } else {
+//            guard let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {
+//                return
+//            }
+//            myProfileVC.fromScreen = "AddBussiness"
+//            myProfileVC.Newid = self.Newid
+//            self.navigationController?.setViewControllers([myProfileVC], animated: true)
+//        }
+//    }
+    
+    
     @IBAction func BackButtionAction(_ sender: UIButton) {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if backAction == "homeBack" {
-            guard let homeVC = storyboard.instantiateViewController(withIdentifier: "NeigbrnookViewController") as? NeigbrnookViewController else {
-                return
+            if let navController = self.navigationController {
+                for controller in navController.viewControllers {
+                    if controller is NeigbrnookViewController {
+                        navController.popToViewController(controller, animated: true)
+                        return
+                    }
+                }
             }
-            self.navigationController?.setViewControllers([homeVC], animated: true)
         } else {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
             guard let myProfileVC = storyboard.instantiateViewController(withIdentifier: "MyProfileViewController") as? MyProfileViewController else {
                 return
             }
@@ -302,6 +312,7 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
             self.navigationController?.setViewControllers([myProfileVC], animated: true)
         }
     }
+
 
     
     
@@ -412,16 +423,16 @@ class BussinesViewController: BaseViewController, BussinessDataSelectionDelegate
     // new code Irshad
     func callBussinesTypePostWebService() {
         let dictParams: [String: Any] = [:]
-        WebService.sharedInstance.callBussinesTypePostWebService(withParams: dictParams) { data in
-            self.BussinessCategoryData = data
-            
-            DispatchQueue.main.async {
-                self.tpyeCategoryLbl.text = "Select category"
-                self.tpyeCategoryLbl.font = UIFont(name: "Montserrat-Regular", size: 16) // aap size adjust kar sakte ho
-                self.tpyeCategoryLbl.textColor = .darkGray
-            }
-            
-        }
+//        WebService.sharedInstance.callBussinesTypePostWebService(withParams: dictParams) { data in
+//            self.BussinessCategoryData = data
+//            
+//            DispatchQueue.main.async {
+//                self.tpyeCategoryLbl.text = "Select category"
+//                self.tpyeCategoryLbl.font = UIFont(name: "Montserrat-Regular", size: 16) // aap size adjust kar sakte ho
+//                self.tpyeCategoryLbl.textColor = .darkGray
+//            }
+//            
+//        }
     }
  
 }
@@ -564,7 +575,7 @@ extension BussinesViewController: UITableViewDataSource, UITableViewDelegate, Bu
                     vc.presentDuration = 0.5
                     vc.dismissDuration = 0.5
                     vc.isComingFromMenuBussinessVC = true
-                    vc.view.backgroundColor = .white
+            vc.view.backgroundColor = UIColor.white
                     vc.onUpdateForBlock = {
                         self.callBusinessListWebService(searchQuery: "") {
                             self.tableviewBussiness.reloadData()
@@ -578,7 +589,7 @@ extension BussinesViewController: UITableViewDataSource, UITableViewDelegate, Bu
                             self.navigationController?.pushViewController(messageVC, animated: true)
                         }
                     }
-                    self.present(vc, animated: true, completion: nil)
+                self.present(vc, animated: true, completion: nil)
                 }
         
         // DotCallback
@@ -735,36 +746,36 @@ extension BussinesViewController: UITableViewDataSource, UITableViewDelegate, Bu
         
         print(dictParams)
         
-        WebService.sharedInstance.callBusinessListWebService(withParams: dictParams) { data in
-            self.BusinessListData = data // Save the original data
-            
-            // Filter the BusinessListData based on the search query
-            if searchQuery.isEmpty {
-                self.filteredbussinessData = self.BusinessListData // No filtering if search is empty
-            } else {
-                // Filter only the `listdata` array
-                let filteredListdata = data.listdata.filter {
-                    $0.name?.lowercased().contains(searchQuery.lowercased()) ?? false
-                }
-                
-                // Create a new `BussinessListModel` with the filtered listdata
-                self.filteredbussinessData = BussinessListModel(
-                    status: data.status,
-                    message: data.message,
-                    addlineone: data.addlineone,
-                    addlinetwo: data.addlinetwo,
-                    countryName: data.countryName,
-                    stateName: data.stateName,
-                    cityName: data.cityName,
-                    pin: data.pin,
-                    verfiedMsg: data.verfiedMsg,
-                    listdata: filteredListdata
-                )
-            }
-            // Reload the table view after filtering the data
-            completionClosure()
-            self.tableviewBussiness.reloadData()
-        }
+//        WebService.sharedInstance.callBusinessListWebService(withParams: dictParams) { data in
+//            self.BusinessListData = data // Save the original data
+//            
+//            // Filter the BusinessListData based on the search query
+//            if searchQuery.isEmpty {
+//                self.filteredbussinessData = self.BusinessListData // No filtering if search is empty
+//            } else {
+//                // Filter only the `listdata` array
+//                let filteredListdata = data.listdata.filter {
+//                    $0.name?.lowercased().contains(searchQuery.lowercased()) ?? false
+//                }
+//                
+//                // Create a new `BussinessListModel` with the filtered listdata
+//                self.filteredbussinessData = BussinessListModel(
+//                    status: data.status,
+//                    message: data.message,
+//                    addlineone: data.addlineone,
+//                    addlinetwo: data.addlinetwo,
+//                    countryName: data.countryName,
+//                    stateName: data.stateName,
+//                    cityName: data.cityName,
+//                    pin: data.pin,
+//                    verfiedMsg: data.verfiedMsg,
+//                    listdata: filteredListdata
+//                )
+//            }
+//            // Reload the table view after filtering the data
+//            completionClosure()
+//            self.tableviewBussiness.reloadData()
+//        }
     }
     
 }

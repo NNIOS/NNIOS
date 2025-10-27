@@ -1063,18 +1063,15 @@ extension DropDown: UITableViewDataSource, UITableViewDelegate {
 		}
 		
 		cell.optionLabel.textColor = textColor
-       // cell.HeadingoptionLabel.textColor = textColor
 		cell.optionLabel.font = textFont
 		cell.selectedBackgroundColor = selectionBackgroundColor
         cell.highlightTextColor = selectedTextColor
         cell.normalTextColor = textColor
 		
 		if let cellConfiguration = cellConfiguration {
-			cell.optionLabel.text = " \(cellConfiguration(index, dataSource[index]))"
-            //cell.HeadingoptionLabel?.font = UIFont.boldSystemFont(ofSize: 16)
+			cell.optionLabel.text = cellConfiguration(index, dataSource[index])
 		} else {
-			cell.optionLabel.text = " \(dataSource[index])"
-          //  cell.HeadingoptionLabel?.fontName.first = UIFont.boldSystemFont(ofSize: 16)
+			cell.optionLabel.text = dataSource[index]
 		}
 		
 		customCellConfiguration?(index, dataSource[index], cell)

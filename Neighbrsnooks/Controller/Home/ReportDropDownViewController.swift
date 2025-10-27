@@ -69,13 +69,13 @@ class ReportDropDownViewController: UIViewController {
         let parameters: [String: Any] = [:] // Populate this dictionary with your required parameters
 
         // Fetch your data
-        WebService.sharedInstance.callReportPostWebService(withParams: parameters) { [weak self] categories in
-            self?.ReportCatData = categories
-            self?.postData = (categories.listdata?.compactMap { $0.name })! // Assuming 'postTitle' is the text you want to show
-            DispatchQueue.main.async {
-                self?.selectPostTblView.reloadData()
-            }
-        }
+//        WebService.sharedInstance.callReportPostWebService(withParams: parameters) { [weak self] categories in
+//            self?.ReportCatData = categories
+//            self?.postData = (categories.listdata?.compactMap { $0.name })! // Assuming 'postTitle' is the text you want to show
+//            DispatchQueue.main.async {
+//                self?.selectPostTblView.reloadData()
+//            }
+//        }
     }
 
     

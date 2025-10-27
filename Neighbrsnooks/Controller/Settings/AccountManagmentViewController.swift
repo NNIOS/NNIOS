@@ -71,7 +71,7 @@ class AccountManagmentViewController: UIViewController {
         //dev.
         
         print(parameters)
-        guard let url = URL(string: "https://dev.neighbrsnook.com/admin/api/delete-account-request") else {
+        guard let url = URL(string: "https://neighbrsnook.com/admin/api/delete-account-request") else {
             print("❌ Invalid URL")
             return
         }
@@ -134,11 +134,7 @@ class AccountManagmentViewController: UIViewController {
         
         task.resume()
     }
-    
-    
-    
-    
-    
+ 
     @IBAction func BackButtionAction(_ : UIButton){
         
         _ = navigationController?.popViewController(animated: true)
@@ -207,7 +203,7 @@ class AccountManagmentViewController: UIViewController {
     @IBAction func logoutButtonTapped(_ sender: UIButton) {
         let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
         
-        // Title and message customization
+        // Title and message
         let titleText = "Logout"
         let messageText = "Are you sure you want to logout?"
         
@@ -227,12 +223,12 @@ class AccountManagmentViewController: UIViewController {
         alertController.setValue(attributedTitle, forKey: "attributedTitle")
         alertController.setValue(attributedMessage, forKey: "attributedMessage")
         
-        // Confirm Logout Action
+        // Confirm Logout
         let confirmAction = UIAlertAction(title: "Yes", style: .destructive) { _ in
             self.performLogout()
         }
         
-        // Cancel Actionz
+        // Cancel
         let cancelAction = UIAlertAction(title: "No", style: .cancel, handler: nil)
         
         alertController.addAction(confirmAction)
@@ -240,22 +236,27 @@ class AccountManagmentViewController: UIViewController {
         
         self.present(alertController, animated: true, completion: nil)
     }
-    
+
     func performLogout() {
-        // 1. Remove stored user data
+        // 1. Remove stored user data and correct token key
         UserDefaults.standard.removeObject(forKey: "userid")
+        UserDefaults.standard.removeObject(forKey: "authToken")
         UserDefaults.standard.set(false, forKey: "isLoginComplete")
+        UserDefaults.standard.synchronize()
         
         // 2. Navigate to Login screen
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController")
+        let loginVC = storyboard.instantiateViewController(withIdentifier: "LoginViewController") as! LoginViewController
         let navController = UINavigationController(rootViewController: loginVC)
-        
-        // 3. Set login screen as rootViewController
+
+        // 3. Reset rootViewController via SceneDelegate
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
             sceneDelegate.window?.rootViewController = navController
+            sceneDelegate.rootNavigator = navController
+            sceneDelegate.window?.makeKeyAndVisible()
         }
     }
+
     
     
     

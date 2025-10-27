@@ -8,10 +8,10 @@
 import UIKit
 import SVProgressHUD
 import Kingfisher
-import IQKeyboardManager
+
 import Alamofire
 @available(iOS 16.0, *)
-class MessageViewController: BaseViewC, UITextViewDelegate {
+class MessageViewController: BaseViewController, UITextViewDelegate {
     
     @IBOutlet weak var NameLbl: UILabel!
     @IBOutlet weak var profileImgView: UIImageView!
@@ -312,19 +312,31 @@ class MessageViewController: BaseViewC, UITextViewDelegate {
     }
     
     
+  
+    
     func showAlert(message: String) {
-        let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
-        let attributedMessage = NSAttributedString(
-            string: message,
-            attributes: [
-                NSAttributedString.Key.font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 18, weight: .medium),
-                NSAttributedString.Key.foregroundColor: UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+            let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
+            
+            let titleAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.black
             ]
-        )
-        alert.setValue(attributedMessage, forKey: "attributedMessage")
-        alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.darkGray
+            ]
+            
+            let attributedTitle = NSAttributedString(string: title ?? "", attributes: titleAttributes)
+            let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+            alertController.setValue(attributedTitle, forKey: "attributedTitle")
+            alertController.setValue(attributedMessage, forKey: "attributedMessage")
+            
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+            alertController.addAction(okAction)
+            present(alertController, animated: true, completion: nil)
+        }
 }
 
 @available(iOS 16.0, *)
@@ -412,42 +424,42 @@ extension MessageViewController: UITableViewDataSource, UITableViewDelegate{
             "owner": id
         ]
         
-        WebService.sharedInstance.callChatMessageListWebService(withParams: dictParams) { [weak self] data in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                let oldCount = self.ChatMessageData?.data?.count ?? 0
-                let newCount = data.data?.count ?? 0
-                
-                self.ChatMessageData = data
-                
-                if newCount > oldCount {
-                    let indexPaths = (oldCount..<newCount).map { IndexPath(row: $0, section: 0) }
-                    
-                    self.tableviewMembers.performBatchUpdates({
-                        self.tableviewMembers.insertRows(at: indexPaths, with: .automatic)
-                    }, completion: { success in
-                        if success {
-                            self.previousMessageCount = newCount
-                            self.scrollToBottom()
-                        } else {
-                            self.tableviewMembers.reloadData()
-                            self.previousMessageCount = newCount
-                            self.scrollToBottomWithoutAnimation() // <- ADD THIS HERE
-
-                        }
-                    })
-                } else {
-                    // No new messages, just reload
-                    self.tableviewMembers.reloadData()
-                    self.previousMessageCount = newCount
-                    self.scrollToBottomWithoutAnimation() // <- ADD THIS HERE
-
-                }
-                
-                completionClosure()
-            }
-        }
+//        WebService.sharedInstance.callChatMessageListWebService(withParams: dictParams) { [weak self] data in
+//            guard let self = self else { return }
+//            
+//            DispatchQueue.main.async {
+//                let oldCount = self.ChatMessageData?.data?.count ?? 0
+//                let newCount = data.data?.count ?? 0
+//                
+//                self.ChatMessageData = data
+//                
+//                if newCount > oldCount {
+//                    let indexPaths = (oldCount..<newCount).map { IndexPath(row: $0, section: 0) }
+//                    
+//                    self.tableviewMembers.performBatchUpdates({
+//                        self.tableviewMembers.insertRows(at: indexPaths, with: .automatic)
+//                    }, completion: { success in
+//                        if success {
+//                            self.previousMessageCount = newCount
+//                            self.scrollToBottom()
+//                        } else {
+//                            self.tableviewMembers.reloadData()
+//                            self.previousMessageCount = newCount
+//                            self.scrollToBottomWithoutAnimation() // <- ADD THIS HERE
+//
+//                        }
+//                    })
+//                } else {
+//                    // No new messages, just reload
+//                    self.tableviewMembers.reloadData()
+//                    self.previousMessageCount = newCount
+//                    self.scrollToBottomWithoutAnimation() // <- ADD THIS HERE
+//
+//                }
+//                
+//                completionClosure()
+//            }
+//        }
     }
     
     
@@ -463,14 +475,14 @@ extension MessageViewController: UITableViewDataSource, UITableViewDelegate{
             "textmessage":self.tvmessage.text ?? "",
         ]
         
-        WebService.sharedInstance.callUserChatMessageListWebService(withParams: dictParams) { data in
-            self.ChatNewMessageData = data
-            if self.ChatNewMessageData?.status == "success"{
-                completionClosure()
-            }else{
-                self.showAlert(Message: self.ChatNewMessageData?.message ?? "")
-            }
-        }
+//        WebService.sharedInstance.callUserChatMessageListWebService(withParams: dictParams) { data in
+//            self.ChatNewMessageData = data
+//            if self.ChatNewMessageData?.status == "success"{
+//                completionClosure()
+//            }else{
+//                self.showAlert(Message: self.ChatNewMessageData?.message ?? "")
+//            }
+//        }
     }
     
     
@@ -526,14 +538,14 @@ extension MessageViewController: UITableViewDataSource, UITableViewDelegate{
             }
             print("Param is :\(dictParams)")
             
-            WebService.sharedInstance.callDeleteMeassaAPI(withParams: dictParams) { data in
-                self.objDeleteDMeassgae = data
-                if self.objDeleteDMeassgae?.status == "success"{
-                    completionClosure()
-                }else{
-                    self.showAlert(Message: self.objDeleteDMeassgae?.message ?? "")
-                }
-            }
+//            WebService.sharedInstance.callDeleteMeassaAPI(withParams: dictParams) { data in
+//                self.objDeleteDMeassgae = data
+//                if self.objDeleteDMeassgae?.status == "success"{
+//                    completionClosure()
+//                }else{
+//                    self.showAlert(Message: self.objDeleteDMeassgae?.message ?? "")
+//                }
+//            }
         }
         
         

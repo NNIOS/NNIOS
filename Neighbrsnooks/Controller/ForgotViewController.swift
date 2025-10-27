@@ -21,7 +21,6 @@ class ForgotViewController: BaseViewController {
 
     
     var forgetOTPData : ForgetOTPModel?
-    var verifyOTPData : VerifyOTPModel?
     var otpFields: [CustomLabelFirstName] = []
     // var verifyOTPData : VerifyOTPModel?
     var otp : String?
@@ -136,14 +135,14 @@ class ForgotViewController: BaseViewController {
             "reqestmobileno":self.tfMobile.text ?? "",
             "flag":"forget"
         ]
-        WebService.sharedInstance.callForgetOTPWebService(withParams: dictParams) { data in
-            self.forgetOTPData = data
-            
-            //              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-            // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callForgetOTPWebService(withParams: dictParams) { data in
+//            self.forgetOTPData = data
+//            
+//            //              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//            // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//            
+//            completionClosure()
+//        }
     }
     
     func callVerifyOTPWebService(_ completionClosure: @escaping () -> ()) {
@@ -151,17 +150,17 @@ class ForgotViewController: BaseViewController {
             "reqestmobileno":self.tfMobile.text ?? "",
             "otpvarify": self.otp ?? ""
         ]
-        WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { data in
-            self.verifyOTPData = data
-            if self.verifyOTPData?.description.desc == "Code Matched successfully." {
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "ResetPasswordVC") as? ResetPasswordVC else {return}
-                vc.phoneno = self.tfMobile.text ?? ""
-                self.navigationController?.pushViewController(vc, animated: true)
-            } else {
-                self.alertToast(Message: "Code does not match.")
-            }
-            completionClosure()
-        }
+//        WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { data in
+//            self.verifyOTPData = data
+//            if self.verifyOTPData?.description.desc == "Code Matched successfully." {
+//                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "ResetPasswordVC") as? ResetPasswordVC else {return}
+//                vc.phoneno = self.tfMobile.text ?? ""
+//                self.navigationController?.pushViewController(vc, animated: true)
+//            } else {
+//                self.alertToast(Message: "Code does not match.")
+//            }
+//            completionClosure()
+//        }
     }
     
     

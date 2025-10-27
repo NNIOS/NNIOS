@@ -98,14 +98,14 @@ extension PublicProfileVisibilityVC {
             dictParams["address"] = model.address
             dictParams["profession"] = model.profession
         }
-        WebService.sharedInstance.callNewNotificationWebService(withParams: dictParams) { responseData in
-            self.updateNewNotificationsData = responseData
-            print("Api data response is model is : \(String(describing: self.updateNewNotificationsData))")
-            DispatchQueue.main.async {
-                self.updateUIFromModel()
-                completionClosure()
-            }
-        }
+//        WebService.sharedInstance.callNewNotificationWebService(withParams: dictParams) { responseData in
+//            self.updateNewNotificationsData = responseData
+//            print("Api data response is model is : \(String(describing: self.updateNewNotificationsData))")
+//            DispatchQueue.main.async {
+//                self.updateUIFromModel()
+//                completionClosure()
+//            }
+//        }
     }
     
     func callSaveNotificationVisibilitySettings(completion: @escaping () -> ()) { // save notification setting calling function (Save Data)
@@ -117,7 +117,7 @@ extension PublicProfileVisibilityVC {
             "address": model.address,
             "profession": model.profession
         ]
-        WebService.sharedInstance.callNewNotificationWebService(withParams: params) { _ in completion() }
+//        WebService.sharedInstance.callNewNotificationWebService(withParams: params) { _ in completion() }
     }
     
     func updateUIFromModel() { // updating values in model

@@ -10,9 +10,10 @@ import SVProgressHUD
 import AVKit
  
 import Kingfisher
+import CropViewController
 
 @available(iOS 16.0, *)
-class EditProfileViewController: UIViewController,CropViewControllerDelegate,PopupSelectionDelegate {
+class EditProfileViewController: UIViewController,CropViewControllerDelegate {
     
     @IBOutlet weak var lblAlittleMoreAbout: UILabel!
     @IBOutlet weak var lblProfession: UILabel!
@@ -308,7 +309,7 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
                 print("Profile data fetched successfully")
                 let userName = self.profileData?.username ?? ""
                 let firstLetter = String(userName.prefix(1)).uppercased()
-                self.getCustomImage(imageDisplayName: self.lblName.text, imageView: self.profilePic)
+//                self.getCustomImage(imageDisplayName: self.lblName.text, imageView: self.profilePic)
                 if let imageUrlString = self.profileData?.userpic,
                    let url = URL(string: imageUrlString),
                    !imageUrlString.trimmingCharacters(in: .whitespaces).isEmpty {
@@ -325,29 +326,29 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
                     self.setInitialLetterProfile(firstLetter)
                 }
             }
-            let professionLabelTap = UITapGestureRecognizer(target: self, action: #selector(professionLabelTapped))
-            lblDo.isUserInteractionEnabled = true
-            lblDo.addGestureRecognizer(professionLabelTap)
-            
-            let professionImageTap = UITapGestureRecognizer(target: self, action: #selector(professionLabelTapped))
-            whatDoDropDown.isUserInteractionEnabled = true
-            whatDoDropDown.addGestureRecognizer(professionImageTap)
-            
-            let interestLabelTap = UITapGestureRecognizer(target: self, action: #selector(interestLabelTapped))
-            tfIntrest.isUserInteractionEnabled = true
-            tfIntrest.addGestureRecognizer(interestLabelTap)
-            
-            let interestImageTap = UITapGestureRecognizer(target: self, action: #selector(interestLabelTapped))
-            intDropDown.isUserInteractionEnabled = true
-            intDropDown.addGestureRecognizer(interestImageTap)
-            
-            let neighbourLabelTap = UITapGestureRecognizer(target: self, action: #selector(neighbourLabelTapped))
-            tfNeighbour.isUserInteractionEnabled = true
-            tfNeighbour.addGestureRecognizer(neighbourLabelTap)
-            
-            let neighbourImageTap = UITapGestureRecognizer(target: self, action: #selector(neighbourLabelTapped))
+//            let professionLabelTap = UITapGestureRecognizer(target: self, action: #selector(professionLabelTapped))
+//            lblDo.isUserInteractionEnabled = true
+//            lblDo.addGestureRecognizer(professionLabelTap)
+//            
+//            let professionImageTap = UITapGestureRecognizer(target: self, action: #selector(professionLabelTapped))
+//            whatDoDropDown.isUserInteractionEnabled = true
+//            whatDoDropDown.addGestureRecognizer(professionImageTap)
+//            
+//            let interestLabelTap = UITapGestureRecognizer(target: self, action: #selector(interestLabelTapped))
+//            tfIntrest.isUserInteractionEnabled = true
+//            tfIntrest.addGestureRecognizer(interestLabelTap)
+//            
+//            let interestImageTap = UITapGestureRecognizer(target: self, action: #selector(interestLabelTapped))
+//            intDropDown.isUserInteractionEnabled = true
+//            intDropDown.addGestureRecognizer(interestImageTap)
+//            
+//            let neighbourLabelTap = UITapGestureRecognizer(target: self, action: #selector(neighbourLabelTapped))
+//            tfNeighbour.isUserInteractionEnabled = true
+//            tfNeighbour.addGestureRecognizer(neighbourLabelTap)
+//            
+//            let neighbourImageTap = UITapGestureRecognizer(target: self, action: #selector(neighbourLabelTapped))
             neigDropDown.isUserInteractionEnabled = true
-            neigDropDown.addGestureRecognizer(neighbourImageTap)
+//            neigDropDown.addGestureRecognizer(neighbourImageTap)
             self.intrsetName.append("Select Intrest")
             self.serviceName.append("Select Profession")
             self.NeighbourName.append("Select our Love Neighbourhood")
@@ -396,48 +397,48 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
         NetworkMonitor.shared.stopMonitoring()
     }
     
-    @objc func professionLabelTapped() {
-        showPopup(for: 1, allowMultipleSelection: false, hideOkButton: true) // lblDo ke liye OK button hidden
-    }
+//    @objc func professionLabelTapped() {
+//        showPopup(for: 1, allowMultipleSelection: false, hideOkButton: true) // lblDo ke liye OK button hidden
+//    }
+//    
+//    @objc func interestLabelTapped() {
+//        showPopup(for: 2, allowMultipleSelection: true, hideOkButton: false) // OK button visible
+//    }
+//    
+//    @objc func neighbourLabelTapped() {
+//        showPopup(for: 3, allowMultipleSelection: true, hideOkButton: false) // OK button visible
+//    }
     
-    @objc func interestLabelTapped() {
-        showPopup(for: 2, allowMultipleSelection: true, hideOkButton: false) // OK button visible
-    }
-    
-    @objc func neighbourLabelTapped() {
-        showPopup(for: 3, allowMultipleSelection: true, hideOkButton: false) // OK button visible
-    }
-    
-    func showPopup(for labelTag: Int, allowMultipleSelection: Bool, hideOkButton: Bool) {
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            if let popupVC = storyboard.instantiateViewController(withIdentifier: "RegisterFirstPopupVC") as? RegisterFirstPopupVC {
-                popupVC.allowMultipleSelection = allowMultipleSelection
-                popupVC.hideOkButton = hideOkButton // Pass flag to control OK button visibility
-                
-                if labelTag == 1 {
-                    if let professionData = AddProjectData?.nbdata.map({ $0.memberTitle }) {
-                        popupVC.data = professionData
-                    }
-                    popupVC.selectedItems = selectedProfessionItems
-                } else if labelTag == 2 {
-                    if let interestData = IntrsetData?.nbdata.map({ $0.memberTitle }) {
-                        popupVC.data = interestData
-                    }
-                    popupVC.selectedItems = selectedInterestItems
-                } else if labelTag == 3 {
-                    if let neighbourData = NeighbourData?.nbdata.map({ $0.memberTitle }) {
-                        popupVC.data = neighbourData
-                    }
-                    popupVC.selectedItems = selectedNeighbourItems
-                }
-                
-                popupVC.labelTag = labelTag
-                popupVC.delegate = self
-                popupVC.modalPresentationStyle = .overFullScreen
-                popupVC.modalTransitionStyle = .crossDissolve
-                self.present(popupVC, animated: true, completion: nil)
-            }
-        }
+//    func showPopup(for labelTag: Int, allowMultipleSelection: Bool, hideOkButton: Bool) {
+//            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//            if let popupVC = storyboard.instantiateViewController(withIdentifier: "RegisterFirstPopupVC") as? RegisterFirstPopupVC {
+//                popupVC.allowMultipleSelection = allowMultipleSelection
+//                popupVC.hideOkButton = hideOkButton // Pass flag to control OK button visibility
+//                
+//                if labelTag == 1 {
+//                    if let professionData = AddProjectData?.nbdata.map({ $0.memberTitle }) {
+//                        popupVC.data = professionData
+//                    }
+//                    popupVC.selectedItems = selectedProfessionItems
+//                } else if labelTag == 2 {
+//                    if let interestData = IntrsetData?.nbdata.map({ $0.memberTitle }) {
+//                        popupVC.data = interestData
+//                    }
+//                    popupVC.selectedItems = selectedInterestItems
+//                } else if labelTag == 3 {
+//                    if let neighbourData = NeighbourData?.nbdata.map({ $0.memberTitle }) {
+//                        popupVC.data = neighbourData
+//                    }
+//                    popupVC.selectedItems = selectedNeighbourItems
+//                }
+//                
+//                popupVC.labelTag = labelTag
+//                popupVC.delegate = self
+//                popupVC.modalPresentationStyle = .overFullScreen
+//                popupVC.modalTransitionStyle = .crossDissolve
+//                self.present(popupVC, animated: true, completion: nil)
+//            }
+//        }
     
     func setInitialLetterProfile(_ letter: String) {
             let label = UILabel()
@@ -505,18 +506,18 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
     
     
     
-    func getCustomImage(imageDisplayName: String?, imageView: UIImageView!){
-        if let name = imageDisplayName, !name.isEmpty {
-            imageView.setImage(string:name, color: UIColor.colorHash(name: name), circular: isCircularWithStroke, stroke: isCircularWithStroke)
-            
-            
-            //  let imageDisplayName = CGSize(width: 20, height: 20)
-        }else{
-            imageView.setImage(string:"Display Picture", color: UIColor.colorHash(name: "Display Picture"), circular: isCircularWithStroke, stroke: isCircularWithStroke)
-        }
-        
-    }
-    
+//    func getCustomImage(imageDisplayName: String?, imageView: UIImageView!){
+//        if let name = imageDisplayName, !name.isEmpty {
+//            imageView.setImage(string:name, color: UIColor.colorHash(name: name), circular: isCircularWithStroke, stroke: isCircularWithStroke)
+//            
+//            
+//            //  let imageDisplayName = CGSize(width: 20, height: 20)
+//        }else{
+//            imageView.setImage(string:"Display Picture", color: UIColor.colorHash(name: "Display Picture"), circular: isCircularWithStroke, stroke: isCircularWithStroke)
+//        }
+//        
+//    }
+//    
     
     
     @IBAction func BackButtionAction(_ : UIButton){
@@ -585,23 +586,23 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
         print(dictParams)
         
         // Call the web service
-        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { (data: ProfileModel?) in
-            guard let data = data else {
-                print("Error: API response is nil")
-                completionClosure()
-                return
-            }
-
-            // **Assign API response to profileData**
-            self.profileData = data
-
-            // **Update UI on the main thread**
-            DispatchQueue.main.async {
-                self.updateProfileUI()
-            }
-
-            completionClosure()
-        }
+//        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { (data: ProfileModel?) in
+//            guard let data = data else {
+//                print("Error: API response is nil")
+//                completionClosure()
+//                return
+//            }
+//
+//            // **Assign API response to profileData**
+//            self.profileData = data
+//
+//            // **Update UI on the main thread**
+//            DispatchQueue.main.async {
+//                self.updateProfileUI()
+//            }
+//
+//            completionClosure()
+//        }
     }
 
     
@@ -639,18 +640,18 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
   
     func CallProffesoinWebService() {
         let dictParams: [String: Any] = [:]
-        WebService.sharedInstance.CallProffesoinWebService(withParams: dictParams) { data in
-            self.AddProjectData = data
-            // No default id set here, will be set after selection
-        }
+//        WebService.sharedInstance.CallProffesoinWebService(withParams: dictParams) { data in
+//            self.AddProjectData = data
+//            // No default id set here, will be set after selection
+//        }
     }
 
     func CallIntrestWebService() {
         let dictParams: [String: Any] = [:]
-        WebService.sharedInstance.CallIntrestWebService(withParams: dictParams) { data in
-            self.IntrsetData = data
-            // No default id set here, will be set after selection
-        }
+//        WebService.sharedInstance.CallIntrestWebService(withParams: dictParams) { data in
+//            self.IntrsetData = data
+//            // No default id set here, will be set after selection
+//        }
     }
 
     
@@ -666,13 +667,13 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
     
     func CallNeighbourWebService() {
         let dictParams: Dictionary<String, Any> = ["":""]
-        WebService.sharedInstance.CallNeighbourWebService(withParams: dictParams) { data in
-            self.NeighbourData = data
-            for value in self.NeighbourData?.nbdata ?? [] {
-                self.NeighbourName.append(value.memberTitle ?? "")
-            }
- 
-        }
+//        WebService.sharedInstance.CallNeighbourWebService(withParams: dictParams) { data in
+//            self.NeighbourData = data
+//            for value in self.NeighbourData?.nbdata ?? [] {
+//                self.NeighbourName.append(value.memberTitle ?? "")
+//            }
+// 
+//        }
     }
     
     func callMoreYouWebService(_ completionClosure: @escaping () -> ()) {
@@ -681,7 +682,7 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
             let interestIds = UserDefaults.standard.string(forKey: "interestIds") ?? ""
             
             let dictParams: [String: Any] = [
-                "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
+//                "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
                 "profession": professionId,
                 "interest": interestIds,
                 "reason": (self.tfNeighbour.text == "I love my neighbourhood because") ? "" : (self.tfNeighbour.text ?? ""),
@@ -690,10 +691,10 @@ class EditProfileViewController: UIViewController,CropViewControllerDelegate,Pop
                 "userpic": ""
             ]
             print("Param is : \(dictParams)")
-            WebService.sharedInstance.callMoreYouWebService(withParams: dictParams) { data in
-                self.MoreDataF = data
-                completionClosure()
-            }
+//            WebService.sharedInstance.callMoreYouWebService(withParams: dictParams) { data in
+//                self.MoreDataF = data
+//                completionClosure()
+//            }
         }
     
 

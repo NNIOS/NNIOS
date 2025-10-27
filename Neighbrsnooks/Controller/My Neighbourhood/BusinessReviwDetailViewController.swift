@@ -54,11 +54,11 @@ class BusinessReviwDetailViewController: BottomPopupViewController {
     
     
     
-    override var popupHeight: CGFloat { return height ?? CGFloat(SCREEN_HEIGHT - 10) }
-    override var popupTopCornerRadius: CGFloat { return topCornerRadius ?? CGFloat(0) }
-    override var popupPresentDuration: Double { return presentDuration ?? 1.0 }
-    override var popupDismissDuration: Double { return dismissDuration ?? 1.0 }
-    override var popupShouldDismissInteractivelty: Bool { return shouldDismissInteractivelty ?? true }
+//    override var popupHeight: CGFloat { return height ?? CGFloat(SCREEN_HEIGHT - 10) }
+//    override var popupTopCornerRadius: CGFloat { return topCornerRadius ?? CGFloat(0) }
+//    override var popupPresentDuration: Double { return presentDuration ?? 1.0 }
+//    override var popupDismissDuration: Double { return dismissDuration ?? 1.0 }
+//    override var popupShouldDismissInteractivelty: Bool { return shouldDismissInteractivelty ?? true }
     
     @objc func handleLongPress(gesture: UILongPressGestureRecognizer) {
         let point = gesture.location(in: tableviewMembers) // TableView ke andar ka touch point
@@ -141,14 +141,14 @@ extension BusinessReviwDetailViewController: UITableViewDataSource, UITableViewD
             "userid": id ?? "",
             "business_id": business_id ?? ""
         ]
-        WebService.sharedInstance.callBussinesReviewDetailPostWebService(withParams: dictParams) { data in
-            self.BusinessReviewData = data
-            if let firstReview = data.listdata?.first {
-                self.reviewID = firstReview.id  // ID store karna
-                print("✅ Review ID Stored: \(self.reviewID ?? "No ID")")
-            }
-            completionClosure()
-        }
+//        WebService.sharedInstance.callBussinesReviewDetailPostWebService(withParams: dictParams) { data in
+//            self.BusinessReviewData = data
+//            if let firstReview = data.listdata?.first {
+//                self.reviewID = firstReview.id  // ID store karna
+//                print("✅ Review ID Stored: \(self.reviewID ?? "No ID")")
+//            }
+//            completionClosure()
+//        }
     }
     
     func callBussinesReviewDeleteWebService(_ completionClosure: @escaping (String) -> ()) {
@@ -159,41 +159,41 @@ extension BusinessReviwDetailViewController: UITableViewDataSource, UITableViewD
         ]
         print("📡 Sending API Request with Params: \(dictParams)")
         
-        WebService.sharedInstance.callBussinesReviewDeleteWebService(withParams: dictParams) { response in
-            print("✅ API Response: \(response)")
-            
-            if response.status.lowercased() == "failed" {
-                DispatchQueue.main.async {
-                    self.showAutoDismissAlert(message: "Error: \(response.message)")
-                    completionClosure(response.message)
-                }
-                return
-            }
-
-            self.BusinesReviewDelete = response
-            
-            DispatchQueue.main.async {
-                self.showAutoDismissAlert(message: response.message)
-                completionClosure(response.message)
-            }
-
-            self.callBussinesReviewDetailPostWebService {
-                DispatchQueue.main.async {
-                    self.tableviewMembers.reloadData()
-                    self.updatePopupHeight()
-
-                    /// ✅ Always call callback so main screen updates
-                    self.callback?()
-                    
-                    // ✅ Dismiss only if all reviews deleted
-                    if self.BusinessReviewData?.listdata?.isEmpty == true {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            self.dismiss(animated: true, completion: nil)
-                        }
-                    }
-                }
-            }
-        }
+//        WebService.sharedInstance.callBussinesReviewDeleteWebService(withParams: dictParams) { response in
+//            print("✅ API Response: \(response)")
+//            
+//            if response.status.lowercased() == "failed" {
+//                DispatchQueue.main.async {
+//                    self.showAutoDismissAlert(message: "Error: \(response.message)")
+//                    completionClosure(response.message)
+//                }
+//                return
+//            }
+//
+//            self.BusinesReviewDelete = response
+//            
+//            DispatchQueue.main.async {
+//                self.showAutoDismissAlert(message: response.message)
+//                completionClosure(response.message)
+//            }
+//
+//            self.callBussinesReviewDetailPostWebService {
+//                DispatchQueue.main.async {
+//                    self.tableviewMembers.reloadData()
+//                    self.updatePopupHeight()
+//
+//                    /// ✅ Always call callback so main screen updates
+//                    self.callback?()
+//                    
+//                    // ✅ Dismiss only if all reviews deleted
+//                    if self.BusinessReviewData?.listdata?.isEmpty == true {
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+//                            self.dismiss(animated: true, completion: nil)
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     

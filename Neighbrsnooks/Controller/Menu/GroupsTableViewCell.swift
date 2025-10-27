@@ -39,7 +39,7 @@ class GroupsTableViewCell: UITableViewCell {
     private var defaultTextColor: UIColor?
     
     weak var delegateFav: ProfileFavTapDelegate?
-    
+    var groupData: HomeGroupItem?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -83,6 +83,33 @@ class GroupsTableViewCell: UITableViewCell {
             //            updateColors()
         }
     }
+    
+    
+    func configure(with item: HomeGroupItem) {
+        self.groupData = item
+        lblGroupName.text = item.groupName
+        lblName.text = item.username
+        lblSec.text = item.neighborhoodName
+        lblTime.text = item.groupCreatedOn
+        lblPrivate.text = item.groupType
+        
+        if let groupUrl = URL(string: item.groupImage), !item.groupImage.isEmpty {
+            profileImgView.kf.indicatorType = .activity
+            profileImgView.kf.setImage(with: groupUrl, placeholder: UIImage(named: "default_group"))
+        } else {
+            profileImgView.image = UIImage(named: "default_group")
+        }
+        
+        // User image
+        if let userUrl = URL(string: item.userpic), !item.userpic.isEmpty {
+            UserImgView.kf.indicatorType = .activity
+            UserImgView.kf.setImage(with: userUrl, placeholder: UIImage(named: "default_user"))
+        } else {
+            UserImgView.image = UIImage(named: "default_user")
+        }
+        
+         
+     }
     
     
     private func addTapGestureToProfile() {

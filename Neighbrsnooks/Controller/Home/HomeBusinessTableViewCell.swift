@@ -17,8 +17,6 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
     @IBOutlet weak var lblProduct: UILabel!
     @IBOutlet weak var lblHealth: UILabel!
     @IBOutlet weak var profileImgView : UIImageView!
-    @IBOutlet weak var BannerImgView : UIImageView!
-    // @IBOutlet weak var BussinessImgView : UIImageView!
     @IBOutlet weak var lblRating: UILabel!
     @IBOutlet weak var BussinessStatusView: UIView!
     @IBOutlet weak var lblApproval: UILabel!
@@ -29,13 +27,11 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
     weak var delegate: ProfileTapDelegate?
     weak var delegateH: BussinessTableViewCellDelegate?
     var thisWidth:CGFloat = 0
-    //   var BusimgData = [image]()
-    // var BusimgData = [image].self
-    //  var BusimgData = [ImageBussi]()
-    var BusimgData = [BusinessImageH]()
+    var BusimgData = ProfileTapDelegate?.self
     var DetailsCallback : ((UIButton) -> Void)?
     var DotCallback : ((UIButton) -> Void)?
-    // var BusimgData = [image]
+   
+    var businessMedia: [HomeBusinessMedia] = []
     
     weak var businessDelegate: HomeBusinessCellDelegate?
     var businessID: String? // Pass this from controller while setting up cell
@@ -48,34 +44,55 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
         addTapGestureToProfile()
         profileImgView.layer.cornerRadius = profileImgView.frame.height/2
         
-        collectionViewEvent.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap)))
+//        collectionViewEvent.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap)))
 
     }
     
-    @objc private func handleCollectionViewTap(_ gesture: UITapGestureRecognizer) {
-        let location = gesture.location(in: collectionViewEvent)
-        if let indexPath = collectionViewEvent.indexPathForItem(at: location) {
-            let selectedData = BusimgData[indexPath.row]
-            print("Selected data: \(selectedData)")
-///businessDelegate?.didSelectItem(with: selectedData, username: UserName,)
+//    @objc private func handleCollectionViewTap(_ gesture: UITapGestureRecognizer) {
+//        let location = gesture.location(in: collectionViewEvent)
+//        if let indexPath = collectionViewEvent.indexPathForItem(at: location) {
+//            let selectedData = BusimgData[indexPath.row]
+//            print("Selected data: \(selectedData)")
+/////businessDelegate?.didSelectItem(with: selectedData, username: UserName,)
+//        }
+//    }
+//
+//    override func layoutSubviews() {
+//        super.layoutSubviews()
+//
+//        // Check if any image or video is available
+//        let hasValidItem = BusimgData.contains { item in
+//            let hasImage = !(item.img?.isEmpty ?? true)
+//            let hasVideo = !(item.video?.isEmpty ?? true)
+//            return hasImage || hasVideo
+//        }
+//
+//        // Set height constraint accordingly
+//        collectionViewHeightConstraint.constant = hasValidItem ? 500 : -20
+//        collectionViewEvent.layoutIfNeeded()
+//    }
+    func configure(with item: HomeBusinessItem) {
+        lblUserName.text = item.username
+        lblSector.text = item.neighborhoodName
+        lblProduct.text = item.businessTitle
+        
+        // Profile Image Kingfisher se load karo
+        if let url = URL(string: item.userpic) {
+            profileImgView.kf.setImage(
+                with: url,
+                placeholder: UIImage(named: "defaultProfile"),
+                options: [.transition(.fade(0.3))]
+            )
+        } else {
+            profileImgView.image = UIImage(named: "defaultProfile")
         }
+        
+        // Media set karna
+        self.businessMedia = item.businessMedia
+        collectionViewEvent.reloadData()
     }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-
-        // Check if any image or video is available
-        let hasValidItem = BusimgData.contains { item in
-            let hasImage = !(item.img?.isEmpty ?? true)
-            let hasVideo = !(item.video?.isEmpty ?? true)
-            return hasImage || hasVideo
-        }
-
-        // Set height constraint accordingly
-        collectionViewHeightConstraint.constant = hasValidItem ? 500 : -20
-        collectionViewEvent.layoutIfNeeded()
-    }
-
+    
+   
     
     private func addTapGestureToProfile() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(profileTapped))
@@ -116,50 +133,32 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
-        return BusimgData.count ?? 0
-        
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeBusinessCollectionViewCell", for: indexPath) as! HomeBusinessCollectionViewCell
-        // Check if the index is valid
-        guard indexPath.row < BusimgData.count else {
-            print("Index out of bounds for BusimgData at row: \(indexPath.row)")
-            return cell // Return an empty cell if the index is invalid
-        }
-        
-        let item = BusimgData[indexPath.row]
-        // If it's an image
-        if let imageUrl = item.img, !imageUrl.isEmpty {
-            let url = URL(string: imageUrl)
-            cell.profileImgView.kf.indicatorType = .activity
-            cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "NewEvents"))
-            
-            // Hide video controls for images
-            cell.pauseButton.isHidden = true
-            cell.muteButton.isHidden = true
-            cell.removeVideoPlayer()
-        }
-        // If it's a video
-        else if let videoUrl = item.video, !videoUrl.isEmpty {
-            let url = URL(string: videoUrl)!
-            cell.configureVideoPlayer(with: url)
-            
-            // Show video controls
-            cell.pauseButton.isHidden = false
-            cell.muteButton.isHidden = false
-        }
-        
-        
-         cell.numberLabel.text = "\(indexPath.item + 1)"
-        cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-        cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-        let totalNumberOfImages = BusimgData.count
-        cell.totalImagesLabel.text =  "/ \(totalNumberOfImages)"
-        
-        return cell
-    }
+           return businessMedia.count
+       }
+
+       func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+           let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeBusinessCollectionViewCell", for: indexPath) as! HomeBusinessCollectionViewCell
+
+           let item = businessMedia[indexPath.row]
+
+           if let imageUrl = item.img, !imageUrl.isEmpty {
+               let url = URL(string: imageUrl)
+               cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder"))
+               cell.pauseButton.isHidden = true
+               cell.muteButton.isHidden = true
+               cell.removeVideoPlayer()
+           } else if let videoUrl = item.video, !videoUrl.isEmpty {
+               let url = URL(string: videoUrl)!
+               cell.configureVideoPlayer(with: url)
+               cell.pauseButton.isHidden = false
+               cell.muteButton.isHidden = false
+           }
+
+           cell.numberLabel.text = "\(indexPath.item + 1)"
+           cell.totalImagesLabel.text = "/ \(businessMedia.count)"
+
+           return cell
+       }
     
         func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
             print("TabDidSelect")
@@ -170,19 +169,14 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
         }
     
     
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        thisWidth = CGFloat(self.collectionViewEvent.width) / 1
-//        return CGSize(width: thisWidth, height: 500)
-//    }
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        guard indexPath.row < BusimgData.count else {
+        guard indexPath.row < businessMedia.count else {
             return CGSize(width: collectionView.frame.width, height: 0)
         }
 
-        let item = BusimgData[indexPath.row]
-        let isImageEmpty = item.img?.isEmpty ?? true
-        let isVideoEmpty = item.video?.isEmpty ?? true
+        let mediaItem = businessMedia[indexPath.row]
+        let isImageEmpty = mediaItem.img?.isEmpty ?? true
+        let isVideoEmpty = mediaItem.video?.isEmpty ?? true
 
         if isImageEmpty && isVideoEmpty {
             return CGSize(width: collectionView.frame.width, height: 0)
@@ -190,6 +184,7 @@ class HomeBusinessTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLay
             return CGSize(width: collectionView.frame.width, height: 500)
         }
     }
+
 
     
 }

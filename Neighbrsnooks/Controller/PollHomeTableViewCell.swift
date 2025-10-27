@@ -34,42 +34,10 @@ class PollHomeTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-//        updateColors()
+ 
         addTapGestureToProfile()
         ProfileImgView.layer.cornerRadius = ProfileImgView.frame.height/2
     }
-    
-//    private func updateColors() {
-//        if traitCollection.userInterfaceStyle == .dark {
-//            // Dark mode colors
-//            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblSector.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblTime.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblAddress.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblstartdate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblEnddate.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblVote.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblStartPoll.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            lblEndPoll.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            btnDotsImg.tintColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-//            
-//        } else {
-//            // Light mode
-//            lblName.textColor = #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
-//            lblSector.textColor = UIColor.secondaryLabel
-//            lblTime.textColor = UIColor.secondaryLabel
-//            lblAddress.textColor = UIColor.secondaryLabel
-//            lblstartdate.textColor = UIColor.secondaryLabel
-//            lblEnddate.textColor = UIColor.secondaryLabel
-//            lblVote.textColor = UIColor.secondaryLabel
-//            lblStartPoll.textColor = UIColor.secondaryLabel
-//            lblEndPoll.textColor = UIColor.secondaryLabel
-//            btnDotsImg.tintColor = .black
-//            
-//        }
-//    }
-    
-   
     
     private func addTapGestureToProfile() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(profileTapped))
@@ -92,6 +60,25 @@ class PollHomeTableViewCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
+    
+    func configure(with item: HomePollItem) {
+           lblName.text = item.username
+           lblSector.text = item.neighborhoodName
+           lblTime.text = item.pollCreatedOn
+           lblAddress.text = item.pollTitle
+           lblstartdate.text = "Start: \(item.pollStartDate)"
+           lblEnddate.text = "End: \(item.pollEndDate)"
+           lblVote.text = "\(item.pollTotalVote) Votes"
+
+           // Profile image
+           if let url = URL(string: item.userpic), !item.userpic.isEmpty {
+               ProfileImgView.kf.indicatorType = .activity
+               ProfileImgView.kf.setImage(with: url, placeholder: UIImage(named: "default_user"))
+           } else {
+               ProfileImgView.image = UIImage(named: "default_user")
+           }
+       }
+    
     
     @IBAction func btnDetails(_ sender: UIButton) {
         DetailsCallback?(sender)

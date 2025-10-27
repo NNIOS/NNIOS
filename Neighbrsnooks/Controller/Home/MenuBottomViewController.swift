@@ -44,8 +44,7 @@ class MenuBottomViewController: UIViewController {
     @IBOutlet weak var LblContact: UILabel!
    
     var profileData : ProfileModel?
-//    private let bottomPanelView = BottomPanelView()
-    var selectedNewTabIndex: Int?
+     var selectedNewTabIndex: Int?
     weak var delegate: MenuBottomViewControllerDelegate?
   //  weak var delegate: MenuBottomViewControllerDelegate?
 
@@ -183,14 +182,14 @@ class MenuBottomViewController: UIViewController {
                                                    
                                                    
                                                                         ]
-          WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-              UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
-              UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
-              UserDefaults.standard.set(self.profileData?.lastname, forKey: "lastName")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+//            self.profileData = data
+//              UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
+//              UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
+//              UserDefaults.standard.set(self.profileData?.lastname, forKey: "lastName")
+//
+//            completionClosure()
+//          }
         }
    
     

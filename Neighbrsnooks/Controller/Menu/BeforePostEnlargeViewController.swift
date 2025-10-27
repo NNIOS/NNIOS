@@ -96,13 +96,13 @@ class BeforePostEnlargeViewController: UIViewController,UICollectionViewDelegate
 //    }
 
     
-    func fetchDataFromAPI() {
-        APIManager.shared.fetchData { images, videos in
-            self.imageArray = images
-            self.videoArray = videos
-            self.collectionView.reloadData()
-        }
-    }
+//    func fetchDataFromAPI() {
+//        APIManager.shared.fetchData { images, videos in
+//            self.imageArray = images
+//            self.videoArray = videos
+//            self.collectionView.reloadData()
+//        }
+//    }
     
     // MARK: - UICollectionViewDelegate & UICollectionViewDataSource
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

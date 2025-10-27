@@ -368,35 +368,38 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     }
     
     @IBAction func PublishBtn(_ sender: UIButton){
-        
-        
-        // Show loader
-        showLoader()
-        self.hideLoader()
-        
-        switch selectedCheckbox {
-        case .sold:
-            callMarketSoldWebService {
-                self.callMarketCreateWebService {
-                    
+        if tfItemName.text == "" {
+            alertToast(Message: "Please enter market name")
+        } else if tfDesc.text == "" {
+            alertToast(Message: "Please enter market description")
+        } else {
+            // Show loader
+            showLoader()
+            self.hideLoader()
+            
+            switch selectedCheckbox {
+            case .sold:
+                callMarketSoldWebService {
+                    self.callMarketCreateWebService {
+                        
+                    }
+                }
+            case .active:
+                callMarketActiveWebService {
+                    self.callMarketCreateWebService {
+                        
+                    }
+                }
+            case .deactivate, .none:
+                callMarketDeactiveWebService {
+                    self.callMarketCreateWebService {
+                        
+                    }
                 }
             }
-        case .active:
-            callMarketActiveWebService {
-                self.callMarketCreateWebService {
-                    
-                }
-            }
-        case .deactivate, .none:
-            callMarketDeactiveWebService {
-                self.callMarketCreateWebService {
-                    
-                }
-            }
+            
+            self.navigationController?.popViewController(animated: true)
         }
-        
-        self.navigationController?.popViewController(animated: true)
-       
     }
     
     func showLoader() {
@@ -553,7 +556,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
 
     // dev.
         func callMarketDeactiveWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/product_inactive_status?"
+            let url = "https://neighbrsnook.com/admin/api/product_inactive_status?"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -569,53 +572,53 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
                 
             ]
             
-            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
-            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-                switch statusCode {
-                case .SUCCESS ,.CREATED:
-                    
-                    do {
-                        let data = try JSONDecoder().decode(InactivemarketModel.self, from: result!)
-                        self.SoldDataNew = data
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                        self.collectionViewEvent.reloadData()
-                        
-                        
-                        DispatchQueue.global().async {
-                            // Simulate network delay
-                            sleep(2)
-                            
-                            // Update MarketWDetailData with fetched data
-                            // Example data assignment
-                            self.SoldDataNew = data // Your actual data fetching logic
-                            
-                            DispatchQueue.main.async {
-                                completion() // Call completion handler
-                            }
-                        }
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                    do {
-                        let data = try JSONDecoder().decode(InactivemarketModel.self, from: result!)
-                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .UNAUTHORIZED:
-                    print(error?.localizedDescription)
-                    //   self.showLogoutAlert()
-                default:
-                    break
-                }
-            }
+//            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
+//            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//                switch statusCode {
+//                case .SUCCESS ,.CREATED:
+//                    
+//                    do {
+//                        let data = try JSONDecoder().decode(InactivemarketModel.self, from: result!)
+//                        self.SoldDataNew = data
+//                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+//                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
+//                        self.collectionViewEvent.reloadData()
+//                        
+//                        
+//                        DispatchQueue.global().async {
+//                            // Simulate network delay
+//                            sleep(2)
+//                            
+//                            // Update MarketWDetailData with fetched data
+//                            // Example data assignment
+//                            self.SoldDataNew = data // Your actual data fetching logic
+//                            
+//                            DispatchQueue.main.async {
+//                                completion() // Call completion handler
+//                            }
+//                        }
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                    do {
+//                        let data = try JSONDecoder().decode(InactivemarketModel.self, from: result!)
+//                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .UNAUTHORIZED:
+//                    print(error?.localizedDescription)
+//                    //   self.showLogoutAlert()
+//                default:
+//                    break
+//                }
+//            }
         }
         //dev.
         
         func callMarketActiveWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/product_active_status"
+            let url = "https://neighbrsnook.com/admin/api/product_active_status"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -631,54 +634,54 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
                 
             ]
             
-            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
-            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-                switch statusCode {
-                case .SUCCESS ,.CREATED:
-                    
-                    do {
-                        let data = try JSONDecoder().decode(ActiveStatusModel.self, from: result!)
-                        self.ActiveData = data
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                        self.collectionViewEvent.reloadData()
-                        
-                        
-                        DispatchQueue.global().async {
-                            // Simulate network delay
-                            sleep(2)
-                            
-                            // Update MarketWDetailData with fetched data
-                            // Example data assignment
-                            self.ActiveData = data // Your actual data fetching logic
-                            
-                            DispatchQueue.main.async {
-                                completion() // Call completion handler
-                            }
-                        }
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                    do {
-                        let data = try JSONDecoder().decode(ActiveStatusModel.self, from: result!)
-                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .UNAUTHORIZED:
-                    print(error?.localizedDescription)
-                    //   self.showLogoutAlert()
-                default:
-                    break
-                }
-            }
+//            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
+//            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//                switch statusCode {
+//                case .SUCCESS ,.CREATED:
+//                    
+//                    do {
+//                        let data = try JSONDecoder().decode(ActiveStatusModel.self, from: result!)
+//                        self.ActiveData = data
+//                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+//                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
+//                        self.collectionViewEvent.reloadData()
+//                        
+//                        
+//                        DispatchQueue.global().async {
+//                            // Simulate network delay
+//                            sleep(2)
+//                            
+//                            // Update MarketWDetailData with fetched data
+//                            // Example data assignment
+//                            self.ActiveData = data // Your actual data fetching logic
+//                            
+//                            DispatchQueue.main.async {
+//                                completion() // Call completion handler
+//                            }
+//                        }
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                    do {
+//                        let data = try JSONDecoder().decode(ActiveStatusModel.self, from: result!)
+//                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .UNAUTHORIZED:
+//                    print(error?.localizedDescription)
+//                    //   self.showLogoutAlert()
+//                default:
+//                    break
+//                }
+//            }
         }
         
         //dev.
         
         func callMarketSoldWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/product_sold_status"
+            let url = "https://neighbrsnook.com/admin/api/product_sold_status"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -694,55 +697,55 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
                 
             ]
             
-            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
-            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-                switch statusCode {
-                case .SUCCESS ,.CREATED:
-                    
-                    do {
-                        let data = try JSONDecoder().decode(SoldModel.self, from: result!)
-                        self.soldData = data
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                        self.collectionViewEvent.reloadData()
-                        
-                        
-                        DispatchQueue.global().async {
-                            // Simulate network delay
-                            sleep(2)
-                            
-                            // Update MarketWDetailData with fetched data
-                            // Example data assignment
-                            self.soldData = data // Your actual data fetching logic
-                            
-                            DispatchQueue.main.async {
-                                self.hideLoader() // Ensure loader is hidden in both cases
-                                completion() // Call completion handler
-                            }
-                        }
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                    do {
-                        let data = try JSONDecoder().decode(SoldModel.self, from: result!)
-                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .UNAUTHORIZED:
-                    print(error?.localizedDescription)
-                    //   self.showLogoutAlert()
-                default:
-                    break
-                }
-            }
+//            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
+//            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//                switch statusCode {
+//                case .SUCCESS ,.CREATED:
+//                    
+//                    do {
+//                        let data = try JSONDecoder().decode(SoldModel.self, from: result!)
+//                        self.soldData = data
+//                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+//                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
+//                        self.collectionViewEvent.reloadData()
+//                        
+//                        
+//                        DispatchQueue.global().async {
+//                            // Simulate network delay
+//                            sleep(2)
+//                            
+//                            // Update MarketWDetailData with fetched data
+//                            // Example data assignment
+//                            self.soldData = data // Your actual data fetching logic
+//                            
+//                            DispatchQueue.main.async {
+//                                self.hideLoader() // Ensure loader is hidden in both cases
+//                                completion() // Call completion handler
+//                            }
+//                        }
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                    do {
+//                        let data = try JSONDecoder().decode(SoldModel.self, from: result!)
+//                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .UNAUTHORIZED:
+//                    print(error?.localizedDescription)
+//                    //   self.showLogoutAlert()
+//                default:
+//                    break
+//                }
+//            }
             
             
         }
         //dev.
         func callMarketDetailWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
+            let url = "https://neighbrsnook.com/admin/api/mpk_product_detail?"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -758,53 +761,53 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
                 
             ]
             
-            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
-            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-                switch statusCode {
-                case .SUCCESS ,.CREATED:
-                    
-                    do {
-                        let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-                        self.MarketWDetailData = data
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
-                        self.collectionViewEvent.reloadData()
-                       
-                        
-                        DispatchQueue.global().async {
-                            // Simulate network delay
-                            sleep(2)
-                            
-                            // Update MarketWDetailData with fetched data
-                            // Example data assignment
-                            self.MarketWDetailData = data // Your actual data fetching logic
-                            
-                            DispatchQueue.main.async {
-                                completion() // Call completion handler
-                            }
-                        }
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                    do {
-                        let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .UNAUTHORIZED:
-                    print(error?.localizedDescription)
-                    //   self.showLogoutAlert()
-                default:
-                    break
-                }
-            }
+//            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
+//            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//                switch statusCode {
+//                case .SUCCESS ,.CREATED:
+//                    
+//                    do {
+//                        let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
+//                        self.MarketWDetailData = data
+//                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+//                        UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "producttId")
+//                        self.collectionViewEvent.reloadData()
+//                       
+//                        
+//                        DispatchQueue.global().async {
+//                            // Simulate network delay
+//                            sleep(2)
+//                            
+//                            // Update MarketWDetailData with fetched data
+//                            // Example data assignment
+//                            self.MarketWDetailData = data // Your actual data fetching logic
+//                            
+//                            DispatchQueue.main.async {
+//                                completion() // Call completion handler
+//                            }
+//                        }
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                    do {
+//                        let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
+//                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .UNAUTHORIZED:
+//                    print(error?.localizedDescription)
+//                    //   self.showLogoutAlert()
+//                default:
+//                    break
+//                }
+//            }
         }
         
         //dev.
         func callMarketCreateWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add?"
+            let url = "https://neighbrsnook.com/admin/api/mpk_product_add?"
            
             
             let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
@@ -859,39 +862,39 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
                 })
             } else {
                 // If no image needs to be uploaded, make a separate data post request
-                RSNetworkManager.shared.newRequestApi(withServiceName: url, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-                    switch statusCode {
-                    case .SUCCESS, .CREATED:
-                        do {
-                            let data = try JSONDecoder().decode(MarketUpdateModel.self, from: result!)
-                            self.MarketEditDataNew = data
-                            self.collectionViewEvent.reloadData()
-                            
-                            
-                            
-                            DispatchQueue.global().async {
-                                sleep(2)
-                                self.MarketEditDataNew = data
-                                DispatchQueue.main.async {
-                                    completion()
-                                }
-                            }
-                        } catch {
-                            print(error.localizedDescription)
-                        }
-                    case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                        do {
-                            let data = try JSONDecoder().decode(MarketUpdateModel.self, from: result!)
-                            // Handle any necessary error messages
-                        } catch {
-                            print(error.localizedDescription)
-                        }
-                    case .UNAUTHORIZED:
-                        print(error?.localizedDescription)
-                    default:
-                        break
-                    }
-                }
+//                RSNetworkManager.shared.newRequestApi(withServiceName: url, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//                    switch statusCode {
+//                    case .SUCCESS, .CREATED:
+//                        do {
+//                            let data = try JSONDecoder().decode(MarketUpdateModel.self, from: result!)
+//                            self.MarketEditDataNew = data
+//                            self.collectionViewEvent.reloadData()
+//                            
+//                            
+//                            
+//                            DispatchQueue.global().async {
+//                                sleep(2)
+//                                self.MarketEditDataNew = data
+//                                DispatchQueue.main.async {
+//                                    completion()
+//                                }
+//                            }
+//                        } catch {
+//                            print(error.localizedDescription)
+//                        }
+//                    case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                        do {
+//                            let data = try JSONDecoder().decode(MarketUpdateModel.self, from: result!)
+//                            // Handle any necessary error messages
+//                        } catch {
+//                            print(error.localizedDescription)
+//                        }
+//                    case .UNAUTHORIZED:
+//                        print(error?.localizedDescription)
+//                    default:
+//                        break
+//                    }
+//                }
             }
         }
         
@@ -996,62 +999,62 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         //dev.
         
         func callMarketCatWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/category"
+            let url = "https://neighbrsnook.com/admin/api/category"
             
             let dictParams: Dictionary<String, Any> = ["":""]
             
             
             
-            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
-            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-                switch statusCode {
-                case .SUCCESS ,.CREATED:
-                    
-                    do {
-                        let data = try JSONDecoder().decode(MarketCategoryModel.self, from: result!)
-                        self.MarketCatDataNew = data
-                        //  UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
-                        //                    for value in self.MarketCatDataNew?.category ?? [] {
-                        //                        self.serviceName.append(value.catTitle ?? "")
-                        //                    }
-                        //                    self.serviceDropdownData.dataSource = self.serviceName
-                        
-                        DispatchQueue.global().async {
-                            // Simulate network delay
-                            sleep(2)
-                            
-                            // Update MarketWDetailData with fetched data
-                            // Example data assignment
-                            self.MarketCatDataNew = data // Your actual data fetching logic
-                            for value in self.MarketCatDataNew?.category ?? [] {
-                                self.serviceName.append(value.catTitle ?? "")
-                            }
-                           // self.serviceDropdownData.dataSource = self.serviceName
-                            DispatchQueue.main.async {
-                                completion() // Call completion handler
-                            }
-                        }
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                    do {
-                        let data = try JSONDecoder().decode(MarketCategoryModel.self, from: result!)
-                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                        //                    for value in self.MarketCatDataNew?.category ?? [] {
-                        //                        self.serviceName.append(value.catTitle ?? "")
-                        //                    }
-                        //                    self.serviceDropdownData.dataSource = self.serviceName
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                case .UNAUTHORIZED:
-                    print(error?.localizedDescription)
-                    //   self.showLogoutAlert()
-                default:
-                    break
-                }
-            }
+//            RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
+//            {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//                switch statusCode {
+//                case .SUCCESS ,.CREATED:
+//                    
+//                    do {
+//                        let data = try JSONDecoder().decode(MarketCategoryModel.self, from: result!)
+//                        self.MarketCatDataNew = data
+//                        //  UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.createdBy, forKey: "CreatorId")
+//                        //                    for value in self.MarketCatDataNew?.category ?? [] {
+//                        //                        self.serviceName.append(value.catTitle ?? "")
+//                        //                    }
+//                        //                    self.serviceDropdownData.dataSource = self.serviceName
+//                        
+//                        DispatchQueue.global().async {
+//                            // Simulate network delay
+//                            sleep(2)
+//                            
+//                            // Update MarketWDetailData with fetched data
+//                            // Example data assignment
+//                            self.MarketCatDataNew = data // Your actual data fetching logic
+//                            for value in self.MarketCatDataNew?.category ?? [] {
+//                                self.serviceName.append(value.catTitle ?? "")
+//                            }
+//                           // self.serviceDropdownData.dataSource = self.serviceName
+//                            DispatchQueue.main.async {
+//                                completion() // Call completion handler
+//                            }
+//                        }
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                    do {
+//                        let data = try JSONDecoder().decode(MarketCategoryModel.self, from: result!)
+//                        //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+//                        //                    for value in self.MarketCatDataNew?.category ?? [] {
+//                        //                        self.serviceName.append(value.catTitle ?? "")
+//                        //                    }
+//                        //                    self.serviceDropdownData.dataSource = self.serviceName
+//                    } catch {
+//                        print(error.localizedDescription)
+//                    }
+//                case .UNAUTHORIZED:
+//                    print(error?.localizedDescription)
+//                    //   self.showLogoutAlert()
+//                default:
+//                    break
+//                }
+//            }
         }
         
     }

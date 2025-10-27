@@ -78,10 +78,10 @@ class EventJoinListViewController: UIViewController {
             "type": "1",
             
         ]
-        WebService.sharedInstance.callEventJoinListWebService(withParams: dictParams) { data in
-            self.EventJoinListData = data
-            completionClosure()
-        }
+//        WebService.sharedInstance.callEventJoinListWebService(withParams: dictParams) { data in
+//            self.EventJoinListData = data
+//            completionClosure()
+//        }
     }
     
 }

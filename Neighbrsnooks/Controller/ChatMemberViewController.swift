@@ -2,7 +2,7 @@ import UIKit
 import SVProgressHUD
 
 @available(iOS 16.0, *)
-class ChatMemberViewController: BaseViewC,UITextFieldDelegate {
+class ChatMemberViewController: BaseViewController,UITextFieldDelegate {
     
     @IBOutlet weak var tableviewMembers: UITableView!
     @IBOutlet weak var MembersLbl: UILabel!
@@ -157,25 +157,25 @@ extension ChatMemberViewController: UITableViewDataSource, UITableViewDelegate{
             "searchQuery": searchQuery
         ]
         print(dictParams)
-        WebService.sharedInstance.callChatMemberListWebService(withParams: dictParams) { data in
-            self.ChatMemberData = data
-            
-            // Filter the PollsData based on search query
-            if searchQuery.isEmpty {
-                self.filteredChatData = self.ChatMemberData // No filtering if search is empty
-            } else {
-                self.filteredChatData = ChatMemberModel(
-                    status: data.status,
-                    message: data.message,
-                    //  verfiedMsg: data.message,
-                    listdata: data.listdata.filter { $0.fullname.lowercased().contains(searchQuery.lowercased()) }
-                )
-            }
-            
-            // Reload the table view after filtering the data
-            completionClosure()
-            self.tableviewMembers.reloadData()
-        }
+//        WebService.sharedInstance.callChatMemberListWebService(withParams: dictParams) { data in
+//            self.ChatMemberData = data
+//            
+//            // Filter the PollsData based on search query
+//            if searchQuery.isEmpty {
+//                self.filteredChatData = self.ChatMemberData // No filtering if search is empty
+//            } else {
+//                self.filteredChatData = ChatMemberModel(
+//                    status: data.status,
+//                    message: data.message,
+//                    //  verfiedMsg: data.message,
+//                    listdata: data.listdata.filter { $0.fullname.lowercased().contains(searchQuery.lowercased()) }
+//                )
+//            }
+//            
+//            // Reload the table view after filtering the data
+//            completionClosure()
+//            self.tableviewMembers.reloadData()
+//        }
     }
     
     

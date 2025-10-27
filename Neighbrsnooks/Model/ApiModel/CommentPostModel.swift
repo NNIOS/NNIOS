@@ -25,7 +25,12 @@ struct Postlistdatum: Codable {
     let userLikeStatus: String
     let totalComments: String
     let neighbrhood: String
-    let replies: [Postlistdatum]?
+    var replies: [Postlistdatum]?
+    
+    // ✅ Add these two fields
+    let top_level_username: String?
+    let top_level_userid: String?
+    
     var isLiked: Bool = false
     
     enum CodingKeys: String, CodingKey {
@@ -34,5 +39,7 @@ struct Postlistdatum: Codable {
         case totalLikes = "total_likes"
         case userLikeStatus = "user_like_status"
         case postid, userid, commenttext, username, createon, userpic, neighbrhood, replies
+        case top_level_username
+        case top_level_userid
     }
 }

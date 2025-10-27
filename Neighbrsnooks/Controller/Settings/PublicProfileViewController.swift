@@ -245,18 +245,18 @@ class PublicProfileViewController: UIViewController {
         ]
         
         // Call the web service
-        WebService.sharedInstance.callNewNotificationWebService(withParams: dictParams) { responseData in
-            // If `responseData` is already of type `NewNotificationModel`, assign it directly
-            if let notificationData = responseData as? NewNotificationModel {
-                self.UpdateNewNotificationsData = notificationData
-                print("Decoded data: \(self.UpdateNewNotificationsData)")
-                
-                // Call the completion handler to update the UI
-                completionClosure()
-            } else {
-                print("Error: Could not cast responseData to NewNotificationModel")
-            }
-        }
+//        WebService.sharedInstance.callNewNotificationWebService(withParams: dictParams) { responseData in
+//            // If `responseData` is already of type `NewNotificationModel`, assign it directly
+//            if let notificationData = responseData as? NewNotificationModel {
+//                self.UpdateNewNotificationsData = notificationData
+//                print("Decoded data: \(self.UpdateNewNotificationsData)")
+//                
+//                // Call the completion handler to update the UI
+//                completionClosure()
+//            } else {
+//                print("Error: Could not cast responseData to NewNotificationModel")
+//            }
+//        }
     }
     
     func callUpdateNewNotificationWebService(_ completionClosure: @escaping () -> ()) {
@@ -282,16 +282,16 @@ class PublicProfileViewController: UIViewController {
             dictParams["addresslinetwo"] = Add2
         }
 
-        WebService.sharedInstance.callNewNotificationWebService(withParams: dictParams) { responseData in
-            // If `responseData` is already of type `NewNotificationModel`, assign it directly
-            if let notificationData = responseData as? NewNotificationModel {
-                self.UpdateNewNotificationsData = notificationData
-                print("Decoded data: \(self.UpdateNewNotificationsData)")
-                completionClosure()
-            } else {
-                print("Error: Could not cast responseData to NewNotificationModel")
-            }
-        }
+//        WebService.sharedInstance.callNewNotificationWebService(withParams: dictParams) { responseData in
+//            // If `responseData` is already of type `NewNotificationModel`, assign it directly
+//            if let notificationData = responseData as? NewNotificationModel {
+//                self.UpdateNewNotificationsData = notificationData
+//                print("Decoded data: \(self.UpdateNewNotificationsData)")
+//                completionClosure()
+//            } else {
+//                print("Error: Could not cast responseData to NewNotificationModel")
+//            }
+//        }
     }
 
 

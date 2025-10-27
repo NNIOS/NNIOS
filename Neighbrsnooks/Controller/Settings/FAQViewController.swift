@@ -133,11 +133,11 @@ extension FAQViewController: UITableViewDataSource, UITableViewDelegate{
         let dictParams: Dictionary<String, Any> = [:
                                                     
                                                                         ]
-          WebService.sharedInstance.callFAQWebService(withParams: dictParams) { data in
-            self.FAQData = data
-             
-            completionClosure()
-          }
+//          WebService.sharedInstance.callFAQWebService(withParams: dictParams) { data in
+//            self.FAQData = data
+//             
+//            completionClosure()
+//          }
         }
     
     

@@ -9,6 +9,7 @@ import UIKit
 import SVProgressHUD
 import Alamofire
 import Photos
+import CropViewController
 
 @available(iOS 16.0, *)
 class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate {
@@ -51,6 +52,7 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
     
     var EventDetauilData : EventDetailModel?
     var EventUpdatesData : UpdateEventModel?
+    var objDecryptEventData:decryptEvent?
     var from = 1
     var fromDate = 1
     var timePickerContainer = UIView()
@@ -65,10 +67,22 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
     var images: [UIImage] = []
     var selectedImge: UIImage? = nil
     
+    var jEventId:Int?
+    var objEventData:EventItem?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        lblHeading.text = titleLabel
-        // Do any additional setup after loading the view.
+        let item = objDecryptEventData?.data?.data
+        lblHeading.text = item?.title
+        tfTitle.text = item?.title
+        tfSrartDate.text = item?.event_date
+        tfEndDate.text = item?.event_end_date
+        tfStartTime.text = item?.event_start_time
+        tfEndTime.text = item?.event_end_time
+        tvDesc.text = item?.event_detail
+        tfAdd1.text = item?.address_line_one
+        tfAdd2.text = item?.address_line_two
+        ImageLoader.shared.setImage(on: profileImgView, urlString: item?.cover_image, placeholder: "check")
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -88,36 +102,7 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
         self.lblUploadEvent.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.tfAdd1.font = UIFont(name: "Montserrat-Regular", size: 17)
         self.tfAdd2.font = UIFont(name: "Montserrat-Regular", size: 17)
-        SVProgressHUD.show()
-        callEventDetailWebService{ [self] in
-            SVProgressHUD.dismiss()
-            self.tfTitle.text = self.EventDetauilData?.title
-            self.tfSrartDate.text = self.EventDetauilData?.eventStartDate
-            self.tfEndDate.text = self.EventDetauilData?.eventEndDate
-            self.tfStartTime.text = self.EventDetauilData?.eventStarttime
-            self.tfEndTime.text = self.EventDetauilData?.eventEndtime
-            self.tvDesc.text = self.EventDetauilData?.eventDetail
-            
-            self.tfAdd1.text = self.EventDetauilData?.addlineone
-            self.tfAdd2.text = self.EventDetauilData?.addlinetwo
-         
-            let url = URL(string: (self.EventDetauilData?.coverImage ?? ""))
-            self.profileImgView.kf.indicatorType = .activity
-           self.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "EventImage"))
-            
-            
-            self.imagePicker = UIImagePickerController()
-            self.imagePicker?.delegate = self
-//            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageViewTapped(_:)))
-//            profileImgView.isUserInteractionEnabled = true
-//            profileImgView.addGestureRecognizer(tapGestureRecognizer)
-//            profileImgView.layer.masksToBounds = true
-//            profileImgView.layer.cornerRadius = profileImgView.frame.height / 2
-           
-            
-            
-            // Do any additional setup after loading the view.
-        }
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -164,7 +149,6 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
            
             
         } else {
-            // Light mode mein storyboard ke original colors preserve karna
           //  questionView.textColor = UIColor.secondaryLabel
             TitleeView.isUserInteractionEnabled = true // Disable in light mode
             EndDateView.isUserInteractionEnabled = true
@@ -206,8 +190,7 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
     }
     
     @IBAction func BackButtionAction(_ : UIButton){
-
-        _ = navigationController?.popViewController(animated: true)
+        self.navigationController?.popViewController(animated: true)
 
     }
     
@@ -230,15 +213,11 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
     }
     
     @IBAction func selectPhotos(_ sender: UIButton) {
-    
         openCameraGallery()
-    
        }
     
     @objc func imageViewTapped(_ sender:AnyObject){
-     //   selectPictureThroughPhotoGallery()
         openCameraGallery()
-        
     }
     
     @IBAction func PublishBtn(_ sender: UIButton){
@@ -260,52 +239,40 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
                 } else if tfAdd2.text?.isEmpty == true {
                     showAlert(message: "Please enter address line 2")
                 } else {
-                    callUpdateEventWebService { success in
-                        DispatchQueue.main.async {
-                            if success {
-                                //                            if let eventsVC = self.navigationController?.viewControllers.first(where: { $0 is EventsViewController }) {
-                                //                                self.navigationController?.popToViewController(eventsVC, animated: true)
-                                //                            } else {
-                                //                                self.navigationController?.popToRootViewController(animated: true)
-                                //                            }
-                                
-                                if let viewControllers = self.navigationController?.viewControllers {
-                                    let targetViewController = viewControllers[viewControllers.count - 3]
-                                    self.navigationController?.popToViewController(targetViewController, animated: true)
-                                }
-                            } else {
-                                self.showAlert(message: "Failed to update event. Please try again.")
-                            }
-                        }
-                    }
+                    updateEvents()
                 }
           
         }
+    
     func showAlert(message: String) {
-        let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
-        
-        let attributedMessage = NSAttributedString(
-            string: message,
-            attributes: [
-                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: .medium),
-                NSAttributedString.Key.foregroundColor: UIColor.black
+            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+            let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
+            
+            let titleAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.black
             ]
-        )
-        
-        alert.setValue(attributedMessage, forKey: "attributedMessage")
-        
-        alert.addAction(UIAlertAction(title: "Close", style: .default, handler: nil))
-        
-        self.present(alert, animated: true, completion: nil)
-    }
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.darkGray
+            ]
+            
+            let attributedTitle = NSAttributedString(string: title ?? "", attributes: titleAttributes)
+            let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+            alertController.setValue(attributedTitle, forKey: "attributedTitle")
+            alertController.setValue(attributedMessage, forKey: "attributedMessage")
+            
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+            alertController.addAction(okAction)
+            present(alertController, animated: true, completion: nil)
+        }
     
     func showDatePicker(for textField: UITextField) {
            let datePicker = UIDatePicker()
            datePicker.datePickerMode = .date
            datePicker.preferredDatePickerStyle = .wheels
-        
-        // Disable past dates
-        datePicker.minimumDate = Date()
+            datePicker.minimumDate = Date()
            datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
            
            let toolbar = UIToolbar()
@@ -389,77 +356,40 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
         }
 
         timePicker.backgroundColor = UIColor.white
-        timePicker.locale = Locale(identifier: "en_US") // Ensure 12-hour format with AM/PM
+        timePicker.locale = Locale(identifier: "en_US")
         timePickerContainer.addSubview(timePicker)
 
         self.view.addSubview(timePickerContainer)
     }
     
-    func callEventDetailWebService(_ completionClosure: @escaping () -> ()) {
-       // let id = UserDefaults.standard.string(forKey: "userid")
-        let idName = UserDefaults.standard.string(forKey: "name")
-        let idEvent = UserDefaults.standard.string(forKey: "eventid")
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let idCr = UserDefaults.standard.string(forKey: "usercr")
-          let dictParams: Dictionary<String, Any> = [
-                                                    "userid":id ?? "",
-                                                    "eventid": eventid ?? "",
-                                                   
-                                                                        ]
-          WebService.sharedInstance.callEventDetailWebService(withParams: dictParams) { data in
-            self.EventDetauilData = data
-              UserDefaults.standard.set(self.EventDetauilData?.id, forKey: "eventid")
-              UserDefaults.standard.set(self.EventDetauilData?.userid, forKey: "usercr")
-              
-              
-
-            completionClosure()
-          }
-        }
     
     func callsendImageAPI(param:[String: Any],arrImage:UIImage,imageKey:String,URlName:String, withblock:@escaping ()->Void){
-
-        let headers: HTTPHeaders
-        headers = ["Content-type": "multipart/form-data"]
+        let token = UserDefaults.standard.string(forKey: "authToken") ?? ""
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer \(token)",
+            "Content-Type": "multipart/form-data"
+        ]
         
         AF.upload(multipartFormData: { (multipartFormData) in
             
             for (key, value) in param {
                 multipartFormData.append((value as! String).data(using: String.Encoding.utf8)!, withName: key)
             }
-            
-        //    for img in arrImage {
                 guard let imgData = arrImage.jpegData(compressionQuality: 1) else { return }
             multipartFormData.append(imgData, withName: imageKey, fileName: "\(NSDate().timeIntervalSince1970.rounded())" + ".jpeg", mimeType: "image/jpeg")
             guard let imgData2 = self.profileImgView.image?.jpegData(compressionQuality: 1) else { return }
             multipartFormData.append(imgData, withName: "aadharBack", fileName: "\(NSDate().timeIntervalSince1970.rounded())" + ".jpeg", mimeType: "image/jpeg")
-            
-           // }
-            
-            
         },to: URL.init(string: URlName)!, usingThreshold: UInt64.init(),
           method: .post,
           headers: headers).response{ response in
-            
             if((response.error == nil)){
                 do{
                     if let jsonData = response.data{
                         let parsedData = try JSONSerialization.jsonObject(with: jsonData) as! Dictionary<String, AnyObject>
                         print(parsedData)
                         withblock()
-                     //   withblock(parsedData)
-//                        let status = parsedData[Message.Status] as? NSInteger ?? 0
-//
-//                        if (status == 1){
                             if let jsonArray = parsedData["data"] as? [[String: Any]] {
-                               
                             }
-//
-//                        }else if (status == 2){
-//                            print("error message")
-//                        }else{
-//                            print("error message")
-//                        }
                     }
                 }catch{
                     print("error message")
@@ -470,36 +400,116 @@ class UpdateEventViewController:  BaseViewController,CropViewControllerDelegate 
         }
     }
     
-    func callUpdateEventWebService(_ completionClosure: @escaping (Bool) -> Void) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-        let dictParams: [String: Any] = [
-            "userid": id ?? "",
-            "title": self.tfTitle.text ?? "",
-            "eventdate": self.tfSrartDate.text ?? "",
-            "e_id": eventid ?? "",
-            "eventenddate": self.tfEndDate.text ?? "",
-            "eventstarttime": self.tfStartTime.text ?? "",
-            "eventendtime": self.tfEndTime.text ?? "",
-            "eventdetails": self.tvDesc.text ?? "",
-            "addlineone": self.tfAdd1.text ?? "",
-            "addlinetwo": self.tfAdd2.text ?? "",
-            "datelong": "5"
+    func formatDate(_ dateStr: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "dd-MM-yyyy"
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "yyyy-MM-dd"
+        
+        if let date = inputFormatter.date(from: dateStr) {
+            return outputFormatter.string(from: date)
+        }
+        return dateStr
+    }
+    
+    func formatTime(_ timeStr: String) -> String {
+        let inputFormatter1 = DateFormatter()
+        inputFormatter1.dateFormat = "hh:mm a"
+        let inputFormatter2 = DateFormatter()
+        inputFormatter2.dateFormat = "HH:mm"
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "HH:mm"
+        
+        if let date = inputFormatter1.date(from: timeStr) {
+            return outputFormatter.string(from: date)
+        } else if let date = inputFormatter2.date(from: timeStr) {
+            return outputFormatter.string(from: date)
+        }
+        return timeStr
+    }
+
+    
+    func isImageSizeValid(_ image: UIImage, maxSizeKB: Int = 5048) -> Bool {
+        if let imageData = image.jpegData(compressionQuality: 1.0) {
+            let imageSizeKB = imageData.count / 1024
+            let imageSizeMB = Double(imageSizeKB) / 1024.0
+            print("Image size: \(imageSizeKB) KB (\(String(format: "%.2f", imageSizeMB)) MB)")
+            return imageSizeKB <= maxSizeKB
+        }
+        print("❌ Could not convert image to data")
+        return false
+    }
+    
+    func isValidStartEnd(startDate: String, endDate: String, startTime: String, endTime: String) -> Bool {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm"
+        
+        if let start = formatter.date(from: "\(startDate) \(startTime)"),
+           let end = formatter.date(from: "\(endDate) \(endTime)") {
+            return end > start
+        }
+        return false
+    }
+
+    
+    func updateEvents() {
+        let startDate = formatDate(tfSrartDate.text ?? "")
+        let endDate = formatDate(tfEndDate.text ?? "")
+        let startTime = formatTime(tfStartTime.text ?? "")
+        let endTime = formatTime(tfEndTime.text ?? "")
+        
+        if !isValidStartEnd(startDate: startDate, endDate: endDate, startTime: startTime, endTime: endTime) {
+            self.alertToast(Message: "End time must be after start time")
+            return
+        }
+
+        let request = EventUpdate_Request(
+            title: tfTitle.text ?? "",
+            event_date: startDate,
+            event_end_date: endDate,
+            event_start_time: startTime,
+            event_end_time: endTime,
+            cover_image: "",
+            event_detail: tvDesc.text ?? "",
+            address_line_one: tfAdd1.text ?? "",
+            address_line_two: tfAdd2.text ?? "",
+            id: jEventId ?? 0
+        )
+
+        var uploadImages = imageArray
+        if let profileImage = selectedImge {
+            uploadImages.append(profileImage)
+        }
+        if uploadImages.isEmpty, let defaultImg = UIImage(named: "EventImage") {
+            uploadImages.append(defaultImg)
+        }
+        for img in uploadImages {
+            if !isImageSizeValid(img) {
+                self.alertToast(Message: "Image size should be less than 5 MB")
+                return
+            }
+        }
+
+        let param: [String: Any] = [
+            "title": request.title,
+            "event_date": request.event_date,
+            "event_end_date": request.event_end_date,
+            "event_start_time": request.event_start_time,
+            "event_end_time": request.event_end_time,
+            "event_detail": request.event_detail,
+            "address_line_one": request.address_line_one,
+            "address_line_two": request.address_line_two
         ]
         
-        WebService.sharedInstance.callUpdateEventWebService(withParams: dictParams) { [self] data in
-            self.EventUpdatesData = data
-            
-            if let croppedImage = profileImgView.image {
-                callsendImageAPI(param: dictParams, arrImage: croppedImage, imageKey: "eventpic", URlName: kBASEURL + WebServiceName.kUpdateEvent) {
-                    DispatchQueue.main.async {
-                        completionClosure(true)
-                    }
+        if let croppedImage = profileImgView.image {
+            callsendImageAPI(param: param, arrImage: croppedImage, imageKey: "cover_image", URlName: API.createEvents) {
+                DispatchQueue.main.async {
+                    self.navigationController?.popViewController(animated: true)
                 }
             }
         }
     }
-
-
 }
 
 @available(iOS 16.0, *)
@@ -533,15 +543,10 @@ extension UpdateEventViewController: UIImagePickerControllerDelegate, UINavigati
         }
     }
 
-//
-
-
     func openCameraGallery() {
         let alert = UIAlertController()
-
         alert.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
             print("User clicked Camera button")
-
             if UIImagePickerController.isSourceTypeAvailable(.camera) {
                 self.imagePicker = UIImagePickerController()
                 self.imagePicker?.sourceType = .camera
@@ -555,7 +560,6 @@ extension UpdateEventViewController: UIImagePickerControllerDelegate, UINavigati
 
         alert.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
             print("User clicked Gallery button")
-
             if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
                 self.imagePicker = UIImagePickerController()
                 self.imagePicker?.sourceType = .photoLibrary
@@ -575,8 +579,4 @@ extension UpdateEventViewController: UIImagePickerControllerDelegate, UINavigati
             print("completion block")
         })
     }
-
-
-
-
 }

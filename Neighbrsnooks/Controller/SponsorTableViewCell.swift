@@ -43,6 +43,36 @@ class SponsorTableViewCell: UITableViewCell {
         // Configure the view for the selected state
     }
     
+    
+    func configure(with item: HomeSponsorItem) {
+        // Company name
+        lblCompany.text = item.company
+        
+        // Sponsor caption ya description
+        lblSponsor.text = item.caption
+        
+        // Action label (externallink ya action)
+        lblAction.text = item.externallink
+        
+        // Company logo
+        if let logoUrl = URL(string: item.companylogo), !item.companylogo.isEmpty {
+            LogoImg.kf.indicatorType = .activity
+            LogoImg.kf.setImage(with: logoUrl, placeholder: UIImage(named: "default_logo"))
+        } else {
+            LogoImg.image = UIImage(named: "default_logo")
+        }
+        
+        // Banner image
+        if let bannerUrl = URL(string: item.bannerimage), !item.bannerimage.isEmpty {
+            BannerImgView.kf.indicatorType = .activity
+            BannerImgView.kf.setImage(with: bannerUrl, placeholder: UIImage(named: "default_banner"))
+        } else {
+            BannerImgView.image = UIImage(named: "default_banner")
+        }
+    }
+
+    
+    
 //    @IBAction func btnSponsor(_ sender: UIButton) {
 //        SponsCallback?(sender)
 //    }

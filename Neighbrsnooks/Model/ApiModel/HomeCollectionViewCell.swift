@@ -47,40 +47,32 @@ class HomeCollectionViewCell: UICollectionViewCell {
         muteButton.isHidden = true
     }
     
-    func configure(with postImage: postImagesN, totalCount: Int) {
-        // Show or hide the image count view
+    func configure(with media: HomePostMedia, totalCount: Int) {
         viewShowImgCount.isHidden = (totalCount <= 1)
-        
-        if let videoUrl = postImage.video, !videoUrl.isEmpty {
-            print("✅ Loading Video: \(videoUrl)")
+        if let videoUrl = media.video, !videoUrl.isEmpty {
             profileImgView.isHidden = false
             setupVideo(from: videoUrl)
             pauseButton.isHidden = false
             muteButton.isHidden = false
-            muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
-        } else if let imageUrl = postImage.img, !imageUrl.isEmpty {
-            print("✅ Loading Image: \(imageUrl)")
+        } else if let imageUrl = media.img, !imageUrl.isEmpty {
             profileImgView.isHidden = false
             loadImage(from: imageUrl)
             pauseButton.isHidden = true
             muteButton.isHidden = true
         } else {
-            print("⚠️ No Image or Video available")
             profileImgView.isHidden = true
             pauseButton.isHidden = true
             muteButton.isHidden = true
         }
     }
-
-    
     private func loadImage(from urlString: String) {
         if let url = URL(string: urlString) {
-            // 👇 Placeholder image dikhayega jab tak asli image load ho
             profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder"))
         }
     }
 
-
+ 
+    
     
     private func setupVideo(from urlString: String) {
         guard let url = URL(string: urlString) else { return }

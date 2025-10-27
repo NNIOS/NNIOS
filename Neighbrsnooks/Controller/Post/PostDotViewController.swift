@@ -85,7 +85,7 @@ class PostDotViewController: BottomPopupViewController {
     var navigateToMDCallback: (() -> Void)?
     var navigateToDeleteCallback: (() -> Void)?
     var navigateToReportCallback: (() -> Void)?
-    var HomeNewData: HomeNewData?  // ✅ Corrected type
+    
     var onUpdateForBlock: (() -> Void)?
     var objBlockUserData : BlockUserModel?
     var isComingFromMenuPostVC:Bool = true
@@ -94,21 +94,21 @@ class PostDotViewController: BottomPopupViewController {
     var shareCallback: (() -> Void)?
 
     
-    override var popupTopCornerRadius: CGFloat {
-        return topCornerRadius ?? CGFloat(0) // Customize top corner radius
-    }
-    
-    override var popupPresentDuration: Double {
-        return presentDuration ?? 1.0 // Customize presentation duration
-    }
-    
-    override var popupDismissDuration: Double {
-        return dismissDuration ?? 1.0 // Customize dismissal duration
-    }
-    
-    override var popupShouldDismissInteractivelty: Bool {
-        return shouldDismissInteractivelty ?? true // Enable or disable interactive dismiss
-    }
+//    override var popupTopCornerRadius: CGFloat {
+//        return topCornerRadius ?? CGFloat(0) // Customize top corner radius
+//    }
+//    
+//    override var popupPresentDuration: Double {
+//        return presentDuration ?? 1.0 // Customize presentation duration
+//    }
+//    
+//    override var popupDismissDuration: Double {
+//        return dismissDuration ?? 1.0 // Customize dismissal duration
+//    }
+//    
+//    override var popupShouldDismissInteractivelty: Bool {
+//        return shouldDismissInteractivelty ?? true // Enable or disable interactive dismiss
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -192,9 +192,9 @@ class PostDotViewController: BottomPopupViewController {
     }
 
     
-    override var popupHeight: CGFloat {
-        return calculateDynamicHeight() // ✅ Dynamically set height
-    }
+//    override var popupHeight: CGFloat {
+//        return calculateDynamicHeight() // ✅ Dynamically set height
+//    }
     
     
     @IBAction func btnDotPoll(_ sender: UIButton) {
@@ -449,12 +449,12 @@ class PostDotViewController: BottomPopupViewController {
                 "type": "Post" ,
                 "neighbrhood":idNeighbour ?? "",
             ]
-            WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
-                self.BussinessFavouriteData = data
-                
-                
-                completionClosure()
-            }
+//            WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
+//                self.BussinessFavouriteData = data
+//                
+//                
+//                completionClosure()
+//            }
         }
         
         func callFavouriteRemoveBussinessWebService(_ completionClosure: @escaping () -> ()) {
@@ -471,11 +471,11 @@ class PostDotViewController: BottomPopupViewController {
                 "neighbrhood":idNeighbour ?? "",
             ]
             print("Param is :\(dictParams)")
-            WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
-                self.BussinessRemoveFavouriteData = data
-                
-                completionClosure()
-            }
+//            WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
+//                self.BussinessRemoveFavouriteData = data
+//                
+//                completionClosure()
+//            }
         }
     
     
@@ -491,15 +491,15 @@ class PostDotViewController: BottomPopupViewController {
             "postid": business_id ?? "",
             
         ]
-        WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
-            self.CommentPostListData = data
-            completionClosure()
-        }
+//        WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
+//            self.CommentPostListData = data
+//            completionClosure()
+//        }
     }
     
     // dev.
     func handleBlockUnblockAPI(completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
+        let url = "https://neighbrsnook.com/admin/api/toggle-block-user"
         guard let blockerId = UserDefaults.standard.string(forKey: "userid") else {
             print("Error: Missing blocker ID")
             return
@@ -514,39 +514,39 @@ class PostDotViewController: BottomPopupViewController {
             "blocked_userid": blockedId,
             "action": "block"
         ]
-        print("Block dictParams :\(dictParams)")
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true) {
-            (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                do {
-                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
-                    self.objBlockUserData = data
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        if self.isComingFromMenuPostVC == false {
-                            self.onUpdateForBlock!()
-                            self.dismiss(animated: true)
-                        } else if self.isComingFromMenuPostVC == true {
-                            self.onUpdateForBlock!()
-                            self.dismiss(animated: true)
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
-                    self.objBlockUserData = data
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription ?? "")
-            default:
-                break
-            }
-        }
+//        print("Block dictParams :\(dictParams)")
+//        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true) {
+//            (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS ,.CREATED:
+//                do {
+//                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+//                    self.objBlockUserData = data
+//                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+//                        if self.isComingFromMenuPostVC == false {
+//                            self.onUpdateForBlock!()
+//                            self.dismiss(animated: true)
+//                        } else if self.isComingFromMenuPostVC == true {
+//                            self.onUpdateForBlock!()
+//                            self.dismiss(animated: true)
+//                        }
+//                    }
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                do {
+//                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+//                    self.objBlockUserData = data
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .UNAUTHORIZED:
+//                print(error?.localizedDescription ?? "")
+//            default:
+//                break
+//            }
+//        }
     }
     
 }

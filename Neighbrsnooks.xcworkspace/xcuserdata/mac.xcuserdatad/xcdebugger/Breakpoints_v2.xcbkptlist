@@ -7,112 +7,96 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "A114F9CB-A213-46F1-9E37-2793C66CBAB4"
+            uuid = "0EA15505-0150-4C73-B834-F589467FD68F"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/Controller/Post/PostDetailsViewController.swift"
+            filePath = "Neighbrsnooks/MVVM_Neighbrsnook/Controller/PostVC/Postdetails/Controller/PostDetailsNewViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "986"
-            endingLineNumber = "986"
-            landmarkName = "tableView(_:cellForRowAt:)"
+            startingLineNumber = "420"
+            endingLineNumber = "420"
+            landmarkName = "actionLike(_:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "A1E84C75-9645-4A16-82C4-DDC20773C832"
+            uuid = "667012A5-30B4-49D2-9696-1A52C9C85F78"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/Controller/Post/PostDetailsNewViewController.swift"
+            filePath = "Neighbrsnooks/MVVM_Neighbrsnook/Controller/PostVC/PostListController/Controller/MennuPostViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1064"
-            endingLineNumber = "1064"
-            landmarkName = "tableView(_:cellForRowAt:)"
+            startingLineNumber = "573"
+            endingLineNumber = "573"
+            landmarkName = "callPostListAPI()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "6A85569C-BA65-4D1E-A0E0-5847D390B6F2"
+            uuid = "65059778-F0E3-4BA5-8FD6-456DA83E5294"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/NewRegistation/RegistationAdressProofVC.swift"
+            filePath = "Neighbrsnooks/MVVM_Neighbrsnook/Controller/PostVC/PostListController/Controller/MennuPostViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "364"
-            endingLineNumber = "364"
-            landmarkName = "action_Back(_:)"
+            startingLineNumber = "565"
+            endingLineNumber = "565"
+            landmarkName = "callPostListAPI()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "04570388-07EA-4975-BEB0-FE6D0EF387D3"
+            uuid = "54B93012-D7FA-45B0-98DA-13D2E71A5730"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/NewRegistation/RegistationAdressProofVC.swift"
+            filePath = "Neighbrsnooks/MVVM_Neighbrsnook/Controller/Group/Group List Exit Join/Controller/GroupListVC.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "439"
-            endingLineNumber = "439"
-            landmarkName = "action_Back(_:)"
+            startingLineNumber = "202"
+            endingLineNumber = "202"
+            landmarkName = "groupListAPI(page:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "49A61A18-1AA8-41C1-B86F-0132435DDD4D"
+            uuid = "D635AA9E-BC35-4DDD-B95B-BB5CAC6A46DB"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/NewRegistation/RegistationAdressProofVC.swift"
+            filePath = "Neighbrsnooks/MVVM_Neighbrsnook/Controller/Group/Group List Exit Join/Controller/GroupListVC.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "453"
-            endingLineNumber = "453"
-            landmarkName = "action_Back(_:)"
+            startingLineNumber = "207"
+            endingLineNumber = "207"
+            landmarkName = "groupListAPI(page:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "D6D18A4D-7DCA-4718-9142-2F5F868454E6"
+            uuid = "5C5706B8-A317-41E4-BFC9-B19A457FDDA2"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/Controller/My Neighbourhood/EventsDetailViewController.swift"
+            filePath = "Neighbrsnooks/MVVM_Neighbrsnook/Application/AppDelegate.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "145"
-            endingLineNumber = "145"
-            landmarkName = "updateCollectionViewHeight()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "D3388EF9-90CF-4A71-AEEF-E9A3FCEAE546"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Neighbrsnooks/Controller/My Neighbourhood/EventsDetailViewController.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "154"
-            endingLineNumber = "154"
-            landmarkName = "updateCollectionViewHeight()"
+            startingLineNumber = "297"
+            endingLineNumber = "297"
+            landmarkName = "messaging(_:didReceiveRegistrationToken:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

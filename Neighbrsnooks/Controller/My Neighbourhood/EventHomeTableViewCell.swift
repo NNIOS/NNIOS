@@ -118,12 +118,37 @@ class EventHomeTableViewCell: UITableViewCell {
 
        @objc private func profileTapped() {
            if let userId = userId {
-               delegate?.didTapProfile(userId: userId) // 🔴 Delegate Call
+               delegate?.didTapProfile(userId: userId)  
                delegateFav?.didTapProfile(userId: userId)
            }
        }
     
     
+    func configure(with eventItem: HomeEventItem) {
+        
+        lblName.text = eventItem.username
+        lblSector.text = eventItem.neighborhoodName
+        lblCreateOn.text = eventItem.eventCreatedAt
+        lblStartDate.text = eventItem.eventStartDate
+        lblEndDate.text = eventItem.eventEndDate
+        lblEventTitle.text = eventItem.eventTitle
+       
+        if let groupUrl = URL(string: eventItem.eventMedia), !eventItem.eventMedia.isEmpty {
+            ProfileImgView.kf.indicatorType = .activity
+            ProfileImgView.kf.setImage(with: groupUrl, placeholder: UIImage(named: "default_group"))
+        } else {
+            ProfileImgView.image = UIImage(named: "default_group")
+        }
+        
+        // User image
+        if let userUrl = URL(string: eventItem.userpic), !eventItem.userpic.isEmpty {
+            BannerImgView.kf.indicatorType = .activity
+            BannerImgView.kf.setImage(with: userUrl, placeholder: UIImage(named: "default_user"))
+        } else {
+            BannerImgView.image = UIImage(named: "default_user")
+        }
+         
+     }
     
     
     

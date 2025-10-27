@@ -32,6 +32,13 @@ class WelcomeTableViewCell: UITableViewCell {
     }
   
 
+    func configure(with item: HomeWelcomeItem) {
+        lblWelcmMsg.text = item.welcomeMsg
+        lblBookaCount.text = "\(item.totalLike) Likes"
+        lblWelcmCount.text = "\(item.totalBokay) Likes"
+       
+    }
+    
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 

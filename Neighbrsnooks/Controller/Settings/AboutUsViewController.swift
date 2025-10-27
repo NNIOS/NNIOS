@@ -50,12 +50,12 @@ class AboutUsViewController: UIViewController {
            
         ]
         
-        WebService.sharedInstance.callAboutUsWebService(withParams: dictParams) { data in
-            self.AbouusData = data
-           
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callAboutUsWebService(withParams: dictParams) { data in
+//            self.AbouusData = data
+//           
+//            
+//            completionClosure()
+//        }
     }
 
 }

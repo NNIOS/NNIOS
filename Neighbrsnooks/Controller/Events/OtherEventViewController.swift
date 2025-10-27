@@ -170,16 +170,16 @@ class OtherEventViewController:  BaseViewController , UICollectionViewDelegateFl
                                                     
                                                    
                                                                         ]
-          WebService.sharedInstance.callEventListWebService(withParams: dictParams) { data in
-            self.EventListData = data
-           //   UserDefaults.standard.set(self.EventListData?.c?.name, forKey: "name")
-//              UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.status, forKey: "status")
-          //    UserDefaults.standard.set(self.EventListData?.eventFuture.id, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callEventListWebService(withParams: dictParams) { data in
+//            self.EventListData = data
+//           //   UserDefaults.standard.set(self.EventListData?.c?.name, forKey: "name")
+////              UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.status, forKey: "status")
+//          //    UserDefaults.standard.set(self.EventListData?.eventFuture.id, forKey: "accessToken")
+//             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -237,11 +237,11 @@ class OtherEventViewController:  BaseViewController , UICollectionViewDelegateFl
             cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 13)
             
             cell.DetailCallback = { [self] value in
-                
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController")as! EventsDetailViewController
-                vc.eventid = EventListData?.eventCurrent[indexPath.row].id ?? ""
-             
-                self.navigationController?.pushViewController(vc, animated: true)
+//                
+//                let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController")as! EventsDetailViewController
+//                vc.eventid = EventListData?.eventCurrent[indexPath.row].id ?? ""
+//             
+//                self.navigationController?.pushViewController(vc, animated: true)
                 
                 
     
@@ -277,11 +277,11 @@ class OtherEventViewController:  BaseViewController , UICollectionViewDelegateFl
          
          cell.DetailCallback = { [self] value in
              
-             let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController")as! EventsDetailViewController
-             vc.eventid = EventListData?.eventFuture[indexPath.row].id ?? ""
-          
-             self.navigationController?.pushViewController(vc, animated: true)
-             
+//             let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController")as! EventsDetailViewController
+//             vc.eventid = EventListData?.eventFuture[indexPath.row].id ?? ""
+//          
+//             self.navigationController?.pushViewController(vc, animated: true)
+//             
              
  
          }
@@ -311,12 +311,12 @@ class OtherEventViewController:  BaseViewController , UICollectionViewDelegateFl
              }
          
          cell.DetailCallback = { [self] value in
-             
-             let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController")as! EventsDetailViewController
-             vc.eventid = EventListData?.eventPast[indexPath.row].id ?? ""
-          
-             self.navigationController?.pushViewController(vc, animated: true)
-             
+//             
+//             let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController")as! EventsDetailViewController
+//             vc.eventid = EventListData?.eventPast[indexPath.row].id ?? ""
+//          
+//             self.navigationController?.pushViewController(vc, animated: true)
+//             
              
  
          }

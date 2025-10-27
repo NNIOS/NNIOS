@@ -23,7 +23,6 @@ class PostEnlargeImageViewController: UIViewController,UICollectionViewDelegateF
     var newNavigationController:  UINavigationController!
     var PostListData : PostListModel?
     var imgData = [PostImage]()
-    var imgDataAll = [postImagesN]()
     // var imgData: [UIImage] = []
     var thisWidth:CGFloat = 0
     var UserName =  ""

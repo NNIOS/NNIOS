@@ -70,7 +70,7 @@ class GroupTableViewCell: UITableViewCell {
         contentView.addSubview(profileImageView)
 
         messageBackgroundView.translatesAutoresizingMaskIntoConstraints = false
-        messageBackgroundView.backgroundColor = UIColor(hex: "#dcedc9")
+        messageBackgroundView.backgroundColor = UIColor(hexString: "#dcedc9")
         messageBackgroundView.layer.cornerRadius = 12
         messageBackgroundView.clipsToBounds = true
         contentView.addSubview(messageBackgroundView)

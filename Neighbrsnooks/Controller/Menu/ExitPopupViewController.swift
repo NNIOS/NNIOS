@@ -64,15 +64,15 @@ class ExitPopupViewController: UIViewController {
                                                     "groupid": groupid ?? "",
                                                    
                                                                         ]
-          WebService.sharedInstance.callExitGroupWebService(withParams: dictParams) { data in
-            self.ExitGrouData = data
-          //    UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.name, forKey: "neighbrshood")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callExitGroupWebService(withParams: dictParams) { data in
+//            self.ExitGrouData = data
+//          //    UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.name, forKey: "neighbrshood")
+////              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
 
 }

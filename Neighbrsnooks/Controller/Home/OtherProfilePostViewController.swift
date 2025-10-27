@@ -399,16 +399,16 @@ extension OtherProfilePostViewController: UITableViewDataSource, UITableViewDele
         let dictParams: Dictionary<String, Any> = [
                                                   "userid":idPost ?? "",
                                                   ]
-          WebService.sharedInstance.callPostListWebService(withParams: dictParams) { data in
-            self.PostListData = data
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-              UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callPostListWebService(withParams: dictParams) { data in
+//            self.PostListData = data
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//              UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
+////              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//             // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
     
     @objc private func emojiTapped(sender: UIButton) {
@@ -428,16 +428,16 @@ extension OtherProfilePostViewController: UITableViewDataSource, UITableViewDele
                                                   "emojiunicode":  "",
                                                    ]
         
-          WebService.sharedInstance.callPostUnLikeWebService(withParams: dictParams) { data in
-          //  self.LikePostModel = data
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            //  UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
-            //  UserDefaults.standard.set(self.PostListData?.listdata.u, forKey: "accessToken")
-           //   UserDefaults.standard.set(self.PostUnlikeLikeData?..id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callPostUnLikeWebService(withParams: dictParams) { data in
+//          //  self.LikePostModel = data
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//            //  UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
+//            //  UserDefaults.standard.set(self.PostListData?.listdata.u, forKey: "accessToken")
+//           //   UserDefaults.standard.set(self.PostUnlikeLikeData?..id, forKey: "id")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
     
     func callPostLikeWebService(postId : String?,emoji : String?, _ completionClosure: @escaping () -> ()) {
@@ -451,17 +451,17 @@ extension OtherProfilePostViewController: UITableViewDataSource, UITableViewDele
                                                   "emojiunicode": emoji ?? "",
                                                    ]
         
-          WebService.sharedInstance.callPostLikeWebService(withParams: dictParams) { data in
-            self.PostLikeData = data
-             // UserDefaults.standard.setValue(nil, forKey: "postid")
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callPostLikeWebService(withParams: dictParams) { data in
+//            self.PostLikeData = data
+//             // UserDefaults.standard.setValue(nil, forKey: "postid")
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
+////              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
     
 }

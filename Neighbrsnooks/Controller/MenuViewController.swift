@@ -92,21 +92,21 @@ class MenuViewController: UIViewController {
       
         
         SVProgressHUD.show()
-        callUserProfileWebService{ [self] in
-            
-            SVProgressHUD.dismiss()
-            
-            
-            
-            self.NameLbl.text = self.profileData?.firstname
-          //  self.SecLbl.text = self.profileData?.lastname
-           
-            
-            self.SectorLbl.text = self.profileData?.neighborhood
-           // self.MobileLbl.text = self.profileData?.phoneno
-            
-           
-        }
+//        callUserProfileWebService{ [self] in
+//            
+//            SVProgressHUD.dismiss()
+//            
+//            
+//            
+//            self.NameLbl.text = self.profileData?.firstname
+//          //  self.SecLbl.text = self.profileData?.lastname
+//           
+//            
+//            self.SectorLbl.text = self.profileData?.neighborhood
+//           // self.MobileLbl.text = self.profileData?.phoneno
+//            
+//           
+//        }
         // Do any additional setup after loading the view.
     }
     
@@ -291,21 +291,21 @@ class MenuViewController: UIViewController {
 
        }
 
-    func callUserProfileWebService(_ completionClosure: @escaping () -> ()) {
-        let id = UserDefaults.standard.string(forKey: "userid")
-          let dictParams: Dictionary<String, Any> = [
-                                                    
-                                                    "userid":id ?? "",
-                                                   
-                                                   
-                                                                        ]
-          WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-              UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
-              UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
-              UserDefaults.standard.set(self.profileData?.lastname, forKey: "lastName")
-
-            completionClosure()
-          }
-        }
+//    func callUserProfileWebService(_ completionClosure: @escaping () -> ()) {
+//        let id = UserDefaults.standard.string(forKey: "userid")
+//          let dictParams: Dictionary<String, Any> = [
+//                                                    
+//                                                    "userid":id ?? "",
+//                                                   
+//                                                   
+//                                                                        ]
+//          WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+//            self.profileData = data
+//              UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
+//              UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
+//              UserDefaults.standard.set(self.profileData?.lastname, forKey: "lastName")
+//
+//            completionClosure()
+//          }
+//        }
 }

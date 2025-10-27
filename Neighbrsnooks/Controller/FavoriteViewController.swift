@@ -22,8 +22,7 @@ class FavoriteViewController: BaseViewController, FavoriteTableViewCellDelegate 
     var deletePost : DeletePostModel?
     var sortedSections: [(type: String, items: [Any])] = []
     //    var NeighData = [NeighbrhoodF]()
-    private let bottomPanelView = BottomPanelView()
-    override func viewDidLoad() {
+     override func viewDidLoad() {
         super.viewDidLoad()
         self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
         callFavouriteListPostWebService{
@@ -44,10 +43,7 @@ class FavoriteViewController: BaseViewController, FavoriteTableViewCellDelegate 
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if let selectedIndex = selectedTabIndex {
-                       bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
-                   }
- 
+       
         refreshPage()
     }
     
@@ -90,12 +86,12 @@ class FavoriteViewController: BaseViewController, FavoriteTableViewCellDelegate 
                                                   "userid":id ?? "" ,
                                                  // "neighbrhood":idNeighbour ?? "",
         ]
-          WebService.sharedInstance.callFavouriteListPostWebService(withParams: dictParams) { data in
-            self.FavoriteListData = data
-            
-              self.prepareSortedData(favModel: self.FavoriteListData)  // Ensure it's using updated data
-            completionClosure()
-          }
+//          WebService.sharedInstance.callFavouriteListPostWebService(withParams: dictParams) { data in
+//            self.FavoriteListData = data
+//            
+//              self.prepareSortedData(favModel: self.FavoriteListData)  // Ensure it's using updated data
+//            completionClosure()
+//          }
         }
     
     
@@ -107,10 +103,10 @@ class FavoriteViewController: BaseViewController, FavoriteTableViewCellDelegate 
             "postid": postId
         ]
         
-        WebService.sharedInstance.callDeletePostWebService(withParams: dictParams) { data in
-            self.deletePost = data
-            completionClosure()
-        }
+//        WebService.sharedInstance.callDeletePostWebService(withParams: dictParams) { data in
+//            self.deletePost = data
+//            completionClosure()
+//        }
     }
     
 
@@ -677,16 +673,16 @@ extension FavoriteViewController: UITableViewDataSource, UITableViewDelegate, Fa
                 
                 
                 // MARK: - Call for button push toh eventDitails
-                cell.eventCallAction = { [weak self] value in
-                    guard let self = self else { return }
-                    guard let postListData = self.FavoriteListData?.listdata, indexPath.row < postListData.count else { return }
-                    
-                    // Safely unwrap PostDotViewController
-                    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController") as? EventsDetailViewController else { return }
-                    vc.eventid = eventData.eventid ?? ""
-                      self.navigationController?.pushViewController(vc, animated: true)
-                    
-                }
+//                cell.eventCallAction = { [weak self] value in
+//                    guard let self = self else { return }
+//                    guard let postListData = self.FavoriteListData?.listdata, indexPath.row < postListData.count else { return }
+//                    
+//                    // Safely unwrap PostDotViewController
+//                    guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController") as? EventsDetailViewController else { return }
+//                    vc.eventid = eventData.eventid ?? ""
+//                      self.navigationController?.pushViewController(vc, animated: true)
+//                    
+//                }
                 
                 
                 cell.DotFCallback = { [weak self] value in
@@ -926,14 +922,14 @@ extension FavoriteViewController {
             "neighbrhood": neighborhoodId
         ]
         
-        WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
-            if let json = data as? [String: Any],
-               let message = json["message"] as? String {
-                completionClosure(message) // Pass message to closure
-            } else {
-                completionClosure("Added to favorite successfully!")
-            }
-        }
+//        WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
+//            if let json = data as? [String: Any],
+//               let message = json["message"] as? String {
+//                completionClosure(message) // Pass message to closure
+//            } else {
+//                completionClosure("Added to favorite successfully!")
+//            }
+//        }
     }
 
     func callFavouriteRemoveBussinessWebService(postId: String, _ completionClosure: @escaping (String) -> Void) {
@@ -945,14 +941,14 @@ extension FavoriteViewController {
             "type": "Post"
         ]
         
-        WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
-            if let json = data as? [String: Any],
-               let message = json["message"] as? String {
-                completionClosure(message) // Pass message to closure
-            } else {
-                completionClosure("Removed to favorite successfully!")
-            }
-        }
+//        WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
+//            if let json = data as? [String: Any],
+//               let message = json["message"] as? String {
+//                completionClosure(message) // Pass message to closure
+//            } else {
+//                completionClosure("Removed to favorite successfully!")
+//            }
+//        }
     }
 }
 

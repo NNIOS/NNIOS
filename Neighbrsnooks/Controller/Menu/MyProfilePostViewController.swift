@@ -29,8 +29,7 @@ class MyProfilePostViewController: BaseViewController {
     var DescriptionlName = ""
     var userid: String?
         var sourceViewController: String?
-    //    private let bottomPanelView = BottomPanelView()
-    
+ 
     let items = [
         (id: "1", name: "Item 1"),
         (id: "2", name: "Item 2"),
@@ -458,16 +457,16 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
                     ]
                 }
                 print("Param is :\(dictParams)")
-        WebService.sharedInstance.callPostListWebService(withParams: dictParams) { data in
-            self.PostListData = data
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
-            //              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-            // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
-            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callPostListWebService(withParams: dictParams) { data in
+//            self.PostListData = data
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//            UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
+//            //              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//            // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
+//            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//            
+//            completionClosure()
+//        }
     }
     
     func callPostUnLikeWebService(_ completionClosure: @escaping () -> ()) {
@@ -481,16 +480,16 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
             "emojiunicode":  "",
         ]
         
-        WebService.sharedInstance.callPostUnLikeWebService(withParams: dictParams) { data in
-            self.PostLikeData = data
-            //        UserDefaults.standard.set(self.PostLikeData?., forKey: "id")
-            //  UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
-            //  UserDefaults.standard.set(self.PostListData?.listdata.u, forKey: "accessToken")
-            //   UserDefaults.standard.set(self.PostUnlikeLikeData?..id, forKey: "id")
-            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callPostUnLikeWebService(withParams: dictParams) { data in
+//            self.PostLikeData = data
+//            //        UserDefaults.standard.set(self.PostLikeData?., forKey: "id")
+//            //  UserDefaults.standard.set(self.PostListData?.listdata?.first?.postid, forKey: "postid")
+//            //  UserDefaults.standard.set(self.PostListData?.listdata.u, forKey: "accessToken")
+//            //   UserDefaults.standard.set(self.PostUnlikeLikeData?..id, forKey: "id")
+//            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//            
+//            completionClosure()
+//        }
     }
     
     func callPostLikeWebService(postId : String?,emoji : String?, _ completionClosure: @escaping () -> ()) {
@@ -503,12 +502,12 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
             "emojiunicode": emoji ?? "",
         ]
         
-        WebService.sharedInstance.callPostLikeWebService(withParams: dictParams) { data in
-            self.PostLikeData = data
-            
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callPostLikeWebService(withParams: dictParams) { data in
+//            self.PostLikeData = data
+//            
+//            
+//            completionClosure()
+//        }
     }
     @objc private func emojiTapped(sender: UIButton) {
         callPostUnLikeWebService{
@@ -526,10 +525,10 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
         ]
         print(dictParams)
         
-        WebService.sharedInstance.callDeletePostWebService(withParams: dictParams) { data in
-            self.deletePost = data
-            completionClosure()
-        }
+//        WebService.sharedInstance.callDeletePostWebService(withParams: dictParams) { data in
+//            self.deletePost = data
+//            completionClosure()
+//        }
     }
     
     
@@ -602,14 +601,14 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
             "neighbrhood": neighborhoodId
         ]
         
-        WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
-            if let json = data as? [String: Any],
-               let message = json["message"] as? String {
-                completionClosure(message) // Pass message to closure
-            } else {
-                completionClosure("Added to favorite successfully!")
-            }
-        }
+//        WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
+//            if let json = data as? [String: Any],
+//               let message = json["message"] as? String {
+//                completionClosure(message) // Pass message to closure
+//            } else {
+//                completionClosure("Added to favorite successfully!")
+//            }
+//        }
     }
     
     func callFavouriteRemoveBussinessWebService(postId: String, _ completionClosure: @escaping (String) -> Void) {
@@ -621,14 +620,14 @@ extension MyProfilePostViewController: UITableViewDataSource, UITableViewDelegat
             "type": "Post"
         ]
         
-        WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
-            if let json = data as? [String: Any],
-               let message = json["message"] as? String {
-                completionClosure(message) // Pass message to closure
-            } else {
-                completionClosure("Removed to favorite successfully!")
-            }
-        }
+//        WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
+//            if let json = data as? [String: Any],
+//               let message = json["message"] as? String {
+//                completionClosure(message) // Pass message to closure
+//            } else {
+//                completionClosure("Removed to favorite successfully!")
+//            }
+//        }
     }
     
     

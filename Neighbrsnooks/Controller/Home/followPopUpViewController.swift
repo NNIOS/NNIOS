@@ -5,122 +5,6 @@
 //  Created by Mac on 26/11/24.
 //
 
-//import UIKit
-//
-////protocol ConfirmfollowDelegate {
-////  func tapConfirm() -> Void
-////}
-//
-//protocol ConfirmfollowDelegate: AnyObject {
-//    func tapConfirm()
-//}
-//
-//@available(iOS 16.0, *)
-//class followPopUpViewController: BaseViewController {
-//    
-//    @IBOutlet weak var lblFollowUnFollow: UILabel!
-//    var delegate: ConfirmfollowDelegate?
-//    var FollowName : String?
-//    var Nid : String?
-//    var Nstats : String?
-//    var neighbrhoodData : MyNeighbhoodModel?
-//    var followData : FollowModel?
-//    var follow = "Are you sure you want to follow this?"
-//    var unFollow = "Are you sure you want to Unfollow this?"
-//    
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        
-//        self.lblFollowUnFollow.font = UIFont(name: "Montserrat-Regular", size: 15)
-//    }
-//    override func viewWillAppear(_ animated: Bool) {
-//            super.viewWillAppear(animated)
-//            lblFollowUnFollow.numberOfLines = 2
-//            if let status = Nstats {
-//                if status == "0" {
-//                    self.lblFollowUnFollow.text = "Are you sure you\n want to unfollow \(FollowName ?? "")?"
-//                    
-//                } else if status == "1" {
-//                    self.lblFollowUnFollow.text = "Are you sure you\n want to follow \(FollowName ?? "")?"
-//                }
-//            }
-//        }
-//    
-//    
-//    @IBAction func tapDismiss(_ sender: UIButton) {
-//        delegate?.tapConfirm()
-//        self.dismiss(animated: true, completion: nil)
-//    }
-//    
-//    
-//    @IBAction func ExitYesBtn(_ sender: UIButton) {
-//        callFollowWebService {
-//            self.callMyNeighbrhoodWebService {
-//                self.delegate?.tapConfirm()
-//                self.dismiss(animated: true)
-//            }
-//        }
-//    }
-//    
-//    // Follow WebService Call
-//    func callFollowWebService(_ completionClosure: @escaping () -> ()) {
-//        let UserName = UserDefaults.standard.string(forKey: "username")
-//        let id = UserDefaults.standard.string(forKey: "userid")
-//        let dictParams: Dictionary<String, Any> = [
-//            "userid": id ?? "",
-//            "sub_stat": Nstats ?? "", // This will be "1" for Follow, "0" for Unfollow
-//            "neighbrhood": FollowName ?? ""
-//        ]
-//        
-//        WebService.sharedInstance.callFollowWebService(withParams: dictParams) { data in
-//            self.followData = data
-//            if self.followData?.status == "success" {
-//                completionClosure()
-//            } else {
-//                self.showAlert(Message: self.followData?.message ?? "Something went wrong")
-//            }
-//        }
-//    }
-//    
-//    
-//    // Neighborhood WebService Call
-//    func callMyNeighbrhoodWebService(_ completionClosure: @escaping () -> ()) {
-//        let id = UserDefaults.standard.string(forKey: "userid")
-//        let idNeighbour = UserDefaults.standard.string(forKey: "neighbrhood")
-//        
-//        let dictParams: Dictionary<String, Any> = [
-//            "userid": id ?? "",
-//            "neighbrhood": idNeighbour ?? ""
-//        ]
-//        
-//        WebService.sharedInstance.callMyNeighbrhoodWebService(withParams: dictParams) { data in
-//            self.neighbrhoodData = data
-//            UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.name, forKey: "name")
-//            completionClosure()
-//        }
-//    }
-//    
-//}
-//@available(iOS 16.0, *)
-//extension UIViewController {
-//    func showAlert(title: String = "", message: String, buttonTitle: String = "OK") {
-//        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
-//        
-//        let titleFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16)]
-//        let messageFont = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 16)]
-//        
-//        let attributedTitle = NSAttributedString(string: title, attributes: titleFont)
-//        let attributedMessage = NSAttributedString(string: message, attributes: messageFont)
-//
-//        alert.setValue(attributedTitle, forKey: "attributedTitle")
-//        alert.setValue(attributedMessage, forKey: "attributedMessage")
-//
-//        alert.addAction(UIAlertAction(title: buttonTitle, style: .default, handler: nil))
-//        
-//        self.present(alert, animated: true, completion: nil)
-//    }
-//
-//}
 
 
 import UIKit
@@ -179,11 +63,28 @@ class followPopUpViewController: BaseViewController {
 
 @available(iOS 16.0, *)
 extension UIViewController {
+//    func showAlert(title: String = "", message: String, buttonTitle: String = "OK") {
+//        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+//        alert.addAction(UIAlertAction(title: buttonTitle, style: .default, handler: nil))
+//        self.present(alert, animated: true, completion: nil)
+//    }
+    
     func showAlert(title: String = "", message: String, buttonTitle: String = "OK") {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: buttonTitle, style: .default, handler: nil))
-        self.present(alert, animated: true, completion: nil)
-    }
+            let alertController = UIAlertController(title: "", message: "", preferredStyle: .alert)
+            
+            // Title styling
+            let attributedTitle = NSAttributedString(
+                string: title, attributes: [.font: UIFont(name: "Montserrat-Bold", size: 18) ?? UIFont.systemFont(ofSize: 18),.foregroundColor: UIColor.black])
+            alertController.setValue(attributedTitle, forKey: "attributedTitle")
+            let messageAttributes: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16), .foregroundColor: UIColor.darkGray ]
+            let attributedMessage = NSAttributedString(string: message, attributes: messageAttributes)
+            alertController.setValue(attributedMessage, forKey: "attributedMessage")
+            let okAction = UIAlertAction(title: buttonTitle, style: .default, handler: nil)
+            okAction.setValue(#colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1), forKey: "titleTextColor")
+            alertController.addAction(okAction)
+            self.present(alertController, animated: true, completion: nil)
+        }
 }
 
 @available(iOS 16.0, *)
@@ -203,14 +104,14 @@ extension followPopUpViewController {
             "neighbrhood": FollowName ?? ""
         ]
         print("Param is : \(dictParams)")
-        WebService.sharedInstance.callFollowWebService(withParams: dictParams) { data in
-            self.followData = data
-            if self.followData?.status == "success" {
-                completionClosure()
-            } else {
-                self.showAlert(Message: self.followData?.message ?? "Something went wrong")
-            }
-        }
+//        WebService.sharedInstance.callFollowWebService(withParams: dictParams) { data in
+//            self.followData = data
+//            if self.followData?.status == "success" {
+//                completionClosure()
+//            } else {
+//                self.showAlert(Message: self.followData?.message ?? "Something went wrong")
+//            }
+//        }
     }
 
     func callMyNeighbrhoodWebService(_ completionClosure: @escaping () -> ()) { // Neighborhood WebService API Call
@@ -222,10 +123,10 @@ extension followPopUpViewController {
             "neighbrhood": idNeighbour ?? ""
         ]
         print("Param is : \(dictParams)")
-        WebService.sharedInstance.callMyNeighbrhoodWebService(withParams: dictParams) { data in
-            self.neighbrhoodData = data
-            UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.name, forKey: "name")
-            completionClosure()
-        }
+//        WebService.sharedInstance.callMyNeighbrhoodWebService(withParams: dictParams) { data in
+//            self.neighbrhoodData = data
+//            UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.name, forKey: "name")
+//            completionClosure()
+//        }
     }
 }

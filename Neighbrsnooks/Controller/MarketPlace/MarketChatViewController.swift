@@ -1,6 +1,6 @@
 import UIKit
 
-class MarketChatViewController: BaseViewC, UITextViewDelegate {
+class MarketChatViewController: BaseViewController, UITextViewDelegate {
     
     @IBOutlet weak var lblHeading: UILabel!
     
@@ -237,7 +237,7 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
     
     //dev.
     func callMarketChatWebService(completion: @escaping () -> Void) {
-        let baseURL = "https://dev.neighbrsnook.com/admin/api/messages/"
+        let baseURL = "https://neighbrsnook.com/admin/api/messages/"
         let id = UserDefaults.standard.string(forKey: "userid")
         let Sid: String
 
@@ -253,47 +253,47 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
             "product_id": Productid ?? ""
         ]
 
-        RSNetworkManager.shared.newRequestApi(withServiceName: url, requestMethod: .GET, requestParameters: dictParams, withProgressHUD: true) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS, .CREATED:
-                do {
-                    let data = try JSONDecoder().decode(MarketChatModel.self, from: result!)
-                    self.MarketChatData = data
-                    UserDefaults.standard.set(self.MarketChatData?.messages?.first?.senderID, forKey: "Senderid")
-                    self.tableviewMembers.reloadData()
-                    self.scrollToBottomWithoutAnimation()
-                    DispatchQueue.global().async {
-                        sleep(2)
-                        self.MarketChatData = data
-                        DispatchQueue.main.async {
-                            completion()
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
-                } catch {
-                    print(error.localizedDescription)
-                }
-
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-
-            default:
-                break
-            }
-        }
+//        RSNetworkManager.shared.newRequestApi(withServiceName: url, requestMethod: .GET, requestParameters: dictParams, withProgressHUD: true) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS, .CREATED:
+//                do {
+//                    let data = try JSONDecoder().decode(MarketChatModel.self, from: result!)
+//                    self.MarketChatData = data
+//                    UserDefaults.standard.set(self.MarketChatData?.messages?.first?.senderID, forKey: "Senderid")
+//                    self.tableviewMembers.reloadData()
+//                    self.scrollToBottomWithoutAnimation()
+//                    DispatchQueue.global().async {
+//                        sleep(2)
+//                        self.MarketChatData = data
+//                        DispatchQueue.main.async {
+//                            completion()
+//                        }
+//                    }
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//
+//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                do {
+//                    let data = try JSONDecoder().decode(ProductResponse.self, from: result!)
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//
+//            case .UNAUTHORIZED:
+//                print(error?.localizedDescription)
+//
+//            default:
+//                break
+//            }
+//        }
     }
 
   
     
     //  "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?" dev.
     func callMarketChatPostWebService(message: String, completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/send-message"
+        let url = "https://neighbrsnook.com/admin/api/send-message"
         
         let id = UserDefaults.standard.string(forKey: "userid")
         let Sid = UserDefaults.standard.string(forKey: "SenderidN")
@@ -305,31 +305,31 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
             "message": message // Yahan pe stored message bhej rahe hain
         ]
         
-        RSNetworkManager.shared.newRequestApi(
-            withServiceName: url,
-            requestMethod: .POST,
-            requestParameters: dictParams,
-            withProgressHUD: true
-        ) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS, .CREATED:
-                guard let resultData = result else {
-                    print("Error: API response data is nil")
-                    return
-                }
-                do {
-                    let data = try JSONDecoder().decode(CreateChatMarketModel.self, from: resultData)
-                    self.MarketChatPostData = data
-                    self.tableviewMembers.reloadData()
-                    self.scrollToBottomWithoutAnimation()
-                } catch {
-                    print("Decoding Error:", error.localizedDescription)
-                }
-            default:
-                print("Unhandled status code:", statusCode)
-            }
-            completion() // API response milne ke baad completion block call karna na bhoolein
-        }
+//        RSNetworkManager.shared.newRequestApi(
+//            withServiceName: url,
+//            requestMethod: .POST,
+//            requestParameters: dictParams,
+//            withProgressHUD: true
+//        ) { (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS, .CREATED:
+//                guard let resultData = result else {
+//                    print("Error: API response data is nil")
+//                    return
+//                }
+//                do {
+//                    let data = try JSONDecoder().decode(CreateChatMarketModel.self, from: resultData)
+//                    self.MarketChatPostData = data
+//                    self.tableviewMembers.reloadData()
+//                    self.scrollToBottomWithoutAnimation()
+//                } catch {
+//                    print("Decoding Error:", error.localizedDescription)
+//                }
+//            default:
+//                print("Unhandled status code:", statusCode)
+//            }
+//            completion() // API response milne ke baad completion block call karna na bhoolein
+//        }
     }
 }
 

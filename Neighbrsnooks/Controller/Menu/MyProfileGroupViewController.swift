@@ -23,8 +23,7 @@ class MyProfileGroupViewController: BaseViewController, ConfirmDelegate  {
     @IBOutlet weak var GroupLbl: UILabel!
     @IBOutlet weak var lblHeading: UILabel!
    
-    private let bottomPanelView = BottomPanelView()
-    var GroupListData : GropsListModel?
+     var GroupListData : GropsListModel?
     var JoinListData : JoinGroupModel?
     var groupid : String?
     var groupName : String?
@@ -33,9 +32,7 @@ class MyProfileGroupViewController: BaseViewController, ConfirmDelegate  {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let selectedIndex = selectedTabIndex {
-                       bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
-                   }
+         
         // Do any additional setup after loading the view.
     }
     
@@ -91,16 +88,16 @@ class MyProfileGroupViewController: BaseViewController, ConfirmDelegate  {
                                                     "groupuserlist": id ?? ""
                                                    
                                                                         ]
-          WebService.sharedInstance.callGroupListWebService(withParams: dictParams) { data in
-            self.GroupListData = data
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callGroupListWebService(withParams: dictParams) { data in
+//            self.GroupListData = data
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
+////              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
     
     func callJoinGroupWebService(_ completionClosure: @escaping () -> ()) {
@@ -114,28 +111,17 @@ class MyProfileGroupViewController: BaseViewController, ConfirmDelegate  {
                                                     "username": userName ?? ""
                                                    
                                                                         ]
-          WebService.sharedInstance.callJoinGroupWebService(withParams: dictParams) { data in
-            self.JoinListData = data
-              if self.JoinListData?.status == "success"{
-                  completionClosure()
-              }else{
-                  self.showAlert(Message: self.JoinListData?.message ?? "")
-              }
-          }
+//          WebService.sharedInstance.callJoinGroupWebService(withParams: dictParams) { data in
+//            self.JoinListData = data
+//              if self.JoinListData?.status == "success"{
+//                  completionClosure()
+//              }else{
+//                  self.showAlert(Message: self.JoinListData?.message ?? "")
+//              }
+//          }
         }
     
-    private func setupBottomPanel() {
-            bottomPanelView.delegate = self
-            bottomPanelView.translatesAutoresizingMaskIntoConstraints = false
-            view.addSubview(bottomPanelView)
-
-            NSLayoutConstraint.activate([
-                bottomPanelView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                bottomPanelView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                bottomPanelView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -5), // Moves it downward
-                bottomPanelView.heightAnchor.constraint(equalToConstant: 70)
-            ])
-        }
+     
     
 }
 

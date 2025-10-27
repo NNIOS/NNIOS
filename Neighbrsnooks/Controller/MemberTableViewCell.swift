@@ -9,7 +9,7 @@ import UIKit
 
 
 protocol HomeTableViewCellDelegate: AnyObject {
-    func didSelectItem(with postImage: postImagesN, username: String, allImages: [postImagesN])
+    func didSelectItem(with data: HomePostMedia, username: String, allImages: [HomePostMedia])
 }
 
 
@@ -72,7 +72,6 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     weak var delegateThreDot: ThreeDotMemberTableViewCellDelegate?
     weak var delegateLikeUnlikeCell: MemberTableViewLikeUnlikeCellDelegate?
     var postId: String = ""
-    
     var isExpanded = false
     var profileData : ProfileModel?
     var isLiked = false
@@ -88,8 +87,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     
     
     weak var delegate: HomeTableViewCellDelegate?
-    var imgDataAll = [postImagesN]()
-    var UserName = ""
+     var UserName = ""
     private var defaultTextColor: UIColor?
     var FullImgCallback : ((UIButton) -> Void)?
     var DotCallback: ((String?) -> Void)?
@@ -99,7 +97,8 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     var postid: String?
     var showVerificationAlertCallback: (() -> Void)?
     
-    
+    var postData: HomePostItem?
+    var imgDataAll: [HomePostMedia] = []
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -168,8 +167,7 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         
-        // Configure the view for the selected state
-    }
+     }
     
     
     
@@ -326,26 +324,42 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
         DotCallback?(postid)
     }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        print("Data in imgDataAll: \(imgDataAll)") // Prints the entire data
-        print("Total items in section: \(imgDataAll.count)") // Prints the count of items
-        return imgDataAll.count ?? 0
-        
+    func configure(with post: HomePostItem) {
+        self.postData = post
+        self.imgDataAll = post.postMedia
+
+        lblName.text = post.username
+        if let url = URL(string: post.userpic), !post.userpic.isEmpty {
+            profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder"))
+        } else {
+            profileImgView.image = UIImage(named: "placeholder")
+        }
+        lblDescription.text = post.postDescription
+        lblMonth.text = post.postCreatedAt
+        lblSec.text = post.neighborhoodName
+        lblLikeCount.text = "\(post.postTotallike)"
+        lblCommentCount.text = "\(post.postTotcomment)"
+        lblGeneral.text = post.postType
+
+        collectionViewBanner.reloadData()
     }
     
+    
+    //MARK: - Collection view
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return imgDataAll.count
+    }
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCollectionViewCell", for: indexPath) as! HomeCollectionViewCell
-        let postImage = imgDataAll[indexPath.row]  // Current item
-        
-        let totalCount = imgDataAll.count
-        cell.configure(with: postImage, totalCount: totalCount)
+        let media = imgDataAll[indexPath.row]
+        cell.configure(with: media, totalCount: imgDataAll.count)
         cell.numberLabel.text = "\(indexPath.item + 1)"
-        cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-        cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-        let totalNumberOfImages = imgDataAll.count
-        cell.totalImagesLabel.text =  "/ \(totalNumberOfImages)"
+        cell.totalImagesLabel.text = "/ \(imgDataAll.count)"
         return cell
     }
+
     
     
     
@@ -389,8 +403,8 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     
     // UICollectionViewDelegate Method - DidSelectItemAt
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let selectedData = imgDataAll[indexPath.row]
-        delegate?.didSelectItem(with: selectedData, username: UserName, allImages: imgDataAll)
+//        let selectedData = imgDataAll[indexPath.row]
+//        delegate?.didSelectItem(with: selectedData, username: UserName, allImages: imgDataAll)
     }
     
     
@@ -629,18 +643,19 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     
     
     @IBAction func favouriteButtonTapped(_ sender: UIButton) {
-        
         favouriteButtonCallback?()
     }
     
     // Update UI based on fav/unfav status
     func updateFavouriteButton(isFavourite: Bool) {
-        let imageName = isFavourite ? "favorites" : "Un favorites" // ✅ Image names from Assets
-        let image = UIImage(named: imageName)
-        btnFavourite.setImage(image, for: .normal)
+        let imageName = isFavourite ? "favorites" : "Un favorites"
+        if let image = UIImage(named: imageName) {
+            btnFavourite.setImage(image, for: .normal)
+        } else {
+            btnFavourite.setImage(UIImage(systemName: "heart"), for: .normal) // fallback icon, just in case
+        }
     }
-    
-    
+
     
     
 }

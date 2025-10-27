@@ -18,8 +18,7 @@ class ResetPasswordVC: UIViewController {
     
     // MARK: - Variables
     var phoneno: String?
-    var objReset: ResetPasswordModel?
-    
+ 
     // MARK: - Life cycle methods
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -97,18 +96,18 @@ extension ResetPasswordVC {
             "password":passwordTF.text ?? "",
             "confirm_password":confirmPasswordTF.text ?? "",
         ]
-        WebService.sharedInstance.callForGotPasswordWebService(withParams: dictParams) { data in
-            self.objReset = data
-            if self.objReset?.message == "New password changed successfully" {
-                if let viewControllers = self.navigationController?.viewControllers {
-                    let targetViewController = viewControllers[viewControllers.count - 3]
-                    self.navigationController?.popToViewController(targetViewController, animated: true)
-                }
-            } else {
-                self.showAlert(message: self.objReset?.message ?? "")
-            }
-            completionClosure()
-        }
+//        WebService.sharedInstance.callForGotPasswordWebService(withParams: dictParams) { data in
+//            self.objReset = data
+//            if self.objReset?.message == "New password changed successfully" {
+//                if let viewControllers = self.navigationController?.viewControllers {
+//                    let targetViewController = viewControllers[viewControllers.count - 3]
+//                    self.navigationController?.popToViewController(targetViewController, animated: true)
+//                }
+//            } else {
+//                self.showAlert(message: self.objReset?.message ?? "")
+//            }
+//            completionClosure()
+//        }
     }
     
     // MARK : function for Validate Password

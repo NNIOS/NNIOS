@@ -10,7 +10,7 @@ import UIKit
 class UpdateNeigDataShowTableViewCell: UITableViewCell {
 
     var isCheckedNeig: Bool = false
-    weak var delegate: NeighbourhoodDataShowTableViewCellDelegate?
+//    weak var delegate: NeighbourhoodDataShowTableViewCellDelegate?
     var indexPath: IndexPath?
     
     @IBOutlet weak var checkboxButtonNei: UIButton!
@@ -24,11 +24,11 @@ class UpdateNeigDataShowTableViewCell: UITableViewCell {
         checkboxButtonNei.tintColor = isCheckedNeig ? UIColor(red: 0, green: 100/255.0, blue: 0, alpha: 1) : .black
     }
     
-    @IBAction func checkboxTappedN(_ sender: UIButton) {
-        if let indexPath = indexPath {
-            delegate?.didTapCheckbox(at: indexPath)
-        }
-    }
+//    @IBAction func checkboxTappedN(_ sender: UIButton) {
+//        if let indexPath = indexPath {
+//            delegate?.didTapCheckbox(at: indexPath)
+//        }
+//    }
     
     override func awakeFromNib() {
         super.awakeFromNib()

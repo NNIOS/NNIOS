@@ -12,6 +12,7 @@ import Photos
 import PhotosUI
 import TOCropViewController
 import PDFKit
+import CropViewController
 
 @available(iOS 16.0, *)
 class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITextViewDelegate,CropViewControllerDelegate,PHPickerViewControllerDelegate, UICollectionViewDelegateFlowLayout, ImageCollectionViewControllerDelegate, UITextFieldDelegate, UIDocumentPickerDelegate, ImageCollectionGalViewControllerDelegate,MediaCountUpdateDelegate,SelectWeekDaysDelegate, BusinessCategorySelectionDelegate  {
@@ -90,8 +91,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     var selectedImages: [UIImage] = []
     var images: [UIImage] = []
     var tfSunday: UITextField!
-    private let bottomPanelView = BottomPanelView()
-    var imagePicker:UIImagePickerController?
+     var imagePicker:UIImagePickerController?
     private weak var delegate: UIImagePickerControllerDelegate?
     var selectedImge: UIImage? = nil
     var from = 0
@@ -135,7 +135,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         tfBussinessName.autocapitalizationType = .words
         viewWeekly.isHidden = true
         viewSelectHideDay.isHidden = true
-        self.viewWeekly.roundCorners([.topLeft, .topRight], radius: 0)
+//        self.viewWeekly.roundCorners([.topLeft, .topRight], radius: 0)
         NewmagePicker.delegate = self
         //        NewmagePicker.sourceType = .camera
         //        NewmagePicker.allowsEditing = false
@@ -395,56 +395,6 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     }
     
     
-//    // Start Time label click event
-//    @objc func startTimeTapped() {
-//        showPickerAlert(title: "Select Start Time", picker: startTimePicker, label: lblStartTime)
-//    }
-//    
-//    // End Time label click event
-//    @objc func endTimeTapped() {
-//        showPickerAlert(title: "Select End Time", picker: endTimePicker, label: lblEndTime)
-//    }
-//    
-//    // Function to show time picker in an alert
-//    func showPickerAlert(title: String, picker: UIDatePicker, label: UILabel) {
-//        let alert = UIAlertController(title: title, message: "\n\n\n\n\n\n\n\n", preferredStyle: .actionSheet)
-//        
-//        picker.frame = CGRect(x: 10, y: 10, width: alert.view.frame.width - 20, height: 200)
-//        picker.datePickerMode = .time  // Time mode set kar rahe hain
-//        picker.locale = Locale(identifier: "en_US")  // 12-hour format ke liye
-//        
-//        alert.view.addSubview(picker)
-//        
-//        let selectAction = UIAlertAction(title: "Select", style: .default) { _ in
-//            self.updateLabel(picker, label: label)
-//        }
-//        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-//        
-//        alert.addAction(selectAction)
-//        alert.addAction(cancelAction)
-//        present(alert, animated: true)
-//    }
-//    
-//    
-//    // Update the UILabel with selected time
-//    func updateLabel(_ sender: UIDatePicker, label: UILabel) {
-//        let formatter = DateFormatter()
-//        formatter.dateFormat = "hh:mm a"  // AM/PM format
-//        label.text = formatter.string(from: sender.date)
-//    }
-    
-//    @objc func openWeekDaysPopup() {
-//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-//        if let popupVC = storyboard.instantiateViewController(withIdentifier: "SelectWeekDaysPopupVC") as? SelectWeekDaysPopupVC {
-//            popupVC.delegate = self
-//            popupVC.modalPresentationStyle = .overFullScreen
-//            popupVC.modalTransitionStyle = .crossDissolve
-//            
-//            
-//            self.present(popupVC, animated: true)
-//        }
-//    }
-    
     @objc func openWeekDaysPopup() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let popupVC = storyboard.instantiateViewController(withIdentifier: "SelectWeekDaysPopupVC") as? SelectWeekDaysPopupVC {
@@ -530,18 +480,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     }
     
     
-    private func setupBottomPanel() {
-        bottomPanelView.delegate = self
-        bottomPanelView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(bottomPanelView)
-        
-        NSLayoutConstraint.activate([
-            bottomPanelView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomPanelView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomPanelView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -5), // Moves it downward
-            bottomPanelView.heightAnchor.constraint(equalToConstant: 70)
-        ])
-    }
+    
     
     @IBAction func BackButtionAction(_ : UIButton){
         
@@ -556,21 +495,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         
     }
     
-    
-//    @IBAction func selectDocPhotos(_ sender: UIButton) {
-//        if imageArray.count >= getImageLimit() && videoArray.count >= 1 {
-//            showAlert(message: "You can only add up to 3 media items (1 video and \(getImageLimit()) images).")
-//            return
-//        }
-//        // Warna permission check karke image/video select karne dena hai
-//        checkCameraPermission { [weak self] granted in
-//            guard let self = self else { return }
-//            if granted {
-//                self.selectImages()
-//            }
-//        }
-//    }
-    
+ 
     @IBAction func selectDocPhotos(_ sender: UIButton) {
             let imageLimit = Int("\(AddPCategoryData?.businessImgLimit ?? "0")") ?? 0
             let videoLimit = Int("\(AddPCategoryData?.businessVideoLimit ?? "0")") ?? 0
@@ -1076,41 +1001,62 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     @IBAction func actionopenOnAllDay(_ sender: UIButton) {
         viewWeekly.isHidden = true
         viewWeeklyOfHeight.constant = 0 // Reset height to 0
-        updateSelection(selectedButton: btnOpenOnAllDay, allButtons: [btnOpenOnAllDay, btnSelectWeekyOf])
+        
+        // ✅ Update selection
+        updateSelection(selectedButton: btnOpenOnAllDay,
+                        allButtons: [btnOpenOnAllDay, btnSelectWeekyOf])
+        
+        // ✅ State update karo
+        btnOpenOnAllDay.isSelected = true
+        btnSelectWeekyOf.isSelected = false
     }
-    
+
     @IBAction func actionSelectWeekyOf(_ sender: UIButton) {
         viewWeekly.isHidden = false
-        updateSelection(selectedButton: btnSelectWeekyOf, allButtons: [btnOpenOnAllDay, btnSelectWeekyOf])
         
-        updateViewHeight() // Call function to update height dynamically
+        // ✅ Update selection
+        updateSelection(selectedButton: btnSelectWeekyOf,
+                        allButtons: [btnOpenOnAllDay, btnSelectWeekyOf])
+        
+        // ✅ State update karo
+        btnSelectWeekyOf.isSelected = true
+        btnOpenOnAllDay.isSelected = false
+        
+        updateViewHeight()
+        openWeekDaysPopup()
     }
-    
-    
+
     func updateViewHeight() {
-        let maxWidth = lblSelectWeeklyOfDay.frame.width  // Label ke width ko lein
-        let newSize = lblSelectWeeklyOfDay.sizeThatFits(CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude)) // Required height calculate karein
+        let maxWidth = lblSelectWeeklyOfDay.frame.width
+        let newSize = lblSelectWeeklyOfDay.sizeThatFits(
+            CGSize(width: maxWidth, height: CGFloat.greatestFiniteMagnitude)
+        )
         
-        let newHeight = newSize.height + 20 // Extra padding ke liye 20 add karein
-        
-        viewWeeklyOfHeight.constant = newHeight // UIView ki height update karein
-        
+        let newHeight = newSize.height + 20
+        viewWeeklyOfHeight.constant = newHeight
     }
+
     func updateSelection(selectedButton: UIButton, allButtons: [UIButton]) {
-        let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular) // Set the same size for all buttons
+        let config = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
         let selectedImage = UIImage(systemName: "largecircle.fill.circle", withConfiguration: config)?.withRenderingMode(.alwaysTemplate)
         let unselectedImage = UIImage(systemName: "circle", withConfiguration: config)?.withRenderingMode(.alwaysTemplate)
         
         for button in allButtons {
             if button == selectedButton {
                 button.setImage(selectedImage, for: .normal)
-                button.tintColor = UIColor(red: 0, green: 100/255.0, blue: 0, alpha: 1) // Dark green for selected
+                button.setImage(selectedImage, for: .selected) // ✅ add this
+                button.tintColor = UIColor(red: 0, green: 100/255.0, blue: 0, alpha: 1)
+                button.isSelected = true
             } else {
                 button.setImage(unselectedImage, for: .normal)
-                button.tintColor = .darkGray // Black for unselected
+                button.setImage(unselectedImage, for: .selected) // ✅ add this
+                button.tintColor = .darkGray
+                button.isSelected = false
             }
         }
     }
+
+
     
     
     
@@ -1173,21 +1119,21 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
     
     func callCatBussinessWebService() {
         let dictParams: Dictionary<String, Any> = ["":""]
-        WebService.sharedInstance.callCatBussinessWebService(withParams: dictParams) { data in
-            self.AddPCategoryData = data
-            UserDefaults.standard.set(self.AddPCategoryData?.nbdata.first?.id, forKey: "id")
-            UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
-            
-            // ✅ Save image and video limits here
-            
-            UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
-            UserDefaults.standard.set(self.AddPCategoryData?.businessVideoSize, forKey: "videoLimit")
-            
-            for value in self.AddPCategoryData?.nbdata ?? [] {
-                self.serviceName.append(value.businessTitle ?? "")
-            }
-            
-        }
+//        WebService.sharedInstance.callCatBussinessWebService(withParams: dictParams) { data in
+//            self.AddPCategoryData = data
+//            UserDefaults.standard.set(self.AddPCategoryData?.nbdata.first?.id, forKey: "id")
+//            UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
+//            
+//            // ✅ Save image and video limits here
+//            
+//            UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
+//            UserDefaults.standard.set(self.AddPCategoryData?.businessVideoSize, forKey: "videoLimit")
+//            
+//            for value in self.AddPCategoryData?.nbdata ?? [] {
+//                self.serviceName.append(value.businessTitle ?? "")
+//            }
+//            
+//        }
     }
     
     
@@ -1286,10 +1232,60 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
 
         // ✅ Category
         guard let category = tfCategory.text?.trimmingCharacters(in: .whitespacesAndNewlines), !category.isEmpty else {
-            showValidationError("Please enter Category")
+            showValidationError("Please select Category")
             return
         }
 
+        // ✅ Description
+        let description = tvDescribe.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if description.isEmpty || description == "Describe your business" {
+            showValidationError("Please enter Description")
+            return
+        }
+        
+        // ✅ Start Time
+        guard let startTime = lblStartTime.text?.trimmingCharacters(in: .whitespacesAndNewlines), !startTime.isEmpty else {
+            showValidationError("Please select Start Time")
+            return
+        }
+
+        // ✅ End Time
+        guard let endTime = lblEndTime.text?.trimmingCharacters(in: .whitespacesAndNewlines), !endTime.isEmpty else {
+            showValidationError("Please select End Time")
+            return
+        }
+       
+        
+        // ✅ Weekly Off Day
+//        let weekoff = lblSelectWeeklyOfDay.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+//        if weekoff.isEmpty || weekoff == "Select day" {
+//            showValidationError("Please select a your weekly off days")
+//            return
+//        }
+
+        // ✅ Weekly Off & Open On All Day Validation
+        let weekoff = lblSelectWeeklyOfDay.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let isOpenOnAllDaySelected = btnOpenOnAllDay.isSelected
+        let isWeeklyOffSelected = btnSelectWeekyOf.isSelected
+
+        if isOpenOnAllDaySelected {
+            // ✅ Agar "Open On All Day" select hai → validation skip
+        } else if isWeeklyOffSelected {
+            if weekoff.isEmpty || weekoff == "Select day" {
+                showValidationError("Please select your weekly off days")
+                return
+            }
+        } else {
+            // ✅ Agar dono select nahi kiye → error
+            showValidationError("Please select either Weekly Off day or Open On All Day")
+            return
+        }
+
+
+       
+
+
+        
         // ✅ Address Line 1
         guard let add1 = tfAdd1.text?.trimmingCharacters(in: .whitespacesAndNewlines), !add1.isEmpty else {
             showValidationError("Please enter Address Line 1")
@@ -1302,25 +1298,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
             return
         }
 
-        // ✅ Start Time
-        guard let startTime = lblStartTime.text?.trimmingCharacters(in: .whitespacesAndNewlines), !startTime.isEmpty else {
-            showValidationError("Please select Start Time")
-            return
-        }
-
-        // ✅ End Time
-        guard let endTime = lblEndTime.text?.trimmingCharacters(in: .whitespacesAndNewlines), !endTime.isEmpty else {
-            showValidationError("Please select End Time")
-            return
-        }
-
-        // ✅ Description
-        let description = tvDescribe.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        if description.isEmpty || description == "Describe your business" {
-            showValidationError("Please enter a valid Description")
-            return
-        }
-
+       
         // ✅ Inappropriate Content Check
         if containsBadWords(description) {
             showValidationError("""
@@ -1331,27 +1309,8 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
             return
         }
 
-        // ✅ Weekly Off Day
-//        let weekoff = lblSelectWeeklyOfDay.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-//        if weekoff.isEmpty || weekoff == "Select day" {
-//            showValidationError("Please select a weekly off day")
-//            return
-//        }
+       
 
-        // ✅ Everything is validated, call API now
-//        callCreateBussinessWebService {
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-//                loader.stopAnimating()
-//                loader.removeFromSuperview()
-//                sender.isEnabled = true
-//
-//                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "BussinesViewController") as? BussinesViewController else { return }
-//                vc.sourceViewControlleraddbuss = "AddBussiness"
-//                vc.Newid = UserDefaults.standard.string(forKey: "userid") ?? ""
-//                self.navigationController?.pushViewController(vc, animated: true)
-//            }
-//        }
-        
         callCreateBussinessWebService {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 loader.stopAnimating()
@@ -1376,20 +1335,27 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         }
 
 
-
         // ✅ Helper to handle loader + alert
         func showValidationError(_ message: String) {
             loader.stopAnimating()
             loader.removeFromSuperview()
             sender.isEnabled = true
-            showAlert(message: message)
+            
+            let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+            
+            // Custom font
+            let font = UIFont(name: "Montserrat-Regular", size: 15)!
+            let attributedMessage = NSAttributedString(string: message, attributes: [
+                .font: font
+            ])
+            alert.setValue(attributedMessage, forKey: "attributedMessage")
+            
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            self.present(alert, animated: true)
         }
     }
 
-    
-    
-    
-    
+        
     
     func callUserProfileWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -1423,19 +1389,18 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         }
         
         // Call the web service
-        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-            
-            // Save data to UserDefaults based on source
-            if self.sourceViewController == "MessageViewController" {
-                UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
-            } else {
-                UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
-                UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
-            }
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+//            self.profileData = data
+//            // Save data to UserDefaults based on source
+//            if self.sourceViewController == "MessageViewController" {
+//                UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
+//            } else {
+//                UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
+//                UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
+//            }
+//            
+//            completionClosure()
+//        }
     }
     
     
@@ -1443,55 +1408,53 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         let id = UserDefaults.standard.string(forKey: "userid") ?? ""
         let idcategory = UserDefaults.standard.string(forKey: "idCategory") ?? ""
 
-        var dictParams: [String: Any] = [
-            "userid": id,
-            "businessname": tfBussinessName.text ?? "",
-            "tagline": tfTag.text ?? "",
-            "cat": idcategory,
-            "description": tvDescribe.text ?? "",
-            "opentime": lblStartTime.text ?? "",
-            "closetime": lblEndTime.text ?? "",
-            "weekoff": lblSelectWeeklyOfDay.text ?? "",
-            "address1": tfAdd1.text ?? "",
-            "address2": tfAdd2.text ?? "",
-            "pin": lblPinCode.text ?? "",
-            "web": tfWeb.text ?? "",
-            "email": tfEmail.text ?? "",
-            "mobile": tfMob.text ?? "",
-            "telephone": tfTel.text ?? ""
-        ]
-
-        // ✅ Only add doctype if it's not nil or empty
-        if let docType = docType, !docType.isEmpty {
-            dictParams["doctype"] = docType
-        }
-
-        print("📤 Params:", dictParams)
-
-        // ✅ Make sure URL is properly formatted
-        var urlString = kBASEURL + WebServiceName.kCreateBussines
-        if !urlString.contains("?") {
-            urlString += "?flag=newcreatebusiness"
-        } else {
-            urlString += "&flag=newcreatebusiness"
-        }
-
-        // ✅ Upload logic
-        if !imageArray.isEmpty || !videoArray.isEmpty || selectedPDFURL != nil {
-            callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: selectedPDFURL, mediaKey: "image[]", URlName: urlString) {
-                print("✅ Upload with media done")
-                completionClosure()
-            }
-        } else {
-            callsendMediaAPI(param: dictParams, images: [], videos: [], pdfURL: nil, mediaKey: "image[]", URlName: urlString) {
-                print("✅ Upload without media done")
-                completionClosure()
-            }
-        }
+//        var dictParams: [String: Any] = [
+//            "userid": id,
+//            "businessname": tfBussinessName.text ?? "",
+//            "tagline": tfTag.text ?? "",
+//            "cat": idcategory,
+//            "description": tvDescribe.text ?? "",
+//            "opentime": lblStartTime.text ?? "",
+//            "closetime": lblEndTime.text ?? "",
+//            "weekoff": lblSelectWeeklyOfDay.text ?? "",
+//            "address1": tfAdd1.text ?? "",
+//            "address2": tfAdd2.text ?? "",
+//            "pin": lblPinCode.text ?? "",
+//            "web": tfWeb.text ?? "",
+//            "email": tfEmail.text ?? "",
+//            "mobile": tfMob.text ?? "",
+//            "telephone": tfTel.text ?? ""
+//        ]
+//
+//        // ✅ Only add doctype if it's not nil or empty
+//        if let docType = docType, !docType.isEmpty {
+//            dictParams["doctype"] = docType
+//        }
+//
+//        print("📤 Params:", dictParams)
+//
+//        // ✅ Make sure URL is properly formatted
+//        var urlString = kBASEURL + WebServiceName.kCreateBussines
+//        if !urlString.contains("?") {
+//            urlString += "?flag=newcreatebusiness"
+//        } else {
+//            urlString += "&flag=newcreatebusiness"
+//        }
+//
+//        // ✅ Upload logic
+//        if !imageArray.isEmpty || !videoArray.isEmpty || selectedPDFURL != nil {
+//            callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: selectedPDFURL, mediaKey: "image[]", URlName: urlString) {
+//                print("✅ Upload with media done")
+//                completionClosure()
+//            }
+//        } else {
+//            callsendMediaAPI(param: dictParams, images: [], videos: [], pdfURL: nil, mediaKey: "image[]", URlName: urlString) {
+//                print("✅ Upload without media done")
+//                completionClosure()
+//            }
+//        }
     }
 
-
-    
     
     
     
@@ -1539,11 +1502,8 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
                           mediaKey: String,
                           URlName: String,
                           withblock: @escaping () -> Void) {
-
         let headers: HTTPHeaders = ["Content-type": "multipart/form-data"]
-
         AF.upload(multipartFormData: { multipartFormData in
-
             // ✅ Append only non-empty string parameters
             for (key, value) in param {
                 if let valueString = value as? String, !valueString.isEmpty {
@@ -1552,7 +1512,6 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
                     }
                 }
             }
-
             // ✅ Append images
             for img in images {
                 if let imgData = img.jpegData(compressionQuality: 0.7) {

@@ -50,7 +50,10 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
     @IBOutlet weak var gmailContainerHeight: NSLayoutConstraint!
     @IBOutlet weak var phoneContainerHeight: NSLayoutConstraint!
 
+    @IBOutlet weak var docTypeEye: UIImageView!
+    @IBOutlet weak var btnViewDoc: UIButton!
     
+    @IBOutlet weak var messageReviewViewHeight: NSLayoutConstraint!
     
     var bussData = [ImageBussi]()
     var thisWidth:CGFloat = 0
@@ -203,7 +206,7 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
             self.lblWeek.font = UIFont(name: "Montserrat-Regular", size: 15)
             self.CategoryLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
             // self.LblUploadDoc.font = UIFont(name: "Montserrat-Regular", size: 15)
-            self.BussinessLbl.font = UIFont(name: "Montserrat-SemiBold", size: 15)
+            self.BussinessLbl.font = UIFont(name: "Montserrat-SemiBold", size: 18)
             self.RatingLbl.font = UIFont(name: "Montserrat-SemiBold", size: 14)
             self.ReviewLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
             self.ReviewText.font = UIFont(name: "Montserrat-Regular", size: 12)
@@ -276,10 +279,26 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
         }
     }
     
+    // MARK: - height for textview height auto fill
+    
     func textViewDidChange(_ textView: UITextView) {
-        // Show or hide placeholder label based on text view content
+        // Content ka size nikalna
+        let fixedWidth = textView.frame.width
+        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
+        
+        // ✅ Minimum height = 60, Maximum height = 200
+        let newHeight = min(max(newSize.height, 60), 200)
+        messageReviewViewHeight.constant = newHeight
+        
+        // ✅ Placeholder hide/show
         placeholderLabel.isHidden = !textView.text.isEmpty
+        
+        // Layout update
+        view.layoutIfNeeded()
     }
+
+
+    
     
     func scrollToBottom() {
         let bottomOffset = CGPoint(x: 0, y: scrollView.contentSize.height - scrollView.bounds.height + scrollView.contentInset.bottom)
@@ -295,35 +314,35 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
         
         ActivityIndicatorManager.shared.start(in: self.view)
 
-        WebService.sharedInstance.callBussinesReviewDetailPostWebService(withParams: dictParams) { data in
-            DispatchQueue.main.async {
-                ActivityIndicatorManager.shared.stop()
-                
-                // ✅ Check if reviews exist
-                guard let reviews = data.listdata, !reviews.isEmpty else {
-                    self.showAutoDismissAlert(message: "No reviews yet.")
-                    return
-                }
-                
-                // ✅ Reviews exist, open the popup
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "BusinessReviwDetailViewController") as? BusinessReviwDetailViewController else { return }
-                
-                vc.business_id = self.business_id
-                vc.height = 200
-                vc.topCornerRadius = 10.0
-                vc.presentDuration = 0.5
-                vc.dismissDuration = 0.5
-                vc.view.backgroundColor = .white
-                vc.callback = { [weak self] in
-                    guard let self = self else { return }
-                    print("🟢 Review deleted, reloading business details...")
-                    self.callBussinesDetailPostWebService {
-                        self.updateBusinessDetailUI()
-                    }
-                }
-                self.present(vc, animated: true, completion: nil)
-            }
-        }
+//        WebService.sharedInstance.callBussinesReviewDetailPostWebService(withParams: dictParams) { data in
+//            DispatchQueue.main.async {
+//                ActivityIndicatorManager.shared.stop()
+//                
+//                // ✅ Check if reviews exist
+//                guard let reviews = data.listdata, !reviews.isEmpty else {
+//                    self.showAutoDismissAlert(message: "No reviews yet.")
+//                    return
+//                }
+//                
+//                // ✅ Reviews exist, open the popup
+//                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "BusinessReviwDetailViewController") as? BusinessReviwDetailViewController else { return }
+//                
+//                vc.business_id = self.business_id
+//                vc.height = 200
+//                vc.topCornerRadius = 10.0
+//                vc.presentDuration = 0.5
+//                vc.dismissDuration = 0.5
+//                vc.view.backgroundColor = .white
+//                vc.callback = { [weak self] in
+//                    guard let self = self else { return }
+//                    print("🟢 Review deleted, reloading business details...")
+//                    self.callBussinesDetailPostWebService {
+//                        self.updateBusinessDetailUI()
+//                    }
+//                }
+//                self.present(vc, animated: true, completion: nil)
+//            }
+//        }
     }
 
     
@@ -368,13 +387,6 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
     }
 
 
-
-        @IBAction func btnViewdocHideden(_ : UIButton){
-        
-        
-        
-    }
-    
     @IBAction func btRating(_ : UIButton){
         let vc = storyboard?.instantiateViewController(withIdentifier:"BusinessRatingViewController")as! BusinessRatingViewController
         vc.modalPresentationStyle = .overFullScreen
@@ -535,11 +547,6 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
         }
     }
     
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        thisWidth = CGFloat(self.collectionViewEvent.width) / 1
-//        return CGSize(width: thisWidth, height: 500)
-//    }
-    
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         guard let images = BussinessDetailData?.image, indexPath.row < images.count else {
@@ -571,27 +578,27 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
         let dictParams: Dictionary<String, Any> = [
             "userid":id ?? "" ,
             "business_id":business_id ?? "",]
-        WebService.sharedInstance.callBussinesDetailPostWebService(withParams: dictParams) { data in
-            self.BussinessDetailData = data
-            if id == self.BussinessDetailData?.userid {
-                self.btnEdit.isHidden = false
-                self.btnDelete.isHidden = false
-            } else {
-                self.btnEdit.isHidden = true
-                self.btnDelete.isHidden = true
-            }
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            
-            //  let url = URL(string: (imgData[indexPath.row].img ?? ""))
-            //   UserDefaults.standard.set(self.imgData[IndexPath.row].postid, forKey: "postid")
-            UserDefaults.standard.set(self.BussinessDetailData?.userid, forKey: "useidProfile")
-            UserDefaults.standard.set(self.BussinessDetailData?.id, forKey: "Businessid")
-            UserDefaults.standard.set(self.BussinessDetailData?.image?.first?.img, forKey: "Businessfirstimg")
-            // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
-            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callBussinesDetailPostWebService(withParams: dictParams) { data in
+//            self.BussinessDetailData = data
+//            if id == self.BussinessDetailData?.userid {
+//                self.btnEdit.isHidden = false
+//                self.btnDelete.isHidden = false
+//            } else {
+//                self.btnEdit.isHidden = true
+//                self.btnDelete.isHidden = true
+//            }
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//            
+//            //  let url = URL(string: (imgData[indexPath.row].img ?? ""))
+//            //   UserDefaults.standard.set(self.imgData[IndexPath.row].postid, forKey: "postid")
+//            UserDefaults.standard.set(self.BussinessDetailData?.userid, forKey: "useidProfile")
+//            UserDefaults.standard.set(self.BussinessDetailData?.id, forKey: "Businessid")
+//            UserDefaults.standard.set(self.BussinessDetailData?.image?.first?.img, forKey: "Businessfirstimg")
+//            // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
+//            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//            
+//            completionClosure()
+//        }
     }
     
     
@@ -603,12 +610,12 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
             "business_id":business_id ?? "",
             "review": self.tvmessage.text ?? "",
         ]
-        WebService.sharedInstance.callReviewCommentWebService(withParams: dictParams) { data in
-            self.ReviewCommentData = data
-           
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callReviewCommentWebService(withParams: dictParams) { data in
+//            self.ReviewCommentData = data
+//           
+//            
+//            completionClosure()
+//        }
     }
     
     func callDeleteBusinessWebService(_ completionClosure: @escaping () -> ()) {
@@ -620,12 +627,12 @@ class BusinessDetailsViewController: BaseViewController,UICollectionViewDelegate
             "businessid": business_id ?? "",
             
         ]
-        WebService.sharedInstance.callDeleteBusinessWebService(withParams: dictParams) { data in
-            //   self.GrouDeleteData = data
-            
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callDeleteBusinessWebService(withParams: dictParams) { data in
+//            //   self.GrouDeleteData = data
+//            
+//            
+//            completionClosure()
+//        }
     }
     
     

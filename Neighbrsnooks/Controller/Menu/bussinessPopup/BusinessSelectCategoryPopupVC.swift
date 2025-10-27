@@ -79,21 +79,21 @@ class BusinessSelectCategoryPopupVC: UIViewController, UITableViewDataSource, UI
     func callCatBussinessWebService() {
         let dictParams: Dictionary<String, Any> = ["":""]
         
-        WebService.sharedInstance.callCatBussinessWebService(withParams: dictParams) { data in
-            self.AddPCategoryData = data
-            UserDefaults.standard.set(self.AddPCategoryData?.nbdata.first?.id, forKey: "id")
-            UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
-            
-            self.serviceName.removeAll()
-            for value in self.AddPCategoryData?.nbdata ?? [] {
-                self.serviceName.append(value.businessTitle)
-            }
-            
-            // ✅ Ensure UI update happens on the main thread
-            DispatchQueue.main.async {
-                self.tblSelectCategory.reloadData() // 🔥 FIX: Data reload karna zaroori hai
-            }
-        }
+//        WebService.sharedInstance.callCatBussinessWebService(withParams: dictParams) { data in
+//            self.AddPCategoryData = data
+//            UserDefaults.standard.set(self.AddPCategoryData?.nbdata.first?.id, forKey: "id")
+//            UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
+//            
+//            self.serviceName.removeAll()
+//            for value in self.AddPCategoryData?.nbdata ?? [] {
+//                self.serviceName.append(value.businessTitle)
+//            }
+//            
+//            // ✅ Ensure UI update happens on the main thread
+//            DispatchQueue.main.async {
+//                self.tblSelectCategory.reloadData() // 🔥 FIX: Data reload karna zaroori hai
+//            }
+//        }
     }
 
     

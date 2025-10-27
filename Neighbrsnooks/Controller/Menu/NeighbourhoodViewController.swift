@@ -54,8 +54,8 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         super.viewDidLoad()
         //        updateColors()
         collectionViewDirectory.isScrollEnabled = false
-
         self.EventsLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
+        self.LblMemberText.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.lblTotalMember.font = UIFont(name: "Montserrat-Regular", size: 13)
         self.PollLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
         self.BusinessLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
@@ -69,6 +69,12 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         self.MyNearByLbl.font  = UIFont(name: "Montserrat-Regular", size: 20)
         self.LblMyNeighbrhoods.font  = UIFont(name: "Montserrat-Regular", size: 20)
         defaultTextColor = lblMember.textColor
+        self.LblMemberText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblGroupsText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblEventText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblPollText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblBussinessText.font = UIFont(name: "Montserrat-Regular", size: 17)
+        self.LblPostText.font = UIFont(name: "Montserrat-Regular", size: 17)
         
     }
     
@@ -473,8 +479,8 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
         if neighbrhoodData?.verfiedMsg == "User Verification is completed!" {
             // Save selectedNeighborhoodId to UserDefaults
             UserDefaults.standard.set(idNeighbour, forKey: "neighbrshood")
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: "PostViewController") as! PostViewController
-            vc.selectedNeighborhoodId = self.idNeighbour
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "MennuPostViewController") as! MennuPostViewController
+           
             self.navigationController?.pushViewController(vc, animated: true)
         } else {
             let alert = UIAlertController(title: "", message: nil, preferredStyle: .alert)
@@ -731,25 +737,25 @@ class NeighbourhoodViewController: BaseViewController,UICollectionViewDelegate, 
             "neighbrhood": idNeighbour ?? ""
         ]
         
-        WebService.sharedInstance.callMyNeighbrhoodWebService(withParams: dictParams) { data in
-            self.neighbrhoodData = data
-            
-            UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.name, forKey: "name")
-            UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.status, forKey: "status")
-            
-            DispatchQueue.main.async {
-                self.collectionViewDirectory.reloadData()
-                
-                // Ensure height updates after reload
-                DispatchQueue.main.async {
-                    self.updateCollectionViewHeight()
-                }
-                
-                // Agar koi extra UI updates hai to yaha kar sakte ho
-            }
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callMyNeighbrhoodWebService(withParams: dictParams) { data in
+//            self.neighbrhoodData = data
+//            
+//            UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.name, forKey: "name")
+//            UserDefaults.standard.set(self.neighbrhoodData?.nearestNeighbrhood.first?.status, forKey: "status")
+//            
+//            DispatchQueue.main.async {
+//                self.collectionViewDirectory.reloadData()
+//                
+//                // Ensure height updates after reload
+//                DispatchQueue.main.async {
+//                    self.updateCollectionViewHeight()
+//                }
+//                
+//                // Agar koi extra UI updates hai to yaha kar sakte ho
+//            }
+//            
+//            completionClosure()
+//        }
     }
 
     

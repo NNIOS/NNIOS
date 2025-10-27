@@ -113,9 +113,9 @@ class BusinessRatingViewController: UIViewController {
             "rateno":  rating
             
         ]
-        WebService.sharedInstance.callRatingBusinessWebService(withParams: dictParams) { data in
-            self.BusinessRatingtData = data
-            completionClosure()
-        }
+//        WebService.sharedInstance.callRatingBusinessWebService(withParams: dictParams) { data in
+//            self.BusinessRatingtData = data
+//            completionClosure()
+//        }
     }
 }

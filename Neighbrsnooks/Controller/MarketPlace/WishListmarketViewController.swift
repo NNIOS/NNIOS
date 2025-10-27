@@ -7,175 +7,130 @@
 
 import UIKit
 @available(iOS 16.0, *)
-class WishListmarketViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,UICollectionViewDataSource {
+class WishListmarketViewController: BaseViewController {
     
     @IBOutlet weak var lblHeading: UILabel!
     @IBOutlet weak var collectionViewMyEvent: UICollectionView!
-    var WishListListData : WishlistModel?
-
+    
+    var wishListViewModel = WishListViewModel()
+    var objWishListData:WishListResponse?
+    var decryptWishList:DecryptWishlistResponse?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+            setupUI()
+        if Reach().isInternet() {
+            callwishListApi()
+        } else {
+            AlertViewManager.shared.alertMessage(title: "Neighbrsnook", message: AlertMessages.NoInternetConnection, controller: self)
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if Reach().isInternet() {
+            callwishListApi()
+        } else {
+            AlertViewManager.shared.alertMessage(title: "Neighbrsnook", message: AlertMessages.NoInternetConnection, controller: self)
+        }
+    }
+    
+    func setupUI() {
         lblHeading.text = "Wish List"
         collectionViewMyEvent.delegate = self
         collectionViewMyEvent.dataSource = self
-        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 17)
-        
-        DispatchQueue.main.async {
-            self.callMarketWishlistWebService {
-                // This ensures collection view is updated on main thread
-                DispatchQueue.main.async {
-                    self.collectionViewMyEvent.reloadData()
-                }
-            }
-        }
+        self.lblHeading.font = UIFont(name: "Montserrat-Regular", size: 18)
     }
     
-
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//
-//        callMarketWishlistWebService{}
-//
-//
-//    }
-    
     @IBAction func BackButtionAction(_ : UIButton){
-        
-        _ = navigationController?.popViewController(animated: true)
-        
+        self.navigationController?.popViewController(animated: true)
     }
     
     @IBAction func btnCreateMarketAction(_ sender: UIButton) {
-            guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "CreateMarketViewController") as? CreateMarketViewController else {return}
-            self.navigationController?.pushViewController(vc, animated: true)
-            print("Abdul Aleem Usmani")
+        guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "CreateMarketViewController") as? CreateMarketViewController else {return}
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+}
+
+extension WishListmarketViewController {
+    func callwishListApi() {
+        wishListViewModel.fetchWishListData() { [weak self] wishListResponse in
+            guard let self = self else { return }
+            if let wishListProduct = wishListResponse {
+                let encryptedString = wishListProduct.data
+                self.objWishListData?.data = encryptedString
+                print("Encrypted WishList Data is :\(encryptedString)")
+                DispatchQueue.main.async {
+                    self.decryptWishListApi(encryptedString: encryptedString)
+                }
+            }
         }
+    }
     
+    func decryptWishListApi(encryptedString: String) {
+        wishListViewModel.decryptWishListData(encryptedString: encryptedString) { [weak self] decryptedResponse in
+            guard let self = self else { return }
+            if let decryptedData = decryptedResponse {
+                DispatchQueue.main.async {
+                    self.decryptWishList = decryptedData
+                    self.collectionViewMyEvent.reloadData()
+                    print("Decrypted WishList Data is: \(decryptedData)")
+                }
+            } else {
+                print("❌ Failed to decrypt poll list data")
+            }
+        }
+    }
+}
+
+
+extension WishListmarketViewController: UICollectionViewDelegate,UICollectionViewDelegateFlowLayout,UICollectionViewDataSource{
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return WishListListData?.wishlist?.count ?? 0
-       
-        
-        
+        return decryptWishList?.data.data.Auth_Wishlist.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-            
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyItemCollectionViewCell", for: indexPath) as! MyItemCollectionViewCell
-            
-            cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
-            cell.viewItems.layer.shadowOpacity = 0.5
-            cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
-            cell.viewItems.layer.shadowRadius = 5
-            cell.viewItems.layer.masksToBounds = false
-            cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-            cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-            cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-            cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
-            cell.EventLbl.text = WishListListData?.wishlist?[indexPath.row].pTitle
-            if let priceString = WishListListData?.wishlist?[indexPath.row].salePrice,
-               let price = Double(priceString) {
-                if price == 0.0 {
-                    cell.rsLbl.text = "Free"
-                    cell.lblSellDonate.text = "GIVEN"
-                } else {
-                    cell.rsLbl.text = "Rs. \(Int(price))"
-                    cell.lblSellDonate.text = "SOLD"
-                }
-                
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyItemCollectionViewCell", for: indexPath) as! MyItemCollectionViewCell
+        let item = decryptWishList?.data.data.Auth_Wishlist[indexPath.row]
+        cell.viewItems.layer.applyShadow(color: .gray,  alpha: 0.5,x: 0, y: 0, blur: 10, spread: 0, cornerRadius: 2)
+        cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+        cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+        cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
+        cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
+        cell.EventLbl.text = item?.p_title
+        cell.EventLbl.numberOfLines = 1
+        if let priceString = item?.sale_price,
+           let priceDouble = Double(priceString) {
+            if priceDouble == 0 {
+                cell.rsLbl.text = "Free"
+                cell.lblSellDonate.text = "GIVEN"
             } else {
-                cell.rsLbl.text = "Rs. 0"
+                cell.rsLbl.text = "Rs. \(formatPrice(priceDouble))"
+                cell.lblSellDonate.text = "SOLD"
             }
-            
-            cell.secttLbl.text = WishListListData?.wishlist?[indexPath.row].neighborhoodName
-            if WishListListData?.wishlist?[indexPath.row].pStatus == 2 /*|| WishListListData?.wishlist?[indexPath.row].saleType == "Donate"*/{
-                cell.lblSellDonate.isHidden = false
-            } else {
-                cell.lblSellDonate.isHidden = true
-            }
-            let url = URL(string: (WishListListData?.wishlist?[indexPath.row].pImages ?? ""))
-            cell.profileImgView.kf.indicatorType = .activity
-            cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-            
-            cell.DetailCallback = { [self] value in
-                
-                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
-               // vc.idD = (MarketWallData?.yourItems?[indexPath.row].id)!
-                vc.idD = String(WishListListData?.wishlist?[indexPath.row].productID ?? 0)
-             
-                self.navigationController?.pushViewController(vc, animated: true)
-                
-                
-
-            }
-    //
-            return cell
+        } else {
+            cell.rsLbl.text = "Rs. 0"
         }
+        
+        if item?.p_status == false {
+            cell.lblSellDonate.isHidden = false
+        } else {
+            cell.lblSellDonate.isHidden = true
+        }
+        cell.DayLbl.text = item?.created_time
+        ImageLoader.shared.setImage(on: cell.profileImgView, urlString: item?.p_images ?? "", placeholder: "MarketDefault")
+        cell.secttLbl.text = item?.neighborhood_name
+        cell.DetailCallback = { [self] value in
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
+            vc.jMarketId = item?.id ?? 0
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        return cell
+    }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-    let width = collectionViewMyEvent.frame.width / 2 - 5
-       let height = width - 20
+        let width = collectionViewMyEvent.frame.width / 2 - 5
+        let height = CGFloat(152)
         return CGSize(width: width , height: height)
-    
     }
-    
-    //dev.
-    func callMarketWishlistWebService(completion: @escaping () -> Void) {
-        
-        guard let id = UserDefaults.standard.string(forKey: "userid"), !id.isEmpty else {
-                print("Product ID is not available")
-                return
-            }
-       // let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let url = "https://dev.neighbrsnook.com/admin/api/wishlist/\(id)"
-
-        
-       
-        // let dictParams: Dictionary<String, Any> = ["":""]
-       
-       
-        let dictParams: Dictionary<String, Any> = ["":""]
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                
-                do {
-                    let data = try JSONDecoder().decode(WishlistModel.self, from: result!)
-                    self.WishListListData = data
-                 //   UserDefaults.standard.set(self.MarketWDetailData?.productdetail?.first?.id, forKey: "CrId")
-                    self.collectionViewMyEvent.reloadData()
-                    
-                    DispatchQueue.global().async {
-                        // Simulate network delay
-                        sleep(2)
-                        
-                        // Update MarketWDetailData with fetched data
-                        // Example data assignment
-                        self.WishListListData = data // Your actual data fetching logic
-                       // self.collectionViewMyEvent.reloadData()
-                        DispatchQueue.main.async {
-                            self.collectionViewMyEvent.reloadData()
-                            completion() // Call completion handler
-                        }
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(WishlistModel.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
-            }
-        }
-    }
-
 }

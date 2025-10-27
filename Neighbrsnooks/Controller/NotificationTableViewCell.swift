@@ -46,7 +46,7 @@ class NotificationTableViewCell: UITableViewCell {
     
     override func layoutSubviews() {
            super.layoutSubviews()
-           viewNotification.roundCorners([.topLeft, .bottomLeft], radius: 25)
+//           viewNotification.roundCorners([.topLeft, .bottomLeft], radius: 25)
        }
     
     

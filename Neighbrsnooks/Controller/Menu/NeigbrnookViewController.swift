@@ -122,15 +122,17 @@ class NeigbrnookViewController:UITabBarController,UITabBarControllerDelegate, UI
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         // Check if verification is completed
-        
-        if profileData?.verfiedMsg == "User Verification is completed!" {
-            return true // Allow navigation
-        } else {
-            
-            showVerificationAlert()
-            return false // Prevent navigation
-        }
+//        
+//        if profileData?.verfiedMsg == "User Verification is completed!" {
+//            return true // Allow navigation
+//        } else {
+//            
+//            showVerificationAlert()
+//            return false // Prevent navigation
+//        }
+        return true
     }
+    
     
     
     func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
@@ -214,15 +216,15 @@ class NeigbrnookViewController:UITabBarController,UITabBarControllerDelegate, UI
             
             
         ]
-        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-            UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
-            UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
-            UserDefaults.standard.set(self.profileData?.lastname, forKey: "lastName")
-            UserDefaults.standard.set(self.profileData?.neighborhood, forKey: "myNeighbhrhhod")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+//            self.profileData = data
+//            UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
+//            UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
+//            UserDefaults.standard.set(self.profileData?.lastname, forKey: "lastName")
+//            UserDefaults.standard.set(self.profileData?.neighborhood, forKey: "myNeighbhrhhod")
+//            
+//            completionClosure()
+//        }
     }
     
     
@@ -235,12 +237,12 @@ class NeigbrnookViewController:UITabBarController,UITabBarControllerDelegate, UI
             "userid":id ?? "",
  
         ]
-        WebService.sharedInstance.callNotificationCountWebService(withParams: dictParams) { data in
-            self.NotificationCountData = data
-            
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callNotificationCountWebService(withParams: dictParams) { data in
+//            self.NotificationCountData = data
+//            
+//            
+//            completionClosure()
+//        }
     }
     
     

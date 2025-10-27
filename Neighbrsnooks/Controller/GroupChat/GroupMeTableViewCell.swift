@@ -34,7 +34,7 @@ class GroupMeTableViewCell: UITableViewCell {
 
         contentView.addSubview(messageBackgroundView)
         messageBackgroundView.translatesAutoresizingMaskIntoConstraints = false
-        messageBackgroundView.backgroundColor = UIColor(hex: "#e6e3d3")
+        messageBackgroundView.backgroundColor = UIColor(hexString: "#e6e3d3")
         messageBackgroundView.layer.cornerRadius = 12
         messageBackgroundView.clipsToBounds = true
 

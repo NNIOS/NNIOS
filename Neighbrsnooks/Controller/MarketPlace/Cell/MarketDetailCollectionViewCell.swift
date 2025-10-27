@@ -13,58 +13,53 @@ import Kingfisher
 
 class MarketDetailCollectionViewCell: UICollectionViewCell {
     @IBOutlet weak var profileImgView: UIImageView!
-       @IBOutlet weak var numberLabel: UILabel!
-       @IBOutlet weak var totalImagesLabel: UILabel!
-       @IBOutlet weak var pauseButton: UIButton!
-       @IBOutlet weak var muteButton: UIButton!
-
-       var player: AVPlayer?
-       var playerLayer: AVPlayerLayer?
-
-       override func prepareForReuse() {
-           super.prepareForReuse()
-           // Reset state
-           profileImgView.image = nil
-           player?.pause()
-           playerLayer?.removeFromSuperlayer()
-           player = nil
-           playerLayer = nil
-           muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
-       }
-
-    func configure(with postImage: ProductImage) {
-        if let imageUrl = postImage.img {
+    @IBOutlet weak var numberLabel: UILabel!
+    @IBOutlet weak var totalImagesLabel: UILabel!
+    @IBOutlet weak var pauseButton: UIButton!
+    @IBOutlet weak var muteButton: UIButton!
+    
+    var player: AVPlayer?
+    var playerLayer: AVPlayerLayer?
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        profileImgView.image = nil
+        player?.pause()
+        playerLayer?.removeFromSuperlayer()
+        player = nil
+        playerLayer = nil
+        muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
+    }
+    
+    func configure(with postImage: ProductMedia) {
+        if let img = postImage.img, !img.isEmpty {
             // Image setup
             profileImgView.isHidden = false
             pauseButton.isHidden = true
             muteButton.isHidden = true
-            loadImage(from: imageUrl)
-        } else if let videoUrl = postImage.video {
+            loadImage(from: img)
+        } else if let video = postImage.video, !video.isEmpty {
             // Video setup
             profileImgView.isHidden = false
             pauseButton.isHidden = false
             muteButton.isHidden = false
-            playVideo(from: videoUrl) // Load video without autoplay
-            muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal) // Default mute icon
-            pauseButton.setImage(UIImage(systemName: "play.fill"), for: .normal) // Default play icon
+            playVideo(from: video)
+            muteButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
+            pauseButton.setImage(UIImage(systemName: "play.fill"), for: .normal)
+        } else {
+            profileImgView.image = UIImage(named: "MarketDefault")
+            pauseButton.isHidden = true
+            muteButton.isHidden = true
         }
     }
-
-
+    
     private func loadImage(from urlString: String) {
         if let url = URL(string: urlString) {
-            // Optionally show a loading indicator
-            self.profileImgView.kf.indicatorType = .activity
-
-            // Load image with placeholder and caching
-            self.profileImgView.kf.setImage(
-                with: url,
-                placeholder: UIImage(named: "MarketDefault") // जो आपकी default image है
-            )
+            profileImgView.kf.indicatorType = .activity
+            profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
         }
     }
-
-
+    
     private func playVideo(from urlString: String) {
         guard let url = URL(string: urlString) else { return }
         player = AVPlayer(url: url)
@@ -74,18 +69,17 @@ class MarketDetailCollectionViewCell: UICollectionViewCell {
         if let playerLayer = playerLayer {
             profileImgView.layer.addSublayer(playerLayer)
         }
-        
-        player?.isMuted = true // Always start muted
+        player?.isMuted = true
         // No autoplay
     }
-
-       @IBAction func muteButtonTapped(_ sender: UIButton) {
-           guard let player = player else { return }
-              player.isMuted.toggle()
-              let buttonImage = player.isMuted ? UIImage(systemName: "speaker.slash.fill") : UIImage(systemName: "speaker.fill")
-              muteButton.setImage(buttonImage, for: .normal)
-       }
-
+    
+    @IBAction func muteButtonTapped(_ sender: UIButton) {
+        guard let player = player else { return }
+        player.isMuted.toggle()
+        let buttonImage = player.isMuted ? UIImage(systemName: "speaker.slash.fill") : UIImage(systemName: "speaker.fill")
+        muteButton.setImage(buttonImage, for: .normal)
+    }
+    
     @IBAction func pauseButtonTapped(_ sender: UIButton) {
         guard let player = player else { return }
         if player.timeControlStatus == .playing {
@@ -96,4 +90,5 @@ class MarketDetailCollectionViewCell: UICollectionViewCell {
             sender.setImage(UIImage(systemName: "pause.fill"), for: .normal)
         }
     }
-   }
+    
+}

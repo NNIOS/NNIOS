@@ -65,13 +65,13 @@ class EventNoJoinViewController: UIViewController {
                                                     "type": "0",
                                                    
                                                                         ]
-          WebService.sharedInstance.callEventJoinListWebService(withParams: dictParams) { data in
-            self.EventJoinListData = data
-           //   UserDefaults.standard.set(self.EventJoinListData?.listdata.id, forKey: "id")
-         
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callEventJoinListWebService(withParams: dictParams) { data in
+//            self.EventJoinListData = data
+//           //   UserDefaults.standard.set(self.EventJoinListData?.listdata.id, forKey: "id")
+//         
+//
+//            completionClosure()
+//          }
         }
     
 

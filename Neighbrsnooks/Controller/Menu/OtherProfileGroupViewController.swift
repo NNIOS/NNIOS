@@ -88,16 +88,16 @@ class OtherProfileGroupViewController: BaseViewController, ConfirmDelegate  {
                                                     "userid":idPost ?? "",
                                                     "groupuserlist":  idPost ?? ""
                                                                         ]
-          WebService.sharedInstance.callGroupListWebService(withParams: dictParams) { data in
-            self.GroupListData = data
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callGroupListWebService(withParams: dictParams) { data in
+//            self.GroupListData = data
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
+////              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
     
     func callJoinGroupWebService(_ completionClosure: @escaping () -> ()) {
@@ -111,14 +111,14 @@ class OtherProfileGroupViewController: BaseViewController, ConfirmDelegate  {
                                                     "username": userName ?? ""
                                                    
                                                                         ]
-          WebService.sharedInstance.callJoinGroupWebService(withParams: dictParams) { data in
-            self.JoinListData = data
-              if self.JoinListData?.status == "success"{
-                  completionClosure()
-              }else{
-                  self.showAlert(Message: self.JoinListData?.message ?? "")
-              }
-          }
+//          WebService.sharedInstance.callJoinGroupWebService(withParams: dictParams) { data in
+//            self.JoinListData = data
+//              if self.JoinListData?.status == "success"{
+//                  completionClosure()
+//              }else{
+//                  self.showAlert(Message: self.JoinListData?.message ?? "")
+//              }
+//          }
         }
 }
 

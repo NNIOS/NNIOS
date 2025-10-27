@@ -10,7 +10,7 @@ import UIKit
 
 
 protocol PostMenuTableViewCellDelegate: AnyObject {
-    func didSelectItem(with postImage: PostImage,  username: String, allImages: [PostImage])
+    func didSelectItem(with media: PostMedia, username: String, allMedia: [PostMedia])
 }
 
 
@@ -45,7 +45,7 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
     var commentCount = 0
     var shareCount = 0
     var isFavourite = false
-    var isLikedByUser = false // Track if user has already liked
+    var isLikedByUser = false  
     var emojiSelectionHandler: ((String) -> Void)?
     
     @IBOutlet weak var likebtn: UIButton!
@@ -56,16 +56,13 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
     @IBOutlet weak var lblShareCount: UILabel!
     @IBOutlet weak var btnFavourite: UIButton!
     
-    // @IBOutlet weak var UnlikeImageView : UIButton!
-    // @IBOutlet weak var btnCommentsImg : UIButton!
-    // @IBOutlet weak var btnShareImg : UIButton!
     @IBOutlet weak var btnDotsImg : UIButton!
     
     var DotCallback: ((String?) -> Void)?
     var CommentCallback : ((UIButton) -> Void)?
     var FullImgCallback : ((UIButton) -> Void)?
     var LikeListCallback : ((UIButton) -> Void)?
-    var imgData = [PostImage]()
+    var imgData = [PostMedia]()
     var imgEmojiData = [Emojilistdata]()
     var UserName = ""
     var newStoryBoard:  UIStoryboard!
@@ -79,12 +76,9 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
     override func awakeFromNib() {
         super.awakeFromNib()
         defaultTextColor = lblName.textColor
-        //        updateColors()
+        
         collectionViewBanner.delegate = self
         collectionViewBanner.dataSource = self
-        
-        
-        
         if let layout = collectionViewBanner.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.scrollDirection = .horizontal
         }
@@ -94,45 +88,13 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
         collectionViewBanner.addGestureRecognizer(tapGesture)
         
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(showEmojis(_:)))
-           longPress.minimumPressDuration = 2.0 // 2 second press
-           likebtn.addGestureRecognizer(longPress)
-        
-        
-        //viewPopup.isHidden = true
-        //  self.HeartImgView.image = UIImage(systemName: "heart")
-        // Initialization code
+        longPress.minimumPressDuration = 2.0 // 2 second press
+        likebtn.addGestureRecognizer(longPress)
         addTapGestures()
         addTapGestureToLabel()
         
     }
     
-    private func updateColors() {
-        if traitCollection.userInterfaceStyle == .dark {
-            // Dark mode colors
-            lblName.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblSec.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblMonth.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblGeneral.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            lblDescription.textColor = #colorLiteral(red: 0.7058823529, green: 0.7254901961, blue: 0.7843137255, alpha: 1) //
-            viewToHide.backgroundColor =  .black
-            likebtn.tintColor = .white // Arrow tint for dark mode
-            btnShare.tintColor = .white
-            btnComments.tintColor = .white
-            btnDotsImg.tintColor = .white
-            
-        } else {
-            // Light mode
-            lblName.textColor = defaultTextColor
-            lblSec.textColor = UIColor.secondaryLabel
-            lblMonth.textColor = UIColor.secondaryLabel
-            lblGeneral.textColor = UIColor.secondaryLabel
-            lblDescription.textColor = UIColor.secondaryLabel
-            likebtn.tintColor = .black // Arrow tint for light mode
-            btnShare.tintColor = .black
-            btnComments.tintColor = .black
-            btnDotsImg.tintColor = .black
-        }
-    }
     
     func addTapGestureToLabel() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
@@ -159,121 +121,114 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
     }
     
     private func updateDescriptionText() {
-            // ✅ If text is 100 chars or less, show as plain text and return
-            if fullDescriptionText.count <= 100 {
-                lblDescription.numberOfLines = 0
-                lblDescription.text = fullDescriptionText
-                lblDescription.gestureRecognizers?.forEach { recognizer in
-                    lblDescription.removeGestureRecognizer(recognizer)
-                }
-                lblDescription.isUserInteractionEnabled = false
-                return
+        // ✅ If text is 100 chars or less, show as plain text and return
+        if fullDescriptionText.count <= 100 {
+            lblDescription.numberOfLines = 0
+            lblDescription.text = fullDescriptionText
+            lblDescription.gestureRecognizers?.forEach { recognizer in
+                lblDescription.removeGestureRecognizer(recognizer)
             }
-            
-            guard let font = lblDescription.font else { return }
-            
-            let maxLines = 2
-            let maxWidth = lblDescription.frame.width > 0 ? lblDescription.frame.width : UIScreen.main.bounds.width - 40
-            let lineHeight = "A".size(withAttributes: [.font: font]).height
-            let maxHeight = lineHeight * CGFloat(maxLines)
-            
-            let fullTextAttr = NSAttributedString(string: fullDescriptionText, attributes: [
-                .font: font
+            lblDescription.isUserInteractionEnabled = false
+            return
+        }
+        
+        guard let font = lblDescription.font else { return }
+        
+        let maxLines = 2
+        let maxWidth = lblDescription.frame.width > 0 ? lblDescription.frame.width : UIScreen.main.bounds.width - 40
+        let lineHeight = "A".size(withAttributes: [.font: font]).height
+        let maxHeight = lineHeight * CGFloat(maxLines)
+        
+        let fullTextAttr = NSAttributedString(string: fullDescriptionText, attributes: [
+            .font: font
+        ])
+        
+        let fullBoundingRect = fullTextAttr.boundingRect(
+            with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            context: nil
+        )
+        
+        let lineCount = Int(ceil(fullBoundingRect.height / lineHeight))
+        
+        if isExpanded {
+            // Show full description with "Less"
+            let fullText = NSMutableAttributedString(string: "\(fullDescriptionText) ", attributes: [
+                .font: font,
+                .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
             ])
+            let lessText = NSAttributedString(string: "Less", attributes: [
+                .font: font,
+                .foregroundColor: #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+            ])
+            fullText.append(lessText)
             
-            let fullBoundingRect = fullTextAttr.boundingRect(
-                with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
-                options: [.usesLineFragmentOrigin, .usesFontLeading],
-                context: nil
-            )
-            
-            let lineCount = Int(ceil(fullBoundingRect.height / lineHeight))
-            
-            if isExpanded {
-                // Show full description with "Less"
-                let fullText = NSMutableAttributedString(string: "\(fullDescriptionText) ", attributes: [
-                    .font: font,
-                    .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
-                ])
-                let lessText = NSAttributedString(string: "Less", attributes: [
+            lblDescription.numberOfLines = 0
+            lblDescription.attributedText = fullText
+        } else {
+            if lineCount > maxLines {
+                // Show trimmed text + "... More"
+                let trailingText = "... More"
+                let trailingAttr = NSAttributedString(string: trailingText, attributes: [
                     .font: font,
                     .foregroundColor: #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
                 ])
-                fullText.append(lessText)
                 
-                lblDescription.numberOfLines = 0
-                lblDescription.attributedText = fullText
-            } else {
-                if lineCount > maxLines {
-                    // Show trimmed text + "... More"
-                    let trailingText = "... More"
-                    let trailingAttr = NSAttributedString(string: trailingText, attributes: [
+                var fittingText = fullDescriptionText
+                var finalText = NSMutableAttributedString()
+                
+                for i in stride(from: fittingText.count, through: 0, by: -1) {
+                    let sub = String(fittingText.prefix(i)).trimmingCharacters(in: .whitespacesAndNewlines)
+                    let testAttr = NSMutableAttributedString(string: sub, attributes: [
                         .font: font,
-                        .foregroundColor: #colorLiteral(red: 0, green: 0.5019607843, blue: 0, alpha: 1)
+                        .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
                     ])
+                    testAttr.append(trailingAttr)
                     
-                    var fittingText = fullDescriptionText
-                    var finalText = NSMutableAttributedString()
+                    let boundingRect = testAttr.boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
+                                                             options: [.usesLineFragmentOrigin, .usesFontLeading],
+                                                             context: nil)
                     
-                    for i in stride(from: fittingText.count, through: 0, by: -1) {
-                        let sub = String(fittingText.prefix(i)).trimmingCharacters(in: .whitespacesAndNewlines)
-                        let testAttr = NSMutableAttributedString(string: sub, attributes: [
-                            .font: font,
-                            .foregroundColor: #colorLiteral(red: 0.4352941176, green: 0.4431372549, blue: 0.4745098039, alpha: 1)
-                        ])
-                        testAttr.append(trailingAttr)
-                        
-                        let boundingRect = testAttr.boundingRect(with: CGSize(width: maxWidth, height: .greatestFiniteMagnitude),
-                                                                 options: [.usesLineFragmentOrigin, .usesFontLeading],
-                                                                 context: nil)
-                        
-                        if boundingRect.height <= maxHeight {
-                            finalText = testAttr
-                            break
-                        }
+                    if boundingRect.height <= maxHeight {
+                        finalText = testAttr
+                        break
                     }
-                    
-                    lblDescription.numberOfLines = maxLines
-                    lblDescription.attributedText = finalText
-                } else {
-                    // Show plain full text, no "More"
-                    lblDescription.numberOfLines = 0
-                    lblDescription.text = fullDescriptionText
                 }
-            }
-            
-            // Disable tap if only 1 line
-            if lineCount <= 1 {
-                lblDescription.gestureRecognizers?.forEach { recognizer in
-                    lblDescription.removeGestureRecognizer(recognizer)
-                }
-                lblDescription.isUserInteractionEnabled = false
+                
+                lblDescription.numberOfLines = maxLines
+                lblDescription.attributedText = finalText
             } else {
-                // Re-add tap gesture if missing
-                if lblDescription.gestureRecognizers?.isEmpty ?? true {
-                    let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
-                    lblDescription.addGestureRecognizer(tapGesture)
-                    lblDescription.isUserInteractionEnabled = true
-                }
-            }
-            
-            lblDescription.setNeedsLayout()
-            lblDescription.layoutIfNeeded()
-            
-            if let tableView = self.superview as? UITableView {
-                tableView.beginUpdates()
-                tableView.endUpdates()
+                // Show plain full text, no "More"
+                lblDescription.numberOfLines = 0
+                lblDescription.text = fullDescriptionText
             }
         }
-    
-    
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
         
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            //            updateColors()
+        // Disable tap if only 1 line
+        if lineCount <= 1 {
+            lblDescription.gestureRecognizers?.forEach { recognizer in
+                lblDescription.removeGestureRecognizer(recognizer)
+            }
+            lblDescription.isUserInteractionEnabled = false
+        } else {
+            // Re-add tap gesture if missing
+            if lblDescription.gestureRecognizers?.isEmpty ?? true {
+                let tapGesture = UITapGestureRecognizer(target: self, action: #selector(labelTapped))
+                lblDescription.addGestureRecognizer(tapGesture)
+                lblDescription.isUserInteractionEnabled = true
+            }
+        }
+        
+        lblDescription.setNeedsLayout()
+        lblDescription.layoutIfNeeded()
+        
+        if let tableView = self.superview as? UITableView {
+            tableView.beginUpdates()
+            tableView.endUpdates()
         }
     }
+    
+    
     
     private func addTapGestures() {
         let nameTap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -333,19 +288,9 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
         // Configure the view for the selected state
     }
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
-    }
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
     
-    //       required init?(coder: NSCoder) {
-    //           fatalError("init(coder:) has not been implemented")
-    //       }
-    
+     
     
     // single tab
     @objc private func handleCollectionViewTap(_ gesture: UITapGestureRecognizer) {
@@ -353,12 +298,10 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
         if let indexPath = collectionViewBanner.indexPathForItem(at: location) {
             pauseAllVideosInVisibleCells()
             let selectedData = imgData[indexPath.row]
-            delegate?.didSelectItem(with: selectedData, username: UserName, allImages: imgData)
+            delegate?.didSelectItem(with: selectedData, username: UserName, allMedia: imgData) // <-- allMedia
         }
     }
-    
-    
-    
+
     
     @IBAction func btnFullImg(_ sender: UIButton) {
         FullImgCallback?(sender)
@@ -368,8 +311,6 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
         DotCallback?(postid)
         
     }
-    
-    
     
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -390,14 +331,6 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
         }
     }
     
-    
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imgData.count ?? 0
-        
-        
-    }
-    
     @IBAction func categoryTapped(sender: UITapGestureRecognizer) {
         
         // self.sectorLbl.text = neighbrhoodData?.nearestNeighbrhood[viewTag!].name
@@ -409,24 +342,19 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
         
     }
     
-    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return imgData.count
+    }
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MenuCollectionViewCell", for: indexPath) as! MenuCollectionViewCell
-        let postImage = imgData[indexPath.row]  // Current item
-        cell.configure(with: postImage)
-        
-        //        let url = URL(string: (imgData[indexPath.row].img ?? ""))
-        //        cell.profileImgView.kf.indicatorType = .activity
-        //        cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: ""))
-        
-        let totalNumberOfImages = imgData.count
-        cell.totalImagesLabel.text =  "/ \(totalNumberOfImages)"
-        cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-        cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-        
+        let media = imgData[indexPath.row]
+        cell.configure(with: media)
+        cell.numberLabel.text = "\(indexPath.row + 1)"
+        cell.totalImagesLabel.text = "/\(imgData.count)"
         return cell
     }
+
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -438,10 +366,32 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         pauseAllVideosInVisibleCells()
         let selectedData = imgData[indexPath.row]
-        delegate?.didSelectItem(with: selectedData, username: UserName , allImages: imgData)
+        delegate?.didSelectItem(with: selectedData, username: UserName, allMedia: imgData)
     }
+
     
     
+    func setPostData(post: PostItem) {
+        lblName.text = post.userFullName
+        lblDescription.text = post.postDescription
+        lblMonth.text = post.createdAt
+        imgData = post.media                 // POST KA MEDIA ARRAY
+        collectionViewBanner.reloadData()    // Bina fail reload!
+        // Profile image logic yahi raho
+
+        // Reset/placeholder for image
+        profileImgView.image = nil
+        if let profileURL = URL(string: post.userpic), !post.userpic.isEmpty {
+            DispatchQueue.global().async {
+                if let data = try? Data(contentsOf: profileURL), let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.profileImgView.image = image
+                    }
+                }
+            }
+        }
+    }
+
     
     //    new code emoji code
     @objc func showEmojis(_ gesture: UILongPressGestureRecognizer) {
@@ -451,49 +401,13 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
             }
         }
     }
-
+    
     
     @IBAction func likeButtonTapped(_ sender: UIButton) {
-        if selectedEmoji == nil {
-            if isLikedByUser {
-                // ❌ UNLIKE
-                if let vc = self.parentViewController as? MennuPostViewController {
-                    vc.callPostUnLikeWebService {
-                        // ✅ API Done - Update UI from API response
-                        if let updatedCount = vc.PostLikeData?.totalLike {
-                            self.likeCount = Int(updatedCount) ?? 0
-                            self.lblLikeCount.text = self.likeCount > 0 ? "\(self.likeCount)" : ""
-                        }
-
-                        self.isLikedByUser = false
-                        self.likebtn.setImage(UIImage(systemName: "hand.thumbsup.circle"), for: .normal)
-                        self.likebtn.tintColor = .gray
-                        self.likebtn.setTitle("", for: .normal)
-                    }
-                }
-            } else {
-                // 👍 LIKE
-                if let vc = self.parentViewController as? MennuPostViewController {
-                    vc.callPostLikeWebService(postId: postid, emoji: "") {
-                        // ✅ API Done - Update UI from API response
-                        if let updatedCount = vc.PostLikeData?.totalLike {
-                            self.likeCount = Int(updatedCount) ?? 0
-                            self.lblLikeCount.text = "\(self.likeCount)"
-                        }
-
-                        self.isLikedByUser = true
-                        self.likebtn.setImage(UIImage(systemName: "hand.thumbsup.circle.fill"), for: .normal)
-                        self.likebtn.tintColor = .green
-                        self.likebtn.setTitle("", for: .normal)
-                    }
-                }
-            }
-        } else {
-            updateLikeWithEmoji()
-        }
+        
     }
-
-
+    
+    
     
     // Show emoji selection view
     func showEmojiSelectionView(button: UIButton) {
@@ -570,7 +484,7 @@ class MennuPostTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout
         likebtn.setImage(nil, for: .normal)
     }
     
- 
+    
     
     
     @IBAction func commentsButtonTapped(_ sender: UIButton) {

@@ -11,6 +11,7 @@ import Alamofire
 import Photos
 import PhotosUI
 import TOCropViewController
+import CropViewController
 
 @available(iOS 16.0, *)
 class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UITextViewDelegate,CropViewControllerDelegate,PHPickerViewControllerDelegate, UICollectionViewDelegateFlowLayout, ImageCollectionViewControllerDelegate, UITextFieldDelegate, UIDocumentPickerDelegate, ImageCollectionGalViewControllerDelegate,MediaCountUpdateDelegate,SelectWeekDaysDelegate, BusinessCategorySelectionDelegate  {
@@ -79,8 +80,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     var selectedImages: [UIImage] = []
     var images: [UIImage] = []
     var tfSunday: UITextField!
-    private let bottomPanelView = BottomPanelView()
-    var imagePicker:UIImagePickerController?
+     var imagePicker:UIImagePickerController?
     private weak var delegate: UIImagePickerControllerDelegate?
     var selectedImge: UIImage? = nil
     var from = 0
@@ -119,7 +119,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         tfBussinessName.autocapitalizationType = .words
         viewWeekly.isHidden = true
         viewSelectHideDay.isHidden = true
-        self.viewWeekly.roundCorners([.topLeft, .topRight], radius: 0)
+//        self.viewWeekly.roundCorners([.topLeft, .topRight], radius: 0)
         NewmagePicker.delegate = self
         NewmagePicker.sourceType = .camera
         NewmagePicker.allowsEditing = false
@@ -521,18 +521,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         
     }
     
-    private func setupBottomPanel() {
-        bottomPanelView.delegate = self
-        bottomPanelView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(bottomPanelView)
-        
-        NSLayoutConstraint.activate([
-            bottomPanelView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomPanelView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            bottomPanelView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -5), // Moves it downward
-            bottomPanelView.heightAnchor.constraint(equalToConstant: 70)
-        ])
-    }
+    
     
     @IBAction func BackButtionAction(_ : UIButton){
         
@@ -894,17 +883,17 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         
         let dictParams: Dictionary<String, Any> = ["":""]
         
-        WebService.sharedInstance.callCatBussinessWebService(withParams: dictParams) { data in
-            self.AddPCategoryData = data
-            UserDefaults.standard.set(self.AddPCategoryData?.nbdata.first?.id, forKey: "id")
-            UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
-            for value in self.AddPCategoryData?.nbdata ?? [] {
-                self.serviceName.append(value.businessTitle ?? "")
-            }
-            //            self.serviceDropdownData.dataSource = self.serviceName
-            
-            
-        }
+//        WebService.sharedInstance.callCatBussinessWebService(withParams: dictParams) { data in
+//            self.AddPCategoryData = data
+//            UserDefaults.standard.set(self.AddPCategoryData?.nbdata.first?.id, forKey: "id")
+//            UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
+//            for value in self.AddPCategoryData?.nbdata ?? [] {
+//                self.serviceName.append(value.businessTitle ?? "")
+//            }
+//            //            self.serviceDropdownData.dataSource = self.serviceName
+//            
+//            
+//        }
     }
     
     
@@ -1130,10 +1119,10 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         print("✅ FINAL PARAMS: \(dictParams)")
         
         // 🔁 Send to API via multipart form-data
-        callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: selectedPDFURL, mediaKey: "image[]", URlName: kBASEURL + WebServiceName.kCreateBussines) {
-            print("✅ Upload completed.")
-            completionClosure()
-        }
+//        callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: selectedPDFURL, mediaKey: "image[]", URlName: kBASEURL + WebServiceName.kCreateBussines) {
+//            print("✅ Upload completed.")
+//            completionClosure()
+//        }
     }
     
     func callBussinesDetailPostWebService(_ completionClosure: @escaping () -> ()) {
@@ -1146,20 +1135,20 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         let dictParams: Dictionary<String, Any> = [
             "userid":id ?? "" ,
             "business_id":Busid ?? "",]
-        WebService.sharedInstance.callBussinesDetailPostWebService(withParams: dictParams) { data in
-            self.BussinessDetailData = data
-            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
-            
-            //  let url = URL(string: (imgData[indexPath.row].img ?? ""))
-            //   UserDefaults.standard.set(self.imgData[IndexPath.row].postid, forKey: "postid")
-            UserDefaults.standard.set(self.BussinessDetailData?.userid, forKey: "useidProfile")
-            UserDefaults.standard.set(self.BussinessDetailData?.id, forKey: "Businessid")
-            UserDefaults.standard.set(self.BussinessDetailData?.image?.first?.img, forKey: "Businessfirstimg")
-            // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
-            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callBussinesDetailPostWebService(withParams: dictParams) { data in
+//            self.BussinessDetailData = data
+//            //  UserDefaults.standard.set(self.MemberListData?.listdata.first?.id, forKey: "id")
+//            
+//            //  let url = URL(string: (imgData[indexPath.row].img ?? ""))
+//            //   UserDefaults.standard.set(self.imgData[IndexPath.row].postid, forKey: "postid")
+//            UserDefaults.standard.set(self.BussinessDetailData?.userid, forKey: "useidProfile")
+//            UserDefaults.standard.set(self.BussinessDetailData?.id, forKey: "Businessid")
+//            UserDefaults.standard.set(self.BussinessDetailData?.image?.first?.img, forKey: "Businessfirstimg")
+//            // UserDefaults.standard.set(self.PostListData?.em.id, forKey: "id")
+//            // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//            
+//            completionClosure()
+//        }
     }
     
     func callsendMediaAPI(param: [String: Any],

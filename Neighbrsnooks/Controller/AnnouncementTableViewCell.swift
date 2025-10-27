@@ -18,8 +18,7 @@ class AnnouncementTableViewCell: UITableViewCell {
         super.awakeFromNib()
         imgAnnouncement.layer.cornerRadius = imgAnnouncement.frame.height / 2
         imgAnnouncement.clipsToBounds = true
-//        applyGradientToAnnouncement()
-        // Initialization code
+
     }
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
@@ -39,8 +38,8 @@ class AnnouncementTableViewCell: UITableViewCell {
            let newGradient = CAGradientLayer()
            newGradient.frame = viewAnnouncement.bounds // uses size from storyboard constraints
            newGradient.colors = [
-               UIColor(hex: "#AA4A44").cgColor,
-               UIColor(hex: "#E0817B").cgColor
+               UIColor(hexString: "#AA4A44").cgColor,
+               UIColor(hexString: "#E0817B").cgColor
            ]
            newGradient.startPoint = CGPoint(x: 0, y: 0)
            newGradient.endPoint = CGPoint(x: 1, y: 0)

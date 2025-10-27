@@ -248,16 +248,16 @@ class FavouriteDetailViewController: BaseViewController,UICollectionViewDelegate
                                                     "postid": postid ?? "",
                                                     
                                                                         ]
-          WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
-            self.CommentPostListData = data
-            //  UserDefaults.standard.set(self.CommentPostListData?.postlistdata.first?.postid, forKey: "postid")
-            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-            //  UserDefaults.standard.set(self.CommentPostListData?.postlistdata.first?.postid, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
+//            self.CommentPostListData = data
+//            //  UserDefaults.standard.set(self.CommentPostListData?.postlistdata.first?.postid, forKey: "postid")
+//            //  UserDefaults.standard.set("\(self.MemberListData?.listdata.first?.id ?? 0)", forKey: "userid")
+////              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//            //  UserDefaults.standard.set(self.CommentPostListData?.postlistdata.first?.postid, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
     
     func callCommentePostWebService(_ completionClosure: @escaping () -> ()) {
@@ -270,15 +270,15 @@ class FavouriteDetailViewController: BaseViewController,UICollectionViewDelegate
                                                     
                                                     "commenttext":self.tvmessage.text ?? "",
                                                                         ]
-          WebService.sharedInstance.callCommentePostWebService(withParams: dictParams) { data in
-            self.PostCommentData = data
-            
-              if self.PostCommentData?.status == "success"{
-                  completionClosure()
-              }else{
-                  self.showAlert(Message: self.PostCommentData?.message ?? "")
-              }
-          }
+//          WebService.sharedInstance.callCommentePostWebService(withParams: dictParams) { data in
+//            self.PostCommentData = data
+//            
+//              if self.PostCommentData?.status == "success"{
+//                  completionClosure()
+//              }else{
+//                  self.showAlert(Message: self.PostCommentData?.message ?? "")
+//              }
+//          }
         }
 
 

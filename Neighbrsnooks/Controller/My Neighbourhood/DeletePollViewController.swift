@@ -56,12 +56,12 @@ class DeletePollViewController: UIViewController {
                                                     "pollid": Pollid ?? "",
                                                    
                                                                         ]
-          WebService.sharedInstance.callPollDeleteWebService(withParams: dictParams) { data in
-         //   self.GrouDeleteData = data
-         
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callPollDeleteWebService(withParams: dictParams) { data in
+//         //   self.GrouDeleteData = data
+//         
+//
+//            completionClosure()
+//          }
         }
 
 }

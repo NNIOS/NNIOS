@@ -14,7 +14,7 @@ open class DropDown: UITextField {
     var shadow: UIView!
     public var selectedIndex: Int?
 
-    // MARK: - IBInspectable
+    // MARK: IBInspectable
 
     @IBInspectable public var rowHeight: CGFloat = 30
     @IBInspectable public var rowBackgroundColor: UIColor = .white

@@ -56,25 +56,25 @@ class GroupThreeDotViewController: BottomPopupViewController {
     var callback: ((_ range: Int) -> Void)?
     
     // Override popup configurations from BottomPopup
-    override var popupHeight: CGFloat {
-        return height ?? CGFloat(SCREEN_HEIGHT - 150) // Customize height
-    }
+//    override var popupHeight: CGFloat {
+//        return height ?? CGFloat(SCREEN_HEIGHT - 150) // Customize height
+//    }
     
-    override var popupTopCornerRadius: CGFloat {
-        return topCornerRadius ?? CGFloat(0) // Customize top corner radius
-    }
-    
-    override var popupPresentDuration: Double {
-        return presentDuration ?? 1.0 // Customize presentation duration
-    }
-    
-    override var popupDismissDuration: Double {
-        return dismissDuration ?? 1.0 // Customize dismissal duration
-    }
-    
-    override var popupShouldDismissInteractivelty: Bool {
-        return shouldDismissInteractivelty ?? true // Enable or disable interactive dismiss
-    }
+//    override var popupTopCornerRadius: CGFloat {
+//        return topCornerRadius ?? CGFloat(0) // Customize top corner radius
+//    }
+//    
+//    override var popupPresentDuration: Double {
+//        return presentDuration ?? 1.0 // Customize presentation duration
+//    }
+//    
+//    override var popupDismissDuration: Double {
+//        return dismissDuration ?? 1.0 // Customize dismissal duration
+//    }
+//    
+//    override var popupShouldDismissInteractivelty: Bool {
+//        return shouldDismissInteractivelty ?? true // Enable or disable interactive dismiss
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -206,12 +206,12 @@ class GroupThreeDotViewController: BottomPopupViewController {
             "type": "Post" ,
             "neighbrhood":idNeighbour ?? "",
         ]
-        WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
-            self.BussinessFavouriteData = data
-            
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callFavouriteBussinessWebService(withParams: dictParams) { data in
+//            self.BussinessFavouriteData = data
+//            
+//            
+//            completionClosure()
+//        }
     }
     
     func callFavouriteRemoveBussinessWebService(_ completionClosure: @escaping () -> ()) {
@@ -226,10 +226,10 @@ class GroupThreeDotViewController: BottomPopupViewController {
             "postid":business_id ?? "",
             "type": "Post" ,
         ]
-        WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
-            self.BussinessRemoveFavouriteData = data
-            completionClosure()
-        }
+//        WebService.sharedInstance.callFavouriteRemoveBussinessWebService(withParams: dictParams) { data in
+//            self.BussinessRemoveFavouriteData = data
+//            completionClosure()
+//        }
     }
     
     func callPostCommenteWebService(_ completionClosure: @escaping () -> ()) {
@@ -241,15 +241,15 @@ class GroupThreeDotViewController: BottomPopupViewController {
             "postid": business_id ?? "",
             
         ]
-        WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
-            self.CommentPostListData = data
-            completionClosure()
-        }
+//        WebService.sharedInstance.callPostCommenteWebService(withParams: dictParams) { data in
+//            self.CommentPostListData = data
+//            completionClosure()
+//        }
     }
     // dev.
     
     func handleBlockUnblockAPI(completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/toggle-block-user"
+        let url = "https://neighbrsnook.com/admin/api/toggle-block-user"
         guard let blockerId = UserDefaults.standard.string(forKey: "userid") else {
             print("Error: Missing blocker ID")
             return
@@ -264,34 +264,34 @@ class GroupThreeDotViewController: BottomPopupViewController {
             "blocked_userid": blockedId,
             "action": "block"
         ]
-        print("Block dictParams :\(dictParams)")
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true) {
-            (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                do {
-                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
-                    self.objBlockUserData = data
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        self.onUpdateForBlock!()
-                        self.dismiss(animated: true)
-                    }
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
-                    self.objBlockUserData = data
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription ?? "")
-            default:
-                break
-            }
-        }
+//        print("Block dictParams :\(dictParams)")
+//        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true) {
+//            (result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS ,.CREATED:
+//                do {
+//                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+//                    self.objBlockUserData = data
+//                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+//                        self.onUpdateForBlock!()
+//                        self.dismiss(animated: true)
+//                    }
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                do {
+//                    let data = try JSONDecoder().decode(BlockUserModel.self, from: result!)
+//                    self.objBlockUserData = data
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .UNAUTHORIZED:
+//                print(error?.localizedDescription ?? "")
+//            default:
+//                break
+//            }
+//        }
     }
     
     

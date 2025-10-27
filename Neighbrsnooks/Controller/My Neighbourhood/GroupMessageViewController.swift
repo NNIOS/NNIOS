@@ -299,14 +299,14 @@ extension GroupMessageViewController: UITableViewDataSource, UITableViewDelegate
             "groupid": groupid ?? "",
             
         ]
-        WebService.sharedInstance.callGroupChatListWebService(withParams: dictParams) { data in
-            self.GroupChatData = data
-            if self.GroupChatData?.status == "success"{
-                completionClosure()
-            }else{
-                self.showAlert(Message: self.GroupChatData?.message ?? "")
-            }
-        }
+//        WebService.sharedInstance.callGroupChatListWebService(withParams: dictParams) { data in
+//            self.GroupChatData = data
+//            if self.GroupChatData?.status == "success"{
+//                completionClosure()
+//            }else{
+//                self.showAlert(Message: self.GroupChatData?.message ?? "")
+//            }
+//        }
     }
     
     func callGroupMessageWebService(_ completionClosure: @escaping () -> ()) {
@@ -317,14 +317,14 @@ extension GroupMessageViewController: UITableViewDataSource, UITableViewDelegate
             "groupid": groupid ?? "",
             "message":self.tvmessage.text ?? "",
         ]
-        WebService.sharedInstance.callGroupMessageWebService(withParams: dictParams) { data in
-            self.GroupMessageData = data
-            
-            if self.GroupMessageData?.status == "success"{
-                completionClosure()
-            }else{
-                self.showAlert(Message: self.GroupMessageData?.message ?? "")
-            }
-        }
+//        WebService.sharedInstance.callGroupMessageWebService(withParams: dictParams) { data in
+//            self.GroupMessageData = data
+//            
+//            if self.GroupMessageData?.status == "success"{
+//                completionClosure()
+//            }else{
+//                self.showAlert(Message: self.GroupMessageData?.message ?? "")
+//            }
+//        }
     }
 }

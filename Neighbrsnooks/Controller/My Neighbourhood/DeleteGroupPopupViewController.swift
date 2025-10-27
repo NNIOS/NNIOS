@@ -53,11 +53,11 @@ class DeleteGroupPopupViewController: UIViewController {
                                                     "groupid": groupid ?? "",
                                                    
                                                                         ]
-          WebService.sharedInstance.callGroupDeleteWebService(withParams: dictParams) { data in
-            self.GrouDeleteData = data
-         
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callGroupDeleteWebService(withParams: dictParams) { data in
+//            self.GrouDeleteData = data
+//         
+//
+//            completionClosure()
+//          }
         }
 }

@@ -296,17 +296,17 @@ class PublicAgencyViewController: BaseViewController {
                                                    
                                                    
                                                                         ]
-          WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-              UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
-              UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
-            //  UserDefaults.standard.set(self.profileData?.UserName, forKey: "userName")
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+//            self.profileData = data
+//              UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
+//              UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
+//            //  UserDefaults.standard.set(self.profileData?.UserName, forKey: "userName")
+////              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//             // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
 
 }
@@ -714,14 +714,14 @@ extension PublicAgencyViewController: UITableViewDataSource, UITableViewDelegate
         let dictParams: Dictionary<String, Any> = [
             "userid": id ?? ""
         ]
-        WebService.sharedInstance.calldirectoryWebService(withParams: dictParams) { data in
-            self.PublicDirecData = data
-            if self.PublicDirecData?.status == "success"{
-                completionClosure()
-            }else{
-                self.alertToast(Message: self.PublicDirecData?.message ?? "")
-            }
-        }
+//        WebService.sharedInstance.calldirectoryWebService(withParams: dictParams) { data in
+//            self.PublicDirecData = data
+//            if self.PublicDirecData?.status == "success"{
+//                completionClosure()
+//            }else{
+//                self.alertToast(Message: self.PublicDirecData?.message ?? "")
+//            }
+//        }
     }
     
    

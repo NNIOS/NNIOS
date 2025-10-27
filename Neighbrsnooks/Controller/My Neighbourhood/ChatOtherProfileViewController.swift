@@ -128,16 +128,16 @@ class ChatOtherProfileViewController: BaseViewController {
                                                     "loggeduser":id ?? "",
                                                    
                                                                         ]
-          WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-//              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-              UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
-              UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
-            //  UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
-             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+//            self.profileData = data
+////              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
+//              UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
+//              UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
+//            //  UserDefaults.standard.set(self.profileData?.id, forKey: "idOther")
+//             // UserDefaults.standard.set(self.MoreData?.data.profile, forKey: "profileImage")
+//
+//            completionClosure()
+//          }
         }
     
 

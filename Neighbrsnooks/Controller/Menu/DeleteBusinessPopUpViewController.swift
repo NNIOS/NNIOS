@@ -54,11 +54,11 @@ class DeleteBusinessPopUpViewController: UIViewController {
                                                     "businessid": Busid ?? "",
                                                    
                                                                         ]
-          WebService.sharedInstance.callDeleteBusinessWebService(withParams: dictParams) { data in
-         //   self.GrouDeleteData = data
-         
-
-            completionClosure()
-          }
+//          WebService.sharedInstance.callDeleteBusinessWebService(withParams: dictParams) { data in
+//         //   self.GrouDeleteData = data
+//         
+//
+//            completionClosure()
+//          }
         }
 }

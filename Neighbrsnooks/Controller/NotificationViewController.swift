@@ -22,8 +22,7 @@ class NotificationViewController: BaseViewController {
     let transitionManager = SideMenuTransitionManager()
     var NotificationCountData : NotificationCountModel?
     var notiid = ""
-    private let bottomPanelView = BottomPanelView()
-    let refreshControl = UIRefreshControl()
+     let refreshControl = UIRefreshControl()
     
     
     override func viewDidLoad() {
@@ -86,14 +85,14 @@ class NotificationViewController: BaseViewController {
             
             
         ]
-        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
-            self.profileData = data
-            UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
-            UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
-            UserDefaults.standard.set(self.profileData?.lastname, forKey: "lastName")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callUserProfileWebService(withParams: dictParams) { data in
+//            self.profileData = data
+//            UserDefaults.standard.set(self.profileData?.emerPhone, forKey: "emer_phone")
+//            UserDefaults.standard.set(self.profileData?.userpic, forKey: "profileImage")
+//            UserDefaults.standard.set(self.profileData?.lastname, forKey: "lastName")
+//            
+//            completionClosure()
+//        }
     }
     
     func callHideNotificationWebService(notificationID: String, _ completionClosure: @escaping () -> ()) {
@@ -105,21 +104,21 @@ class NotificationViewController: BaseViewController {
             "not_Id": notificationID // Sending as a string instead of an array
         ]
         
-        WebService.sharedInstance.callHideNotificationWebService(withParams: dictParams) { data in
-            self.HideNotificationData = data
-            
-            // Clear stored notiId after successful API call (if needed)
-            UserDefaults.standard.removeObject(forKey: "notiId")
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callHideNotificationWebService(withParams: dictParams) { data in
+//            self.HideNotificationData = data
+//            
+//            // Clear stored notiId after successful API call (if needed)
+//            UserDefaults.standard.removeObject(forKey: "notiId")
+//            
+//            completionClosure()
+//        }
     }
     
     
     
     // dev.
     func callNotificationCountWebService() {
-        let url = "https://dev.neighbrsnook.com/admin/api/notificationcount?flag=counter&appkey=abc1239"
+        let url = "https://neighbrsnook.com/admin/api/notificationcount?flag=counter&appkey=abc1239"
         
         // let dictParams: Dictionary<String, Any> = ["":""]
         
@@ -131,34 +130,34 @@ class NotificationViewController: BaseViewController {
             
             
         ]
-        
-        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true)
-        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-            switch statusCode {
-            case .SUCCESS ,.CREATED:
-                do {
-                    let data = try JSONDecoder().decode(NotificationCountModel.self, from: result!)
-                    self.NotificationCountData = data
-                    //  self.collectionViewMyEvent.reloadData()
-                    
-                    //    completionClosure(data)
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
-                do {
-                    let data = try JSONDecoder().decode(NotificationCountModel.self, from: result!)
-                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
-                } catch {
-                    print(error.localizedDescription)
-                }
-            case .UNAUTHORIZED:
-                print(error?.localizedDescription)
-                //   self.showLogoutAlert()
-            default:
-                break
-            }
-        }
+//        
+//        RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.POST,requestParameters: dictParams, withProgressHUD: true)
+//        {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+//            switch statusCode {
+//            case .SUCCESS ,.CREATED:
+//                do {
+//                    let data = try JSONDecoder().decode(NotificationCountModel.self, from: result!)
+//                    self.NotificationCountData = data
+//                    //  self.collectionViewMyEvent.reloadData()
+//                    
+//                    //    completionClosure(data)
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST, .USER_EXISTS:
+//                do {
+//                    let data = try JSONDecoder().decode(NotificationCountModel.self, from: result!)
+//                    //   self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(data.message))
+//                } catch {
+//                    print(error.localizedDescription)
+//                }
+//            case .UNAUTHORIZED:
+//                print(error?.localizedDescription)
+//                //   self.showLogoutAlert()
+//            default:
+//                break
+//            }
+//        }
     }
     
     
@@ -172,20 +171,20 @@ class NotificationViewController: BaseViewController {
             "appkey": "abc1239"
         ]
         
-        WebService.sharedInstance.callNoticationWebService(withParams: dictParams) { data in
-            self.NotificationData = data
-            
-            // Extract notificationIDs
-            let notificationIDs = self.NotificationData?.nbdata.compactMap { $0.notificationID } ?? []
-            
-            // Convert Array to JSON String
-            if let jsonData = try? JSONSerialization.data(withJSONObject: notificationIDs, options: []),
-               let jsonString = String(data: jsonData, encoding: .utf8) {
-                UserDefaults.standard.set(jsonString, forKey: "notiId")
-            }
-            
-            completionClosure()
-        }
+//        WebService.sharedInstance.callNoticationWebService(withParams: dictParams) { data in
+//            self.NotificationData = data
+//            
+//            // Extract notificationIDs
+//            let notificationIDs = self.NotificationData?.nbdata.compactMap { $0.notificationID } ?? []
+//            
+//            // Convert Array to JSON String
+//            if let jsonData = try? JSONSerialization.data(withJSONObject: notificationIDs, options: []),
+//               let jsonString = String(data: jsonData, encoding: .utf8) {
+//                UserDefaults.standard.set(jsonString, forKey: "notiId")
+//            }
+//            
+//            completionClosure()
+//        }
     }
     
   
@@ -216,12 +215,12 @@ extension NotificationViewController: UITableViewDataSource, UITableViewDelegate
                 // Call API first to hide the notification
                 callHideNotificationWebService(notificationID: notificationID) {
                     // After API call, navigate to PollsDetailViewController
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController") as! EventsDetailViewController
-                    
-                    vc.eventid = NotificationData?.nbdata[indexPath.row].id ?? ""
-                    vc.id = notificationID
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
+//                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "EventsDetailViewController") as! EventsDetailViewController
+//                    
+//                    vc.eventid = NotificationData?.nbdata[indexPath.row].id ?? ""
+//                    vc.id = notificationID
+//                    
+//                    self.navigationController?.pushViewController(vc, animated: true)
                 }
             }
             
@@ -439,7 +438,7 @@ extension NotificationViewController: UITableViewDataSource, UITableViewDelegate
         cell.lblName.font = UIFont(name: "Montserrat-SemiBold", size: 15)
         cell.lblSec.font = UIFont(name: "Montserrat-Regular", size: 13)
         cell.lblDate.font = UIFont(name: "Montserrat-Regular", size: 10)
-        cell.viewNotification.roundCorners([.topLeft, .bottomLeft], radius: 25)
+//        cell.viewNotification.roundCorners([.topLeft, .bottomLeft], radius: 25)
         return cell
     }
     

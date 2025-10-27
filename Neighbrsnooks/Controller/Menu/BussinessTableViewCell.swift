@@ -49,7 +49,7 @@ class BussinessTableViewCell: UITableViewCell {
     var BusinessListData : BussinessListModel?
     var bussData = [ImageBussi]()
     var FavoriteListData = [BusinessImage]()
-    var BusimgData = [BusinessImageH]()
+    var BusimgData = [BusinessImage]()
     
     var businessData: BusinessListData?
     var DotCallback : ((UIButton) -> Void)?
@@ -71,6 +71,7 @@ class BussinessTableViewCell: UITableViewCell {
         bussCollectionData = []
         collecViewBuss.isPagingEnabled = true
         collecViewBuss.delaysContentTouches = true
+        self.lblBussApproval.font = UIFont(name: "Montserrat-Regular", size: 14)
         collecViewBuss.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleCollectionViewTap)))
         // Horizontal scrolling enable karein
         if let layout = collecViewBuss.collectionViewLayout as? UICollectionViewFlowLayout {

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="AttendeesImageCell" id="gTV-IL-0wX" customClass="AttendeesImageCell" customModule="Neighbrsnooks" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="135" height="139"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="135" height="139"/>
+                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FP5-NP-hxl">
+                        <rect key="frame" x="0.0" y="0.0" width="135" height="139"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="rfh-QI-PIl">
+                                <rect key="frame" x="5" y="10" width="125" height="119"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="119" id="3cE-kC-7zX"/>
+                                    <constraint firstAttribute="width" constant="125" id="vPJ-Zd-IDQ"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eyX-Md-efq">
+                                <rect key="frame" x="105" y="2" width="20" height="20"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="20" id="5Nx-Re-1Lv"/>
+                                    <constraint firstAttribute="height" constant="20" id="LNy-8Q-NGJ"/>
+                                </constraints>
+                                <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" image="xmark.circle" catalog="system"/>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="0.94117647059999998" green="0.96862745100000003" blue="0.94117647059999998" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstItem="rfh-QI-PIl" firstAttribute="leading" secondItem="FP5-NP-hxl" secondAttribute="leading" constant="5" id="Hvg-la-dJc"/>
+                            <constraint firstItem="eyX-Md-efq" firstAttribute="top" secondItem="rfh-QI-PIl" secondAttribute="top" constant="-8" id="TNW-HS-m8x"/>
+                            <constraint firstItem="rfh-QI-PIl" firstAttribute="top" secondItem="FP5-NP-hxl" secondAttribute="top" constant="10" id="Z2d-xf-M4i"/>
+                            <constraint firstAttribute="bottom" secondItem="rfh-QI-PIl" secondAttribute="bottom" constant="10" id="pmb-b2-BWc"/>
+                            <constraint firstItem="eyX-Md-efq" firstAttribute="trailing" secondItem="rfh-QI-PIl" secondAttribute="trailing" constant="-5" id="wvY-Gv-AKk"/>
+                            <constraint firstAttribute="trailing" secondItem="rfh-QI-PIl" secondAttribute="trailing" constant="5" id="yl7-am-atV"/>
+                        </constraints>
+                    </view>
+                </subviews>
+            </view>
+            <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <constraints>
+                <constraint firstItem="FP5-NP-hxl" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="24Q-6c-ePv"/>
+                <constraint firstAttribute="trailing" secondItem="FP5-NP-hxl" secondAttribute="trailing" id="7cJ-QF-LMs"/>
+                <constraint firstItem="FP5-NP-hxl" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="BfI-9f-wWa"/>
+                <constraint firstAttribute="bottom" secondItem="FP5-NP-hxl" secondAttribute="bottom" id="CGY-eE-D5J"/>
+            </constraints>
+            <connections>
+                <outlet property="attenessImage" destination="rfh-QI-PIl" id="8Ms-qt-Weg"/>
+                <outlet property="btnImgDelete" destination="eyX-Md-efq" id="cLx-Nu-CqN"/>
+                <outlet property="mainView" destination="FP5-NP-hxl" id="oKi-Vx-9Y2"/>
+            </connections>
+            <point key="canvasLocation" x="69" y="20"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="xmark.circle" catalog="system" width="128" height="123"/>
+    </resources>
+</document>

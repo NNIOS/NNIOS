@@ -364,11 +364,11 @@ class SettingsViewController: BaseViewController {
                                                     
 
                                                                         ]
-          WebService.sharedInstance.callSettingsWebService(withParams: dictParams) { data in
-              
-              self.SettingData = data
-            
-          }
+//          WebService.sharedInstance.callSettingsWebService(withParams: dictParams) { data in
+//              
+//              self.SettingData = data
+//            
+//          }
         }
 //
     func callGetSettingsWebService(_ completionClosure: @escaping () -> ()) {
@@ -380,11 +380,11 @@ class SettingsViewController: BaseViewController {
                                                     
 
                                                                         ]
-          WebService.sharedInstance.callGetSettingsWebService(withParams: dictParams) { data in
-              
-              self.GetSettingData = data
-            
-          }
+//          WebService.sharedInstance.callGetSettingsWebService(withParams: dictParams) { data in
+//              
+//              self.GetSettingData = data
+//            
+//          }
         }
 
 }
