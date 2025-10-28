@@ -724,6 +724,14 @@ class HomeViewController: BaseViewController, UITextFieldDelegate, BussinessTabl
             print("⏳ awaitStatus: \(data.awaitStatus ?? "nil")")
             SVProgressHUD.dismiss()
             if data.status == "success" {
+                
+                if let referredMsg = data.referredUserMsg {
+                        UserDefaults.standard.set(referredMsg, forKey: "referredUserMsg")
+                        print("💾 referred_user_msg saved: \(referredMsg)")
+                    } else {
+                        print("⚠️ referred_user_msg not found in API response")
+                    }
+                
                 if let newListData = data.listdata {
                     if self.currentPage == 1 {
                         self.HomeNewData = data
@@ -899,7 +907,8 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate, HomeTa
             verifiedStatus: originalData.verifiedStatus,
             popupVerifiedStatus: originalData.popupVerifiedStatus,
             missmatchStatus: originalData.missmatchStatus,
-            listdata: filteredList
+            listdata: filteredList,
+            referredUserMsg: originalData.referredUserMsg
         )
         prepareSortedData(homeModel: filteredData)
         DispatchQueue.main.async {
@@ -2693,7 +2702,9 @@ extension HomeAllModel {
             verifiedStatus: self.verifiedStatus,
             popupVerifiedStatus: self.popupVerifiedStatus,
             missmatchStatus: self.missmatchStatus,
-            listdata: listdata
+            listdata: listdata,
+            referredUserMsg: self.referredUserMsg
+            
         )
     }
 }

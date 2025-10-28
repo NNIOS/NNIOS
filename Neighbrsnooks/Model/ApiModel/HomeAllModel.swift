@@ -12,6 +12,7 @@ struct HomeAllModel: Codable {
     let popupVerifiedStatus: Int?
     let missmatchStatus: String?
     var listdata: [HomeNewData]?
+    let referredUserMsg: String?
 
     enum CodingKeys: String, CodingKey {
         case status, message, announcement
@@ -25,6 +26,7 @@ struct HomeAllModel: Codable {
         case memberCount = "member_count"
         case verifiedStatus = "verified_status"
         case listdata
+        case referredUserMsg = "referred_user_msg"
     }
 }
 

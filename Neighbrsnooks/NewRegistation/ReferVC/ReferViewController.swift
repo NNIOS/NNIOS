@@ -43,7 +43,24 @@ class ReferViewController: BaseViewController {
         
      }
     
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        showReferredUserMessageIfAvailable()
+    }
+
+
+    // ✅ Common function to show message only if available
+    func showReferredUserMessageIfAvailable() {
+        if let referredMsg = UserDefaults.standard.string(forKey: "referredUserMsg"),
+           !referredMsg.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            showAlert(message: referredMsg)
+        }
+    }
+
+    
     @objc func neighborhoodTapped() {
+        showReferredUserMessageIfAvailable()
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let vc = storyboard.instantiateViewController(withIdentifier: "ReferListNeighbourhoodViewController") as? ReferListNeighbourhoodViewController {
             vc.modalPresentationStyle = .overFullScreen
@@ -63,6 +80,7 @@ class ReferViewController: BaseViewController {
 
     // MARK: - Button Action
     @IBAction func actionRefer(_ sender: Any) {
+        showReferredUserMessageIfAvailable()
         guard let referredName = txtReferName.text,
               !referredName.trimmingCharacters(in: .whitespaces).isEmpty else {
             showAlert(message: "Please enter full name")
@@ -85,7 +103,11 @@ class ReferViewController: BaseViewController {
     }
 
     // MARK: - Create Referral API
+ 
+    
     func createReferral(sender: Any) {
+        showReferredUserMessageIfAvailable()
+        
         guard let referrerUserId = Int(UserDefaults.standard.string(forKey: "userid") ?? ""),
               let referredName = txtReferName.text, !referredName.isEmpty,
               let referredPhone = txtPhone.text, !referredPhone.isEmpty else {
@@ -140,7 +162,7 @@ class ReferViewController: BaseViewController {
                 return
             }
 
-            // ✅ Print the full response to verify instantly
+            // ✅ Print full response for debugging
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("✅ API Response: \(jsonString)")
             }
@@ -149,21 +171,19 @@ class ReferViewController: BaseViewController {
                 let decodedResponse = try JSONDecoder().decode(ReferralResponse.self, from: data)
                 DispatchQueue.main.async {
                     if decodedResponse.success {
-                        // ✅ API success message
                         self.showAlert(message: "Referral created successfully!") {
-                            // After OK, open share screen
-                            let appLink = "https://neighbrsnook.com/open-app"
-                            let referralMessage = """
-                            Hi! I am referring you to join me on Neighbrsnook - it's a safe, real-neighbour app to stay connected and strengthen our community.
+                            // ✅ Combine API message + extra details
+                            let apiMessage = decodedResponse.data?.referMessage ?? ""
+                            let extraInfo = """
 
                             You have been invited by: \(decodedResponse.data?.referredName ?? "")
                             Neighbourhood ID: \(decodedResponse.data?.neighbourhoodId ?? 0)
                             Referral Code: \(decodedResponse.data?.referralCode ?? "")
-
-                            Download here: \(appLink)
                             """
+                            
+                            let finalMessage = apiMessage + "\n\n" + extraInfo
 
-                            let activityVC = UIActivityViewController(activityItems: [referralMessage], applicationActivities: nil)
+                            let activityVC = UIActivityViewController(activityItems: [finalMessage], applicationActivities: nil)
                             if let popover = activityVC.popoverPresentationController {
                                 popover.sourceView = self.view
                                 if let button = sender as? UIView {
@@ -173,7 +193,6 @@ class ReferViewController: BaseViewController {
                             self.present(activityVC, animated: true)
                         }
                     } else {
-                        // ❌ API returned failure
                         self.showAlert(message: decodedResponse.message)
                     }
                 }
@@ -182,11 +201,13 @@ class ReferViewController: BaseViewController {
                     self.showAlert(message: "Failed to parse response: \(error.localizedDescription)")
                 }
             }
+
         }
 
-        // ✅ Hit the API instantly on button click
+        // ✅ Execute API request
         task.resume()
     }
+
 
     func showAlert(message: String, completion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: "Neighbrsnook", message: message, preferredStyle: .alert)

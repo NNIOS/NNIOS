@@ -119,7 +119,8 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         if sourceScreen != "profile" && sourceScreen != "home" && sourceScreen != "profilebackUn" {
             UserDefaults.standard.set("step2", forKey: "registrationStep")
         }
-        
+        expandableViewHeightConstraint.constant = 250
+
         imgPrivacy.alpha = 0.12
         imgPrivacy.contentMode = .scaleAspectFit
         view.sendSubviewToBack(imgPrivacy)
@@ -225,63 +226,6 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         let referralStatus = UserDefaults.standard.integer(forKey: "referralStatus")
         
 
-//        if referralStatus == 0 && referrerNeighbourhoodStatus == 0 {
-//            // status 0: update texts and hide expand view and button
-//            lblSelectTheAdressProof.text = "Select Address Proof for your residence"
-//            viewExpand.isHidden = true
-//            btnExpand.isHidden = true
-//            viewReferdCodeHeight.constant = -40
-//            viewReferralCodeBottmHeight.constant = 0
-//            self.view.layoutIfNeeded()
-//        } else if referralStatus == 1 {
-//            // status 1: update texts and show expand view and button
-//            lblSelectTheAdressProof.text = "Address Proof for your residence"
-//            if optionalLabel == nil {
-//                selectViewHeightShowOptinal.constant += 20
-//                let label = UILabel()
-//                label.text = "(optional)"
-//                label.font = UIFont.systemFont(ofSize: 12)
-//                label.textColor = UIColor.gray
-//                label.translatesAutoresizingMaskIntoConstraints = false
-//                viewExpand.addSubview(label)
-//                lblSelectTheAdressProof.superview?.addSubview(label)
-//                NSLayoutConstraint.activate([
-//                    label.topAnchor.constraint(equalTo: lblSelectTheAdressProof.bottomAnchor, constant: 4),
-//                    label.leadingAnchor.constraint(equalTo: lblSelectTheAdressProof.leadingAnchor),
-//                    label.trailingAnchor.constraint(equalTo: lblSelectTheAdressProof.trailingAnchor)
-//                ])
-//
-//                optionalLabel = label
-//            }
-//
-//            fetchReferralDetails()
-//            viewExpand.isHidden = false
-//            btnExpand.isHidden = false
-//            imgPrivacy.isHidden = true
-//            expandableViewHeightConstraint.constant = 0
-//           
-//            expandableView.clipsToBounds = true
-//            
-//            // MARK: - API se aaye data ke saath label update
-//            if let decoded = self.referralDetailsModel { // assume yeh variable API response store karta hai
-//                if let referredName = decoded.data?.referredName,
-//                   let nbdName = decoded.data?.referrer?.nbdName {
-//                    lblNeighbrsnookHeading.text = "You have been referred by \(referredName) from \(nbdName), hence providing ID is optional"
-//                } else {
-//                    lblNeighbrsnookHeading.text = "You have been referred, hence providing ID is optional"
-//                }
-//            } else {
-//                // fallback text agar API data abhi nahi aaya
-//                lblNeighbrsnookHeading.text = "You have been referred, hence providing ID is optional"
-//            }
-//            
-//        } else {
-//            // Optional: handle other cases or default UI
-//            lblSelectTheAdressProof.text = "Address Proof for your residence"
-//            viewExpand.isHidden = true
-//            btnExpand.isHidden = true
-//        }
-
         
         // MARK: - Referral UI Logic
 
@@ -354,7 +298,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         
         
         viewSelectProof.layer.cornerRadius = 16
-        viewSelectProof.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
+//        viewSelectProof.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
         viewSelectProof.clipsToBounds = true
 
         
@@ -479,7 +423,7 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
     @IBAction func expandCollapseButtonTapped(_ sender: UIButton) {
             isExpanded.toggle()
             expandableView.clipsToBounds = true
-            expandableViewHeightConstraint.constant = isExpanded ? 300 : 0
+            expandableViewHeightConstraint.constant = isExpanded ? 250 : 0
             UIView.animate(withDuration: 0.3) {
                 self.view.layoutIfNeeded()
             }
@@ -1070,6 +1014,8 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         }
         
         UIView.animate(withDuration: 0.25) {
+            self.expandableViewHeightConstraint.constant = 320
+
             self.view.layoutIfNeeded()
         }
     }
@@ -1214,50 +1160,79 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
         genderTextField.placeholder = "Select Gender"
     }
     
+//    func setupDatePicker() {
+//        // Set the date picker mode to date only
+//        datePicker.datePickerMode = .date
+//        
+//        // Set the maximum date to today to prevent future dates selection
+//        datePicker.maximumDate = Date()
+//        
+//        // Set a minimum date (13 years ago from today)
+//        let calendar = Calendar.current
+//        let minDate = calendar.date(byAdding: .year, value: -13, to: Date())
+//        datePicker.maximumDate = minDate // Maximum date ko 13 saal pehle set kar rahe hain
+//        
+//        // Configure for iOS 14 and later
+//        if #available(iOS 14, *) {
+//            datePicker.preferredDatePickerStyle = .wheels // Use wheel style for better UX
+//        }
+//        
+//        // Set the date picker as the input view for the text field
+//        dobTextField.inputView = datePicker
+//        
+//        // Add target for the date picker value change
+//        datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
+//        
+//        // Set placeholder for the text field
+//        dobTextField.placeholder = "Select Date"
+//    }
+    
     func setupDatePicker() {
-        // Set the date picker mode to date only
         datePicker.datePickerMode = .date
         
-        // Set the maximum date to today to prevent future dates selection
-        datePicker.maximumDate = Date()
-        
-        // Set a minimum date (13 years ago from today)
         let calendar = Calendar.current
-        let minDate = calendar.date(byAdding: .year, value: -13, to: Date())
-        datePicker.maximumDate = minDate // Maximum date ko 13 saal pehle set kar rahe hain
         
-        // Configure for iOS 14 and later
+        // ✅ User must be at least 13 years old
+        let maxDate = calendar.date(byAdding: .year, value: -13, to: Date())
+        datePicker.maximumDate = maxDate
+        
+        // OPTIONAL: user ka birth year minimum 100 years old tak allowed
+        let minDate = calendar.date(byAdding: .year, value: -100, to: Date())
+        datePicker.minimumDate = minDate
+        
         if #available(iOS 14, *) {
-            datePicker.preferredDatePickerStyle = .wheels // Use wheel style for better UX
+            datePicker.preferredDatePickerStyle = .wheels
         }
         
-        // Set the date picker as the input view for the text field
         dobTextField.inputView = datePicker
-        
-        // Add target for the date picker value change
         datePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
-        
-        // Set placeholder for the text field
         dobTextField.placeholder = "Select Date"
     }
     
+//    @objc func dateChanged(_ sender: UIDatePicker) {
+//        let selectedDate = sender.date
+//        let calendar = Calendar.current
+//        let currentDate = Date()
+//        
+//        // Calculate the difference between current date and selected date
+//        let ageComponents = calendar.dateComponents([.year], from: selectedDate, to: currentDate)
+//        if let age = ageComponents.year, age < 13 {
+//            showAlert(message: "Age should be above 13 years")
+//            dobTextField.text = "" // Clear the text field
+//        } else {
+//            // Format the selected date and set it in the text field
+//            let dateFormatter = DateFormatter()
+//            dateFormatter.dateStyle = .medium
+//            dobTextField.text = dateFormatter.string(from: selectedDate)
+//        }
+//    }
+    
     @objc func dateChanged(_ sender: UIDatePicker) {
-        let selectedDate = sender.date
-        let calendar = Calendar.current
-        let currentDate = Date()
-        
-        // Calculate the difference between current date and selected date
-        let ageComponents = calendar.dateComponents([.year], from: selectedDate, to: currentDate)
-        if let age = ageComponents.year, age < 13 {
-            showAlert(message: "Age should be above 13 years")
-            dobTextField.text = "" // Clear the text field
-        } else {
-            // Format the selected date and set it in the text field
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateStyle = .medium
-            dobTextField.text = dateFormatter.string(from: selectedDate)
-        }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"   // ✅ Required by API
+        dobTextField.text = formatter.string(from: sender.date)
     }
+
    
     // Hide karte waqt aap ye function use kar sakte hain:
     func hideStackViewImage() {
@@ -1285,16 +1260,22 @@ class RegistationAdressProofVC: UIViewController, UIImagePickerControllerDelegat
             }
         }
         
+//        var formattedDOB = ""
+//        if let dobString = self.dobTextField.text, !dobString.isEmpty {
+//            let dateFormatter = DateFormatter()
+//            dateFormatter.dateFormat = "dd-MM-yyyy"
+//            if let date = dateFormatter.date(from: dobString) {
+//                formattedDOB = dateFormatter.string(from: date)
+//            } else {
+//                formattedDOB = dobString
+//            }
+//        }
+        
+        
         var formattedDOB = ""
-        if let dobString = self.dobTextField.text, !dobString.isEmpty {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "dd-MM-yyyy"
-            if let date = dateFormatter.date(from: dobString) {
-                formattedDOB = dateFormatter.string(from: date)
-            } else {
-                formattedDOB = dobString
-            }
-        }
+           if let dobString = self.dobTextField.text, !dobString.isEmpty {
+               formattedDOB = dobString
+           }
         
         // Parameters
         let dictParams: [String: String] = [

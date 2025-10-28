@@ -752,7 +752,6 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
     // MARK: - Registation Api
     
     func callRegSecWebService() {
-        
         let userID = UserDefaults.standard.string(forKey: "userid") ?? ""
         let dictParams: [String: Any] = [
             "address": txtFieldFlatHouse.text ?? "",

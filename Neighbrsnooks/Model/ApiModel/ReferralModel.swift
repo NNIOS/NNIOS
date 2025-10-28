@@ -23,6 +23,8 @@ struct ReferralData: Codable {
     let neighbourhoodId: Int
     let status: String
     let referredAt: String
+    let referSubject: String?
+    let referMessage: String?
     
     enum CodingKeys: String, CodingKey {
         case referralId = "referral_id"
@@ -34,6 +36,8 @@ struct ReferralData: Codable {
         case neighbourhoodId = "neighbourhood_id"
         case status
         case referredAt = "referred_at"
+        case referSubject = "refer_subject"
+        case referMessage = "refer_message"      
     }
 }
 
