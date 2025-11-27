@@ -71,7 +71,7 @@ class AccountManagmentViewController: UIViewController {
         //dev.
         
         print(parameters)
-        guard let url = URL(string: "https://dev.neighbrsnook.com/admin/api/delete-account-request") else {
+        guard let url = URL(string: "https://laravelpanel.neighbrsnook.com/api/delete-account-request") else {
             print("❌ Invalid URL")
             return
         }

@@ -329,23 +329,29 @@ class MemberTableViewCell: UITableViewCell,UICollectionViewDelegateFlowLayout,UI
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         print("Data in imgDataAll: \(imgDataAll)") // Prints the entire data
         print("Total items in section: \(imgDataAll.count)") // Prints the count of items
-        return imgDataAll.count ?? 0
+        return imgDataAll.count
         
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCollectionViewCell", for: indexPath) as! HomeCollectionViewCell
-        let postImage = imgDataAll[indexPath.row]  // Current item
         
+        guard indexPath.row < imgDataAll.count else {
+            print("⚠️ Index out of range: \(indexPath.row) / \(imgDataAll.count)")
+            return cell
+        }
+        
+        let postImage = imgDataAll[indexPath.row]
         let totalCount = imgDataAll.count
         cell.configure(with: postImage, totalCount: totalCount)
         cell.numberLabel.text = "\(indexPath.item + 1)"
         cell.numberLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
         cell.totalImagesLabel.font = UIFont(name: "Montserrat-Regular", size: 12)
-        let totalNumberOfImages = imgDataAll.count
-        cell.totalImagesLabel.text =  "/ \(totalNumberOfImages)"
+        cell.totalImagesLabel.text =  "/ \(totalCount)"
+        
         return cell
     }
+
     
     
     

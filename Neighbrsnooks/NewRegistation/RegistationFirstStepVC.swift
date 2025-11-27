@@ -58,7 +58,7 @@ class RegistationFirstStepVC: BaseViewController {
     var otpFields: [CustomLabelFirstName] = []
     var isVerifyingOTP = false
     var numberOfOTPdigit = 6
-    var objVerifyModel:VerifyOTPModel?
+    var objVerifyModel:VerifyOTPResponse?
     var textFieldArray = [CustomLabelFirstName]()
     
     
@@ -202,52 +202,7 @@ extension RegistationFirstStepVC : UITextFieldDelegate {
         }
     }
     
-    
-    
-    
-    //    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-    //        guard let currentText = textField.text else { return false }
-    //        let isDeleting = string.isEmpty
-    //
-    //        if !isDeleting && currentText.count >= 1 {
-    //            return false
-    //        }
-    //        if let typedField = textField as? CustomLabelFirstName,
-    //           let index = otpFields.firstIndex(of: typedField) {
-    //            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-    //                if isDeleting {
-    //                    if index > 0 {
-    //                        self.otpFields[index - 1].becomeFirstResponder()
-    //                    }
-    //                } else {
-    //                    if index < self.otpFields.count - 1 {
-    //                        self.otpFields[index + 1].becomeFirstResponder()
-    //                    } else {
-    //                        self.otpFields[index].resignFirstResponder()
-    //                        let enteredOTP = self.otpFields.compactMap { $0.text }.joined()
-    //                        if enteredOTP.count == 6 {
-    //                            self.callVerifyOTPWebService(userOTP: enteredOTP) { success, message in
-    //                                DispatchQueue.main.async {
-    //                                    if success {
-    //                                        print("✅ OTP matched")
-    //                                        self.checkImage.isHidden = false
-    //                                        self.checkImage.image = UIImage(named: "check")
-    //                                        self.showAutoDismissAlert(message: "Code Matched successfully.")
-    //                                    } else {
-    //                                        print("✅ OTP did not match")
-    //                                        self.checkImage.isHidden = false
-    //                                        self.checkImage.image = UIImage(named: "CrossOtp")
-    //                                        self.showAutoDismissAlert(message: "Code does not match.")
-    //                                    }
-    //                                }
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        return true
-    //    }
+
 }
 
 // MARK: - extension for Controller
@@ -337,9 +292,12 @@ extension RegistationFirstStepVC {
             alertToast(Message: "Please enter a valid email address"); return
         }
         
-        if self.objVerifyModel?.description.desc == "Code does not match." {
-            alertToast(Message: self.objVerifyModel?.description.desc ?? ""); return
+        if let msg = self.objVerifyModel?.message,
+           msg.lowercased().contains("does not match") {
+            alertToast(Message: msg)
+            return
         }
+
         guard let password = passwordTF.text, !password.isEmpty else {
             alertToast(Message: "Please enter password"); return
         }
@@ -501,112 +459,209 @@ extension RegistationFirstStepVC {
         timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
     }
     
-    // MARK:  Send OTP Api method
+    // MARK: - Send OTP API method
     func callOTPWebService(_ completionClosure: @escaping () -> ()) {
+
         let dictParams: [String: Any] = [
             "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
-            "reqestmobileno": self.phoneNumberTF.text ?? ""
+            "phone_no": self.phoneNumberTF.text ?? ""
+            
         ]
+
         print("Param isn : \(dictParams)")
-        WebService.sharedInstance.callOTPWebService(withParams: dictParams) { data in
-            self.loadingAlert = self.showLoadingAlert(on: self)
-            print("Send OTP Model: \(data)")
-            self.SendOTPData = data
-            self.loadingAlert?.dismiss(animated: true, completion: {
-                if self.SendOTPData?.status == "success" {
-                    self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "OTP Sent Successfully")
-                    self.otpView.isHidden = false
-                    self.otpViewHeightConst.constant = 50
-                    self.otpTopHeightConst.constant = 15
-                    self.otpBottomHeightConst.constant = 15
-                    completionClosure()
-                    
-                    // ✅ Auto-fill OTP from API if available
-                    if let otp = self.SendOTPData?.otp, otp.count == 6 {
-                        let otpChars = Array(otp)
-                        self.otpFields = [self.firstOtpTF, self.secondOtpTF, self.thirdOtpTF, self.fourthOtpTF, self.fifthOtpTF, self.sixthOtpTF]
-                        
-                        for (i, tf) in self.otpFields.enumerated() {
-                            tf.text = String(otpChars[i])
-                        }
-                        let enteredOTP = self.otpFields.compactMap { $0.text }.joined()
-                        self.callVerifyOTPWebService(userOTP: enteredOTP) { success, message in
-                            DispatchQueue.main.async {
-                                if success {
-                                    print("✅ OTP matched (Auto-filled)")
-                                    self.checkImage.isHidden = false
-                                    self.checkImage.image = UIImage(named: "check")
-                                    //                                    self.showAutoDismissAlert(message: "")
-                                } else {
-                                    self.checkImage.isHidden = false
-                                    self.checkImage.image = UIImage(named: "CrossOtp")
-                                    //                                    self.showAutoDismissAlert(message: nil)
+
+        // Show loader
+        self.loadingAlert = self.showLoadingAlert(on: self)
+
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json"
+        ]
+
+        Alamofire.Session.default.request(
+            "https://laravelpanel.neighbrsnook.com/api/send-otp",
+            method: .post,
+            parameters: dictParams,
+            encoding: JSONEncoding.default,
+            headers: headers
+        ).responseData { response in
+
+            switch response.result {
+
+            // ---------------------------------------------------
+            // MARK: - SUCCESS RESPONSE
+            // ---------------------------------------------------
+            case .success(let data):
+
+                do {
+                    let otpResponse = try JSONDecoder().decode(OtpModel.self, from: data)
+                    print("OTP Response:", otpResponse)
+
+                    self.SendOTPData = otpResponse
+
+                    // FIRST dismiss loader then continue
+                    self.loadingAlert?.dismiss(animated: true, completion: {
+
+                        DispatchQueue.main.async {
+
+                            // ---------------------------------------------------------
+                            // CASE 1: SUCCESS
+                            // ---------------------------------------------------------
+                            if otpResponse.status == true {
+
+                                self.showAutoDismissAlert(message: otpResponse.message ?? "OTP Sent Successfully")
+
+                                self.otpView.isHidden = false
+                                self.otpViewHeightConst.constant = 50
+                                self.otpTopHeightConst.constant = 15
+                                self.otpBottomHeightConst.constant = 15
+
+                                completionClosure()
+
+                                // Auto-fill OTP if available
+                                if let otp = otpResponse.otp, otp.count == 6 {
+
+                                    let otpChars = Array(otp)
+
+                                    self.otpFields = [
+                                        self.firstOtpTF,
+                                        self.secondOtpTF,
+                                        self.thirdOtpTF,
+                                        self.fourthOtpTF,
+                                        self.fifthOtpTF,
+                                        self.sixthOtpTF
+                                    ]
+
+                                    for (i, tf) in self.otpFields.enumerated() {
+                                        tf.text = String(otpChars[i])
+                                    }
+
+                                    let enteredOTP = self.otpFields.compactMap { $0.text }.joined()
+
+                                    self.callVerifyOTPWebService(userOTP: enteredOTP) { success, message in
+                                        DispatchQueue.main.async {
+                                            self.checkImage.isHidden = false
+                                            self.checkImage.image = UIImage(named: success ? "check" : "CrossOtp")
+                                        }
+                                    }
                                 }
+
+                            } else {
+                                // ---------------------------------------------------------
+                                // CASE 2: FAILED RESPONSE (Number already exists, etc)
+                                // ---------------------------------------------------------
+                                let msg = otpResponse.message ?? "Something went wrong"
+                                print("❌ API Error:", msg)
+
+                                self.showAutoDismissAlert(message: msg)
+
+
                             }
                         }
-                    }
-                } else if self.SendOTPData?.status == "failed" {
-                    self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "Something went wrong")
+                    })
+
+                } catch {
+                    print("❌ JSON Decode Error:", error.localizedDescription)
+
+                    self.loadingAlert?.dismiss(animated: true, completion: {
+                        self.showAutoDismissAlert(message: "Invalid response from server")
+                    })
                 }
-            })
+
+            // ---------------------------------------------------
+            // MARK: - FAILURE (NO INTERNET ETC.)
+            // ---------------------------------------------------
+            case .failure(let error):
+                print("❌ Request Error:", error.localizedDescription)
+
+                self.loadingAlert?.dismiss(animated: true, completion: {
+                    self.showAutoDismissAlert(message: "Network error")
+                })
+            }
         }
     }
+
+
     
     // MARK:  Verify OTP Api method
     func callVerifyOTPWebService(userOTP: String, completion: @escaping (Bool, String) -> Void) {
+
         guard let mobileNumber = phoneNumberTF.text, !mobileNumber.isEmpty else {
             completion(false, "Mobile number is missing.")
             return
         }
-        let dictParams: [String: Any] = ["otpvarify": userOTP, "reqestmobileno": mobileNumber]
-        print("Verify OTP Param is : \(dictParams)")
+
+        // ✅ Correct backend params
+        let dictParams: [String: Any] = [
+            "phone_no": mobileNumber,
+            "otp": userOTP
+           
+        ]
+
+        print("✅ Verify OTP Params: \(dictParams)")
+
+        // Show loader
         self.loadingAlert = self.showLoadingAlert(on: self)
-        WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { response in
-            self.objVerifyModel = response
-            print("Parsed Model: \(String(describing: response))")
-            self.loadingAlert?.dismiss(animated: true, completion: {
-                if self.objVerifyModel?.status == "success",
-                   let message = self.objVerifyModel?.description.desc,
-                   message != "Code does not match." {
-                    self.isOTPVerified = true
-                    self.emailTF.becomeFirstResponder()
-                    completion(true, self.objVerifyModel?.description.desc ?? "OTP Verified.")
-                    //                    completion(true, message)
-                } else {
-                    self.isOTPVerified = false
-                    completion(false, self.objVerifyModel?.description.desc ?? "Invalid OTP.")
-                    
+
+        // ✅ Headers
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer ",   // If token needed, add here
+            "Content-Type": "application/json"
+        ]
+
+        // ✅ DIRECT POST REQUEST
+        Alamofire.Session.default.request(
+            "https://laravelpanel.neighbrsnook.com/api/otp_verify",
+            method: .post,
+            parameters: dictParams,
+            encoding: JSONEncoding.default,
+            headers: headers
+        ).responseData { response in
+
+            // Hide loader
+            DispatchQueue.main.async {
+                self.loadingAlert?.dismiss(animated: true)
+            }
+
+            switch response.result {
+
+            case .success(let data):
+                do {
+                    let verifyResponse = try JSONDecoder().decode(VerifyOTPResponse.self, from: data)
+                    print("✅ Verify OTP Response:", verifyResponse)
+
+                    DispatchQueue.main.async {
+                        if verifyResponse.status == true {
+                            // ✅ OTP Verified
+                            self.isOTPVerified = true
+                            self.emailTF.becomeFirstResponder()
+
+                            completion(true, verifyResponse.message ?? "OTP Verified Successfully.")
+                        } else {
+                            // ❌ Wrong OTP
+                            self.isOTPVerified = false
+                            completion(false, verifyResponse.message ?? "Invalid OTP.")
+                        }
+                    }
+
+                } catch {
+                    print("❌ Decode Error:", error.localizedDescription)
+                    DispatchQueue.main.async {
+                        completion(false, "Invalid server response.")
+                    }
                 }
-            })
+
+            case .failure(let error):
+                print("❌ Request Failed:", error.localizedDescription)
+                DispatchQueue.main.async {
+                    completion(false, "Network error")
+                }
+            }
         }
     }
-    //    func callVerifyOTPWebService(userOTP: String, completion: @escaping (Bool, String) -> Void) {
-    //        guard let mobileNumber = phoneNumberTF.text, !mobileNumber.isEmpty else {
-    //            completion(false, "Mobile number is missing.")
-    //            return
-    //        }
-    //        let dictParams: [String: Any] = ["otpvarify": userOTP, "reqestmobileno": mobileNumber]
-    //        print("Verify OTP Param is : \(dictParams)")
-    //        self.loadingAlert = self.showLoadingAlert(on: self)
-    //        WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { response in
-    //            let responseModel = response
-    //            print("Parsed Model: \(String(describing: response))")
-    //            self.loadingAlert?.dismiss(animated: true, completion: {
-    //                if responseModel.status == "success",
-    //                   let message = responseModel.description.desc,
-    //                   message != "Code does not match." {
-    //                    self.isOTPVerified = true
-    //                    self.emailTF.becomeFirstResponder()
-    //                    completion(true, responseModel.description.desc ?? "OTP Verified.")
-    //                    //                    completion(true, message)
-    //                } else {
-    //                    self.isOTPVerified = false
-    //                    completion(false, responseModel.description.desc ?? "Invalid OTP.")
-    //
-    //                }
-    //            })
-    //        }
-    //    }
+
+    
+   
     
     // MARK:  Verify Email Api method
     func callVerifyEmailAPI(_ completionClosure: @escaping () -> ()) {
@@ -624,45 +679,7 @@ extension RegistationFirstStepVC {
         }
     }
     
-    // MARK:  Register Web Service Api method
-    
-    //    func callRegisterWebService(firebaseToken: String,_ completionClosure: @escaping () -> ()) {
-    //        let dictParams: [String: Any] = [
-    //            "name": self.fullNameTF.text ?? "",
-    //            "emailid": self.emailTF.text ?? "",
-    //            "phoneno": self.phoneNumberTF.text ?? "",
-    //            "password": self.passwordTF.text ?? "",
-    //            "term": isTerm ?? "",
-    //            "firebase_token": firebaseToken
-    //        ]
-    //        print("param is :\(dictParams)")
-    //        self.loadingAlert = self.showLoadingAlert(on: self)
-    //        WebService.sharedInstance.callRegisterWebServiceFirst(withParams: dictParams) { responseData in
-    //            self.registerData = responseData
-    //            self.registerData = responseData
-    //            if let userID = self.registerData?.userid {
-    //                UserDefaults.standard.set(userID, forKey: "userid")
-    //                print("✅ Saved userID: \(userID)")
-    //                // ✅ Location API ko yahan call karo
-    //                self.callUserLocationWebService()
-    //            }
-    //            print("Api data response is model is : \(String(describing: self.registerData))")
-    //            self.loadingAlert?.dismiss(animated: true, completion: {
-    //                if self.registerData?.status == "success" {
-    //                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "NewRegistationSecondStepVC") as! NewRegistationSecondStepVC
-    //                    self.showToast(message: self.registerData?.message ?? "Something went wrong")
-    //                    UserDefaults.standard.set(self.fullNameTF.text ?? "", forKey: "userFirstName")
-    //                    print("User created successfully. Please proceed with registration.")
-    //                    self.navigationController?.pushViewController(vc, animated: false)
-    //                    completionClosure()
-    //                } else {
-    //                    self.showAlert(message: self.registerData?.message ?? "")
-    //                }
-    //            })
-    //
-    //        }
-    //    }
-    
+
     
     // Updated callsendImageAPI accepting data and error in completion
     func callsendImageAPI(param: [String: Any], arrImage: [UIImage], imageKey: String, URlName: String, withblock: @escaping (Data?, Error?) -> Void) {
@@ -775,6 +792,7 @@ extension RegistationFirstStepVC {
     func callRegisterWebService(firebaseToken: String, completionClosure: @escaping () -> ()) {
         let fullName = self.fullNameTF.text ?? ""
         UserDefaults.standard.set(self.phoneNumberTF.text ?? "", forKey: "savedPhoneNumber")
+        UserDefaults.standard.set(self.fullNameTF.text ?? "", forKey: "userFirstName")
         
         let firstLetter = String(fullName.trimmingCharacters(in: .whitespaces).prefix(1)).uppercased()
         let bgColor = UIColor.colorForAlphabet(firstLetter)
@@ -821,6 +839,7 @@ extension RegistationFirstStepVC {
                 do {
                     let decodedResponse = try JSONDecoder().decode(RegisterModel.self, from: data)
                     self.registerData = decodedResponse
+                    UserDefaults.standard.set(true, forKey: "isFirstLaunch")
                     print("✅ Parsed Response: \(decodedResponse)")
                 } catch {
                     print("❌ JSON Decoding error: \(error.localizedDescription)")
@@ -850,13 +869,7 @@ extension RegistationFirstStepVC {
         return img
     }
     
-    
-    
-    
-    
-    
-    
-    
+   
     
     func showToast(message: String) {
         let toastLabel = UILabel(frame: CGRect(x: self.view.frame.size.width/2 - 150, y: self.view.frame.size.height-100, width: 300, height: 40))
@@ -881,7 +894,7 @@ extension RegistationFirstStepVC {
     // MARK:  USER LOCATION Api method  //dev.
     func callUserLocationWebService() {
         let id = UserDefaults.standard.string(forKey: "userid")
-        let url = "https://dev.neighbrsnook.com/admin/api/user-location"
+        let url = "https://laravelpanel.neighbrsnook.com/api/user-location"
         let params: [String: Any] = [
             "userid": id ?? "",
             "latitude": currentLatitude ?? 0.0,

@@ -19,6 +19,7 @@
 		0442B03E2DDF327A00C3CBD2 /* UserDeletePicModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0442B03D2DDF327A00C3CBD2 /* UserDeletePicModel.swift */; };
 		0475C0B02DE4336C003387F5 /* PublicProfileVisibilityVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0475C0AF2DE4336C003387F5 /* PublicProfileVisibilityVC.swift */; };
 		0475C0BA2DE4887A003387F5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0475C0B92DE4887A003387F5 /* GoogleService-Info.plist */; };
+		0481C06B2ED71D4F00E44566 /* OnboardingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0481C0692ED71D4F00E44566 /* OnboardingVC.swift */; };
 		0491B2DF2E3DEE4400206E52 /* RegistationFirstStepVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B2DE2E3DEE4400206E52 /* RegistationFirstStepVC.swift */; };
 		0491B2E12E3DF57400206E52 /* NewRegistationSecondStepVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B2E02E3DF57400206E52 /* NewRegistationSecondStepVC.swift */; };
 		0491B2F32DA7A65C00955502 /* FontUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0491B2F22DA7A65C00955502 /* FontUtility.swift */; };
@@ -499,6 +500,7 @@
 		04E76F7F2E40824900A4E518 /* NeighbrhoodTblViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E76F7E2E40824900A4E518 /* NeighbrhoodTblViewCell.swift */; };
 		04E779382EAA632300A11B58 /* DK25CompatibilityHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E779372EAA632300A11B58 /* DK25CompatibilityHelper.swift */; };
 		04E9E2DD2E03ED9F00F57933 /* LocationPermissionPopupVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04E9E2DC2E03ED9F00F57933 /* LocationPermissionPopupVC.swift */; };
+		04EC698A2EB22D1C00BAE2A0 /* ReferralsValidateNeighbourhoodModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04EC69892EB22D1C00BAE2A0 /* ReferralsValidateNeighbourhoodModel.swift */; };
 		04F578022E1FDDEB00D1BB8F /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F578012E1FDDEB00D1BB8F /* ImageLoader.swift */; };
 		04F99EC72DCDDDD600112CC3 /* PostDetailsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F99EC62DCDDDD600112CC3 /* PostDetailsVC.swift */; };
 		04F9C5732DED839B00048C69 /* LocationPermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F9C5722DED839B00048C69 /* LocationPermissionManager.swift */; };
@@ -537,6 +539,7 @@
 		0442B03D2DDF327A00C3CBD2 /* UserDeletePicModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDeletePicModel.swift; sourceTree = "<group>"; };
 		0475C0AF2DE4336C003387F5 /* PublicProfileVisibilityVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicProfileVisibilityVC.swift; sourceTree = "<group>"; };
 		0475C0B92DE4887A003387F5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		0481C0692ED71D4F00E44566 /* OnboardingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingVC.swift; sourceTree = "<group>"; };
 		0491B2DE2E3DEE4400206E52 /* RegistationFirstStepVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegistationFirstStepVC.swift; sourceTree = "<group>"; };
 		0491B2E02E3DF57400206E52 /* NewRegistationSecondStepVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewRegistationSecondStepVC.swift; sourceTree = "<group>"; };
 		0491B2F12DA7A65C00955502 /* checkCameraPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = checkCameraPermission.swift; sourceTree = "<group>"; };
@@ -1014,6 +1017,7 @@
 		04E76F7E2E40824900A4E518 /* NeighbrhoodTblViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeighbrhoodTblViewCell.swift; sourceTree = "<group>"; };
 		04E779372EAA632300A11B58 /* DK25CompatibilityHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DK25CompatibilityHelper.swift; sourceTree = "<group>"; };
 		04E9E2DC2E03ED9F00F57933 /* LocationPermissionPopupVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPermissionPopupVC.swift; sourceTree = "<group>"; };
+		04EC69892EB22D1C00BAE2A0 /* ReferralsValidateNeighbourhoodModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferralsValidateNeighbourhoodModel.swift; sourceTree = "<group>"; };
 		04ED67152DAD1A6700822687 /* Neighbrsnooks.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Neighbrsnooks.entitlements; sourceTree = "<group>"; };
 		04F578012E1FDDEB00D1BB8F /* ImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageLoader.swift; sourceTree = "<group>"; };
 		04F99EC62DCDDDD600112CC3 /* PostDetailsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostDetailsVC.swift; sourceTree = "<group>"; };
@@ -1137,6 +1141,14 @@
 				04364B762E9D30B700A6672D /* ReferListNeighbourhoodTableViewCell.swift */,
 			);
 			path = Cell;
+			sourceTree = "<group>";
+		};
+		0481C06A2ED71D4F00E44566 /* OnboardingScreen */ = {
+			isa = PBXGroup;
+			children = (
+				0481C0692ED71D4F00E44566 /* OnboardingVC.swift */,
+			);
+			path = OnboardingScreen;
 			sourceTree = "<group>";
 		};
 		0491B3922DA7A73C00955502 /* Montserrat (1) */ = {
@@ -1751,6 +1763,7 @@
 				04C12FD32E9FB7C900DE18FA /* ReferListNeighbourhoodModel.swift */,
 				04AE39212EA0D1CA008A68AF /* ReferralDetailsModel.swift */,
 				04BA6D132EA2672D0022D3A2 /* ReferralResponseModel.swift */,
+				04EC69892EB22D1C00BAE2A0 /* ReferralsValidateNeighbourhoodModel.swift */,
 			);
 			path = ApiModel;
 			sourceTree = "<group>";
@@ -2118,6 +2131,7 @@
 			isa = PBXGroup;
 			children = (
 				04ED67152DAD1A6700822687 /* Neighbrsnooks.entitlements */,
+				0481C06A2ED71D4F00E44566 /* OnboardingScreen */,
 				04DB4B7A2DA7954400A4CC0C /* Application */,
 				0491B98A2DA7BEEE00955502 /* NetworkMonitor */,
 				0491B9632DA7BEDB00955502 /* Basics */,
@@ -2517,6 +2531,7 @@
 				0491B9EC2DA7BF1600955502 /* SearchNeighouhoodViewController.swift in Sources */,
 				0491B9ED2DA7BF1600955502 /* RegisterModel.swift in Sources */,
 				0491B9EE2DA7BF1600955502 /* UpdateTableViewCell.swift in Sources */,
+				0481C06B2ED71D4F00E44566 /* OnboardingVC.swift in Sources */,
 				0491B9EF2DA7BF1600955502 /* SponsorTableViewCell.swift in Sources */,
 				0491BA122DA7C8DB00955502 /* AddBussinessViewController.swift in Sources */,
 				0491B9F02DA7BF1600955502 /* CapitalizingTextField.swift in Sources */,
@@ -2708,6 +2723,7 @@
 				04A2FFF82E4CBCDA00D69908 /* SplashVC.swift in Sources */,
 				0491B8392DA7BE2600955502 /* FavBussinessDataCollectionViewCell.swift in Sources */,
 				049293DB2E40B83E00A64278 /* SearchNewNeighouhoodViewController.swift in Sources */,
+				04EC698A2EB22D1C00BAE2A0 /* ReferralsValidateNeighbourhoodModel.swift in Sources */,
 				0491B83A2DA7BE2600955502 /* ChatMessageModel.swift in Sources */,
 				0491B83B2DA7BE2600955502 /* MessageChatTableViewCell.swift in Sources */,
 				0491B83C2DA7BE2600955502 /* PollDotViewController.swift in Sources */,
@@ -3078,6 +3094,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Neighbrsnooks/Neighbrsnooks.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -3094,7 +3111,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs access to the microphone to record video audio.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to upload images.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -3104,7 +3121,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 8.3;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = NeighbrsnookMalik.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -3124,6 +3141,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Neighbrsnooks/Neighbrsnooks.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -3140,7 +3158,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "This app needs access to the microphone to record video audio.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to upload images.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -3150,7 +3168,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 8.3;
+				MARKETING_VERSION = 1.7;
 				PRODUCT_BUNDLE_IDENTIFIER = NeighbrsnookMalik.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

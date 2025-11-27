@@ -729,7 +729,7 @@ class RegisterViewController: BaseViewController, CLLocationManagerDelegate {
             return
         }
         //dev.
-        let url = URL(string: "https://dev.neighbrsnook.com/admin/api/verify-email")!
+        let url = URL(string: "https://laravelpanel.neighbrsnook.com/api/verify-email")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -789,38 +789,38 @@ class RegisterViewController: BaseViewController, CLLocationManagerDelegate {
     
     
     func callOTPWebService(_ completionClosure: @escaping () -> ()) {
-        let dictParams: [String: Any] = [
-            "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
-            "reqestmobileno": self.tfMobile.text ?? ""
-        ]
-        
-        WebService.sharedInstance.callOTPWebService(withParams: dictParams) { data in
-            print("📢 Full API Response: \(data)") // ✅ Full API Response Debug
-            
-            self.SendOTPData = data
-            
-            if let dictData = data as? [String: Any] {
-                print("📢 Dictionary Response: \(dictData)")
-            } else {
-                print("❌ API Response is NOT a Dictionary")
-            }
-            
-            if self.SendOTPData?.status == "success" {
-                if let otp = self.SendOTPData?.otp {
-                    print("✅ OTP Sent to Mobile: \(otp)")
-                } else {
-                    print("❌ OTP NOT FOUND in API Response")
-                }
-                
-                // ✅ Show success alert for 2 seconds
-                self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "OTP Sent Successfully")
-                completionClosure()
-                
-            } else {
-                // ❌ Show error alert for 2 seconds
-                self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "Something went wrong")
-            }
-        }
+//        let dictParams: [String: Any] = [
+//            "device_token": FunctionsConstants.kSharedUserDefaults.deviceToken(),
+//            "reqestmobileno": self.tfMobile.text ?? ""
+//        ]
+//        
+//        WebService.sharedInstance.callOTPWebService(withParams: dictParams) { data in
+//            print("📢 Full API Response: \(data)") // ✅ Full API Response Debug
+//            
+//            self.SendOTPData = data
+//            
+//            if let dictData = data as? [String: Any] {
+//                print("📢 Dictionary Response: \(dictData)")
+//            } else {
+//                print("❌ API Response is NOT a Dictionary")
+//            }
+//            
+//            if self.SendOTPData?.status == "success" {
+//                if let otp = self.SendOTPData?.otp {
+//                    print("✅ OTP Sent to Mobile: \(otp)")
+//                } else {
+//                    print("❌ OTP NOT FOUND in API Response")
+//                }
+//                
+//                // ✅ Show success alert for 2 seconds
+//                self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "OTP Sent Successfully")
+//                completionClosure()
+//                
+//            } else {
+//                // ❌ Show error alert for 2 seconds
+//                self.showAutoDismissAlert(message: self.SendOTPData?.message ?? "Something went wrong")
+//            }
+//        }
     }
     
     
@@ -922,7 +922,7 @@ class RegisterViewController: BaseViewController, CLLocationManagerDelegate {
         let id = UserDefaults.standard.string(forKey: "userid")
         print("✅ User ID after login: \(id ?? "Not Found")")
         
-        let url = "https://dev.neighbrsnook.com/admin/api/user-location" // dev.
+        let url = "https://laravelpanel.neighbrsnook.com/api/user-location" // dev.
         let params: [String: Any] = [
             "userid": id ?? "",
             "latitude": currentLatitude ?? 0.0,
@@ -984,30 +984,30 @@ class RegisterViewController: BaseViewController, CLLocationManagerDelegate {
         
         print("📌 Sending OTP Verification with Params: \(dictParams)")
         
-        WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { response in
-            print("📌 Received response: \(String(describing: response))")
-            print("📌 Type of response received: \(type(of: response))")
-            
-            guard let responseModel = response as? VerifyOTPModel else {
-                print("❌ Response is not of type VerifyOTPModel. Actual Type: \(type(of: response))")
-                completion(false, "Invalid response from server.")
-                return
-            }
-            
-            print("📌 Parsed Model: Status = \(String(describing: responseModel.status)), Description = \(String(describing: responseModel.description.desc))")
-            
-            if responseModel.status == "success" {
-                if responseModel.description.desc == "Code does not match." {
-                    self.isOTPVerified = false
-                } else {
-                    self.isOTPVerified = true
-                }
-                print("Isvarified is : \(self.isOTPVerified)")
-                completion(true, responseModel.description.desc ?? "OTP Verified Successfully.")
-            } else {
-                completion(false, responseModel.description.desc ?? "Invalid OTP.")
-            }
-        }
+//        WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { response in
+//            print("📌 Received response: \(String(describing: response))")
+//            print("📌 Type of response received: \(type(of: response))")
+//            
+//            guard let responseModel = response as? VerifyOTPModel else {
+//                print("❌ Response is not of type VerifyOTPModel. Actual Type: \(type(of: response))")
+//                completion(false, "Invalid response from server.")
+//                return
+//            }
+//            
+//            print("📌 Parsed Model: Status = \(String(describing: responseModel.status)), Description = \(String(describing: responseModel.description.desc))")
+//            
+//            if responseModel.status == "success" {
+//                if responseModel.description.desc == "Code does not match." {
+//                    self.isOTPVerified = false
+//                } else {
+//                    self.isOTPVerified = true
+//                }
+//                print("Isvarified is : \(self.isOTPVerified)")
+//                completion(true, responseModel.description.desc ?? "OTP Verified Successfully.")
+//            } else {
+//                completion(false, responseModel.description.desc ?? "Invalid OTP.")
+//            }
+//        }
     }
     
     
@@ -1097,21 +1097,3 @@ extension RegisterViewController: UITextFieldDelegate {
 
  
 
-extension UIViewController {
-    func showAutoDismissAlert(message: String) {
-        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
-        let messageFont = UIFont(name: "Montserrat-Regular", size: 15) ?? UIFont.systemFont(ofSize: 14)
-        let messageAttrString = NSAttributedString(
-            string: message,
-            attributes: [
-                .font: messageFont,
-                .foregroundColor: #colorLiteral(red: 0.3607843137, green: 0.3607843137, blue: 0.3607843137, alpha: 1)
-            ]
-        )
-        alert.setValue(messageAttrString, forKey: "attributedMessage")
-        self.present(alert, animated: true)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
-            alert.dismiss(animated: true, completion: nil)
-        }
-    }
-}

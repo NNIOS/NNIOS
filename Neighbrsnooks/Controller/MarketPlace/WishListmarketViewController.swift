@@ -126,15 +126,8 @@ class WishListmarketViewController: UIViewController,UICollectionViewDelegate,UI
                 return
             }
        // let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let url = "https://dev.neighbrsnook.com/admin/api/wishlist/\(id)"
-
-        
-       
-        // let dictParams: Dictionary<String, Any> = ["":""]
-       
-       
+        let url = "https://laravelpanel.neighbrsnook.com/api/wishlist/\(id)"
         let dictParams: Dictionary<String, Any> = ["":""]
-        
         RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.GET,requestParameters: dictParams, withProgressHUD: true)
         {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
             switch statusCode {

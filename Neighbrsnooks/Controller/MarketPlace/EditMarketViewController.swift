@@ -471,81 +471,141 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
     
     @objc func selectImages() {
         let actionSheet = UIAlertController(title: "", message: "", preferredStyle: .actionSheet)
-        
+
+        // PHOTO OPTIONS
         actionSheet.addAction(UIAlertAction(title: "Take Photo", style: .default, handler: { _ in
             self.openCamera()
-            
         }))
-        
+
         actionSheet.addAction(UIAlertAction(title: "Choose Photo", style: .default, handler: { _ in
             self.openGallery()
         }))
-        
+
+        // ⭐ VIDEO OPTIONS
+        actionSheet.addAction(UIAlertAction(title: "Take Video", style: .default, handler: { _ in
+            self.openCameraForVideo()
+        }))
+
+        actionSheet.addAction(UIAlertAction(title: "Choose Video", style: .default, handler: { _ in
+            self.openGalleryForVideo()
+        }))
+
+        // CANCEL
         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        
+
         present(actionSheet, animated: true, completion: nil)
     }
-    
+
+    func openCameraForVideo() {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            let picker = UIImagePickerController()
+            picker.delegate = self
+            picker.mediaTypes = ["public.movie"]
+            picker.videoQuality = .typeHigh
+            picker.sourceType = .camera
+            present(picker, animated: true)
+        }
+    }
+
+    func openGalleryForVideo() {
+        var config = PHPickerConfiguration()
+        config.selectionLimit = 1
+        config.filter = .videos
+
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+
     func openCamera() {
         from = 2
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            let imagePickerController = UIImagePickerController()
-            imagePickerController.delegate = self
-            imagePickerController.sourceType = .camera
-            present(imagePickerController, animated: true, completion: nil)
+            let picker = UIImagePickerController()
+            picker.delegate = self
+            picker.sourceType = .camera
+            picker.mediaTypes = ["public.image"]
+            present(picker, animated: true)
         }
     }
-    
+
     func openGallery() {
         from = 1
         var config = PHPickerConfiguration()
-        config.selectionLimit = 0 // 0 means no limit
+        config.selectionLimit = 0
         config.filter = .images
-        
+
         let picker = PHPickerViewController(configuration: config)
         picker.delegate = self
-        present(picker, animated: true, completion: nil)
+        present(picker, animated: true)
     }
-    
-    func presentCropViewController(image: UIImage) {
-        let cropViewController = TOCropViewController(image: image)
-        cropViewController.delegate = self
-        self.present(cropViewController, animated: true, completion: nil)
-    }
-    
 
-    
+    func openVideoPicker() {
+        var config = PHPickerConfiguration()
+        config.selectionLimit = 1
+        config.filter = .videos              
+
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+
+    func presentCropViewController(image: UIImage) {
+        let cropVC = TOCropViewController(image: image)
+        cropVC.delegate = self
+        self.present(cropVC, animated: true)
+    }
+
+    // MARK: - Camera Image Picker
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+
         if let image = info[.originalImage] as? UIImage {
             DispatchQueue.main.async {
                 self.presentCropViewController(image: image)
                 self.images.append(image)
                 self.selectedImge = image
                 self.collectionViewEvent.reloadData()
-                self.updatePreviewLabel() // ✅ Add this line
+                self.updatePreviewLabel()
+            }
+        }
+
+        picker.dismiss(animated: true)
+    }
+
+    // MARK: - Photo + Video PHPicker
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        picker.dismiss(animated: true)
+
+        for result in results {
+
+            // ⭐ IMAGE LOADING
+            if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
+                result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
+                    if let imageNew = object as? UIImage {
+
+                        self.imageArray.append(imageNew)
+                        self.selectedImge = imageNew
+
+                        DispatchQueue.main.async {
+                            self.presentCropViewController(image: imageNew)
+                            self.collectionViewEvent.reloadData()
+                            self.updatePreviewLabel()
+                        }
+                    }
+                }
             }
 
-        }
-        picker.dismiss(animated: true, completion: nil)
-    }
-    
-    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true, completion: nil)
-        
-        for result in results {
-            result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
-                if let imageNew = object as? UIImage {
-                    // self.showCrop(image: imageNew)
-                    self.imageArray.append(imageNew)
-                    
-                    self.selectedImge = imageNew
-                    
-                    DispatchQueue.main.async {
-                        self.presentCropViewController(image: imageNew)
-                        self.collectionViewEvent.reloadData()
-                        self.updatePreviewLabel()
-                        // Handle the selected image (e.g., add to an array or display in the UI)
-                        print(imageNew)
+            // ⭐ VIDEO LOADING
+            let videoType = UTType.movie.identifier
+
+            if result.itemProvider.hasItemConformingToTypeIdentifier(videoType) {
+                result.itemProvider.loadFileRepresentation(forTypeIdentifier: videoType) { url, error in
+                    if let videoURL = url {
+                        print("🎥 Video selected:", videoURL)
+
+                        DispatchQueue.main.async {
+                            // You can store video URL in your array
+                            // self.videos.append(videoURL)
+                        }
                     }
                 }
             }
@@ -554,9 +614,10 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
 
 
 
+
     // dev.
         func callMarketDeactiveWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/product_inactive_status?"
+            let url = "https://laravelpanel.neighbrsnook.com/api/product_inactive_status?"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -565,12 +626,12 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
             let id = UserDefaults.standard.string(forKey: "userid")
             let idCr = UserDefaults.standard.string(forKey: "CreatorId")
             let idPr = UserDefaults.standard.string(forKey: "producttId")
+            
             let dictParams: Dictionary<String, Any> = [
                 "user_id":id ?? "",
                 "product_id":idD ?? "",
-                
-                
             ]
+            
             
             RSNetworkManager.shared.newRequestApi(withServiceName:url,requestMethod:.PUT,requestParameters: dictParams, withProgressHUD: true)
             {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
@@ -618,7 +679,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         //dev.
         
         func callMarketActiveWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/product_active_status"
+            let url = "https://laravelpanel.neighbrsnook.com/api/product_active_status"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -681,7 +742,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         //dev.
         
         func callMarketSoldWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/product_sold_status"
+            let url = "https://laravelpanel.neighbrsnook.com/api/product_sold_status"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -745,7 +806,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         }
         //dev.
         func callMarketDetailWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_detail?"
+            let url = "https://laravelpanel.neighbrsnook.com/api/mpk_product_detail?"
             
             // let dictParams: Dictionary<String, Any> = ["":""]
             
@@ -807,7 +868,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         
         //dev.
         func callMarketCreateWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add?"
+            let url = "https://laravelpanel.neighbrsnook.com/api/mpk_product_add?"
            
             
             let idNeighbour = UserDefaults.standard.string(forKey: "neighbrshood")
@@ -999,7 +1060,7 @@ class EditMarketViewController: BaseViewController, UIPickerViewDelegate,UITextF
         //dev.
         
         func callMarketCatWebService(completion: @escaping () -> Void) {
-            let url = "https://dev.neighbrsnook.com/admin/api/category"
+            let url = "https://laravelpanel.neighbrsnook.com/api/category"
             
             let dictParams: Dictionary<String, Any> = ["":""]
             

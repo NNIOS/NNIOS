@@ -50,7 +50,7 @@ class DeleteMarketViewController: UIViewController {
                 return
             }
        // let idPr = UserDefaults.standard.string(forKey: "producttId")
-        let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_add/edit/\(idPr)"
+        let url = "https://laravelpanel.neighbrsnook.com/api/mpk_product_add/edit/\(idPr)"
 
         
        

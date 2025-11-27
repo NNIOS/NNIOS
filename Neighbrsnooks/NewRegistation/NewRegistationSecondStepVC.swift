@@ -120,40 +120,21 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
         viewNeighbourhoodAddresh.layer.masksToBounds = true
         viewNeighbourhood.layer.cornerRadius = 10
         viewNeighbourhood.layer.masksToBounds = true
-        
-        //        if isComingFromSearchVC {
-        //            lblNeighbrhood.text =  selectedLocation ?? ""
-        //            lblNeighbroodAddresh.text = fullAddress ?? ""
-        //            lblCity.text = city ?? ""
-        //            lblState.text = state ?? ""
-        //            lblPincode.text = zipcode ?? ""
-        //            print(city)
-        //            print(state)
-        //            self.selectedLatitude = latitudeS
-        //            self.selectedLongitude = longitudeS
-        //            // User ne search kiya hai, toh API call
-        //            if let lat = latitudeS, let long = longitudeS {
-        //                callSearchNeighbrWebService(location: CLLocationCoordinate2D(latitude: lat, longitude: long))
-        //            }
-        //        } else if sourceScreen != "profile" && sourceScreen != "secondStep" && sourceScreen != "home" && sourceScreen != "profileback" && sourceScreen != "profilebackUn" && sourceScreen != "referralstatus"{
-        //            locationManager.delegate = self
-        //            locationManager.requestWhenInUseAuthorization()
-        //            locationManager.startUpdatingLocation()
-        //        }
-        
-        
+
         
         if referralStatus == 1 {
-               if let area = selectedLocation, !area.isEmpty {
-                   // Use dummy coordinates (0.0, 0.0) if actual lat/lon not available
-                   let locationCoord = CLLocationCoordinate2D(latitude: latitudeS ?? 0.0,
-                                                              longitude: longitudeS ?? 0.0)
-                   callSearchNeighbrWebService(location: locationCoord)
-               }
-           } else {
-               // Normal flow: request location if referralStatus != 1
-               
-           }
+            if let area = selectedLocation, !area.isEmpty {
+                let locationCoord = CLLocationCoordinate2D(
+                    latitude: latitudeS ?? 0.0,
+                    longitude: longitudeS ?? 0.0
+                )
+                callSearchNeighbrWebService(location: locationCoord)
+            }
+            
+        } else {
+            // Normal flow: request location if referralStatus != 1
+            
+        }
         
         if isComingFromSearchVC {
             lblNeighbrhood.text = selectedLocation ?? ""
@@ -607,6 +588,18 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                     shouldShowMessage = false
                     // Set button to Next
                     self.btnNext.setTitle("Next", for: .normal)
+                    
+                    if let firstNbdID = validData.first?.nbdID {
+                        print("✅ Selected nbdID to pass:", firstNbdID)
+                        self.referNeighbourhoodID = firstNbdID
+                        
+                        // 🔹 Call validate API here once ID is fetched
+                        let userID = Int(UserDefaults.standard.string(forKey: "userid") ?? "") ?? 0
+                        let neighbourhoodID = Int(firstNbdID) ?? 0
+                        self.callValidateNeighbourhoodAPI(userID: userID, neighbourhoodID: neighbourhoodID)
+                    }
+                    
+                    
                 } else {
                     self.NeighbrhdData = nil
                     shouldShowMessage = true
@@ -762,6 +755,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
             "userid": userID
         ]
         print("📤 [callRegSecWebService] Params:", dictParams)
+        
         WebService.sharedInstance.callRegSecWebService(withParams: dictParams) { [weak self] data in
             guard let self = self else {
                 print("⚠️ Self is nil")
@@ -775,22 +769,69 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                 self.RegistrationSec = data
                 
                 if status == "success" {
-                    if let referrerMessage = data.referrer_msg, !referrerMessage.isEmpty {
-                        self.showReferrerAlert(message: referrerMessage, okHandler: {
-                            self.pushToRegistrationProofVC() // Proceed after OK
-                        }, cancelHandler: {
-                            print("User tapped Cancel")
-                        })
-                    } else {
-                        self.pushToRegistrationProofVC()
-                    }
+                    self.pushToRegistrationProofVC()
                 } else {
                     self.showAlert(title: "Error", message: data.message ?? "Something went wrong.")
                 }
-                
             }
         }
     }
+
+    
+    func callValidateNeighbourhoodAPI(userID: Int, neighbourhoodID: Int) {
+        let url = "https://laravelpanel.neighbrsnook.com/api/referrals/validate-neighbourhood"
+        
+        let parameters: [String: Any] = [
+            "userid": userID,
+            "neighborhood_id": neighbourhoodID,
+            "api": "DEV-3a9f1d2e7b8c4d6f1234abcd5678ef90"
+        ]
+        
+        print("📤 Sending Parameters: \(parameters)")
+        
+        AF.request(url, method: .post, parameters: parameters, encoding: JSONEncoding.default)
+            .validate()
+            .responseDecodable(of: ValidateNeighbourhoodReferralModel.self) { response in
+                switch response.result {
+                case .success(let model):
+                    print("✅ API Success")
+                    print("Status: \(model.status)")
+                    print("Referrer Msg: \(model.data.referrerMsg)")
+                    print("Neighbourhood ID: \(model.data.neighborhoodID)")
+                    print("Referrer Status: \(model.data.referrerNeighbourhoodStatus)")
+                    
+                    // Check referrer_neighbourhood_status value
+                    let referrerStatus = model.data.referrerNeighbourhoodStatus
+                    
+                    // Show alert only if status != 1
+                    if referrerStatus != 1 {
+                        DispatchQueue.main.async {
+                            self.showReferrerAlert(message: model.data.referrerMsg) {
+                                print("OK tapped")
+                                // TODO: Add next step if needed
+                            } cancelHandler: {
+                                print("Cancel tapped")
+                            }
+                        }
+                    } else {
+                        print("ℹ️ Referrer status is 1 — no alert shown.")
+                    }
+                    
+                case .failure(let error):
+                    print("❌ API Error: \(error.localizedDescription)")
+                    if let data = response.data,
+                       let jsonString = String(data: data, encoding: .utf8) {
+                        print("Response JSON: \(jsonString)")
+                    }
+                    // Alert removed here to prevent "Something went wrong. Please try again."
+                    // No UI alert shown on failure
+                    
+                }
+            }
+    }
+
+
+
     
     
     // MARK: - Show Referrer Alert
@@ -993,7 +1034,7 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
     func callUserLocationWebService() { // dev.
         let id = UserDefaults.standard.string(forKey: "userid")
         print("✅ User ID after login: \(id ?? "Not Found")")
-        let url = "https://dev.neighbrsnook.com/admin/api/user-location"
+        let url = "https://laravelpanel.neighbrsnook.com/api/user-location"
         let params: [String: Any] = [
             "userid": id,
             "latitude": lat ?? 0.0,
@@ -1098,14 +1139,14 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
         ]
         print(params)
         
-        let boundary = "Boundary-\(UUID().uuidString)" //dev.
-        var request = URLRequest(url: URL(string: "https://dev.neighbrsnook.com/oldadmin/api/master?flag=requestneighborhood")!)
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var request = URLRequest(url: URL(string: "https://corepanel.neighbrsnook.com/api/master?flag=requestneighborhood")!)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         if let token = UserDefaults.standard.string(forKey: "token") {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        
+
         var body = Data()
         for (key, value) in params {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -1114,12 +1155,15 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
         }
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
-        
+
         URLSession.shared.dataTask(with: request) { data, response, error in
+            // Always send a friendly message regardless of error
+            let defaultMessage = "Thank you for sharing your address details."
+            
             if let error = error {
                 print("❌ Error:", error)
                 DispatchQueue.main.async {
-                    completion("Something went wrong. Please try again.")
+                    completion(defaultMessage)
                 }
                 return
             }
@@ -1130,21 +1174,26 @@ class NewRegistationSecondStepVC: BaseViewController, UITextFieldDelegate, UITex
                     if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                        let message = json["message"] as? String {
                         DispatchQueue.main.async {
-                            completion(message) // ✅ Pass the message from API
+                            completion(message) // Show API message if available
                         }
                     } else {
                         DispatchQueue.main.async {
-                            completion("Thank you for sharing your address details.") // ✅ Default message
+                            completion(defaultMessage) // Always a friendly message
                         }
                     }
                 } catch {
                     DispatchQueue.main.async {
-                        completion("Something went wrong. Please try again.")
+                        completion(defaultMessage) // Always a friendly message
                     }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(defaultMessage) // Always a friendly message
                 }
             }
         }.resume()
     }
+
     
     
     

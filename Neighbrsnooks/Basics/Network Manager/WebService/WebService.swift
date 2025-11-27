@@ -36,33 +36,44 @@ class WebService {
     }
     
     
-    func callOTPWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: OtpModel) -> ()) {
-          RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kOtp, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
-          {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+    func callOTPWebService(withParams dictParams: [String: Any], completionClosure: @escaping (_ otpModel: OtpModel?) -> ()) {
+        RSNetworkManager.shared.newMarketRequestApi(withServiceName: WebServiceName.kOtp,
+                                                   requestMethod: .POST,
+                                                   requestParameters: dictParams,
+                                                   withProgressHUD: true) { (result, error, errorType, statusCode) in
             let dictResponse = FunctionsConstants.kShared.getDictionary(result)
             switch statusCode {
             case .SUCCESS:
-              do {
-                let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
-                  FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+                do {
+                    guard let resultData = result else {
+                        completionClosure(nil)
+                        return
+                    }
+                    let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                    FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
 
-                let data = try JSONDecoder().decode(OtpModel.self, from: result!)
-                completionClosure(data)
-              } catch {
-                print(error.localizedDescription)
-              }
+                    let decodedResponse = try JSONDecoder().decode(OtpModel.self, from: resultData)
+                    completionClosure(decodedResponse)
+                } catch {
+                    print("JSON Decoding error: \(error.localizedDescription)")
+                    completionClosure(nil)
+                }
 
             case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
-              print("")
-              self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                print("Error: \(FunctionsConstants.kShared.getErrorMessage(dictResponse))")
+                completionClosure(nil)
+
             case .UNAUTHORIZED:
-                print(error)
-           //   self.showLogoutAlert()
+                print("Unauthorized error: \(String(describing: error))")
+                // Optionally self.showLogoutAlert()
+                completionClosure(nil)
+
             default:
-              break
+                completionClosure(nil)
             }
-          }
+        }
     }
+
     
     
     func callForgetOTPWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: ForgetOTPModel) -> ()) {
@@ -122,7 +133,7 @@ class WebService {
     }
     
     
-    func callVerifyOTPWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: VerifyOTPModel) -> ()) {
+    func callVerifyOTPWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: VerifyOTPResponse) -> ()) {
           RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kVerifyOTP, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
           {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
             let dictResponse = FunctionsConstants.kShared.getDictionary(result)
@@ -132,7 +143,7 @@ class WebService {
                 let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
                   FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
  
-                  let data = try JSONDecoder().decode(VerifyOTPModel.self, from: result!)
+                  let data = try JSONDecoder().decode(VerifyOTPResponse.self, from: result!)
                  
                   
                 completionClosure(data)
@@ -151,6 +162,7 @@ class WebService {
             }
           }
     }
+    
     
     func CallProffesoinWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: ProffessionModel) -> ()) {
           RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kProffesion, requestMethod: .GET, requestParameters: dictParams, withProgressHUD: true)
@@ -3280,37 +3292,37 @@ class WebService {
               }
         }
     
-    
-    
     func callForGotPasswordWebService(withParams dictParams: Dictionary<String, Any>, _ completionClosure: @escaping (_ subCategoryModel: ResetPasswordModel) -> ()) {
-              RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kForgotPassword, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
-              {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
-                let dictResponse = FunctionsConstants.kShared.getDictionary(result)
-                switch statusCode {
-                case .SUCCESS:
-                  do {
-                    let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
-                      FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
-     
-                      let data = try JSONDecoder().decode(ResetPasswordModel.self, from: result!)
-                     
-                      
-                    completionClosure(data)
-                  } catch {
-                    print(error.localizedDescription)
-                  }
+                  RSNetworkManager.shared.newRequestApi(withServiceName: WebServiceName.kForgotPassword, requestMethod: .POST, requestParameters: dictParams, withProgressHUD: true)
+                  {(result: Data?, error: Error?, errorType: ErrorType, statusCode: HTTPStatusCodeConstants) in
+                    let dictResponse = FunctionsConstants.kShared.getDictionary(result)
+                    switch statusCode {
+                    case .SUCCESS:
+                      do {
+                        let dictResult = FunctionsConstants.kShared.getDictionary(dictResponse[KeyConstants.kData])
+                          FunctionsConstants.kSharedUserDefaults.setLoggedInUserDetails(loggedInUserDetails: dictResult)
+         
+                          let data = try JSONDecoder().decode(ResetPasswordModel.self, from: result!)
+                         
+                          
+                        completionClosure(data)
+                      } catch {
+                        print(error.localizedDescription)
+                      }
 
-                case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
-                  print("")
-                  self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
-                case .UNAUTHORIZED:
-                    print(error)
-               //   self.showLogoutAlert()
-                default:
-                  break
-                }
-              }
-        }
+                    case .NO_CONTENT, .FORBIDDEN, .BAD_REQUEST:
+                      print("")
+                      self.showAlert(withMessage: FunctionsConstants.kShared.getErrorMessage(dictResponse))
+                    case .UNAUTHORIZED:
+                        print(error)
+                   //   self.showLogoutAlert()
+                    default:
+                      break
+                    }
+                  }
+            }
+    
+    
     
     
     

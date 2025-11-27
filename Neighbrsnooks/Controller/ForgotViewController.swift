@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Alamofire
 @available(iOS 16.0, *)
 class ForgotViewController: BaseViewController {
     
@@ -21,13 +22,14 @@ class ForgotViewController: BaseViewController {
 
     
     var forgetOTPData : ForgetOTPModel?
-    var verifyOTPData : VerifyOTPModel?
+    var verifyOTPData : MatchOTPModel?
     var otpFields: [CustomLabelFirstName] = []
     // var verifyOTPData : VerifyOTPModel?
     var otp : String?
     var otpTimer: Timer?
     var remainingSeconds = 30
     var isOTPSent = false
+    var loadingAlert: UIAlertController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +40,8 @@ class ForgotViewController: BaseViewController {
         btnGetOTP.titleLabel?.textAlignment = .center
         btnGetOTP.titleLabel?.adjustsFontSizeToFitWidth = false
         btnGetOTP.titleLabel?.lineBreakMode = .byClipping
+        tfMobile.keyboardType = .numberPad
+
 
     }
     
@@ -132,37 +136,145 @@ class ForgotViewController: BaseViewController {
     }
     
     func callForgetOTPWebService(_ completionClosure: @escaping () -> ()) {
-        let dictParams: [String: Any]  = [
-            "reqestmobileno":self.tfMobile.text ?? "",
-            "flag":"forget"
+        
+        let dictParams: [String: Any] = [
+            "phone_no": self.tfMobile.text ?? "",
+            "api": App_KEYConfig.APP_KEY
         ]
-        WebService.sharedInstance.callForgetOTPWebService(withParams: dictParams) { data in
-            self.forgetOTPData = data
+        
+        print("✅ Forget OTP Params:", dictParams)
+        
+        self.loadingAlert = self.showLoadingAlert(on: self)
+        
+        let headers: HTTPHeaders = [
+            "Content-Type": "application/json"
+        ]
+        
+        Alamofire.Session.default.request(
+            "https://laravelpanel.neighbrsnook.com/api/send-otp_forgot",
+            method: .post,
+            parameters: dictParams,
+            encoding: JSONEncoding.default,
+            headers: headers
+        ).responseData { response in
             
-            //              UserDefaults.standard.set(self.loginData?.data.apiToken, forKey: "accessToken")
-            // UserDefaults.standard.set(self.loginData?.data.id, forKey: "id")
+            DispatchQueue.main.async {
+                self.loadingAlert?.dismiss(animated: true, completion: nil)
+            }
             
-            completionClosure()
+            switch response.result {
+                
+            case .success(let data):
+                
+                print("🌐 RAW RESPONSE:", String(data: data, encoding: .utf8) ?? "nil")
+                
+                do {
+                    let result = try JSONDecoder().decode(ForgetOTPModel.self, from: data)
+                    print("✅ Forget OTP Response:", result)
+                    
+                    self.forgetOTPData = result
+                    
+                    DispatchQueue.main.async {
+                        if result.status == true {
+                            self.showAutoDismissAlert(message: result.message ?? "OTP sent")
+                        } else {
+                            self.alertToast(Message: result.message ?? "Something went wrong.")
+                        }
+                    }
+                    
+                    completionClosure()
+                    
+                } catch {
+                    print("❌ Decode error:", error)
+                    self.alertToast(Message: "Invalid server response.")
+                    completionClosure()
+                }
+                
+            case .failure(let error):
+                print("❌ Request error:", error.localizedDescription)
+                self.alertToast(Message: "Network error.")
+                completionClosure()
+            }
         }
     }
+
+
     
     func callVerifyOTPWebService(_ completionClosure: @escaping () -> ()) {
-        let dictParams: [String: Any]  = [
-            "reqestmobileno":self.tfMobile.text ?? "",
-            "otpvarify": self.otp ?? ""
+        
+        let dictParams: [String: Any] = [
+            "phone_no": self.tfMobile.text ?? "",
+            "otp": self.otp ?? "",
+            "api": App_KEYConfig.APP_KEY
         ]
-        WebService.sharedInstance.callVerifyOTPWebService(withParams: dictParams) { data in
-            self.verifyOTPData = data
-            if self.verifyOTPData?.description.desc == "Code Matched successfully." {
-                guard let vc = self.storyboard?.instantiateViewController(withIdentifier: "ResetPasswordVC") as? ResetPasswordVC else {return}
-                vc.phoneno = self.tfMobile.text ?? ""
-                self.navigationController?.pushViewController(vc, animated: true)
-            } else {
-                self.alertToast(Message: "Code does not match.")
+
+        print("Params:", dictParams)
+
+        self.loadingAlert = self.showLoadingAlert(on: self)
+
+        let headers: HTTPHeaders = [
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json"
+        ]
+
+        Alamofire.Session.default.request(
+            "https://laravelpanel.neighbrsnook.com/api/otp_verify_forgot",
+            method: .post,
+            parameters: dictParams,
+            encoding: JSONEncoding.default,
+            headers: headers
+        ).responseData { response in
+            
+            DispatchQueue.main.async {
+                self.loadingAlert?.dismiss(animated: true)
             }
-            completionClosure()
+
+            switch response.result {
+                
+            case .success(let data):
+                do {
+                    let result = try JSONDecoder().decode(MatchOTPModel.self, from: data)
+                    print("✅ Verify OTP Response:", result)
+
+                    DispatchQueue.main.async {
+                        
+                        if result.status == true {
+                            
+                            // ✅ Show Success Message for 2 seconds
+                            self.show2SecondAlert(result.message ?? "OTP verified successfully.")
+
+                            // ✅ Navigate after 2 seconds
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                if let vc = self.storyboard?.instantiateViewController(withIdentifier: "ResetPasswordVC") as? ResetPasswordVC {
+                                    vc.phoneno = self.tfMobile.text ?? ""
+                                    self.navigationController?.pushViewController(vc, animated: true)
+                                }
+                            }
+
+                        } else {
+                            self.alertToast(Message: result.message ?? "Invalid OTP")
+                        }
+
+                        completionClosure()
+                    }
+
+                } catch {
+                    print("❌ Decode error:", error.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.alertToast(Message: "Invalid server response.")
+                    }
+                }
+                
+            case .failure(let error):
+                print("❌ Request failed:", error.localizedDescription)
+                DispatchQueue.main.async {
+                    self.alertToast(Message: "Network error.")
+                }
+            }
         }
     }
+
+
     
     
     func startOTPTimer() {
@@ -195,6 +307,14 @@ class ForgotViewController: BaseViewController {
         }
     }
 
+    func show2SecondAlert(_ message: String) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        self.present(alert, animated: true)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            alert.dismiss(animated: true)
+        }
+    }
 
 
  

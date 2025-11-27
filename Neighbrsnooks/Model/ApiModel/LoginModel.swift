@@ -101,14 +101,10 @@ struct ResetPasswordModel: Codable {
 
 
 //MARK: - Model for the inner description
-struct VerifyOTPDescription: Codable {
-    let desc: String?
-}
-
-// Main model for the response
-struct VerifyOTPModel: Codable {
-    let status: String?
-    let description: VerifyOTPDescription
+struct VerifyOTPResponse: Codable {
+    let status: Bool?
+    let code: Int?
+    let message: String?
 }
 
 struct VerifyEmailModel:Codable {

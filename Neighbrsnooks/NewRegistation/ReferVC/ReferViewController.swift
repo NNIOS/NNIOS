@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import MessageUI
+
 
 class ReferViewController: BaseViewController {
 
@@ -39,6 +41,9 @@ class ReferViewController: BaseViewController {
         viewNeighborhood.addGestureRecognizer(tapGesture)
         lblYouCan.font = UIFont(name: "Montserrat-Regular", size: 16)
         lblNeighborhood.font = UIFont(name: "Montserrat-Regular", size: 16)
+        txtReferName.font = UIFont(name: "Montserrat-Regular", size: 16)
+        txtPhone.font = UIFont(name: "Montserrat-Regular", size: 16)
+        btnRefer.titleLabel?.font = UIFont(name: "Montserrat-Regular", size: 20)
         callReferralAPI()
         
      }
@@ -104,121 +109,143 @@ class ReferViewController: BaseViewController {
 
     // MARK: - Create Referral API
  
-    
     func createReferral(sender: Any) {
-        showReferredUserMessageIfAvailable()
-        
-        guard let referrerUserId = Int(UserDefaults.standard.string(forKey: "userid") ?? ""),
-              let referredName = txtReferName.text, !referredName.isEmpty,
-              let referredPhone = txtPhone.text, !referredPhone.isEmpty else {
-            showAlert(message: "Please fill all details")
-            return
-        }
+           showReferredUserMessageIfAvailable()
+           
+           guard let referrerUserId = Int(UserDefaults.standard.string(forKey: "userid") ?? ""),
+                 let referredName = txtReferName.text, !referredName.isEmpty,
+                 let referredPhone = txtPhone.text, !referredPhone.isEmpty else {
+               showAlert(message: "Please fill all details")
+               return
+           }
+           
+           guard let neighborhoodIdString = selectedNeighbourhoodId,
+                 let neighborhoodIdInt = Int(neighborhoodIdString) else {
+               showAlert(message: "Please select a neighbourhood")
+               return
+           }
+           
+           let params: [String: Any] = [
+               "referrer_user_id": referrerUserId,
+               "referred_name": referredName,
+               "referred_phone": referredPhone,
+               "neighbourhood_id": neighborhoodIdInt,
+               "api": "DEV-3a9f1d2e7b8c4d6f1234abcd5678ef90"
+           ]
+           
+           guard let url = URL(string: "https://laravelpanel.neighbrsnook.com/api/referrals/create") else {
+               showAlert(message: "Invalid URL")
+               return
+           }
+           
+           var request = URLRequest(url: url)
+           request.httpMethod = "POST"
+           request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+           
+           do {
+               request.httpBody = try JSONSerialization.data(withJSONObject: params, options: [])
+           } catch {
+               showAlert(message: "Failed to serialize request data")
+               return
+           }
+           
+           URLSession.shared.dataTask(with: request) { data, response, error in
+               if let error = error {
+                   DispatchQueue.main.async {
+                       self.showAlert(message: "Request error: \(error.localizedDescription)")
+                   }
+                   return
+               }
+               
+               guard let data = data else {
+                   DispatchQueue.main.async {
+                       self.showAlert(message: "No response data")
+                   }
+                   return
+               }
+               
+               if let jsonString = String(data: data, encoding: .utf8) {
+                   print("✅ API Response: \(jsonString)")
+               }
+               
+               do {
+                   let decodedResponse = try JSONDecoder().decode(ReferralResponse.self, from: data)
+                   
+                   DispatchQueue.main.async {
+                       if decodedResponse.success {
+                           let finalMessage = decodedResponse.data?.referMessage ?? "Referral created successfully!"
+                           let subject = decodedResponse.data?.referSubject ?? "Referral Invitation"
+                           
+                           // ✅ Custom item for handling subject with message
+                           let messageItem = MailSubjectActivityItemSource(message: finalMessage, subject: subject)
+                           
+                           // ✅ Share Sheet (Mail, WhatsApp, Messages etc.)
+                           let activityVC = UIActivityViewController(activityItems: [messageItem], applicationActivities: nil)
+                           
+                           // Optional: exclude unwanted actions
+                           activityVC.excludedActivityTypes = [
+                               .assignToContact,
+                               .addToReadingList,
+                               .saveToCameraRoll,
+                               .print
+                           ]
+                           
+                           // ✅ For iPad safety
+                           if let popoverController = activityVC.popoverPresentationController {
+                               popoverController.sourceView = self.view
+                               popoverController.sourceRect = CGRect(
+                                   x: self.view.bounds.midX,
+                                   y: self.view.bounds.midY,
+                                   width: 0,
+                                   height: 0
+                               )
+                               popoverController.permittedArrowDirections = []
+                           }
+                           
+                           // ✅ Debug logs for selected option
+                           activityVC.completionWithItemsHandler = { activityType, completed, returnedItems, activityError in
+                               if completed {
+                                   if activityType == .mail {
+                                       print("Mail selected — subject: \(subject)")
+                                   } else if activityType == .message {
+                                       print("Message selected")
+                                   } else if activityType?.rawValue == "net.whatsapp.WhatsApp.ShareExtension" {
+                                       print("WhatsApp selected")
+                                   }
+                               }
+                           }
+                           
+                           self.present(activityVC, animated: true, completion: nil)
+                           
+                       } else {
+                           self.showAlert(message: decodedResponse.message)
+                       }
+                   }
+                   
+               } catch {
+                   DispatchQueue.main.async {
+                       self.showAlert(message: "Failed to parse response: \(error.localizedDescription)")
+                   }
+               }
+           }.resume()
+       }
 
-        guard let neighborhoodIdString = selectedNeighbourhoodId,
-              let neighborhoodIdInt = Int(neighborhoodIdString) else {
-            showAlert(message: "Please select a neighbourhood")
-            return
-        }
 
-        let params: [String: Any] = [
-            "referrer_user_id": referrerUserId,
-            "referred_name": referredName,
-            "referred_phone": referredPhone,
-            "neighbourhood_id": neighborhoodIdInt,
-            "api": "DEV-3a9f1d2e7b8c4d6f1234abcd5678ef90"
-        ]
 
-        guard let url = URL(string: "https://dev.neighbrsnook.com/admin/api/referrals/create") else {
-            showAlert(message: "Invalid URL")
-            return
-        }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: params, options: [])
-        } catch {
-            showAlert(message: "Failed to serialize request data")
-            return
-        }
-
-        print("📤 Sending referral API request with params: \(params)")
-
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Request error: \(error.localizedDescription)")
-                }
-                return
-            }
-
-            guard let data = data else {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "No response data")
-                }
-                return
-            }
-
-            // ✅ Print full response for debugging
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("✅ API Response: \(jsonString)")
-            }
-
-            do {
-                let decodedResponse = try JSONDecoder().decode(ReferralResponse.self, from: data)
-                DispatchQueue.main.async {
-                    if decodedResponse.success {
-                        self.showAlert(message: "Referral created successfully!") {
-                            // ✅ Combine API message + extra details
-                            let apiMessage = decodedResponse.data?.referMessage ?? ""
-                            let extraInfo = """
-
-                            You have been invited by: \(decodedResponse.data?.referredName ?? "")
-                            Neighbourhood ID: \(decodedResponse.data?.neighbourhoodId ?? 0)
-                            Referral Code: \(decodedResponse.data?.referralCode ?? "")
-                            """
-                            
-                            let finalMessage = apiMessage + "\n\n" + extraInfo
-
-                            let activityVC = UIActivityViewController(activityItems: [finalMessage], applicationActivities: nil)
-                            if let popover = activityVC.popoverPresentationController {
-                                popover.sourceView = self.view
-                                if let button = sender as? UIView {
-                                    popover.sourceRect = button.frame
-                                }
-                            }
-                            self.present(activityVC, animated: true)
-                        }
-                    } else {
-                        self.showAlert(message: decodedResponse.message)
-                    }
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self.showAlert(message: "Failed to parse response: \(error.localizedDescription)")
-                }
-            }
-
-        }
-
-        // ✅ Execute API request
-        task.resume()
-    }
 
 
     func showAlert(message: String, completion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: "Neighbrsnook", message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
-            completion?()
-        }
-        alert.addAction(okAction)
         DispatchQueue.main.async {
             self.present(alert, animated: true)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                alert.dismiss(animated: true, completion: completion)
+            }
         }
     }
+
 
 
     
@@ -230,7 +257,7 @@ class ReferViewController: BaseViewController {
         let apiKey = "DEV-3a9f1d2e7b8c4d6f1234abcd5678ef90"
 
         
-        let urlString = "https://dev.neighbrsnook.com/admin/api/referrals/user-referrals?user_id=\(userID)&page=\(page)&per_page=\(perPage)&api=\(apiKey)"
+        let urlString = "https://laravelpanel.neighbrsnook.com/api/referrals/user-referrals?user_id=\(userID)&page=\(page)&per_page=\(perPage)&api=\(apiKey)"
 
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
@@ -272,5 +299,40 @@ extension ReferViewController: ReferListNeighbourhoodDelegate {
     func didSelectNeighbourhood(name: String, id: String) {
         lblNeighborhood.text = name
         selectedNeighbourhoodId = id
+    }
+}
+
+extension ReferViewController: MFMailComposeViewControllerDelegate {
+    func mailComposeController(_ controller: MFMailComposeViewController,
+                               didFinishWith result: MFMailComposeResult,
+                               error: Error?) {
+        controller.dismiss(animated: true, completion: nil)
+        // Optionally handle result like sent, cancelled, failed etc.
+    }
+}
+
+class MailSubjectActivityItemSource: NSObject, UIActivityItemSource {
+    let message: String
+    let subject: String
+    
+    init(message: String, subject: String) {
+        self.message = message
+        self.subject = subject
+    }
+    
+    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
+        return message
+    }
+    
+    func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+        return message
+    }
+    
+    // ✅ Ye Mail ke liye subject set karega
+    func activityViewController(_ activityViewController: UIActivityViewController, subjectForActivityType activityType: UIActivity.ActivityType?) -> String {
+        if activityType == .mail {
+            return subject
+        }
+        return ""
     }
 }

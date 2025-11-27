@@ -659,36 +659,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         }
     }
 
-    
-    
-    
-//    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-//        shouldCallAPI = false
-//        picker.dismiss(animated: true, completion: nil)
-//
-//        for result in results {
-//            if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
-//                result.itemProvider.loadObject(ofClass: UIImage.self) { (object, error) in
-//                    if let imageNew = object as? UIImage {
-//                        DispatchQueue.main.async {
-//                            self.shouldCallAPI = false // ✅ Add this line
-//                            self.presentCropViewController(image: imageNew)
-//                        }
-//                    }
-//                }
-//            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.video.identifier) {
-//                result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.video.identifier) { (url, error) in
-//                    if let videoURL = url {
-//                        DispatchQueue.main.async {
-//                            self.shouldCallAPI = false
-//                            self.videoArray.append(videoURL)
-//                            self.updateMediaCount()
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+  
 
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         shouldCallAPI = false
@@ -861,11 +832,7 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         docType = "Others"
         updateSelection(selectedButton: btnOthers, allButtons: [btnMenu, btnRate, btnTerrif, btnOthers])
     }
-    
-    
-    
-    
-    
+   
     
     @IBAction func serviceBtnAction(_ sender: UIButton) {
         self.view.endEditing(true)
@@ -928,39 +895,8 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
         present(documentPicker, animated: true, completion: nil)
     }
     
-    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        guard let selectedFileURL = urls.first else { return }
-
-        selectedPDFURL = selectedFileURL
-
-        do {
-            let fileData = try Data(contentsOf: selectedFileURL)
-
-            // ✅ PDF Upload Call
-            uploadPDFFile(fileURL: selectedFileURL, fileData: fileData)
-
-        } catch {
-            print("❌ Error reading PDF data: \(error.localizedDescription)")
-        }
-    }
-
-    
-    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-        print("User cancelled document picker.")
-    }
-    
-    // Function to upload PDF file
-    func uploadPDFFile(fileURL: URL, fileData: Data) {
-        print("📤 Uploading PDF File: \(fileURL.lastPathComponent)")
-        print("📤 File Size: \(fileData.count / 1024) KB")
-
-        // 🧪 Simulate Upload — Replace with actual API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.lblCountPdfFile.text = "1 preview"
-            self.existingDocumentURL = fileURL.absoluteString // ✅ Store this
-            print("✅ PDF upload done")
-        }
-    }
+    // Function to copy PDF locally for safe upload
+  
 
     @IBAction func actionShowPdf(_ sender: Any) {
         // Check if a PDF URL is selected
@@ -1096,17 +1032,78 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
     
     
     
+    func copyPDFToLocalDirectory(from sourceURL: URL) -> URL? {
+        let fileManager = FileManager.default
+        let tempDir = NSTemporaryDirectory()
+        let localURL = URL(fileURLWithPath: tempDir).appendingPathComponent(sourceURL.lastPathComponent)
+
+        do {
+            if fileManager.fileExists(atPath: localURL.path) {
+                try fileManager.removeItem(at: localURL)
+            }
+            try fileManager.copyItem(at: sourceURL, to: localURL)
+            print("✅ PDF copied to local path: \(localURL.path)")
+            return localURL
+        } catch {
+            print("❌ Failed to copy PDF locally: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+//    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+//        if let pickedURL = urls.first {
+//            // Copy PDF locally and assign to property
+//            selectedPDFURL = copyPDFToLocalDirectory(from: pickedURL)
+//        }
+//    }
+
+    
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        print("User cancelled document picker.")
+    }
+    
+    // Function to upload PDF file
+    func uploadPDFFile(fileURL: URL, fileData: Data) {
+        print("📤 Uploading PDF File: \(fileURL.lastPathComponent)")
+        print("📤 File Size: \(fileData.count / 1024) KB")
+
+        // 🧪 Simulate Upload — Replace with actual API call
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.lblCountPdfFile.text = "1 preview"
+            self.existingDocumentURL = fileURL.absoluteString // ✅ Store this
+            print("✅ PDF upload done")
+        }
+    }
+    
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        if let pickedURL = urls.first {
+            selectedPDFURL = copyPDFToLocalDirectory(from: pickedURL)
+            print("📄 New PDF selected and copied to: \(selectedPDFURL?.path ?? "nil")")
+        }
+    }
+
+    
+    
+    func presentDocumentPicker() {
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf], asCopy: true)
+        documentPicker.delegate = self
+        present(documentPicker, animated: true)
+    }
+
+    
+    
+    
     func callCreateBussinessWebService(_ completionClosure: @escaping () -> ()) {
         guard let selectedDocType = docType, !selectedDocType.isEmpty else {
             print("❌ docType missing")
-            completionClosure() // ✅ call this even on early return
+            completionClosure()
             return
         }
-        
+
         let id = UserDefaults.standard.string(forKey: "userid")
         let idcategory = UserDefaults.standard.string(forKey: "idCategory")
         let Busid = UserDefaults.standard.string(forKey: "Businessid")
-        
+
         let dictParams: [String: Any] = [
             "userid": id ?? "",
             "businessid": Busid ?? "",
@@ -1124,17 +1121,40 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
             "email": tfEmail.text ?? "",
             "mobile": tfMob.text ?? "",
             "telephone": tfTel.text ?? "",
-            "doctype": selectedDocType // ✅ Must be included here
+            "doctype": selectedDocType
         ]
-        
+
         print("✅ FINAL PARAMS: \(dictParams)")
-        
-        // 🔁 Send to API via multipart form-data
-        callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: selectedPDFURL, mediaKey: "image[]", URlName: kBASEURL + WebServiceName.kCreateBussines) {
-            print("✅ Upload completed.")
-            completionClosure()
+
+        // PDF existence and size check debug print
+        if let pdfURL = selectedPDFURL {
+            let exists = FileManager.default.fileExists(atPath: pdfURL.path)
+            print("📁 PDF selectedURL: \(pdfURL.path), Exists: \(exists)")
+            if exists, let attr = try? FileManager.default.attributesOfItem(atPath: pdfURL.path),
+               let size = attr[.size] as? UInt64 {
+                print("📏 PDF file size: \(size) bytes")
+            }
+        } else {
+            print("⚠️ No PDF selectedURL available")
+        }
+
+        // Proceed with upload
+        if let pdfURL = selectedPDFURL, FileManager.default.fileExists(atPath: pdfURL.path) {
+            print("✅ PDF file found at \(pdfURL.path), uploading with media")
+            callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: pdfURL, mediaKey: "image[]", URlName: kBASEURL + WebServiceName.kCreateBussines) {
+                print("✅ Upload completed.")
+                completionClosure()
+            }
+        } else {
+            print("❌ PDF file not found or nil, uploading without PDF")
+            callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: nil, mediaKey: "image[]", URlName: kBASEURL + WebServiceName.kCreateBussines) {
+                print("✅ Upload completed.")
+                completionClosure()
+            }
         }
     }
+
+    
     
     func callBussinesDetailPostWebService(_ completionClosure: @escaping () -> ()) {
         let id = UserDefaults.standard.string(forKey: "userid")
@@ -1258,9 +1278,6 @@ class UpdateBusinessViewController:BaseViewController, UIPickerViewDelegate, UIT
                                   withblock: withblock)
         }
     }
-    
-    
-    
     
     
     func callsendImageAPI(param:[String: Any],arrImage:[UIImage],imageKey:String,URlName:String, withblock:@escaping ()->Void){

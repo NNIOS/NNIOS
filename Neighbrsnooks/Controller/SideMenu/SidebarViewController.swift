@@ -20,7 +20,7 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
     var profileData : ProfileModel?
     var selectedNeighborhoodId: String?
     
-    let menuItems = ["My Profile", "My Neighbourhood", "Business", "Event", "Group", "Poll", "Post", "Public Agency Directory", "Rafer a Neighbour", "Share App", "Setting", "Contact Us"]
+    let menuItems = ["My Profile", "My Neighbourhood", "Business", "Event", "Group", "Poll", "Post", "Public Agency Directory", "Refer a Neighbour", "Share App", "Setting", "Contact Us"]
 
     let menuItemImages = ["person", "location 1", "Market", "calendar", "person.2", "icons8-poll-24", "envelope", "bag", "arrowshape.turn.up.right", "arrowshape.turn.up.right", "gearshape", "phone"]
 
@@ -255,7 +255,7 @@ class SidebarViewController: UIViewController, UITableViewDelegate, UITableViewD
                 }
                 self.pushTo(vc)
                 
-            case "Rafer a Neighbour":
+            case "Refer a Neighbour":
                 guard let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ReferViewController") as? ReferViewController else {
                     print("❌ ReferViewController not found")
                     return

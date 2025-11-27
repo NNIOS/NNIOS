@@ -77,7 +77,7 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
         callMarketwalltWebService()
         
         
-        timer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(callMarketwalltWebService), userInfo: nil, repeats: true)
+//        timer = Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(callMarketwalltWebService), userInfo: nil, repeats: true)
         
         if let selectedIndex = selectedTabIndex {
             bottomPanelView.updateTabAppearance(selectedIndex: selectedIndex)
@@ -317,296 +317,235 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
             }
         }
     
+     
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-            if collectionView == collectionViewMyEvent {
-                
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyItemCollectionViewCell", for: indexPath) as! MyItemCollectionViewCell
-                cell.secttLbl.text =  MarketWallData?.yourItems![indexPath.row].neighborhoodName
-                cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
-                cell.viewItems.layer.shadowOpacity = 0.5
-                cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
-                cell.viewItems.layer.shadowRadius = 5
-                cell.viewItems.layer.masksToBounds = false
-                cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-                cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
-                //  cell.LargeImgView.image = imageArray[indexPath.row]
-                
-                cell.EventLbl.text = MarketWallData?.yourItems![indexPath.row].pTitle
-                //                self.lblImgLimit.text = "Max Images: " + (self.EventDetauilData?.eventImgRemainLimit ?? "")
-                if let priceString = MarketWallData?.yourItems?[indexPath.row].salePrice,
-                   let price = Double(priceString) {
-                    if price == 0.0 {
-                        cell.rsLbl.text = "Free"
-                        cell.lblSellDonate.text = "GIVEN"
-                    } else {
-                        cell.rsLbl.text = "Rs. \(Int(price))"
-                        cell.lblSellDonate.text = "SOLD"
-                    }
-                    
-                } else {
-                    cell.rsLbl.text = "Rs. 0"
-                }
-                
-                if MarketWallData?.yourItems![indexPath.row].pStatus == 2 /*|| MarketWallData?.yourItems![indexPath.row].saleType == "Donate"*/{
-                    cell.lblSellDonate.isHidden = false
-                } else {
-                    cell.lblSellDonate.isHidden = true
-                }
-                
-                
-                
-                
-                
-                cell.DayLbl.text = MarketWallData?.yourItems![indexPath.row].createdTime
-                
-                //  cell.secttLbl.text = MarketWallData?.yourItems![indexPath.row].neighborhoodName
-                let url = URL(string: (MarketWallData?.yourItems![indexPath.row].pImages ?? ""))
-                cell.profileImgView.kf.indicatorType = .activity
-                cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-                
-                
-                
-                cell.DetailCallback = { [self] value in
-                    
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
-                    // vc.idD = (MarketWallData?.yourItems?[indexPath.row].id)!
-                    vc.idD = String(MarketWallData?.yourItems?[indexPath.row].id ?? 0)
-                    
-                    self.navigationController?.pushViewController(vc, animated: true)
-                    
-                    
-                    
-                }
-                
-                return cell
-            }
-            
-            else if collectionView == LatestCollectionView {
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LatestListingCollectionViewCell", for: indexPath) as! LatestListingCollectionViewCell
-                cell.secttLbl.text =  MarketWallData?.todayList![indexPath.row].neighborhoodName
-                cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
-                cell.viewItems.layer.shadowOpacity = 0.5
-                cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
-                cell.viewItems.layer.shadowRadius = 5
-                cell.viewItems.layer.masksToBounds = false
-                cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
-                cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
-                
-                cell.EventLbl.text = MarketWallData?.todayList![indexPath.row].pTitle
-                if let priceString = MarketWallData?.todayList?[indexPath.row].salePrice,
-                   let price = Double(priceString) {
-                    if price == 0.0 {
-                        cell.rsLbl.text = "Free"
-                        cell.lblSellDonate.text = "GIVEN"
-                    } else {
-                        cell.rsLbl.text = "Rs. \(Int(price))"
-                        cell.lblSellDonate.text = "SOLD"
-                    }
-                    
-                } else {
-                    cell.rsLbl.text = "Rs. 0"
-                }
-                
-                if MarketWallData?.todayList![indexPath.row].pStatus == 2 /*|| MarketWallData?.todayList![indexPath.row].saleType == "Donate"*/{
-                    cell.lblSellDonate.isHidden = false
-                } else {
-                    cell.lblSellDonate.isHidden = true
-                }
-                
-                let url = URL(string: (MarketWallData?.todayList![indexPath.row].pImages ?? ""))
-                cell.profileImgView.kf.indicatorType = .activity
-                cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-                cell.DayLbl.text = MarketWallData?.todayList![indexPath.row].updatedTime
-                
-                if MarketWallData?.todayList![indexPath.row].wishlistStatus == 1 {  //AllListingCollectionViewCell
-                    cell.imgWishlist.isHidden = false
+        if collectionView == collectionViewMyEvent {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyItemCollectionViewCell", for: indexPath) as! MyItemCollectionViewCell
+            cell.secttLbl.text = MarketWallData?.yourItems![indexPath.row].neighborhoodName
+            cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
+            cell.viewItems.layer.shadowOpacity = 0.5
+            cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
+            cell.viewItems.layer.shadowRadius = 5
+            cell.viewItems.layer.masksToBounds = false
+            cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
+            cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
 
-                    
-                } else if MarketWallData?.todayList![indexPath.row].wishlistStatus == 0 {
-                    
-                    cell.imgWishlist.isHidden = true
-                    
-                    
-                }
-                
-                cell.DetailCallback = { [self] value in
-                    
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
-                    // vc.idD = (MarketWallData?.yourItems?[indexPath.row].id)!
-                    vc.idD = String(MarketWallData?.todayList?[indexPath.row].id ?? 0)
-                    self.navigationController?.pushViewController(vc, animated: true)
-                    
-                    
-                    
-                }
-                
-                
-                return cell
-            }
-            
-            else if collectionView == collectionViewcategory {
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CategoryCollectionViewCell", for: indexPath) as! CategoryCollectionViewCell
-                cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
-                cell.viewItems.layer.shadowOpacity = 0.5
-                cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
-                cell.viewItems.layer.shadowRadius = 5
-                cell.viewItems.layer.masksToBounds = false
-                cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 13)
-                cell.EventLbl.text = MarketWallData?.categories[indexPath.row].catTitle
-                
-                let url = URL(string: (MarketWallData?.categories[indexPath.row].catImage ?? ""))
-                cell.profileImgView.kf.indicatorType = .activity
-                cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-                // cell.DayLbl.text = MarketWallData?.todayList![indexPath.row].updatedTime
-                
-                cell.DetailCallback = { [self] value in
-                    
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "CategoryDetailViewController")as! CategoryDetailViewController
-                    // vc.idD = (MarketWallData?.yourItems?[indexPath.row].id)!
-                    vc.idD = String(MarketWallData?.categories[indexPath.row].id ?? 0)
-                    //    vc.userName = String(MarketWallData?.categories[indexPath.row].catDescription)
-                    vc.userName = self.MarketWallData?.categories[indexPath.row].catTitle
-                    self.navigationController?.pushViewController(vc, animated: true)
-                    
-                    
-                    
-                }
-                
-                return cell
-            }
-            else if collectionView == LatestCollectionViewListing {
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AllListingCollectionViewCell", for: indexPath) as! AllListingCollectionViewCell
-                cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
-                cell.viewItems.layer.shadowOpacity = 0.5
-                cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
-                cell.viewItems.layer.shadowRadius = 5
-                cell.viewItems.layer.masksToBounds = false
-                cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
-                cell.secttLbl.text = MarketWallData?.allProductsList![indexPath.row].neighborhoodName
-                cell.EventLbl.text = MarketWallData?.allProductsList?[indexPath.row].pTitle
-                if let priceString = MarketWallData?.allProductsList?[indexPath.row].salePrice,
-                   let price = Double(priceString) {
-                    if price == 0.0 {
-                        cell.rsLbl.text = "Free"
-                        cell.lblSellDonate.text = "GIVEN"
-                    } else {
-                        cell.rsLbl.text = "Rs. \(Int(price))"
-                        cell.lblSellDonate.text = "SOLD"
-                    }
-                    
-                } else {
-                    cell.rsLbl.text = "Rs. 0"
-                }
-                
-                if MarketWallData?.allProductsList![indexPath.row].pStatus == 2 /*|| MarketWallData?.allProductsList![indexPath.row].saleType == "Donate"*/ {
-                    cell.lblSellDonate.isHidden = false
-                } else {
-                    cell.lblSellDonate.isHidden = true
-                }
-                
-                if MarketWallData?.allProductsList![indexPath.row].wishlistStatus == 1 {
-                    cell.imgWishlist.isHidden = false
+            cell.EventLbl.text = MarketWallData?.yourItems![indexPath.row].pTitle
 
-                    
-                } else if MarketWallData?.allProductsList![indexPath.row].wishlistStatus == 0 {
-                    
-                    cell.imgWishlist.isHidden = true
-                    
-                    
-                }
-                
-                cell.DayLbl.text = MarketWallData?.allProductsList![indexPath.row].createdTime
-                
-                
-                
-                //  cell.secttLbl.text = MarketWallData?.yourItems![indexPath.row].neighborhoodName
-                let url = URL(string: (MarketWallData?.allProductsList![indexPath.row].pImages ?? ""))
-                cell.profileImgView.kf.indicatorType = .activity
-                cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-                
-                cell.DetailCallback = { [self] value in
-                    
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
-                    // vc.idD = (MarketWallData?.yourItems?[indexPath.row].id)!
-                    vc.idD = String(MarketWallData?.allProductsList?[indexPath.row].id ?? 0)
-                    vc.productUserID = String(MarketWallData?.allProductsList?[indexPath.row].createdBy ?? 0)
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-                
-                return cell
-            }
-            
-            else  {
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WishListCollectionViewCell", for: indexPath) as! WishListCollectionViewCell
-                cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
-                cell.viewItems.layer.shadowOpacity = 0.5
-                cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
-                cell.viewItems.layer.shadowRadius = 5
-                cell.viewItems.layer.masksToBounds = false
-                cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
-                cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
-                
-                cell.EventLbl.text = MarketWallData?.wishlist![indexPath.row].pTitle
-                if let priceString = MarketWallData?.wishlist?[indexPath.row].salePrice,
-                   let price = Double(priceString) {
-                    if price == 0.0 {
-                        cell.rsLbl.text = "Free"
-                        cell.lblSellDonate.text = "GIVEN"
-                    } else {
-                        cell.rsLbl.text = "Rs. \(Int(price))"
-                        cell.lblSellDonate.text = "SOLD"
-                    }
+            if let priceString = MarketWallData?.yourItems?[indexPath.row].salePrice,
+               let price = Double(priceString) {
+                if price == 0.0 {
+                    cell.rsLbl.text = "Free"
+                    cell.lblSellDonate.text = "GIVEN"
                 } else {
-                    cell.rsLbl.text = "Rs. 0"
+                    let formattedPrice = formatAmount(priceString)
+                    cell.rsLbl.text = "Rs. " + formattedPrice
+                    cell.lblSellDonate.text = "SOLD"
                 }
-                
-                if MarketWallData?.wishlist![indexPath.row].pStatus == 2 /*|| MarketWallData?.wishlist![indexPath.row].saleType == "Donate"*/ {
-                    cell.lblSellDonate.isHidden = false
-                } else {
-                    cell.lblSellDonate.isHidden = true
-                }
-                
-                cell.secttLbl.text = MarketWallData?.wishlist![indexPath.row].neighborhoodName
-                cell.DayLbl.text = MarketWallData?.wishlist![indexPath.row].createdTime
-                let url = URL(string: (MarketWallData?.wishlist![indexPath.row].pImages ?? ""))
-                
-                
-                
-                
-                cell.profileImgView.kf.indicatorType = .activity
-                cell.profileImgView.kf.setImage(with:url ,placeholder: UIImage(named: "MarketDefault"))
-                
-                if MarketWallData?.wishlist?.first?.wishlistStatus == 1 {
-                    cell.btnWishlist.isHidden = false
-                    
-                    
-                } else if MarketWallData?.wishlist?.first?.wishlistStatus == 0 {
-                    
-                    cell.btnWishlist.isHidden = true
-                    
-                    
-                }
-                
-                cell.DetailCallback = { [self] value in
-                    
-                    let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController")as! MarketDetailViewController
-                    // vc.idD = (MarketWallData?.yourItems?[indexPath.row].id)!
-                    vc.idD = String(MarketWallData?.wishlist?[indexPath.row].id ?? 0)
-                    self.navigationController?.pushViewController(vc, animated: true)
-                }
-                
-                return cell
+            } else {
+                cell.rsLbl.text = "Rs. 0"
             }
+
+            if MarketWallData?.yourItems![indexPath.row].pStatus == 2 {
+                cell.lblSellDonate.isHidden = false
+            } else {
+                cell.lblSellDonate.isHidden = true
+            }
+
+            cell.DayLbl.text = MarketWallData?.yourItems![indexPath.row].createdTime
+            let url = URL(string: (MarketWallData?.yourItems![indexPath.row].pImages ?? ""))
+            cell.profileImgView.kf.indicatorType = .activity
+            cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
+            cell.DetailCallback = { [self] value in
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController") as! MarketDetailViewController
+                vc.idD = String(MarketWallData?.yourItems?[indexPath.row].id ?? 0)
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            return cell
         }
+        else if collectionView == LatestCollectionView {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "LatestListingCollectionViewCell", for: indexPath) as! LatestListingCollectionViewCell
+            cell.secttLbl.text = MarketWallData?.todayList![indexPath.row].neighborhoodName
+            cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
+            cell.viewItems.layer.shadowOpacity = 0.5
+            cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
+            cell.viewItems.layer.shadowRadius = 5
+            cell.viewItems.layer.masksToBounds = false
+            cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 15)
+            cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
+
+            cell.EventLbl.text = MarketWallData?.todayList![indexPath.row].pTitle
+            if let priceString = MarketWallData?.todayList?[indexPath.row].salePrice,
+               let price = Double(priceString) {
+                if price == 0.0 {
+                    cell.rsLbl.text = "Free"
+                    cell.lblSellDonate.text = "GIVEN"
+                } else {
+                    let formattedPrice = formatAmount(priceString)
+                    cell.rsLbl.text = "Rs. " + formattedPrice
+                    cell.lblSellDonate.text = "SOLD"
+                }
+            } else {
+                cell.rsLbl.text = "Rs. 0"
+            }
+
+            if MarketWallData?.todayList![indexPath.row].pStatus == 2 {
+                cell.lblSellDonate.isHidden = false
+            } else {
+                cell.lblSellDonate.isHidden = true
+            }
+
+            let url = URL(string: (MarketWallData?.todayList![indexPath.row].pImages ?? ""))
+            cell.profileImgView.kf.indicatorType = .activity
+            cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
+            cell.DayLbl.text = MarketWallData?.todayList![indexPath.row].updatedTime
+
+            if MarketWallData?.todayList![indexPath.row].wishlistStatus == 1 {
+                cell.imgWishlist.isHidden = false
+            } else if MarketWallData?.todayList![indexPath.row].wishlistStatus == 0 {
+                cell.imgWishlist.isHidden = true
+            }
+
+            cell.DetailCallback = { [self] value in
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController") as! MarketDetailViewController
+                vc.idD = String(MarketWallData?.todayList?[indexPath.row].id ?? 0)
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            return cell
+        }
+        else if collectionView == collectionViewcategory {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CategoryCollectionViewCell", for: indexPath) as! CategoryCollectionViewCell
+            cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
+            cell.viewItems.layer.shadowOpacity = 0.5
+            cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
+            cell.viewItems.layer.shadowRadius = 5
+            cell.viewItems.layer.masksToBounds = false
+            cell.EventLbl.font = UIFont(name: "Montserrat-SemiBold", size: 13)
+            cell.EventLbl.text = MarketWallData?.categories[indexPath.row].catTitle
+
+            let url = URL(string: (MarketWallData?.categories[indexPath.row].catImage ?? ""))
+            cell.profileImgView.kf.indicatorType = .activity
+            cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
+
+            cell.DetailCallback = { [self] value in
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "CategoryDetailViewController") as! CategoryDetailViewController
+                vc.idD = String(MarketWallData?.categories[indexPath.row].id ?? 0)
+                vc.userName = self.MarketWallData?.categories[indexPath.row].catTitle
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            return cell
+        }
+        else if collectionView == LatestCollectionViewListing {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AllListingCollectionViewCell", for: indexPath) as! AllListingCollectionViewCell
+            cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
+            cell.viewItems.layer.shadowOpacity = 0.5
+            cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
+            cell.viewItems.layer.shadowRadius = 5
+            cell.viewItems.layer.masksToBounds = false
+            cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
+            cell.secttLbl.text = MarketWallData?.allProductsList![indexPath.row].neighborhoodName
+            cell.EventLbl.text = MarketWallData?.allProductsList?[indexPath.row].pTitle
+            if let priceString = MarketWallData?.allProductsList?[indexPath.row].salePrice,
+               let price = Double(priceString) {
+                if price == 0.0 {
+                    cell.rsLbl.text = "Free"
+                    cell.lblSellDonate.text = "GIVEN"
+                } else {
+                    let formattedPrice = formatAmount(priceString)
+                    cell.rsLbl.text = "Rs. " + formattedPrice
+                    cell.lblSellDonate.text = "SOLD"
+                }
+            } else {
+                cell.rsLbl.text = "Rs. 0"
+            }
+
+            if MarketWallData?.allProductsList![indexPath.row].pStatus == 2 {
+                cell.lblSellDonate.isHidden = false
+            } else {
+                cell.lblSellDonate.isHidden = true
+            }
+
+            if MarketWallData?.allProductsList![indexPath.row].wishlistStatus == 1 {
+                cell.imgWishlist.isHidden = false
+            } else if MarketWallData?.allProductsList![indexPath.row].wishlistStatus == 0 {
+                cell.imgWishlist.isHidden = true
+            }
+
+            cell.DayLbl.text = MarketWallData?.allProductsList![indexPath.row].createdTime
+            let url = URL(string: (MarketWallData?.allProductsList![indexPath.row].pImages ?? ""))
+            cell.profileImgView.kf.indicatorType = .activity
+            cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
+
+            cell.DetailCallback = { [self] value in
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController") as! MarketDetailViewController
+                vc.idD = String(MarketWallData?.allProductsList?[indexPath.row].id ?? 0)
+                vc.productUserID = String(MarketWallData?.allProductsList?[indexPath.row].createdBy ?? 0)
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            return cell
+        }
+        else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WishListCollectionViewCell", for: indexPath) as! WishListCollectionViewCell
+            cell.viewItems.layer.shadowColor = UIColor.gray.cgColor
+            cell.viewItems.layer.shadowOpacity = 0.5
+            cell.viewItems.layer.shadowOffset = CGSize(width: 0, height: 0)
+            cell.viewItems.layer.shadowRadius = 5
+            cell.viewItems.layer.masksToBounds = false
+            cell.rsLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.secttLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.EventLbl.font = UIFont(name: "Montserrat-Regular", size: 12)
+            cell.DayLbl.font = UIFont(name: "Montserrat-SemiBold", size: 9)
+
+            cell.EventLbl.text = MarketWallData?.wishlist![indexPath.row].pTitle
+            if let priceString = MarketWallData?.wishlist?[indexPath.row].salePrice,
+               let price = Double(priceString) {
+                if price == 0.0 {
+                    cell.rsLbl.text = "Free"
+                    cell.lblSellDonate.text = "GIVEN"
+                } else {
+                    let formattedPrice = formatAmount(priceString)
+                    cell.rsLbl.text = "Rs. " + formattedPrice
+                    cell.lblSellDonate.text = "SOLD"
+                }
+            } else {
+                cell.rsLbl.text = "Rs. 0"
+            }
+
+            if MarketWallData?.wishlist![indexPath.row].pStatus == 2 {
+                cell.lblSellDonate.isHidden = false
+            } else {
+                cell.lblSellDonate.isHidden = true
+            }
+
+            cell.secttLbl.text = MarketWallData?.wishlist![indexPath.row].neighborhoodName
+            cell.DayLbl.text = MarketWallData?.wishlist![indexPath.row].createdTime
+            let url = URL(string: (MarketWallData?.wishlist![indexPath.row].pImages ?? ""))
+            cell.profileImgView.kf.indicatorType = .activity
+            cell.profileImgView.kf.setImage(with: url, placeholder: UIImage(named: "MarketDefault"))
+
+            if MarketWallData?.wishlist?.first?.wishlistStatus == 1 {
+                cell.btnWishlist.isHidden = false
+            } else if MarketWallData?.wishlist?.first?.wishlistStatus == 0 {
+                cell.btnWishlist.isHidden = true
+            }
+
+            cell.DetailCallback = { [self] value in
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "MarketDetailViewController") as! MarketDetailViewController
+                vc.idD = String(MarketWallData?.wishlist?[indexPath.row].id ?? 0)
+                self.navigationController?.pushViewController(vc, animated: true)
+            }
+            return cell
+        }
+    }
+
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         switch collectionView.tag {
@@ -691,7 +630,7 @@ class HomeMarketViewController: BaseViewController,UICollectionViewDelegate,UICo
     //dev.
     
     @objc func callMarketwalltWebService() {
-        let url = "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?"
+        let url = "https://laravelpanel.neighbrsnook.com/api/mpk_home_wall?"
         
         // let dictParams: Dictionary<String, Any> = ["":""]
         

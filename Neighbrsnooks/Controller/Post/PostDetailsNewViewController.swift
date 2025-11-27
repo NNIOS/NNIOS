@@ -8,6 +8,7 @@
 import UIKit
 import SVProgressHUD
 import AVKit
+import IQKeyboardManagerSwift
 @available(iOS 16.0, *)
 
 class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFlowLayout,UICollectionViewDelegate,UICollectionViewDataSource,UITextViewDelegate {
@@ -39,11 +40,13 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     @IBOutlet weak var  imgcmndReply : UIImageView!
     @IBOutlet weak var  imgcmndDelete : UIImageView!
     @IBOutlet weak var mainHeight: NSLayoutConstraint!
-    @IBOutlet weak var containerView: UIView! // Bottom popup view
+    @IBOutlet weak var containerView: UIView!
     @IBOutlet weak var btnLike: UIButton!
     @IBOutlet weak var btnFav: UIButton!
     @IBOutlet weak var lblShare: UILabel!
     @IBOutlet weak var bottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var tvMainView: UIView!
+    
     
     var createdBy: String?
     var selectedCommentIndexPath: IndexPath?
@@ -98,6 +101,12 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         }
     }
     
+    var originalBottomConstraintConstant: CGFloat = 0
+    
+    
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         print("postId: \(postid) irshad")
@@ -108,10 +117,10 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         
         tvmessage.delegate = self
         tvmessage.isScrollEnabled = false
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow),
-                                               name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide),
-                                               name: UIResponder.keyboardWillHideNotification, object: nil)
+        tvmessage.isUserInteractionEnabled = true
+        IQKeyboardManager.shared.isEnabled = false
+        IQKeyboardManager.shared.enableAutoToolbar = false
+        
         setupContainerView()
         containerView.frame = self.view .frame
         self.view.addSubview(self.containerView)
@@ -159,8 +168,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         self.tvmessage.font = UIFont(name: "Montserrat-Regular", size: 16)
         placeholderLabel.text = "Type a message..."
         placeholderLabel.textColor = UIColor.lightGray
-        placeholderLabel.isHidden = !tvmessage.text.isEmpty
-        tvmessage.delegate = self
+        
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(refreshTableView), userInfo: nil, repeats: true)
         btnComment.isHidden = false
         btnCommentReply.isHidden = true
@@ -177,10 +185,21 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
                 isReplyVisible[section] = false // Default hidden
             }
         }
+        originalBottomConstraintConstant = bottomConstraint.constant
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissIqKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+        
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        IQKeyboardManager.shared.isEnabled = false
+        IQKeyboardManager.shared.enableAutoToolbar = false
         self.MembersLbl.font = UIFont(name: "Montserrat-Regular", size: 18)
         // ✅ Call your post detail API
         callpostDetailWebService(postid: self.postid) {
@@ -230,26 +249,21 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             }
         }
     }
-    
-    
-    
-    @objc func keyboardWillShow(_ notification: Notification) {
-        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
-        let keyboardHeight = keyboardFrame.height
-        
-        self.bottomConstraint.constant = -keyboardHeight
-        
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
+    @objc func dismissIqKeyboard() {
+        view.endEditing(true)
     }
     
-    @objc func keyboardWillHide(_ notification: Notification) {
-        self.bottomConstraint.constant = 0
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
-        }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        IQKeyboardManager.shared.isEnabled = false
+        IQKeyboardManager.shared.enableAutoToolbar = false
     }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    
+    
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
@@ -304,9 +318,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         }
     }
     
-    
-    
-    
     func setupContainerView() {
         let screenWidth = self.view.frame.width
         let screenHeight = self.view.frame.height
@@ -318,7 +329,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         containerView.layer.shadowOpacity = 0.3
         containerView.layer.shadowOffset = CGSize(width: 0, height: -5)
         containerView.layer.shadowRadius = 10
-        
         self.view.addSubview(containerView)
         containerView.isHidden = true
     }
@@ -333,7 +343,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
                 print("No comment selected")
                 return
             }
-            
             print("Showing options for:")
             print("Comment ID: \(pcID)")
             print("Post ID: \(postID)")
@@ -343,7 +352,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         }
         containerView.isHidden = false
         UIView.animate(withDuration: 0.3, animations: {
-            self.containerView.frame.origin.y = screenHeight - 200  // 🎯 Proper bottom position
+            self.containerView.frame.origin.y = screenHeight - 200
         })
     }
     
@@ -351,85 +360,126 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         let screenHeight = self.view.frame.height
         
         UIView.animate(withDuration: 0.3, animations: {
-            self.containerView.frame.origin.y = screenHeight  // 🎯 Hide animation (niche le jaayega)
+            self.containerView.frame.origin.y = screenHeight
         }) { _ in
             self.containerView.isHidden = true
         }
     }
     
-  
+    
     
     func setupLabel() {
-        lblDescription.numberOfLines = 2  // Initially, show only 2 lines
-        lblDescription.isUserInteractionEnabled = true  // Enable user interaction
+        fullText = self.PostDetailData?.listdata?.first?.postMessage ?? ""
+        lblDescription.isUserInteractionEnabled = true
+        checkMoreNeeded()
+    }
+    
+    
+    func checkMoreNeeded() {
+        guard !fullText.isEmpty else { return }
         
-        // If the text exceeds 2 lines, truncate it and add "More"
-        if isTruncated() {
-            truncatedText = getTruncatedText()  // Calculate truncated text
-            lblDescription.text = truncatedText + " ... More"  // Add "More" at the end
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(toggleText))
-            lblDescription.addGestureRecognizer(tapGesture)
+        // Dummy label for height calculation
+        let tempLabel = UILabel()
+        tempLabel.font = lblDescription.font
+        tempLabel.numberOfLines = 0
+        tempLabel.text = fullText
+        
+        let maxWidth = lblDescription.bounds.width
+        let fullSize = tempLabel.sizeThatFits(CGSize(width: maxWidth, height: .greatestFiniteMagnitude))
+        
+        tempLabel.numberOfLines = 2
+        let twoLineSize = tempLabel.sizeThatFits(CGSize(width: maxWidth, height: .greatestFiniteMagnitude))
+        
+        if fullSize.height > twoLineSize.height {
+            isExpanded = false
+            showTruncatedText()
+            addTapGesture()
         } else {
-            lblDescription.text = fullText  // If text fits within 2 lines, display it fully
+            lblDescription.text = fullText
         }
+        
+        updateViewHeight()
+    }
+    func showTruncatedText() {
+        lblDescription.numberOfLines = 2
+        lblDescription.text = fullText + " ...More"
+    }
+    func showFullText() {
+        lblDescription.numberOfLines = 0
+        lblDescription.text = fullText + "   Less"
     }
     
     @objc func toggleText() {
-        // Toggle the expanded/collapsed state
         isExpanded.toggle()
         
         if isExpanded {
-            // If expanded, show full text and change "More" to "Less"
-            lblDescription.numberOfLines = 0  // Show all lines
-            lblDescription.text = fullText + " ... Less"  // Add "Less" at the end
+            showFullText()
         } else {
-            // If collapsed, show only 2 lines and add "More"
-            lblDescription.numberOfLines = 2  // Show only 2 lines
-            lblDescription.text = truncatedText + " ... More"  // Add "More" at the end
+            showTruncatedText()
         }
         
-        // Animate the change smoothly
-        UIView.animate(withDuration: 0.3) {
-            self.lblDescription.layoutIfNeeded()  // Apply changes with animation
+        UIView.animate(withDuration: 0.25) {
+            self.updateViewHeight()
+            self.view.layoutIfNeeded()
         }
     }
     
-    func isTruncated() -> Bool {
-        // Check if the text exceeds 2 lines by calculating the height
-        let size = CGSize(width: lblDescription.frame.width, height: CGFloat.greatestFiniteMagnitude)
-        let attributes: [NSAttributedString.Key: Any] = [.font: lblDescription.font!]
-        let boundingRect = (fullText as NSString).boundingRect(with: size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil)
-        let lineHeight = lblDescription.font.lineHeight
-        let maxHeight = lineHeight * 2  // Maximum height allowed for 2 lines
-        return boundingRect.height > maxHeight  // If text height exceeds 2 lines, return true
-    }
-    
-    func getTruncatedText() -> String {
-        // Calculate and return the truncated text that fits within 2 lines
-        var truncated = ""
-        let words = fullText.split(separator: " ")
-        for word in words {
-            let tempText = truncated.isEmpty ? String(word) : truncated + " " + word
-            let size = CGSize(width: lblDescription.frame.width, height: CGFloat.greatestFiniteMagnitude)
-            let attributes: [NSAttributedString.Key: Any] = [.font: lblDescription.font!]
-            let boundingRect = (tempText as NSString).boundingRect(with: size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil)
-            
-            let lineHeight = lblDescription.font.lineHeight
-            let maxHeight = lineHeight * 2  // Maximum height allowed for 2 lines
-            if boundingRect.height > maxHeight {
-                break
-            }
-            truncated = tempText
+    func updateViewHeight() {
+        let size = lblDescription.sizeThatFits(CGSize(width: lblDescription.bounds.width,
+                                                      height: .greatestFiniteMagnitude))
+        mainHeight.constant = 400 + size.height
+        
+        UIView.animate(withDuration: 0.2) {
+            self.view.layoutIfNeeded()
         }
-        return truncated
     }
     
     
     
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+    
+    
+    func addTapGesture() {
+        if lblDescription.gestureRecognizers?.isEmpty ?? true {
+            let tap = UITapGestureRecognizer(target: self, action: #selector(toggleText))
+            lblDescription.addGestureRecognizer(tap)
+        }
     }
+    
+    
+    
+    
+    
+    @objc func keyboardWillShow(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let kbFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+              let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+        
+        let kbHeight = kbFrame.height
+        bottomConstraint.constant = kbHeight
+        
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    
+    @objc func keyboardWillHide(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+        
+        bottomConstraint.constant = originalBottomConstraintConstant
+        
+        UIView.animate(withDuration: duration) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
     
     
     @IBAction func actionCommentDelete(_ sender: Any) {
@@ -672,10 +722,6 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
         }
     }
     
-    //    func textViewDidChange(_ textView: UITextView) {
-    //        // Show or hide placeholder label based on text view content
-    //        placeholderLabel.isHidden = !textView.text.isEmpty
-    //    }
     
     func textViewDidChange(_ textView: UITextView) {
         let size = CGSize(width: textView.frame.width, height: .infinity)
@@ -759,7 +805,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
             }
         }
     }
-
+    
     
     
     func loadPostData() {
@@ -790,7 +836,7 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     //MARK: - updateCollectionViewHeight
     func updateCollectionViewHeight() {
         if mediaData.isEmpty {
-            collectionViewBannerHeight.constant = -30
+            collectionViewBannerHeight.constant = 0
             collectionViewBanner.isHidden = true
         } else {
             collectionViewBannerHeight.constant = 546 // Your desired height
@@ -800,11 +846,14 @@ class PostDetailsNewViewController:BaseViewController,UICollectionViewDelegateFl
     }
     
     func updateMainHeight() {
-        // Make sure both heights are calculated before calling this
         let bannerHeight = collectionViewBannerHeight.constant
         let tableHeight = tableviewHeightMess.constant
-        mainHeight.constant = 210 + bannerHeight + tableHeight
+        
+        // Ensure minimum height for main content even if media is missing
+        let descriptionHeight = lblDescription.frame.height
+        mainHeight.constant = 210 + bannerHeight + tableHeight + descriptionHeight
     }
+    
     
     
     //MARK: -     ---------------- call collectionview --------------------------------------

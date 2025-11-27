@@ -18,12 +18,19 @@ let kDeviceModel                = UIDevice.current.model
  */
 
  
- // dev.
-let kBASEURL = "https://dev.neighbrsnook.com/oldadmin/api/"
+ // dev. old url
+//let kBASEURL = "https://neighbrsnook.com/oldadmin/api/"
+
+// New URL
+let kBASEURL = "https://corepanel.neighbrsnook.com/api/"
+
 
 //let kMBASEURL = "https://dev.neighbrsnook.com/marketplace/api/"
 
-let kMBASEURL = "https://dev.neighbrsnook.com/admin/api/"
+//let kMBASEURL = "https://neighbrsnook.com/admin/api/"
+
+let kMBASEURL = "https://laravelpanel.neighbrsnook.com/api/"
+
 // https://www.getpostman.com/collections/26b0e1c72aca6e901d76
 
 let kImageBaseUrl = ""
@@ -38,7 +45,7 @@ let kSharedUserDefaults = UserDefaults.standard
 struct WebServiceName {
     
     static let kLogin = "login"
-    static let kOtp = "master?flag=sendotp"
+    static let kOtp = "send-otp"
     static let kRegisterNew = "master?flag=reg-step-I"
     static let kVerifyEmail = "verify-email"
     static let kForgetOtp = "otpverification"
@@ -168,4 +175,9 @@ struct WebServiceName {
     
     //https://dev.neighbrsnook.com/marketplace/api/
     
+}
+
+
+struct App_KEYConfig {
+    static let APP_KEY = "DEV-3a9f1d2e7b8c4d6f1234abcd5678ef90"
 }

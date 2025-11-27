@@ -231,8 +231,6 @@ class UpdateGroupViewController: BaseViewController,CropViewControllerDelegate {
         }
 
         
-        
-        
         func callUpdateGroupWebService(_ completionClosure: @escaping (Bool) -> Void) {
 
             let id = UserDefaults.standard.string(forKey: "userid")

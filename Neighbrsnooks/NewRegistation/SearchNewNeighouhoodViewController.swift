@@ -266,7 +266,7 @@ class SearchNewNeighouhoodViewController: UIViewController,  UITableViewDelegate
         let status = CLLocationManager.authorizationStatus()
         
         if status == .notDetermined {
-//            locationManager.requestWhenInUseAuthorization()
+           locationManager.requestWhenInUseAuthorization()
             activityIndicator.startAnimating()
             locationManager.requestLocation()
         } else if status == .authorizedWhenInUse || status == .authorizedAlways {

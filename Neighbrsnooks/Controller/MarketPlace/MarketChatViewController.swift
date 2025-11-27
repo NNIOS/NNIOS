@@ -75,8 +75,8 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
         }
         startChatRefreshTimer()
 
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
     }
     
@@ -237,7 +237,7 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
     
     //dev.
     func callMarketChatWebService(completion: @escaping () -> Void) {
-        let baseURL = "https://dev.neighbrsnook.com/admin/api/messages/"
+        let baseURL = "https://laravelpanel.neighbrsnook.com/api/messages/"
         let id = UserDefaults.standard.string(forKey: "userid")
         let Sid: String
 
@@ -293,7 +293,7 @@ class MarketChatViewController: BaseViewC, UITextViewDelegate {
     
     //  "https://dev.neighbrsnook.com/admin/api/mpk_home_wall?" dev.
     func callMarketChatPostWebService(message: String, completion: @escaping () -> Void) {
-        let url = "https://dev.neighbrsnook.com/admin/api/send-message"
+        let url = "https://laravelpanel.neighbrsnook.com/api/send-message"
         
         let id = UserDefaults.standard.string(forKey: "userid")
         let Sid = UserDefaults.standard.string(forKey: "SenderidN")

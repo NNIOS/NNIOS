@@ -114,12 +114,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
             // Facebook Analytics Event (instance method)
             AppEvents.shared.logEvent(
-                .init("app_install_iOS"),
-                parameters: [
-                    AppEvents.ParameterName("time"): Date().timeIntervalSince1970,
-                    AppEvents.ParameterName("platform"): "iOS"
-                ]
-            )
+                   .init("app_install_successfully_ios"),
+                   parameters: [
+                       AppEvents.ParameterName("event_name"): "app_install_successfully_ios",
+                       AppEvents.ParameterName("platform"): "iOS",
+                       AppEvents.ParameterName("device_model"): UIDevice.current.model,
+                       AppEvents.ParameterName("method"): "first_app_install_event",
+                       AppEvents.ParameterName("time"): Date().timeIntervalSince1970
+                   ]
+               )
 
             UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
             UserDefaults.standard.synchronize()

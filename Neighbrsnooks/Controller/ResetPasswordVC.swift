@@ -27,6 +27,7 @@ class ResetPasswordVC: UIViewController {
         self.passwordView.layer.cornerRadius = 10
         self.confirmPasswordView.layer.cornerRadius = 10
         passwordTF.addTarget(self, action: #selector(passwordDidChange(_:)), for: .editingChanged)
+        print(phoneno)
     }
     
     // MARK: - Button's Action
@@ -91,25 +92,95 @@ class ResetPasswordVC: UIViewController {
 extension ResetPasswordVC {
     
     // MARK : function for Reset Passowrd API
-    func resetPassowrdAPI(_ completionClosure: @escaping () -> ()) {
-        let dictParams: [String: Any]  = [
-            "phoneno":phoneno ?? "",
-            "password":passwordTF.text ?? "",
-            "confirm_password":confirmPasswordTF.text ?? "",
+    func resetPassowrdAPI() {
+        
+        let urlString = "https://corepanel.neighbrsnook.com/api/master?flag=forgotpassword"
+        guard let url = URL(string: urlString) else { return }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+
+        // ✅ PHP backend requires form-url-encoded
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+        // ✅ Body params
+        let params: [String: Any] = [
+            "phoneno": phoneno ?? "",
+            "password": passwordTF.text ?? "",
+            "confirm_password": confirmPasswordTF.text ?? ""
         ]
-        WebService.sharedInstance.callForGotPasswordWebService(withParams: dictParams) { data in
-            self.objReset = data
-            if self.objReset?.message == "New password changed successfully" {
-                if let viewControllers = self.navigationController?.viewControllers {
-                    let targetViewController = viewControllers[viewControllers.count - 3]
-                    self.navigationController?.popToViewController(targetViewController, animated: true)
+
+        // ✅ Convert into x-www-form-urlencoded
+        let formBody = params
+            .map { "\($0.key)=\($0.value)" }
+            .joined(separator: "&")
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+
+        request.httpBody = formBody.data(using: .utf8)
+
+        print("📤 FINAL BODY:", formBody)
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.showAlert(message: "No response from server")
                 }
-            } else {
-                self.showAlert(message: self.objReset?.message ?? "")
+                return
             }
-            completionClosure()
-        }
+            
+            do {
+                let result = try JSONDecoder().decode(ResetPasswordModel.self, from: data)
+                print("✅ Server Response:", result)
+
+                DispatchQueue.main.async {
+                    if result.message == "New password changed successfully" {
+                        
+                        // ✅ Pop back
+                        if let vcs = self.navigationController?.viewControllers {
+                            let targetVC = vcs[vcs.count - 3]
+                            self.navigationController?.popToViewController(targetVC, animated: true)
+                        }
+                        
+                    } else {
+                        self.showAlert(message: result.message ?? "")
+                    }
+                }
+                
+            } catch {
+                print("❌ JSON decode error:", error)
+            }
+            
+        }.resume()
     }
+
+
+    
+    
+//    func resetPassowrdAPI(_ completionClosure: @escaping () -> ()) {
+//        let dictParams: [String: Any]  = [
+//            "phoneno": phoneno ?? "",
+//            "password": passwordTF.text ?? "",
+//            "confirm_password": confirmPasswordTF.text ?? ""
+//        ]
+//        
+//        print("📤 API Call Params: \(dictParams)")
+//        WebService.sharedInstance.callForGotPasswordWebService(withParams: dictParams) { (data: objReset?) in
+//            
+//            if let data = data {
+//                print("✅ API Response received")
+//                print("🔍 Full ProfileModel: \(data)")
+//                self.objReset = data
+//            } else {
+//                print("❌ API response is nil. Either network failed or model didn't map correctly.")
+//            }
+//            
+//            completionClosure()
+//        }
+//    }
+//    
+    
+    
     
     // MARK : function for Validate Password
     func validatePasswordsAndReset() {
@@ -131,7 +202,7 @@ extension ResetPasswordVC {
             alertToast(Message: "Passwords don't match")
             return
         }
-        resetPassowrdAPI { }
+        resetPassowrdAPI()
     }
     
     // MARK : function for Hide Show secure text entry in textfield

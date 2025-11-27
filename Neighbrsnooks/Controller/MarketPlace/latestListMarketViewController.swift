@@ -106,7 +106,7 @@ class latestListMarketViewController: UIViewController,UICollectionViewDelegate,
     }
     //dev.
     func callMarketLatestWebService() {
-                  let url = "https://dev.neighbrsnook.com/admin/api/mpk_product_today_list?"
+                  let url = "https://laravelpanel.neighbrsnook.com/api/mpk_product_today_list?"
 
        // let dictParams: Dictionary<String, Any> = ["":""]
         

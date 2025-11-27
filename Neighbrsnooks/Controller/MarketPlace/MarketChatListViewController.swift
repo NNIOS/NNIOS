@@ -48,7 +48,7 @@ class MarketChatListViewController: UIViewController {
     //dev.
     func callMarketChatListWebService(completion: @escaping () -> Void) {
        // let url = "https://dev.neighbrsnook.com/marketplace/api/seller-chat-list/"
-        let baseURL = "https://dev.neighbrsnook.com/admin/api/seller-chat-list/"
+        let baseURL = "https://laravelpanel.neighbrsnook.com/api/seller-chat-list/"
         let id = UserDefaults.standard.string(forKey: "userid")
         let Sid = UserDefaults.standard.string(forKey: "Senderid")
         // let dictParams: Dictionary<String, Any> = ["":""]
@@ -173,7 +173,7 @@ extension MarketChatListViewController: UITableViewDataSource, UITableViewDelega
     
     
     func callMarketReadStatus2(completion: @escaping () -> Void) { //dev.
-        let url = "https://dev.neighbrsnook.com/admin/api/chat_read_status"
+        let url = "https://laravelpanel.neighbrsnook.com/api/chat_read_status"
         
         let senderID = UserDefaults.standard.string(forKey: "SenderidN") ?? ""
         let receiverID = UserDefaults.standard.string(forKey: "userid") ?? ""

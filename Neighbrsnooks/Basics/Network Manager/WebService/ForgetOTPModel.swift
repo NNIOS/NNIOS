@@ -8,5 +8,7 @@
 import Foundation
 
 struct ForgetOTPModel: Codable {
-    let status, message: String?
+    let status: Bool?
+    let message: String?
+    let code: Int?
 }

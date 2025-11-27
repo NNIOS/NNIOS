@@ -671,6 +671,29 @@ class BaseViewController: UIViewController, BottomPanelDelegate {
         }
     
     
+    
+    
+    
+    func formatAmount(_ amountString: String) -> String {
+        guard let amount = Double(amountString) else { return amountString }
+        let absAmount = abs(amount)
+        
+        switch absAmount {
+        case 1_000_000_000...:
+            return String(format: "%.0fB", amount / 1_000_000_000)
+        case 1_000_000...:
+            return String(format: "%.0fM", amount / 1_000_000)
+        case 1_000...:
+            return String(format: "%.0fk", amount / 1_000)
+        default:
+            return String(format: "%.0f", amount)
+        }
+    }
+
+    
+    
+    
+    
 }
 
 extension UIViewController {
@@ -942,14 +965,32 @@ extension UIColor {
 
 extension UIViewController {
     func showAutoDismissAlert(message: String, duration: Double = 2.0) {
-        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+
+        // Your required color
+        let textColor = UIColor(red: 0.36, green: 0.36, blue: 0.36, alpha: 1)
+
+        // Your required font
+        let font = UIFont(name: "Montserrat-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16)
+
+        let attributedMessage = NSAttributedString(
+            string: message,
+            attributes: [
+                .font: font,
+                .foregroundColor: textColor
+            ]
+        )
+
+        alert.setValue(attributedMessage, forKey: "attributedMessage")
+
         self.present(alert, animated: true)
 
-        // Dismiss alert after 2 seconds
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             alert.dismiss(animated: true)
         }
     }
+
     
     func alertToast(Message:String) {
             let alert = UIAlertController(title: nil, message: Message, preferredStyle: .alert)

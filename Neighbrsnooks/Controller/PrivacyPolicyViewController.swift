@@ -22,7 +22,7 @@ class PrivacyPolicyViewController: UIViewController {
         viewWeb.addSubview(webView)
         
         // Load the URL //dev.
-        if let url = URL(string: "https://dev.neighbrsnook.com/privacy-policy/") {
+        if let url = URL(string: "https://neighbrsnook.com/privacy-policy/") {
             let request = URLRequest(url: url)
             webView.load(request)
         } else {

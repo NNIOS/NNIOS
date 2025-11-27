@@ -1132,6 +1132,7 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         let dictParams: Dictionary<String, Any> = ["":""]
         WebService.sharedInstance.callCatBussinessWebService(withParams: dictParams) { data in
             self.AddPCategoryData = data
+            print(data)
             UserDefaults.standard.set(self.AddPCategoryData?.nbdata.first?.id, forKey: "id")
             UserDefaults.standard.set(self.AddPCategoryData?.businessImgLimit, forKey: "imageLimit")
             
@@ -1466,44 +1467,6 @@ class AddBussinessViewController: BaseViewController, UIPickerViewDelegate, UITe
         }
     }
 
-    
-    
-    
-    //    func callCreateBussinessWebService(_ completionClosure: @escaping () -> ()) {
-    //        let id = UserDefaults.standard.string(forKey: "userid")
-    //        let idcategory = UserDefaults.standard.string(forKey: "idCategory") // ✅ Selected Category ID
-    //
-    //        let dictParams: Dictionary<String, Any> = [
-    //            "userid": id ?? "",
-    //            "businessname": self.tfBussinessName.text ?? "",
-    //            "tagline": self.tfTag.text ?? "",
-    //            "cat": idcategory ?? "", // ✅ **Pass Selected Category ID**
-    //            "description": self.tvDescribe.text ?? "",
-    //            "image[]": "",
-    //            "opentime": self.lblStartTime.text ?? "", // change irshad malik
-    //            "closetime": self.lblEndTime.text ?? "", // change irshad malik
-    //            "weekoff": self.lblSelectWeeklyOfDay.text ?? "",
-    //            "doctype": self.docType ?? "",
-    //            "address1": self.tfAdd1.text ?? "",
-    //            "address2": self.tfAdd2.text ?? "",
-    //            "pin": self.lblPinCode.text ?? "",
-    //            "web": self.tfWeb.text ?? "",
-    //            "email": self.tfEmail.text ?? "",
-    //            "mobile": self.tfMob.text ?? "",
-    //            "telephone": self.tfTel.text ?? ""
-    //        ]
-    //
-    //        print(dictParams)
-    //        if !imageArray.isEmpty || !videoArray.isEmpty || selectedPDFURL != nil {
-    //            callsendMediaAPI(param: dictParams, images: imageArray, videos: videoArray, pdfURL: selectedPDFURL, mediaKey: "image[]", URlName: kBASEURL + WebServiceName.kCreateBussines) {
-    //                print("Upload successful")
-    //                self.navigationController?.popViewController(animated: true)
-    //            }
-    //        } else {
-    //            print("No media available for upload.")
-    //        }
-    //    }
-    
     
     
     func callsendMediaAPI(param: [String: Any],
